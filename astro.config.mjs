@@ -6,6 +6,12 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Code Monster",
+      logo: {
+        dark: "/src/assets/png/cm-logo-light.png",
+        light: "/src/assets/png/cm-logo-dark.png",
+        replacesTitle: true,
+        alt: "Code Monster Logo",
+      },
       social: {
         github: "https://github.com/withastro/starlight",
       },

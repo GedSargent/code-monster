@@ -47,7 +47,7 @@ Notice the `Document` component that is wrapping everything being returned from 
 
 Right-click the opening `Document` tag, and select 'Go to Source Definition' from the options:
 
-![image-20240211152140693](/src/assets/png/image-20240211152140693.png)
+![Selecting Go to source definition](src/assets/png/image-20240211152140693.png)
 
 This will open the file where the `Document` component code is held.
 

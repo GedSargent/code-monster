@@ -1,0 +1,117 @@
+---
+title: From server to client - useLoaderData
+description: Learn how to use the useLoaderData hook to pass data from the server to the client in Remix.
+---
+
+# From server to component: `useLoaderData`
+
+If the `loader` function loads prepares data on the server, then `useLoaderData` is the bridge which carries this data across into the user's browser.
+
+This a [hook](https://react.dev/learn/reusing-logic-with-custom-hooks) supplied by Remix, and is easily called:
+
+```tsx
+import { LoaderFunctionArgs, json, type LinksFunction } from '@remix-run/node'
+// highlight-next-line
+import { useLoaderData } from '@remix-run/react'
+import AppProvider from '~/components/shared-layout/AppProvider'
+import Document from '~/components/shared-layout/Document.tsx'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'
+// highlight-next-line
+import ThemeSwitch from './components/shared-layout/ThemeSwitch'
+import useTheme from './hooks/useTheme'
+import { getHints } from './utils/client-hints'
+import { getDomainUrl } from './utils/misc'
+import { getTheme } from './utils/theme.server'
+
+// Other code omitted for brevity...
+
+export async function loader({ request }: LoaderFunctionArgs) {
+	const requestInfo = {
+		hints: getHints(request),
+		origin: getDomainUrl(request),
+		path: new URL(request.url).pathname,
+		userPrefs: {
+			theme: getTheme(request),
+		},
+	}
+
+	return json({ requestInfo })
+}
+
+export function App() {
+  // highlight-next-line
+	const data = useLoaderData<typeof loader>()
+	const nonce = useNonce()
+	const theme = useTheme()
+
+	return (
+		<Document nonce={nonce} theme={theme}>
+			<div className="flex h-screen flex-col justify-between">
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
+					</main>
+				</div>
+				{/* highlight-start */}
+
+				<div className="container flex justify-between pb-5">
+					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+				</div>
+				{/* highlight-end */}
+		</Document>
+	)
+}
+```
+
+:::tip
+
+## Review your code
+
+Take a few minutes to review the code you have added.
+
+Can you can understand what it's doing?
+
+Remember you can **<kbd>CTRL</kbd> + click** (or **<kbd>CMD</kbd> + click** on a Mac) on component names to open code you've imported from elsewhere.
+
+When you are ready, open the explanation below.
+
+<details>
+  <summary>
+    ## Explanation 🤓
+  </summary>
+
+  <div>
+    ### 1. `useLoaderData` and the `data` object
+
+    ```tsx title="app/root.tsx" showLineNumbers
+    const data = useLoaderData<typeof loader>()
+    ```
+
+    The `useLoaderData` hook provides whatever value is returned from the `loader` function. In this case, we are calling this value `data`, but it's just a variable name, and could be anything we wanted it to be. `useLoaderData` is the bridge connecting the server to the browser.
+
+    So, the `data` variable here represents the object being returned from the `loader` function defined previously. A few lines down, we pass this into the `ThemeSwitch` component:
+
+    ```tsx title="app/root.tsx" showLineNumbers
+    <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+    ```
+
+    As you can probably guess, this particular bit of the `data` object contains the user's `theme` preferences (i.e. 'light' or 'dark'), and is read directly from a browser [cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies).
+
+    ### 2. The `ThemeSwitch` component
+
+    The `ThemeSwitch` component is simply an icon wrapped inside a Remix [form](https://remix.run/docs/en/main/components/form). It should toggle between 'light' and 'dark' icons clicked, but something isn't quite right yet. Let's see if we can fix it.
+
+  </div>
+
+</details>
+
+:::
+
+## 🤨 But `ThemeSwitch` doesn't work..!
+
+Try clicking on the theme switch icon. Unfortunately it doesn't work yet...
+
+![ThemeSwitch doesn't work...](/src/assets/gif/theme-switch-not-working.gif)
+
+What's going on here? Let's fix it in the next tutorial...

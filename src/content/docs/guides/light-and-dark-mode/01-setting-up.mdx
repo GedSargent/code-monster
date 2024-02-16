@@ -3,8 +3,6 @@ title: Setting up
 description: Understanding where light and dark mode is implemented in the Epic Stack, and how to manually switch between the two.
 ---
 
-# Setting up
-
 Allowing users to switch between a 'light' and 'dark' mode on your website is something most users expect from a modern web application. It also helps improve accessibility for the site, allowing users to settle on a theme that suits them best.
 
 The only problem is that implementing a light and dark mode is surprisingly difficult. Luckily, the Epic Stack has most of the code for this already included.
@@ -15,7 +13,7 @@ All we need to do is implement it 🚀.
 
 Open `app/root.tsx` and look at the `App` function being exported:
 
-```tsx title="app/root.tsx" showLineNumbers
+```tsx title="app/root.tsx"
 export function App() {
   const nonce = useNonce();
 
@@ -49,9 +47,9 @@ Right-click the opening `Document` tag, and select 'Go to Source Definition' fro
 
 ![Selecting Go to source definition](src/assets/png/image-20240211152140693.png)
 
-This will open the file where the `Document` component code is held.
+This will open the file where the `Document` component code is held:
 
-```tsx
+```tsx title="app/components/shared-layout/Document.tsx"
 interface DocumentProps {
   children: React.ReactNode;
   nonce: string;
@@ -91,11 +89,13 @@ export default function Document({
 }
 ```
 
-:::info
+:::note
 
-### Interfaces
+### Interfaces, props and children
 
-Let's take a second to look at the `interface` being defined here. What is it for?
+Let's take a second to look at the code here.
+
+Start with the `interface` being defined here. What is it for?
 
 In TypeScript, an `interface` is like a blueprint for an object. It describes what **[properties](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_objects)** an object should have and what type of data each property should hold.
 

@@ -84,7 +84,7 @@ When you are ready, open the explanation below.
   <div>
     ### 1. `useLoaderData` and the `data` object
 
-    ```tsx title="app/root.tsx" showLineNumbers
+    ```tsx title="app/root.tsx"
     const data = useLoaderData<typeof loader>()
     ```
 
@@ -92,7 +92,7 @@ When you are ready, open the explanation below.
 
     So, the `data` variable here represents the object being returned from the `loader` function defined previously. A few lines down, we pass this into the `ThemeSwitch` component:
 
-    ```tsx title="app/root.tsx" showLineNumbers
+    ```tsx title="app/root.tsx"
     <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
     ```
 

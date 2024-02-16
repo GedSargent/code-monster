@@ -31,13 +31,13 @@ This command starts a local development server. Once 's up and running, you can 
 
 To change the existing text, locate the `<h1>` tag inside the `App` function in your `root.tsx` file:
 
-```tsx title="app/root.tsx" showLineNumbers
+```tsx title="app/root.tsx"
 <h1 className="text-mega">Welcome to Epic News!</h1>
 ```
 
-Change `"Welcome to Epic News!"` to any message you like, such as `"Your New Journey Begins!"`.
+Change `"Welcome to Epic News!"` to any message you like, such as `Your Journey Begins!`.
 
-```tsx title="app/root.tsx" showLineNumbers
+```tsx title="app/root.tsx" ins="Your Journey Begins!"
 <h1 className="text-mega">Your Journey Begins!</h1>
 ```
 
@@ -47,18 +47,18 @@ Save the file and your browser should automatically refresh, displaying the new 
 
 Let's add a new paragraph (`<p>`) element below the `<h1>` tag. This will demonstrate how to insert new content into your page.
 
-```tsx title="app/root.tsx" showLineNumbers
+```diff lang="tsx" title="app/root.tsx"
 <main className="grid h-full place-items-center">
   <h1 className="text-mega">Your Journey Begins!</h1>
-  <p>Welcome to Epic News, where the latest developments in tech are found.</p>
++  <p>Welcome to Epic News, where the latest developments in tech are found.</p>
 </main>
 ```
 
 ### 4. Style the New Element Using Tailwind Classes
 
-To style the paragraph, we'll use TailwindCSS, a utility-first CSS framework. If you're not familiar with Tailwind, it allows you to style elements by adding class names directly in your HTML (or JSX in this case).
+To style the paragraph, we'll use [TailwindCSS](https://tailwindcss.com/), a utility-first CSS framework. If you're not familiar with Tailwind, it lets you style elements by adding class names directly in your HTML (or JSX in this case).
 
-```tsx title="app/root.tsx" showLineNumbers
+```tsx title="app/root.tsx" ins='className="text-base text-gray-600"'
 <p className="text-base text-gray-600">
   Welcome to Epic News, where the latest developments in tech are found.
 </p>
@@ -68,17 +68,17 @@ To style the paragraph, we'll use TailwindCSS, a utility-first CSS framework. If
 
 Tailwind makes creating responsive designs straightforward. To demonstrate, let's make the font size of our paragraph larger on medium (`md`) and large (`lg`) screens.
 
-```tsx title="app/root.tsx" showLineNumbers
+```tsx title="app/root.tsx" ins='md:text-lg lg:text-xl'
 <p className="text-base text-gray-600 md:text-lg lg:text-xl">
   Welcome to Epic News, where the latest developments in tech are found.
 </p>
 ```
 
-In Tailwind, `md:` and `lg:` are responsive prefixes that apply their styles at specific breakpoints, allowing for mobile-first designs.
+In Tailwind, `md:` and `lg:` are [prefixes](https://tailwindcss.com/docs/responsive-design) that apply styles at their given breakpoints, allowing for mobile-first designs.
 
 Try making your browser window wider and narrower. Notice how the text size changes according to the width of your viewport.
 
-::::warning[Challenge]
+::::tip[Challenge]
 
 # Code Challenges
 
@@ -90,7 +90,7 @@ Now that you've seen how to update the UI, try these challenges to practice your
 
 ---
 
-:::tip
+:::note[Hints]
 
 - Remember, start with **mobile-first** designs in mind and then scale up to larger screens.
 - Use the [Tailwind CSS docs](https://tailwindcss.com/docs) to learn how to use their classes. Below are a few key guides to get you started with the challenges above:
@@ -102,28 +102,33 @@ Now that you've seen how to update the UI, try these challenges to practice your
 
 :::
 
-## Extra Credit 🚀
+---
+
+## Extra Credit 🚀🚀
 
 ### 1. Create a series of UI 'Pills' - small elements that show the status of something like this:
 
-![UI Pills challenge](../../../assets/png/ui-pills.png)
+![UI Pills challenge](src/assets/png/ui-pills.png)
 
 ​**Tailwind focus**: text colour, background colour, padding, border colour, border radius
 
-### 2. Create a card component representing a team member that has:
+---
 
-- An image at the top (use placeholders if needed).
+### 2. Team member card component
+
+Create a card component for a team member that includes:
+
+- A circular image at the top (use placeholders if needed).
 - A title and a short description.
 - Buttons for their Twitter/X and LinkedIn profiles.
-- Ensure the card is responsive and maintains its aspect ratio.
 
 **Tailwind Focus**: image positioning, object cover, padding, margins, border radius, background colour
 
-![Card component design](../../../assets/png/image-20240211133548566.png)
+![Card component design](src/assets/png/image-20240211133548566.png)
 
 ### 3. Use your card component to create the 'Meet our team' section below:
 
-!['Meet our team' section design](../../../assets/png/image-20240211133808485.png)
+!['Meet our team' section design](src/assets/png/image-20240211133808485.png)
 
 ::::
 
@@ -139,13 +144,13 @@ Now that you've seen how to update the UI, try these challenges to practice your
 
     ### 1. Change the Background Color
 
-    ```tsx title="app/root.tsx" showLineNumbers
+    ```tsx title="app/root.tsx"
     <div className="flex h-screen flex-col justify-between bg-blue-100">
     ```
 
     ### 2. Add a Button
 
-    ```tsx title="app/root.tsx" showLineNumbers
+    ```tsx title="app/root.tsx"
     <button className="px-4 py-2 bg-blue-500 text-white rounded-md">
       Learn More
     </button>
@@ -153,7 +158,7 @@ Now that you've seen how to update the UI, try these challenges to practice your
 
     ### 3. Make the Button Responsive
 
-    ```tsx title="app/root.tsx" showLineNumbers
+    ```tsx title="app/root.tsx"
     <button className="px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-4 bg-blue-500 text-white rounded-md">
       Learn More
     </button>

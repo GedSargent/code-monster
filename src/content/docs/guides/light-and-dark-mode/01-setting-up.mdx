@@ -33,7 +33,7 @@ export function App() {
 
 :::note
 
-Your `App` function probably looks a little different from this if you followed the 'root-tsx file' tutorial previously.
+Your `App` function probably looks a little different from this if you followed the [**'root-tsx file'**](/code-monster/guides/root-tsx) tutorial previously.
 
 Don't worry, the fundamentals of this process remain the same.
 
@@ -41,7 +41,7 @@ Don't worry, the fundamentals of this process remain the same.
 
 ### The `Document` component
 
-Notice the `Document` component that is wrapping everything being returned from the `App` function?
+Notice the `Document` component that wraps everything being returned from the `App` function?
 
 Right-click the opening `Document` tag, and select 'Go to Source Definition' from the options:
 
@@ -93,11 +93,11 @@ export default function Document({
 
 ### Interfaces, props and children
 
-Let's take a second to look at the code here.
+Let's take a moment to look at the code here.
 
-Start with the `interface` being defined here. What is it for?
+At the top of the file is an `interface`. But what is it for?
 
-In TypeScript, an `interface` is like a blueprint for an object. It describes what **[properties](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_objects)** an object should have and what type of data each property should hold.
+In TypeScript, an [**interface**](https://prismic.io/blog/typescript-interfaces#:~:text=Interfaces%20are%20a%20feature%20of,type%2Drelated%20errors%20during%20development.) is like a blueprint for an object. It describes what [**properties**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_objects) an object should have and what type of data each property should hold.
 
 Here, `DocumentProps` is an interface:
 
@@ -110,13 +110,15 @@ interface DocumentProps {
 }
 ```
 
-It's saying that any object that wants to be a `DocumentProps` should have the following properties:
+It's saying that any object we want to pass as a `DocumentProps` object should have the following properties:
 
 - `children`: This should be a `React.ReactNode`. In simple terms, this means it can be any kind of item that React can render on the screen, like a component, a piece of text, or even nothing at all.
 
 - `nonce`: This should be a `string`, which is a sequence of characters like "hello" or "1234".
 
-- `theme`: This is an optional property (that's what the `?` means), and it should be of type `Theme`. We don't see a definition for `Theme` in this file, but it's being `import`ed at the top from `app/utils/theme.server.ts`:
+> _In our app, a `nonce` is a unique string that's used to prevent [**cross-site scripting (XSS)**](https://developer.mozilla.org/en-US/docs/Glossary/Cross-site_scripting) attacks. We don't need to worry about this for now, but it's good to know what it is._
+
+- `theme`: This is an optional property (that's what the `?` means), and it should be of type `Theme`. We don't see a definition for `Theme` in this file, but it's being `import`ed at the top from the file at `app/utils/theme.server.ts`:
 
   ```tsx
   import { Theme } from "~/utils/theme.server";
@@ -130,7 +132,7 @@ It's saying that any object that wants to be a `DocumentProps` should have the f
 
   This means that `Theme` must be one of two possible strings: `'light'` or `'dark'`. We'll be looking at this in more detail later.
 
-- `env`: This is also optional, and it should be a `Record<string, string`. This is a fancy way of saying it's an object where all the keys and values are strings. For example, `{ "key1": "value1", "key2": "value2" }` would be a valid `env`.
+- `env`: This is also optional, and it should be of the type `Record<string, string`. This is a fancy way of saying it's an object where all the keys and values are strings. For example, `{ "key1": "value1", "key2": "value2" }` would be a valid `env`.
 
 So, if you have an object and you want to make sure it fits the `DocumentProps` blueprint, it needs to have these properties with these types.
 
@@ -138,13 +140,27 @@ So, if you have an object and you want to make sure it fits the `DocumentProps` 
 
 ## Manually updating from 'light' to 'dark' themes
 
-Find the line that reads `theme = 'dark'`. Change this to `theme = 'light'` and save the file. You should see the website in the browser looks completely different:
+Find the line that reads `theme = 'dark'`.
+
+Change this to `theme = 'light'` and save the file:
+
+```diff lang="tsx" title="app/components/shared-layout/Document.tsx"
+export default function Document({
+	children,
+	nonce,
+-	theme = 'dark',
++	theme = 'light',
+	env = {},
+}: DocumentProps)
+```
+
+You should see the website in the browser looks completely different:
 
 ![Project in Light Mode](src/assets/png/image-20240211162611565.png)
 
 ### Why? Tailwind classes and string interpolation
 
-Take a closer look at the opening `html` component being `rerturn`ed from the `Document` function:
+Take a closer look at the opening `html` component being `return`ed from the `Document` function:
 
 ```tsx
 <html lang="en" className={`${theme} h-full overflow-x-hidden`}>
@@ -152,4 +168,6 @@ Take a closer look at the opening `html` component being `rerturn`ed from the `D
 
 Can you see how the `theme` variable has been slotted into the `className` **property** (or '**prop**')? This is called **interpolation**, and is a way of inserting the value of a variable into a string in JavaScript.
 
-What we need now is a way of users to control the value of `theme` dynamically from the front end. Let's put in a button that users can click to toggle between the two states.
+What we need now is a way of users to control the value of `theme` dynamically from the front end, so they can switch easily between both from the front-end.
+
+Let's add a button that users can click to toggle between the two states. We will start by adding something called a `loader` function in the next step.

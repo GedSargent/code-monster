@@ -2,6 +2,12 @@
 import CallToAction from '@astrojs/starlight/components/CallToAction.astro';
 import { Image } from 'astro:assets';
 
+interface HeroActionArgs {
+  text: string;
+  variant: "primary" | "secondary" | "minimal";
+  link: string;
+}
+
 const { data } = Astro.props.entry;
 const { tagline, image, actions = [] } = data.hero || {};
 
@@ -48,8 +54,8 @@ if (image) {
 			{tagline ? <div class="text-gray-400 text-xl text-center md:text-left md:text-2xl" set:html={tagline} /> : null}
 		</div>
     <div class="flex justify-center gap-6 md:justify-start">
-      {actions.map(({ text, ...attrs }) => (
-      <CallToAction {...attrs} set:html={text} />
+      {actions.map(({ text, variant, link }: HeroActionArgs) => (
+      <CallToAction variant={variant} link={link} set:html={text} />
     ))}
     </div>
 	</div>

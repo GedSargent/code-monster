@@ -3,6 +3,8 @@ title: The root.tsx file in Remix
 description: Get started with Remix by updating the `root.tsx` file to change the user interface (UI) of your project.
 ---
 
+import MonsterDetails from "src/components/MonsterDetails.astro";
+
 # The Remix `root.tsx` file
 
 :::info[Understanding the `root.tsx` file]
@@ -78,7 +80,7 @@ In Tailwind, `md:` and `lg:` are [prefixes](https://tailwindcss.com/docs/respons
 
 Try making your browser window wider and narrower. Notice how the text size changes according to the width of your viewport.
 
-::::tip[Challenge]
+::::tip[Did You Know?]
 
 # Code Challenges
 
@@ -132,11 +134,7 @@ Create a card component for a team member that includes:
 
 ::::
 
-<details>
-  <summary>
-    ## Solutions
-  </summary>
-
+<MonsterDetails>
   <div>
     There are actually lots of ways you could complete these challenges. Below are a few.
 
@@ -145,13 +143,13 @@ Create a card component for a team member that includes:
     ### 1. Change the Background Color
 
     ```tsx title="app/root.tsx"
-    <div className="flex h-screen flex-col justify-between bg-blue-100">
+    <div class="flex h-screen flex-col justify-between bg-blue-100">
     ```
 
     ### 2. Add a Button
 
     ```tsx title="app/root.tsx"
-    <button className="px-4 py-2 bg-blue-500 text-white rounded-md">
+    <button class="px-4 py-2 bg-blue-500 text-white rounded-md">
       Learn More
     </button>
     ```
@@ -159,14 +157,13 @@ Create a card component for a team member that includes:
     ### 3. Make the Button Responsive
 
     ```tsx title="app/root.tsx"
-    <button className="px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-4 bg-blue-500 text-white rounded-md">
+    <button class="px-4 py-2 md:px-6 md:py-3 lg:px-8 lg:py-4 bg-blue-500 text-white rounded-md">
       Learn More
     </button>
     ```
 
   </div>
-
-</details>
+</MonsterDetails>
 
 ## Congratulations! 🥳
 

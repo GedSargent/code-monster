@@ -1,0 +1,16 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "Solution" } = Astro.props;
+---
+
+<details class="p-4 border-l-4 border border-lime-700">
+  <summary class="hover:cursor-pointer">
+    <h2>{title}</h2>
+  </summary>
+
+  <slot />
+
+</details>

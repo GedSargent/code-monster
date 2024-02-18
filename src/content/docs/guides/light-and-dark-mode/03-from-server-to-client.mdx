@@ -7,6 +7,8 @@ import MonsterDetails from "src/components/MonsterDetails.astro";
 
 If the `loader` function loads prepares data on the server, then `useLoaderData` is the bridge that carries this data across into the user's browser.
 
+## Adding `useLoaderData` to the `App` component
+
 This a [hook](https://react.dev/learn/reusing-logic-with-custom-hooks) supplied by Remix, and is easily called:
 
 ```diff lang="tsx" title="app/root.tsx"
@@ -60,7 +62,7 @@ export function App() {
 
 :::tip
 
-## Review your code
+### Review your code
 
 Take a few minutes to review the code you have added.
 
@@ -72,7 +74,7 @@ When you are ready, open the explanation below.
 
 <MonsterDetails title="Explanation 🤓">
   <div>
-    ### 1. `useLoaderData` and the `data` object
+    #### 1. `useLoaderData` and the `data` object
 
     ```tsx title="app/root.tsx"
     const data = useLoaderData<typeof loader>()
@@ -88,7 +90,7 @@ When you are ready, open the explanation below.
 
     As you can probably guess, this particular bit of the `data` object contains the user's `theme` preferences (i.e. 'light' or 'dark'), and is read directly from a browser [cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies).
 
-    ### 2. The `ThemeSwitch` component
+    #### 2. The `ThemeSwitch` component
 
     The `ThemeSwitch` component is simply an icon wrapped inside a Remix [form](https://remix.run/docs/en/main/components/form). It should toggle between 'light' and 'dark' icons clicked, but something isn't quite right yet. Let's see if we can fix it.
 

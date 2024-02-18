@@ -1,0 +1,127 @@
+---
+title: Handling form data with an action function
+description: Understanding how to toggle light and dark mode with useTheme
+---
+
+## Adding `useTheme`
+
+Open `app/root.tsx` and add the line highlighted in green below:
+
+![image-20240211170056416](src/assets/png/image-20240211170056416.png)
+
+Notice the red underline? This is because `useTheme` is a custom function, but we haven't defined it yet. Let's fix that now.
+
+### Using 'Quick Fix' to add an `import` statement
+
+1. Hover your cursor over the red underline, and after a moment you will see a pop-up menu.
+2. Click 'Quick Fix' from this menu, and select "add import from './hooks/useTheme'".
+
+![image-20240211170500977](src/assets/png/image-20240211170500977.png)
+
+3. This automatically `import`s the code from the file in the project, and the red underline disappears. You should be able to see the `import` statement at the top of your code window:
+
+![Import statement at top of code window](src/assets/png/image-20240211170747133.png)
+
+### Passing the `theme` to the `Document` component
+
+Now that we have the `useTheme` function imported, we can pass the `theme` directly into the `<Document />` component:
+
+```tsx ins="theme={theme}"
+export function App() {
+  const data = useLoaderData<typeof loader>();
+  const nonce = useNonce();
+  const theme = useTheme();
+
+  return (
+    <Document nonce={nonce} theme={theme}>
+      {/* code omitted for brevity */}
+    </Document>
+  );
+}
+```
+
+## Adding an `action` function
+
+Finally, we need to tie everything together by adding an `action` function. This function will be called when the user clicks the button, and will toggle the theme between light and dark mode.
+
+:::note
+
+### What is an `action` function?
+
+In Remix, `action` functions are the close relative of [**loader**](/code-monster/guides/light-and-dark-mode/02-adding-a-loader-function) functions. But while `loader` functions _load_ data from an external source, `action` functions _send_ data when a user submits a form on a route file.
+
+In this case, we will use an `action` function to toggle the theme between light and dark mode when the user clicks the button.
+:::
+
+### Updating the `import` statements
+
+Firstly, let's update the `import` statements at the top of the `app/root.tsx` file to include some extra code from external packages, like the `parse` function from the `zod` library, and the `setTheme` function from the `theme.server.ts` file:
+
+```diff lang="tsx" title="app/root.tsx" ins="ActionFunctionArgs," ins=", setTheme"
++import { parse } from '@conform-to/zod'
+import {
+	ActionFunctionArgs,
+	LoaderFunctionArgs,
+	json,
+	type LinksFunction,
+} from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
++import { z } from 'zod'
+import AppProvider from '~/components/shared-layout/AppProvider'
+import Document from '~/components/shared-layout/Document.tsx'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'
+import ThemeSwitch from './components/shared-layout/ThemeSwitch'
+import useTheme from './hooks/useTheme'
+import { getHints } from './utils/client-hints'
+import { getDomainUrl } from './utils/misc'
+import { getTheme, setTheme } from './utils/theme.server'
+```
+
+### Defining the `action` function
+
+Next, add the following `action` function to the `app/root.tsx` file, directly beneath the `loader` function we added earlier:
+
+```diff lang="tsx" title="app/root.tsx"
++const ThemeFormSchema = z.object({
++	theme: z.enum(['system', 'light', 'dark']),
++})
++
++export async function action({ request }: ActionFunctionArgs) {
++	const formData = await request.formData()
++	const submission = parse(formData, {
++		schema: ThemeFormSchema,
++	})
++
++	if (submission.intent !== 'submit') {
++		return json({ status: 'idle', submission } as const)
++	}
++
++	if (!submission.value) {
++		return json({ status: 'error', submission } as const, { status: 400 })
++	}
++	const { theme } = submission.value
++
++	const responseInit = {
++		headers: { 'set-cookie': setTheme(theme) },
++	}
++
++	return json({ success: true, submission }, responseInit)
++}
+```
+
+Like the `loader` function, the `action` function takes a `request` object as an argument, which we use to access the form data.
+
+We then use the `parse` function from the `zod` library to extract the form data and return an object that describes the theme choice of the user (`'light'`, `'dark'` or `'system'`)
+
+If the form data is valid, we set the theme using the `setTheme` function and return a `success` message.
+
+## Testing the light and dark mode toggle button
+
+Save your changes, then head back to the browser. You should now be able to toggle the theme between light and dark mode by clicking the button:
+
+![Light and dark mode toggle button](src/assets/gif/theme-switch-toggle.gif)
+
+## 🎉 Congratulations! 🎉
+
+![Celeration time](https://media.giphy.com/media/13QR26H3cyveg0/giphy.gif)

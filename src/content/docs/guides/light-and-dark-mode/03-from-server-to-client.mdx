@@ -1,24 +1,22 @@
 ---
-title: From server to client - useLoaderData
+title: From server to client - `useLoaderData`
 description: Learn how to use the useLoaderData hook to pass data from the server to the client in Remix.
 ---
 
-# From server to component: `useLoaderData`
+import MonsterDetails from "src/components/MonsterDetails.astro";
 
-If the `loader` function loads prepares data on the server, then `useLoaderData` is the bridge which carries this data across into the user's browser.
+If the `loader` function loads prepares data on the server, then `useLoaderData` is the bridge that carries this data across into the user's browser.
 
 This a [hook](https://react.dev/learn/reusing-logic-with-custom-hooks) supplied by Remix, and is easily called:
 
-```tsx
+```diff lang="tsx" title="app/root.tsx"
 import { LoaderFunctionArgs, json, type LinksFunction } from '@remix-run/node'
-// highlight-next-line
-import { useLoaderData } from '@remix-run/react'
++import { useLoaderData } from '@remix-run/react'
 import AppProvider from '~/components/shared-layout/AppProvider'
 import Document from '~/components/shared-layout/Document.tsx'
 import { useNonce } from '~/utils/nonce-provider.ts'
 import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'
-// highlight-next-line
-import ThemeSwitch from './components/shared-layout/ThemeSwitch'
++import ThemeSwitch from './components/shared-layout/ThemeSwitch'
 import useTheme from './hooks/useTheme'
 import { getHints } from './utils/client-hints'
 import { getDomainUrl } from './utils/misc'
@@ -40,10 +38,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export function App() {
-  // highlight-next-line
-	const data = useLoaderData<typeof loader>()
-	const nonce = useNonce()
-	const theme = useTheme()
++	const data = useLoaderData<typeof loader>();
+	const nonce = useNonce();
+	const theme = useTheme();
 
 	return (
 		<Document nonce={nonce} theme={theme}>
@@ -53,12 +50,9 @@ export function App() {
 						<h1 className="text-mega">Welcome to Epic News!</h1>
 					</main>
 				</div>
-				{/* highlight-start */}
-
-				<div className="container flex justify-between pb-5">
-					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-				</div>
-				{/* highlight-end */}
++				<div className="container flex justify-between pb-5">
++					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
++				</div>
 		</Document>
 	)
 }
@@ -76,11 +70,7 @@ Remember you can **<kbd>CTRL</kbd> + click** (or **<kbd>CMD</kbd> + click** on a
 
 When you are ready, open the explanation below.
 
-<details>
-  <summary>
-    ## Explanation 🤓
-  </summary>
-
+<MonsterDetails title="Explanation 🤓">
   <div>
     ### 1. `useLoaderData` and the `data` object
 
@@ -104,7 +94,7 @@ When you are ready, open the explanation below.
 
   </div>
 
-</details>
+</MonsterDetails>
 
 :::
 

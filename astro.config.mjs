@@ -1,7 +1,8 @@
 import starlight from "@astrojs/starlight";
 import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
-const lightDarkMode = "guides/light-and-dark-mode";
+
+const lightDarkModeDir = "guides/light-and-dark-mode";
 
 // https://astro.build/config
 export default defineConfig({
@@ -36,19 +37,19 @@ export default defineConfig({
               items: [
                 {
                   label: "Setting up",
-                  link: `${lightDarkMode}/01-setting-up`,
+                  link: `${lightDarkModeDir}/01-setting-up`,
                 },
                 {
                   label: "Add a loader function",
-                  link: `${lightDarkMode}/02-adding-a-loader-function`,
+                  link: `${lightDarkModeDir}/02-adding-a-loader-function`,
                 },
                 {
-                  label: "useLoaderData - from server to client",
-                  link: `${lightDarkMode}/03-from-server-to-client-with-useLoaderData`,
+                  label: "From server to client - `useLoaderData`",
+                  link: `${lightDarkModeDir}/03-from-server-to-client`,
                 },
                 {
                   label: "Toggle light and dark mode",
-                  link: `${lightDarkMode}/04-toggle-light-and-dark-mode`,
+                  link: `${lightDarkModeDir}/04-toggle-light-and-dark-mode`,
                 },
               ],
             },

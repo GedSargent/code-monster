@@ -12,6 +12,7 @@ export default defineConfig({
     starlight({
       title: "Code Monster",
       favicon: "/src/assets/favicon.ico",
+      customCss: ["./src/tailwind.css"],
       components: {
         Hero: "/src/components/MonsterHero.astro",
       },
@@ -49,7 +50,7 @@ export default defineConfig({
                 },
                 {
                   label: "Toggle light and dark mode",
-                  link: `${lightDarkModeDir}/04-toggle-light-and-dark-mode`,
+                  link: `${lightDarkModeDir}/04-action-functions`,
                 },
               ],
             },
@@ -63,6 +64,9 @@ export default defineConfig({
         },
       ],
     }),
-    tailwind(),
+    tailwind({
+      // Disable the default base styles:
+      applyBaseStyles: false,
+    }),
   ],
 });

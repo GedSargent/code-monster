@@ -1,6 +1,6 @@
-import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
-
+import tailwind from "@astrojs/tailwind";
+import { defineConfig } from "astro/config";
 const lightDarkMode = "guides/light-and-dark-mode";
 
 // https://astro.build/config
@@ -10,6 +10,10 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Code Monster",
+      favicon: "/src/assets/favicon.ico",
+      components: {
+        Hero: "/src/components/MonsterHero.astro",
+      },
       logo: {
         dark: "/src/assets/png/cm-logo-light.png",
         light: "/src/assets/png/cm-logo-dark.png",
@@ -23,7 +27,10 @@ export default defineConfig({
         {
           label: "Epic News",
           items: [
-            { label: "The root.tsx file", link: "guides/root-tsx" },
+            {
+              label: "The root.tsx file",
+              link: "guides/root-tsx",
+            },
             {
               label: "Light and Dark Mode",
               items: [
@@ -49,9 +56,12 @@ export default defineConfig({
         },
         {
           label: "Reference",
-          autogenerate: { directory: "reference" },
+          autogenerate: {
+            directory: "reference",
+          },
         },
       ],
     }),
+    tailwind(),
   ],
 });

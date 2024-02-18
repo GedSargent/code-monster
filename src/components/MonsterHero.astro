@@ -1,0 +1,57 @@
+---
+import CallToAction from '@astrojs/starlight/components/CallToAction.astro';
+import { Image } from 'astro:assets';
+
+const { data } = Astro.props.entry;
+const { tagline, image, actions = [] } = data.hero || {};
+
+const imageAttrs = {
+	loading: 'eager' as const,
+	decoding: 'async' as const,
+	width: 400,
+	height: 400,
+	alt: 'Code Monster for monster code',
+};
+
+let darkImage: ImageMetadata | undefined;
+let lightImage: ImageMetadata | undefined;
+let rawHtml: string | undefined;
+if (image) {
+	if ('file' in image) {
+		darkImage = image.file;
+	} else if ('dark' in image) {
+		darkImage = image.dark;
+		lightImage = image.light;
+	} else {
+		rawHtml = image.html;
+	}
+}
+---
+
+<div class="container md:flex md:flex-row-reverse md:gap-24 md:py-24">
+	<div class="flex justify-center">
+    {
+      darkImage && (
+        <Image
+          src={darkImage}
+          {...imageAttrs}
+          class:list={{ 'light:sl-hidden': Boolean(lightImage) }}
+        />
+      )
+    }
+    {lightImage && <Image src={lightImage} {...imageAttrs} class="dark:sl-hidden" />}
+    {rawHtml && <div class="hero-html sl-flex" set:html={rawHtml} />}
+  </div>
+	<div class="py-8">
+		<div class="pb-8 lg:pb-16">
+			<h1 class="text-center pb-4 md:text-left"><span class="text-5xl font-black lg:text-7xl">Welcome to <span class="from-lime-700 bg-gradient-to-r via-lime-600 to-lime-400 bg-clip-text text-transparent drop-shadow-md">Code Monster</span></span></h1>
+			{tagline ? <div class="text-gray-400 text-2xl text-center md:text-left" set:html={tagline} /> : null}
+		</div>
+    <div class="flex justify-center gap-6 md:justify-start">
+      {actions.map(({ text, ...attrs }) => (
+      <CallToAction {...attrs} set:html={text} />
+    ))}
+    </div>
+	</div>
+</div>
+

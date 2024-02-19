@@ -1,4 +1,5 @@
 ---
+import { Icon } from "@astrojs/starlight/components";
 interface Props {
   title?: string;
 }
@@ -6,9 +7,11 @@ interface Props {
 const { title = "Solution" } = Astro.props;
 ---
 
-<details class="p-4 border-l-4 border border-lime-700">
-  <summary class="hover:cursor-pointer">
-    <h2>{title}</h2>
+
+<details class="p-4 border-l-4 border border-lime-700 bg-lime-300 dark:bg-lime-900 dark:border-lime-500 [&_svg]:open:rotate-90">
+  <summary class="flex items-end list-none h-fit hover:cursor-pointer">
+    <Icon name="right-caret" size="2rem" class="pb-1 pr-2 fill-lime-900 rotate-0 transform h-fit transition-all duration-300 dark:fill-lime-300"/>
+    <h2><span class="text-lime-900 dark:text-lime-300">{title}</span></h2>
   </summary>
 
   <slot />

@@ -58,6 +58,10 @@ export default defineConfig({
               label: "Navbar and Footer",
               link: "guides/navbar-and-footer",
             },
+            {
+              label: "🔀 Routing: The `Outlet` component",
+              link: "guides/outlet",
+            },
           ],
         },
         {

@@ -1,0 +1,133 @@
+---
+title: Navbar and Footer
+description: Adding a navigation bar and footer to our site
+---
+
+import MonsterDetails from "src/components/MonsterDetails.astro";
+
+Now that we have light and dark mode, let's add a navigation bar to our site. We'll use the `<HeaderWithSearch />` component that is included with the Epic Stack.
+
+## Importing `HeaderWithSearch`
+
+First, let's add the component to our `root.tsx` file.
+
+```diff lang="tsx"
+// Code omitted for brevity
+import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'
++import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import ThemeSwitch from './components/shared-layout/ThemeSwitch'
+import useTheme from './hooks/useTheme'
+import { getHints } from './utils/client-hints'
+import { getDomainUrl } from './utils/misc'
+import { getTheme, setTheme } from './utils/theme.server'
+
+// Code omitted for brevity
+
+export function App() {
+	const data = useLoaderData<typeof loader>()
+	const nonce = useNonce()
+	const theme = useTheme()
+
+	return (
+		<Document nonce={nonce} theme={theme}>
+			<div className="flex h-screen flex-col justify-between">
++				<HeaderWithSearch />
+
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
+					</main>
+				</div>
+
+				<div className="container flex justify-between pb-5">
+					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+				</div>
+			</div>
+		</Document>
+	)
+}
+```
+
+### Check the browser
+
+Head across to your browser and you should see the navigation bar at the top of the page. It should look something like this:
+
+![Navbar](src/assets/png/navbar.png)
+
+You'll notice that if you click the **Log in** button, nothing happens. This is because we haven't implemented the login functionality yet. We'll do that in a later section. For now, let's add a footer to our site.
+
+## Challenge: Adding a Footer
+
+Now that we have a navigation bar, let's add a footer.
+
+If you look inside the `app/components/organisms/Footer` directory, you'll see **three** different footer components.
+
+![Footer Components](src/assets/png/footer-components.png)
+
+Using the same techniques we used to add the navigation bar, add a footer to your site yourself. You can choose any of the three above to get started, and if you want to customise them later, feel free!
+
+If you get stuck, you can find the solution below.
+
+<MonsterDetails title="Adding a footer">
+<div>
+For this solution, I'm going to use the `FooterMenuRight` component, but you can choose whatever you like.
+
+#### Import the component
+
+First, let's import the component directly above our `HeaderWithSearch` import at the top of our `root.tsx` file:
+
+```diff lang="tsx" title="app/root.tsx"
+
+// Code omitted for brevity
+import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'
++import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+// Code omitted for brevity
+```
+
+#### Add `FooterMenuRight` to the UI
+
+Next, let's slot the `FooterMenuRight` component towards the bottom of our `App` component. Take care to place this just above the closing `</Document>` tag:
+
+```diff lang="tsx" title="app/root.tsx"
+export function App() {
+	const data = useLoaderData<typeof loader>()
+	const nonce = useNonce()
+	const theme = useTheme()
+
+	return (
+		<Document nonce={nonce} theme={theme}>
+			<div className="flex h-screen flex-col justify-between">
+				<HeaderWithSearch />
+
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
+					</main>
+				</div>
+
+				<div className="container flex justify-between pb-5">
+					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+				</div>
+			</div>
+
++			<FooterMenuRight />
+		</Document>
+	)
+}
+```
+
+#### Check the browser
+
+Save your work and check the browser. Scroll the page down, and you should see a footer at the bottom of the page:
+
+![Footer](src/assets/png/footer.png)
+
+</div>
+</MonsterDetails>
+
+## 🎉 Congratulations! 🎉
+
+You now have a professional navigation bar and footer on your site! 😎
+
+In the next section, we'll look at how to add more pages using Remix's powerful nesting routing system.

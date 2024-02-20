@@ -12,7 +12,11 @@ If the `loader` function loads prepares data on the server, then `useLoaderData`
 This a [hook](https://react.dev/learn/reusing-logic-with-custom-hooks) supplied by Remix, and is easily called:
 
 ```diff lang="tsx" title="app/root.tsx"
-import { LoaderFunctionArgs, json, type LinksFunction } from '@remix-run/node'
+import {
+  json,
+  type LinksFunction,
+  type LoaderFunctionArgs
+} from "@remix-run/node";
 +import { useLoaderData } from '@remix-run/react'
 import AppProvider from '~/components/shared-layout/AppProvider'
 import Document from '~/components/shared-layout/Document.tsx'

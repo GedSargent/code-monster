@@ -57,12 +57,12 @@ In this case, we will use an `action` function to toggle the theme between light
 
 Firstly, let's update the `import` statements at the top of the `app/root.tsx` file to include some extra code from external packages, like the `parse` function from the `zod` library, and the `setTheme` function from the `theme.server.ts` file:
 
-```diff lang="tsx" title="app/root.tsx" ins="ActionFunctionArgs," ins=", setTheme"
+```diff lang="tsx" title="app/root.tsx" ins=", setTheme"
 +import { parse } from '@conform-to/zod'
 import {
-	ActionFunctionArgs,
-	LoaderFunctionArgs,
 	json,
++	type ActionFunctionArgs,
+	type LoaderFunctionArgs,
 	type LinksFunction,
 } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
@@ -123,5 +123,7 @@ Save your changes, then head back to the browser. You should now be able to togg
 ![Light and dark mode toggle button](src/assets/gif/theme-switch-toggle.gif)
 
 ## 🎉 Congratulations! 🎉
+
+You now have a working light and dark mode toggle button in your Remix app! 🚀
 
 ![Celeration time](https://media.giphy.com/media/13QR26H3cyveg0/giphy.gif)

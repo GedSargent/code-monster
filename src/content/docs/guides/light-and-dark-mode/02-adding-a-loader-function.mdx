@@ -19,8 +19,12 @@ Take the time to slot these lines into _exactly_ the same places in your own cod
 
 :::
 
-```diff lang="tsx" title="app/root.tsx" ins="LoaderFunctionArgs, json,"
-import { LoaderFunctionArgs, json, type LinksFunction } from "@remix-run/node";
+```diff lang="tsx" title="app/root.tsx"
+import {
+  json,
++  type LinksFunction,
++  type LoaderFunctionArgs
+} from "@remix-run/node";
 import AppProvider from "~/components/shared-layout/AppProvider";
 import Document from "~/components/shared-layout/Document.tsx";
 import { useNonce } from "~/utils/nonce-provider.ts";

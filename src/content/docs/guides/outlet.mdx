@@ -52,7 +52,7 @@ export function App() {
 }
 ```
 
-Save your changes and head back across to your browser. You should see the welcome message has changed:
+Save your changes and head back across to your browser. Make sure you are on the home page at [http://localhost:3000](http://localhost:3000). You should see the welcome message has changed:
 
 ![Hello from _index.tsx screenshot](src/assets/png/hello-from-index-tsx.png)
 
@@ -89,43 +89,43 @@ So what exactly is happening??
 
 ## The `Outlet` component
 
-The `Outlet` component is a special Remix component that tells the browser to render the **child route** that matches the current URL.
+`Outlet` is a special Remix component that tells the browser to render a **child route** that matches the current URL.
+
+This is quite a strange concept to understand at first, so let's take some time to understand what this means.
 
 :::info
 
-### What is a "route"?
+### 🔀 What is a "route"? 🔀
 
-In a normal web application, a "route" is a URL that corresponds to a specific page or view in the app.
+In a normal web application, a "route" is a URL that corresponds to a specific **page** or **view** in the app. This is usually served from a specific file in the project.
 
-When we run a Remix application on our local machines, the **base URL** is
+For example, when we run a Remix application on our local machines, the **base URL** is
 
 ```bash
 http://localhost:3000/
 ```
 
-The "route" in this case is the base page of our website, which in a Remix app is served from `app/root.tsx`.
+In a Remix app, this is initially served from the file at `app/root.tsx`.
 
-However, if we wanted to navigate to a different page, say the 'About Us' page, then we would typically add the new **path** onto the end of the base URL like so:
+However, if we wanted to navigate to a different page - say the 'About Us' page - then we would typically add a new **path** onto the end of the base URL like so:
 
 ```bash ins="/about-us" title="URL for the 'About Us' page"
 http://localhost:3000/about-us
 ```
 
-The "route" in this case would be served from a file inside the `routes` folder called `about-us.tsx`, a completely different file.
+The "route" in this case would then be served from another file in the code base. In a Remix app, this file would typically be found inside the `routes` folder, and called `about-us.tsx`.
 
 ### "Parent" and "child" routes
 
 However, in a Remix application, we can make use of something much more powerful - "parent" and "child" routes.
 
-A "child route" is a route that is nested _within_ another route, which we call a "parent route".
-
-In this case, the child route is the `_index.tsx` file.
+A "child route" is a route that is nested _within_ another route, which we call a "parent route". As soon as we place the `Outlet` component inside a parent route, it tells Remix to render both the parent and the matching child route through it.
 
 #### The main index page of a website
 
-When you fire up your server, navigating to `http://localhost:3000/` will render main **index** page for the app. Initially, this is page is served by the `root.tsx` file.
+In the case of our app at the moment, the `root.tsx` file is the file being served as the "parent" route, and the `_index.tsx` file is the "child" route.
 
-However, the `Outlet` component tells Remix to render the child route that matches the current URL. In this case, the child route is the `_index.tsx` file.
+The reason we can still see the navbar and footer is because the `root.tsx` file is still being served as the parent route. The content that we see in the middle of the page is being served through the `Outlet` component as the child from the `_index.tsx` file.
 
 #### The route structure
 

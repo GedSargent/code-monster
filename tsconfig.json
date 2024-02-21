@@ -1,6 +1,12 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "baseUrl": "./"
+    "baseUrl": "/Users/gs/Sites/Highlands College/code-monster-starlight",
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "jsxImportSource": "react",
+    "allowImportingTsExtensions": true
   }
 }

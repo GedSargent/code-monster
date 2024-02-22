@@ -62,6 +62,10 @@ export default defineConfig({
               label: "🔀 Routing: The `Outlet` component",
               link: "guides/outlet",
             },
+            {
+              label: "Authentication and security",
+              link: "guides/authentication-and-security",
+            },
           ],
         },
         {

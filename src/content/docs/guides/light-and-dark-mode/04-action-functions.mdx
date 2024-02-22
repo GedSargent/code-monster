@@ -27,7 +27,7 @@ Notice the red underline? This is because `useTheme` is a custom function, but w
 Now that we have the `useTheme` function imported, we can pass the `theme` directly into the `<Document />` component:
 
 ```tsx ins="theme={theme}"
-export function App() {
+export default function App() {
   const data = useLoaderData<typeof loader>();
   const nonce = useNonce();
   const theme = useTheme();
@@ -67,7 +67,6 @@ import {
 } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 +import { z } from 'zod'
-import AppProvider from '~/components/shared-layout/AppProvider'
 import Document from '~/components/shared-layout/Document.tsx'
 import { useNonce } from '~/utils/nonce-provider.ts'
 import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'

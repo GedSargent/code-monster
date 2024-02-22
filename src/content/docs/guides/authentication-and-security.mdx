@@ -1,0 +1,345 @@
+---
+title: Authentication and security
+description: Ensure your application is secure and users are authenticated
+---
+
+We need a way to authenticate users in our application. Let's by adding some important functions to our `app/root.tsx` file.
+
+These will eventually supply the data needed to authenticate users, measure performance and secure the app against malicicious attacks.
+
+Firstly, add the following imports to the top of the file:
+
+```diff lang="tsx" title="app/root.tsx" ins=", type MetaFunction"
+import { parse } from '@conform-to/zod'
+import {
+	json,
+	type ActionFunctionArgs,
++	type HeadersFunction,
+	type LinksFunction,
+	type LoaderFunctionArgs,
+} from '@remix-run/node'
+import { Outlet, useLoaderData, type MetaFunction } from '@remix-run/react'
+import { z } from 'zod'
++import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
++import { HoneypotProvider } from 'remix-utils/honeypot/react'
+
+// Code omitted for brevity
+```
+
+Next, let's add `meta` and `headers` functions further down the file, just below the `links` function that is already defined:
+
+```diff lang="tsx" title="app/root.tsx"
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
+
++export const meta: MetaFunction<typeof loader> = ({ data }) => {
++	return [
++		{ title: data ? 'Epic News' : 'Error | Epic News' },
++		{ name: 'description', content: `Your own captain's log` },
++	]
++}
++
++export const headers: HeadersFunction = ({ loaderHeaders }) => {
++	const headers = {
++		'Server-Timing': loaderHeaders.get('Server-Timing') ?? '',
++	}
++	return headers
++}
+```
+
+:::note
+
+## What are the `meta` and `headers` functions?
+
+### The `meta` function
+
+The `meta` function generates metadata for the webpage. Metadata is used by search engines and web browsers to understand the content of your page.
+
+```tsx title="The 'meta' function"
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: data ? "Epic News" : "Error | Epic News" },
+    { name: "description", content: `Your own captain's log` },
+  ];
+};
+```
+
+The `meta` function here is setting the title and description of the page. It checks if `data` exists, and if it does, it sets the `title` of the page to `'Epic News'`. If `data` does not exist, it sets the `title` to `'Error | Epic News'`. It also sets a `description` for the page with the content `"Your own captain's log"`.
+
+#### Challenge
+
+Can you update the `description` to be more descriptive of the application? You can check the result in the browser by inspecting the page and looking at the `head` section of the HTML.
+
+### The `headers` function
+
+The `headers` function generates HTTP headers for a response. HTTP headers are used to pass additional information between the client and the server.
+
+In this case, it is being used to set the `Server-Timing` header, which is used to measure the performance of the server.
+
+```tsx title="The 'headers' function"
+export const headers: HeadersFunction = ({ loaderHeaders }) => {
+  const headers = {
+    "Server-Timing": loaderHeaders.get("Server-Timing") ?? "",
+  };
+  return headers;
+};
+```
+
+The `Server-Timing` header is used in HTTP responses to provide performance metrics about the request-response cycle to the client. It allows the server to communicate back to the client any metrics that may be useful for debugging or performance-tuning purposes.
+
+:::
+
+## Updating the `loader` function
+
+We care going to completely rewrite the `loader` function to include **user information**, **performance metrics**, and # CSRF tokensns\*\*.
+
+### Replacing `import` statements
+
+Firstly, lets remove the final `import` statements from the top of `app/root.tsx`. Delete the lines highlighted in red below:
+
+```diff lang="tsx" title="app/root.tsx"
+// Code omitted for brevity
+import ThemeSwitch from './components/shared-layout/ThemeSwitch'
+import useTheme from './hooks/useTheme'
+-import { getHints } from './utils/client-hints'
+-import { getDomainUrl } from './utils/misc'
+-import { getTheme, setTheme } from './utils/theme.server'
+```
+
+Let's replace these imports with the following:
+
+```diff lang="tsx" title="app/root.tsx"
+// Code omitted for brevity
+import ThemeSwitch from './components/shared-layout/ThemeSwitch'
+import useTheme from './hooks/useTheme'
++import { getUser } from './server/user.server'
++import { getUserId, logout } from './utils/auth.server'
++import { csrf } from './utils/csrf.server'
++import { honeypot } from './utils/honeypot.server'
++import generateRootJson from './utils/rootProviders/generateRootJson'
++import { setTheme } from './utils/theme.server'
++import { makeTimings, time } from './utils/timing.server'
++import { getToast } from './utils/toast.server'
+```
+
+### Updating the `loader` function
+
+Next, let's update the `loader` function to include the user information and CSRF tokens. Completely replace the old `loader` function body with the following:
+
+```diff lang="tsx" title="app/root.tsx"
+export async function loader({ request }: LoaderFunctionArgs) {
+-const requestInfo = {
+-	hints: getHints(request),
+-	origin: getDomainUrl(request),
+-	path: new URL(request.url).pathname,
+-	userPrefs: {
+-		theme: getTheme(request),
+-},
++	const timings = makeTimings('root loader')
++	const userId: string | null = await time(() => getUserId(request), {
++		timings,
++		type: 'getUserId',
++		desc: 'getUserId in root',
++	})
++
++	const user = userId
++		? await time(getUser(userId), {
++				timings,
++				type: 'find user',
++				desc: 'find user in root',
++			})
++		: null
++
++	if (userId && !user) {
++		console.info('something weird happened')
++		// something weird happened... The user is authenticated but we can't find
++		// them in the database. Maybe they were deleted? Let's log them out.
++		await logout({ request, redirectTo: '/' })
++	}
++
++	const { toast, headers: toastHeaders } = await getToast(request)
++	const honeyProps = honeypot.getInputProps()
++	const [csrfToken, csrfCookieHeader] = await csrf.commitToken()
++	const { pageData, headerData } = generateRootJson({
++		user,
++		request,
++		honeyProps,
++		toast,
++		csrfToken,
++		timings,
++		toastHeaders,
++		csrfCookieHeader,
++	})
++
++	return json(pageData, headerData)
+}
+```
+
+This is a lot of new code, so let's break it down:
+
+:::note
+
+## The new `loader` function
+
+As before, the `loader` function takes a `request` object as an argument, which represents the incoming HTTP request.
+
+However, the function now starts by creating a `timings` object using the `makeTimings` function. This object is used to track how long certain operations take.
+
+```tsx
+const timings = makeTimings("root loader");
+```
+
+---
+
+Next, it retrieves a `userId` from the `request` object using the `getUserId` function that has been imported from elsewhere. If `getUserId` cannot parse a user ID from the `request` object, `userId` is set to `null`.
+
+```tsx
+const userId: string | null = await time(() => getUserId(request), {
+  timings,
+  type: "getUserId",
+  desc: "getUserId in root",
+});
+```
+
+---
+
+If a `userId` has been found in the previous step, we then attempt to retrieve the corresponding user data using the `getUser` function. If no `userId` is found, `user` is set to `null`.
+
+```tsx
+const user = userId
+  ? await time(getUser(userId), {
+      timings,
+      type: "find user",
+      desc: "find user in root",
+    })
+  : null;
+```
+
+---
+
+An edge case might occur here: what if a `userId` was found but no corresponding `user` data was retrieved? If this is the case, we log a message to the console and sign the user out by calling the `logout` function, and redirecting them to the home page.
+
+```tsx
+if (userId && !user) {
+  console.info("something weird happened");
+  // something weird happened... The user is authenticated but we can't find
+  // them in the database. Maybe they were deleted? Let's log them out.
+  await logout({ request, redirectTo: "/" });
+}
+```
+
+---
+
+Next, it retrieves [toast notifications](https://www.suprsend.com/post/the-ultimate-guide-to-toast-messages---what-are-toasts-their-use-cases-and-react-native-toast-message-implementation) and headers using the `getToast` function, generates [honeypot](https://www.kaspersky.com/resource-center/threats/what-is-a-honeypot#:~:text=The%20definition%20of%20a%20honeypot&text=It's%20a%20sacrificial%20computer%20system,distract%20them%20from%20other%20targets.) input properties using the `honeypot.getInputProps` function, and generates a [CSRF token and cookie header](https://portswigger.net/web-security/csrf) using the `csrf.commitToken` function.
+
+```tsx
+const { toast, headers: toastHeaders } = await getToast(request);
+const honeyProps = honeypot.getInputProps();
+const [csrfToken, csrfCookieHeader] = await csrf.commitToken();
+```
+
+The function then generates the final page data and header data using the `generateRootJson` function, before returning this in the form of a JSON response.
+
+This response will be sent back to the client and later accessed in the page itself via the `useLoaderData` hook we have seen [previously](/code-monster/guides/light-and-dark-mode/02-adding-a-loader-function).
+
+```tsx
+const { pageData, headerData } = generateRootJson({
+  user,
+  request,
+  honeyProps,
+  toast,
+  csrfToken,
+  timings,
+  toastHeaders,
+  csrfCookieHeader,
+});
+
+return json(pageData, headerData);
+```
+
+:::
+
+## Adding the `useToast` hook
+
+In our last step here, let's add a new hook called `useToast` to the `App` component. This hook will be used to display [toast notifications](https://www.suprsend.com/post/the-ultimate-guide-to-toast-messages---what-are-toasts-their-use-cases-and-react-native-toast-message-implementation) to the user.
+
+First, let's import the `useToast` hook at the top of the `app/root.tsx` file:
+
+```diff lang="tsx" title="app/root.tsx"
+// Code omitted for brevity
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import ThemeSwitch from './components/shared-layout/ThemeSwitch'
++import { useToast } from './components/toaster'
+import useTheme from './hooks/useTheme'
+import { getUser } from './server/user.server'
+// Code omitted for brevity
+```
+
+Finally, add the following code to the bottom of the `app/root.tsx` file:
+
+```diff lang="tsx" title="app/root.tsx"
+export default function App() {
+	const data = useLoaderData<typeof loader>()
+	const nonce = useNonce()
+	const theme = useTheme()
+
++	useToast(data.toast)
+
+	return (
+		// Code omitted for brevity
+	)
+}
+```
+
+## Wrapping the application with extra security
+
+If you remember from the [updated loader function above](#updating-the-loader-function), we are now generating a [CSRF token](https://portswigger.net/web-security/csrf) and a [honeypot](https://www.kaspersky.com/resource-center/threats/what-is-a-honeypot#:~:text=The%20definition%20of%20a%20honeypot&text=It's%20a%20sacrificial%20computer%20system,distract%20them%20from%20other%20targets.) input. We need to wrap our application with a `AuthenticityTokenProvider` and a `HoneypotProvider` to ensure that these additional security features are available across the entire application.
+
+This is done by wrapping the components in the `App` component with the `AuthenticityTokenProvider` and `HoneypotProvider` components:
+
+```diff lang="tsx" title="app/root.tsx"
+export default function App() {
+	const data = useLoaderData<typeof loader>()
+	const nonce = useNonce()
+	const theme = useTheme()
+
+	useToast(data.toast)
+
+	return (
++		<AuthenticityTokenProvider token={data.csrfToken}>
++			<HoneypotProvider {...data.honeyProps}>
+				<Document nonce={nonce} theme={theme}>
+					<div className="flex h-screen flex-col justify-between">
+						<HeaderWithSearch />
+
+						<div className="flex-1">
+							<Outlet />
+						</div>
+
+						<div className="container flex justify-between pb-5">
+							<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+						</div>
+					</div>
+
+					<FooterMenuRight />
+				</Document>
++			</HoneypotProvider>
++		</AuthenticityTokenProvider>
+	)
+}
+```
+
+As you can see, we pass in the `csrfToken` and `honeyProps` from the `data` object that is provided by our updated `loader` function to the `AuthenticityTokenProvider` and `HoneypotProvider` components respectively.
+
+## Summary
+
+In this step, we have added a lot of new security features to our application.
+
+We have added:
+
+- a `meta` function to generate metadata for the webpage
+- a `headers` function to generate HTTP headers for a response
+- a new `loader` function to include user information, performance metrics, and CSRF tokens
+- a new `useToast` hook to display toast notifications to the user
+- `AuthenticityTokenProvider` and `HoneypotProvider` components to ensure that these additional security features are available across the entire application

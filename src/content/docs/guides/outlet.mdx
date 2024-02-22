@@ -131,12 +131,68 @@ The reason we can still see the navbar and footer is because this is code being 
 
 <NestedRouting />
 
-#### The route structure
+This is a powerful feature of Remix that will explore in more detail later.
+
+::::
+
+## The route structure
 
 Routes in Remix are represented by files and folders in your project. The structure of your files and folders directly maps to the structure of your routes.
 
 Think of the `Outlet` component as a "window" or "placeholder" for the child route. It's a way of telling Remix where to render the child route inside the parent route.
 
-This is a powerful feature of Remix that will explore in more detail later.
+We can see this in action by adding a new route to our app. Let's add a dummy 'about us' page.
 
-::::
+### Adding a new route
+
+Create a new file at `app/routes/about-us.tsx`:
+
+![About us page file](src/assets/png/add-new-route.png)
+
+:::danger[Extra care]
+
+### Route file names in Remix
+
+Take extra care when naming your route files in Remix. The file name must **match** the URL path that you want to serve from it.
+
+For example, because we want to serve a page from the URL path `/about-us`, then the file name must **also** be `about-us.tsx`.
+
+If it was named `aboutUs.tsx` or `about_us.tsx`, then Remix would not be able to serve the page from the correct URL.
+
+:::
+
+Inside this new file, add the following code and save your changes:
+
+```tsx title="app/routes/about-us.tsx"
+export default function AboutUs() {
+  return (
+    <main className="container">
+      <h1 className="text-mega">About us</h1>
+    </main>
+  );
+}
+```
+
+Head back over to your browser and navigate to [http://localhost:3000/about-us](http://localhost:3000/about-us). You should see the new 'About us' page:
+
+![About us page navigation](src/assets/gif/about-us-page.gif)
+
+Notice how the navbar, footer and theme switcher are still present on the page? This is because `/about-us` is a direct child of the base URL, so the `Outlet` component in the `root.tsx` file now provides a "window" into the `about-us.tsx` code.
+
+This is a powerful feature of Remix that we will be exploring in more detail later.
+
+:::tip[Your turn]
+
+### Challenge
+
+Add a new routes to your app that serve pages from the URL paths below. For the time being, you can just add a simple title to each page.
+
+1. `/contact-us`
+2. `/news`
+3. `/account`
+
+#### Extra credit 🚀🚀
+
+What other top-level pages do you think a site like Epic News might need? Add them to your app and give them each a simple placeholder title for the time being.
+
+:::

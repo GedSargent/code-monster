@@ -23,7 +23,7 @@ export default defineConfig({
         alt: "Code Monster Logo",
       },
       social: {
-        github: "https://github.com/withastro/starlight",
+        github: "https://github.com/GedSargent/code-monster",
       },
       sidebar: [
         {
@@ -74,7 +74,7 @@ export default defineConfig({
     }),
     tailwind({
       // Disable the default base styles:
-      applyBaseStyles: false,
+      applyBaseStyles: true,
     }),
     react(),
   ],

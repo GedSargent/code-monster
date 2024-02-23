@@ -66,6 +66,10 @@ export default defineConfig({
               label: "Authentication and security",
               link: "guides/authentication-and-security",
             },
+            {
+              label: "Account creation and SSO",
+              link: "guides/account-creation",
+            },
           ],
         },
         {

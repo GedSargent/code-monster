@@ -1,0 +1,60 @@
+---
+title: Account creation and single-sign-on (SSO)
+description: Get started with Remix by updating the `root.tsx` file to change the user interface (UI) of your project.
+---
+
+Setting up a user account is a common task for web applications. In this guide, you'll learn how to set up a user account in Epic News.
+
+## The signup screen
+
+In the address bar of your browser, navigate to the `/signup` route:
+
+```bash title="Epic News signup URL"
+http://localhost:3000/signup
+```
+
+![Epic News signup screen](src/assets/png/signup-form.png)
+
+As you can see, there are two ways to sign up for an account: with an email address and password, or with GitHub as single-sign-on (SSO) provider.
+
+In this guide, cover both methods.
+
+## Email and password method
+
+By far the most common way to sign up for an account is with an email address and password.
+
+### Enter a dummy email address
+
+To get started, fill out an easy-to-remember dummy email address. Something like `example@email.com` will do.
+
+Click "**Submit**".
+
+![Enter dummy email](src/assets/png/enter-dummy-email.png)
+
+### Check the confirmation email
+
+After you submit the form, you'll see a message that says "Check your email", and an input box to enter the confirmation code.
+
+If this were a production website, we would have configured the email service to send a confirmation email to the address you entered. However, on localhost, this isn't possible.
+
+Instead, a dummy email is generated and displayed in the terminal. Head back to the VS Code terminal and you will see a message printed in green text.
+
+This is the plain text version of the email that would have been sent to the user in a production environment. Hover over the link and `CTRL + click` (or `CMD + click` on Mac) to confirm your email address.
+
+![Dummy email confirmation](src/assets/png/email-verification-link.png)
+
+The same form as the one earlier will appear, but this time with the confirmation code input pre-filled. Click "**Submit**" to confirm your email address.
+
+### User details
+
+Fill in your dummy user details in the next screen, accept the Terms of Service, and click "**Create an account**":
+
+![Onboarding screen](src/assets/png/onboarding-screen.png)
+
+### Account created
+
+You will be redirected to the home page, and you will see your first 'toast' confirmation page appear briefly at the top of the page. We will learn how to create custom toast messages later.
+
+![Account created](src/assets/png/account-created.png)
+
+## Single-sign-on (SSO) with GitHub

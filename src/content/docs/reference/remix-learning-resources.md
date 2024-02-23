@@ -12,6 +12,7 @@ Since its launch, Remix has become a popular framework amongst React developers.
 - Remix [docs](https://remix.run/docs/en/main)
 - [Getting started](https://remix.run/docs/en/main/start/tutorial) tutorial
 - The official Remix [resources](https://remix.run/resources?category=all) page
+- [Remix Guide](https://remix.guide/) - a huge Remix resource bank from around the web
 
 ## Free video courses
 

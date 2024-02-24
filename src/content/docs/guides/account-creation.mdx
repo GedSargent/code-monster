@@ -57,4 +57,40 @@ You will be redirected to the home page, and you will see your first 'toast' con
 
 ![Account created](src/assets/png/account-created.png)
 
-## Single-sign-on (SSO) with GitHub
+## Single-sign-on (SSO)
+
+Another way to sign up for an account is with a single-sign-on (SSO) provider. Using a SSO provider like GitHub is a great way to reduce the number of passwords a user has to remember. A single digital identity can be used to access multiple applications.
+
+In this guide, we'll use GitHub, whch is pre-installed in the Epic Stack, but it's easy to add more if you want to.
+
+### Signup with Github
+
+In the address bar of your browser, navigate to the `/signup` route. This time, click on the "Signup with GitHub" button.
+
+```bash title="Epic News signup URL"
+http://localhost:3000/signup
+```
+
+![Epic News signup screen](src/assets/png/signup-with-github.png)
+
+If you are not already logged in to GitHub, you will be prompted to do so. Once you are logged in, you will be asked fill in your user details.
+
+You will notice that this time, your username and avatar have been pre-filled from your GitHub account. Add your name, accept the Terms of Service, then click "**Create an account**".
+
+![Github user details](src/assets/png/sso-user-details.png)
+
+:::tip[Challenge]
+
+Once you have created an account, spend some time exploring the different functionality available to authenticated users. For example, you can:
+
+- Create, edit, read and delete 'notes'.
+- View your profile page.
+- Edit your email address and password.
+- Manage 'connections' - a feature that allows you to see and edit which SSO providers your account is connected to.
+- Download your data. What does data is stored in the application about you?.
+- See which active sessions are currently logged in to your account. **TIP**: Try logging in to your account from another browser or an incognito session to see this feature in action.
+- Delete your account.
+
+![Profile actions](src/assets/png/profile-actions.png)
+
+:::

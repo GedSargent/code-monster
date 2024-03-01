@@ -11,7 +11,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Code Monster",
-      favicon: "/src/assets/favicon.ico",
+      favicon: "/src/assets/favicon/favicon.ico",
       customCss: ["./src/tailwind.css"],
       components: {
         Hero: "/src/components/MonsterHero.astro",
@@ -49,7 +49,7 @@ export default defineConfig({
                   link: `${lightDarkModeDir}/03-from-server-to-client`,
                 },
                 {
-                  label: "Toggle light and dark mode",
+                  label: "`action` functions - light and dark mode",
                   link: `${lightDarkModeDir}/04-action-functions`,
                 },
               ],
@@ -59,7 +59,7 @@ export default defineConfig({
               link: "guides/navbar-and-footer",
             },
             {
-              label: "🔀 Routing: The `Outlet` component",
+              label: "🔀 Routing 1: The `Outlet` component",
               link: "guides/outlet",
             },
             {
@@ -69,6 +69,14 @@ export default defineConfig({
             {
               label: "Account creation and SSO",
               link: "guides/account-creation",
+            },
+            {
+              label: "🔀 Routing 2: Route file structure",
+              link: "guides/outlet",
+            },
+            {
+              label: "Toast notifications",
+              link: "guides/toast-notifications",
             },
           ],
         },

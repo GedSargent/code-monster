@@ -1,0 +1,224 @@
+---
+title: Toast Notifications
+description: Keep users informed of a process or action with a toast notification.
+---
+
+import MonsterDetails from "src/components/MonsterDetails.astro";
+
+## What is a toast notification?
+
+A toast notification is a message that appears on the surface of the UI to inform the user of a process or action. It appears in a small, unobtrusive window, usually at the top or bottom of the screen, then disappears after a certain amount of time. Toast notifications are often used to inform users of a process or action that has occurred, such as a successful login, a new message, or a system update.
+
+For example, in the Epic News app, a toast notification appears when users delete a 'Note':
+
+![Delete note toast notification](src/assets/gif/delete-note-toast.gif)
+
+Adding a toast notification is easy in Epic News. We just need to call the `redirectWithToast` method at the end of a successful `action` function.
+
+:::note
+
+### `action` function recap
+
+If you remember, `action` functions are only executed on the the **server**, and can only be placed directly on `route` components (i.e. `tsx` files stored in the `routes` folder). They are used to perform an action when a user interacts with the UI, such as clicking a button or submitting a form.
+
+We introduced `action` functions in the ['Light and Dark Mode'](/code-monster/guides/light-and-dark-mode/04-action-functions) tutorial, and you can read more about them in the [Remix Docs](https://remix.run/docs/en/main/route/action).
+
+:::
+
+## Adding a toast notification
+
+At the moment, a toast notification is shown when a user **deletes** a note. Let's add another toast notification to inform users when they have **added** a note successfully.
+
+### 1. Locating the correct route file
+
+First, we need to locate the correct route file.
+
+The Remix filename convention is to name the `route` file after the route path. Take a look closely at the route we will be updating shortly:
+
+```bash
+http://localhost:3000/users/<user-name>/notes/new
+```
+
+:::tip[Locate the file]
+
+Using Remix's naming convention that we looked at together in the ['Route file structure'](/code-monster/guides/route-file-structure) tutorial, can you locate and open the project file that serves the page at `http://localhost:3000/users/<user-name>/notes/new`?
+
+<MonsterDetails>
+  <div>
+    This graphic shows the relationship between file location and route URL in the Epic News app:
+
+    ![Epic News route file structure](src/assets/png/route-file-naming-convention.png)
+  </div>
+</MonsterDetails>
+
+:::
+
+### 2. Understanding the code structure
+
+Now that you have located the correct file, let's take a look at the code structure inside it:
+
+```tsx title="app/routes/users+/$username_+/notes.new.tsx"
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { NoteEditor, action } from './__note-editor.tsx'
+
+export async function loader({ request }: LoaderFunctionArgs) {
+	await requireUserId(request)
+	return json({})
+}
+
+export { action }
+export default NoteEditor
+```
+
+As you can see, the `action` function is actually being imported from another file called `__note-editor.tsx`. This is fine, as we are still exporting the `action` function from our route file, so as far as Remix is concerned, this is where it lives.
+
+When you open this file, you'll see why it was extracted: it's very complicated!
+
+Luckily, we don't need to understand the entire file to add a toast notification. We just need to swap out the `redirect` method at the end of the `action` function for the `redirectWithToast` method.
+
+Firstly, let's `import` the `redirectWithToast` function at the end of all the other `imports`:
+
+```diff lang="tsx" title="app/routes/users+/$username_+/notes.new.tsx"
+// Code omitted for brevity
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
+import { z } from 'zod'
++import { redirectWithToast } from '~/utils/toast.server'
+```
+
+Locate the `redirect` method in question. It is around line 176, and looks like this:
+
+```tsx title="app/routes/users+/$username_+/__note-editor.tsx"
+return redirect(
+  `/users/${updatedNote.owner.username}/notes/${updatedNote.id}`,
+)
+```
+
+:::note
+
+Use <kbd>**CTRL + F**</kbd> (<kbd>**CMD + F**</kbd> on Mac) to search for "`return redirect`" in the `__note-editor.tsx` file:
+
+![Search for redirect method](src/assets/png/search-for-redirect.png)
+
+:::
+
+Now, simply swap out the `redirect` function with the code below:
+
+```diff lang="tsx" title="app/routes/users+/$username_+/__note-editor.tsx"
+-return redirect(
+-  `/users/${updatedNote.owner.username}/notes/${updatedNote.id}`,
+-)
++return redirectWithToast(`/users/${updatedNote.owner.username}/notes`, {
++  type: 'success',
++  title: 'Success',
++  description: 'Your note has been updated.',
++})
+```
+
+Save your changes, and then select a note for editing. Once you click the 'Submit' button, you should see a toast notification appear at the top of the screen, informing you that your note has been updated:
+
+![Update note toast notification](src/assets/gif/update-note-toast.gif)
+
+:::tip[Challenge]
+
+Head to the 'Login' screen in your browser at the following URL:
+
+```bash
+http://localhost:3000/login
+```
+
+Find the correct route file for this page, and add a toast notification to inform users when they have logged in successfully to the website.
+
+There are **two* places where we need to swap out `redirect` for `redirectWithToast` in the `action` function. Can you find them both?
+
+The toast message should have a `type` of 'success', a `title` of 'Welcome back!', and a `description` of 'You have logged in successfully':
+
+![Login toast notification](src/assets/gif/login-toast.gif)
+
+<MonsterDetails>
+  <div>
+    The first place we need to swap out `redirect` for `redirectWithToast` is around line 77 in the `app/routes/_auth+/login.tsx` file.
+
+    ```diff lang="tsx" title="app/routes/_auth+/login.tsx"
+-    return redirect(
+-			`${redirectUrl.pathname}?${redirectUrl.searchParams}`,
+-			combineResponseInits(
+-				{
+-					headers: {
+-						'set-cookie':
+-							await verifySessionStorage.commitSession(verifySession),
+-					},
+-				},
+-				responseInit,
+-			),
+-		)
++    return redirectWithToast(
++			`${redirectUrl.pathname}?${redirectUrl.searchParams}`,
++			{
++				type: 'success',
++				title: 'Welcome back!',
++				description: 'You have logged in successfully.',
++			},
++			combineResponseInits(
++				{
++					headers: {
++						'set-cookie':
++							await verifySessionStorage.commitSession(verifySession),
++					},
++				},
++				responseInit,
++			),
++		)
+    ```
+
+    This is the code that gets executed if the user logs in with two factor authentication.
+
+    The second place we need to swap out these functions is a few lines down, around line 100:
+
+    ```diff lang="tsx" title="app/routes/_auth+/login.tsx"
+-    return redirect(
+-      safeRedirect(redirectTo),
+-      combineResponseInits(
+-				{
+-					headers: {
+-						'set-cookie': await authSessionStorage.commitSession(authSession, {
+-							expires: remember ? session.expirationDate : undefined,
+-						}),
+-					},
+-				},
+-				responseInit,
+-			),
+-    )
++    return redirectWithToast(
++      safeRedirect(redirectTo),
++      {
++        type: 'success',
++        title: 'Welcome back!',
++        description: 'You have logged in successfully.',
++      },
++      combineResponseInits(
++        {
++          headers: {
++            'set-cookie': await authSessionStorage.commitSession(authSession, {
++              expires: remember ? session.expirationDate : undefined,
++            }),
++          },
++        },
++        responseInit,
++      ),
++    )
+    ```
+
+    This is the code that gets executed if the user logs in without two factor authentication.
+
+    Test your solution by loggging in with both methods and checking that the toast notification appears.
+  </div>
+</MonsterDetails>
+
+:::
+
+## Summary
+
+In this tutorial, we learned about toast notifications and how to add them to the Epic News app. We also learned how to locate the correct route file, and how to swap out the `redirect` method for the `redirectWithToast` method in the `action` function of a route file.
+
+As you build your application, you can use toast notifications to keep users informed of a process or action that has occurred. This can help to improve the user experience and make your app more user-friendly.

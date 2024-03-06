@@ -1,0 +1,242 @@
+---
+title: Dynamic routing in Remix
+description: Learn how to use route params to create dynamic routes in Remix.
+---
+
+In our previous lesson, we created a nested "News" route that enabled users to switch between different news categories.
+
+We did this by creating a new route for each category, like this:
+
+![News routes](src/assets/png/static-news-routes.png)
+
+Creating static files for each child route is fine, but not very sustainable. What if we want to add a new category? We'd have to create a new file for it, and then update the code inside each child file so they are consistent.
+
+In this lesson, we'll learn how to use route params to create dynamic routes in Remix. This will allow us to create a single route for all news categories, and then use the route params to fetch the correct data.
+
+## Creating a dynamic route
+
+Delete all your hard-coded static child routes. So in the example above, I would be deleting `news.business.tsx`, `news.entertainment.tsx`, `news.reviews.tsx` and `news.technology.tsx`
+
+![Delete static routes](src/assets/png/delete-static-routes.png)
+
+Create a new file in the `app/routes` directory called `news/$category.tsx`:
+
+```tsx
+export default function NewsCategoryPage() {
+	return (
+		<div className="container py-16">
+			<h2 className="text-h2">Generic news category page</h2>
+		</div>
+	)
+}
+```
+
+Now, head back to your browser. Try clicking the links to your different pages again. You will notice something strange has happened:
+
+![Single dynamic route](src/assets/gif/single-dynamic-route.gif)
+
+When we click each link, the URL route changes, but the content remains the same. Why?
+
+## Route params
+
+The `$` sign in the file name `news/$category.tsx` is a special character that tells Remix that this route is dynamic. It means that the route can match any URL that starts with `/news/` and then has a value for `category`.
+
+At the moment, we are not doing anything with the `category` value. We need to update our `news/$category.tsx` file to read the `category` value from the URL and use it to display the correct data.
+
+:::note[Route Params]
+
+### What are "route params"?
+
+Route params (or "parameters") are a way to pass data to a route.
+
+In Remix, when we add a `$` to a route filename, anything after the `$` is considered a route param. For example, in the filename `news.$category.tsx`, `$category` becomes the route param that Remix will look for when a user visits the corresponding URL.
+
+So, for example, consider the URL below:
+
+```bash ins="business"
+http://localhost:3000/news/business
+
+```
+
+Because we have named the file handling this route `news/$category.tsx`, Remix will pass the string value `business` into the file as a variable called `category`. If the route was `http://localhost:3000/news/reviews`, the value of `category` would be `reviews`, and so on
+
+The name of this variable can be anything we choose, but it makes sense to name it after the route param it represents.
+
+:::
+
+In our case, the reason why we see the same content for each category is because we are not reading the `category` value from the URL. Let's fix that.
+
+## Reading route params
+
+To read the `category` value from the URL, we need to add a `loader` function to our `news/$category.tsx` file. This function will be called by Remix when the route is visited, and it will receive the route `params` as an argument:
+
+At first, we will just log this value out to the console and see what it looks like:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx"
++import { type LoaderFunctionArgs, json } from '@remix-run/node'
++
++export async function loader({ params }: LoaderFunctionArgs) {
++	const { category } = params
++
++	console.log({ category })
++
++	return json({})
++}
+
+export default function NewsCategoryPage() {
+	return (
+		<div className="container py-16">
+			<h2 className="text-h2">Generic news category page</h2>
+		</div>
+	)
+}
+```
+
+Head back to your browser and click the links between the different news categories.
+
+Now check your VS Code terminal. You should see the `category` value logged out each time you click a link:
+
+![Logging route params](src/assets/png/logging-route-params.png)
+
+## Passing data to the page
+
+We are successfully reading the `category` value from the URL. Now we can use this value to fetch the correct data.
+
+Let's update the `loader` function so it returns this value in title-case as part of the `json` response.
+
+:::caution
+
+After updating the code below, you'll see a red line under `category` because TypeScript doesn't know what data type it is yet.
+
+Don't worry - we can fix this issue later.
+
+For now, let's just return the `categoryTitle` value as part of the `json` response.
+:::
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" ins="{ categoryTitle }"
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
++import { useLoaderData } from '@remix-run/react'
+
++function toTitleCase(str: string) {
++	return str
++		.toLowerCase()
++		.split('-')
++		.map(function (word) {
++			return word.charAt(0).toUpperCase() + word.slice(1)
++		})
++		.join(' ')
++}
++
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { category } = params
+
+-	console.log({ category })
++	const categoryTitle = toTitleCase(category)
+
+-	return json({})
++	return json({ categoryTitle })
+}
+
+export default function NewsCategoryPage() {
++	const { categoryTitle } = useLoaderData<typeof loader>()
+
+	return (
+		<div className="container py-16">
+-			<h2 className="text-h2">Generic news category page</h2>
++			<h2 className="text-h2">{categoryTitle}</h2>
+		</div>
+	)
+}
+```
+
+:::note
+
+#### Code review
+
+- We've added a new function called `toTitleCase` that takes a string and returns it in title-case format (in other words, with every first letter of a word capitalized).
+```tsx
+function toTitleCase(str: string) {
+	return str
+		.toLowerCase()
+		.split('-')
+		.map(function (word) {
+			return word.charAt(0).toUpperCase() + word.slice(1)
+		})
+		.join(' ')
+}
+```
+---
+- We call this function inside the `loader` function to convert the `category` value to title-case.
+- We return the `categoryTitle` value as part of the `json` response.
+```tsx
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { category } = params
+
+	const categoryTitle = toTitleCase(category)
+
+	return json({ categoryTitle })
+}
+```
+---
+- We call Remix's `useLoaderData` hook to read the `categoryTitle` value from the `loader` function.
+```tsx
+	const { categoryTitle } = useLoaderData<typeof loader>()
+```
+---
+- We update the `h2` tag to display the `categoryTitle` value.
+```tsx
+		<h2 className="text-h2">{categoryTitle}</h2>
+```
+
+:::
+
+## Checking the result
+
+Now, head back to your browser and click the links between the different news categories again.
+
+This time, you should see the title of the category displayed in every page, but we didn't need to hard-code a separate file for every one 🎉:
+
+![Custom title on every dynamic route](src/assets/gif/news-page-with-nav-links.gif)
+
+## Fixing TypeScript errors
+
+Finally, let's fix that TypeScript error we saw earlier.
+
+We will do this using a package called [Invariant](https://github.com/zertosh/invariant). This package will help us to tell TypeScript that the `categoryTitle` value will always be a string.
+
+First, import the package at the top of your `news.$category.tsx` file:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx"
++import { invariant } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+```
+
+Next, inside your `loader` function, add the following check:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx"
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { category } = params
+
++	invariant(typeof category === 'string', 'Category not found')
+	const categoryTitle = toTitleCase(category)
+
+	return json({ categoryTitle })
+}
+```
+
+The red line has disappeared, and TypeScript now knows that `categoryTitle` will always be a string.
+
+:::tip[Challenge]
+1. Try adding three-five new categories to your `news` route. You don't need to create a new file for it - just add a new link to your `app/routes/index.tsx` file.
+2. Update the layout of the `NewsCategoryPage` page by adding some dummy news story summary areas. You should see your changes reflected on every category page.
+:::
+
+## Summary
+
+In this lesson, we learned how to use route params to create dynamic routes in Remix.
+
+- We created a single route for all news categories, and then used the route params to fetch the correct data.
+- We also learned how to read route params using the `loader` function, and how to pass data to the page using the `json` response.
+- We then read this data using the `useLoaderData` hook, and displayed it on the page.
+- We fixed a TypeScript error by using the `invariant` package to tell TypeScript that the `categoryTitle` value will always be a string.

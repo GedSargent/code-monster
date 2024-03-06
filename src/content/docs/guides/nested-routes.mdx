@@ -1,0 +1,208 @@
+---
+title: Routes and Remix's file structure
+description: Remix's file structure and how it relates to routes in the application
+---
+
+import NestedRouting from "src/components/epicNews/NestedRouting.astro";
+
+As we looked at in the [`Outlet` component lesson](/code-monster/guides/outlet), Remix uses a file-based routing system. This means that the file structure of your project maps directly to the URL structure of your app.
+
+But how does it map exactly? Let's take a look at the file structure of the Epic News app to see how it relates to the URL structure.
+
+The Epic News app uses an NPM package called `remix-flat-routes` which you can read about in detail [here](https://github.com/kiliman/remix-flat-routes). Below is a summary of it's main naming conventions for mapping project files to URL routes:
+
+## The root route
+
+`root.tsx`, and by extension `_index.tsx` once we add the `Outlet` component to it, maps to `/` (or the base URL of the app - `http://localhost:3000/` in our case).
+
+If you remember from our previous lesson, the `Outlet` component is used to render the **child** routes of the current parent. This means that the `root.tsx` file is the **parent** for all other routes in the app.
+
+<NestedRouting />
+
+## Sibling routes
+
+Files that sit at the same level as others in the `routes` folder are called **siblings**. Any file that we add next to the `_index.tsx` file will map to a sibling route of the root route.
+
+For example, head back over to your browser, and type in the URL `http://localhost:3000/news`. Hit return and you should see a page not found message:
+
+![Page not found](src/assets/png/page-not-found.png)
+
+This is to be expected. We haven't created a route file for `/news` yet. Let's create a new file called `news.tsx` in the `routes` folder and add the following code to it:
+
+```tsx title="app/routes/news.tsx"
+export default function NewsPage() {
+	return (
+		<main className="flex flex-col p-24">
+			<div className="container">
+				<h1 className="text-h1">News</h1>
+			</div>
+		</main>
+	)
+}
+
+```
+
+Save the file and head back to your browser. Refresh the page and you should see the new "News" page:
+
+![News page](src/assets/png/news-page.png)
+
+See how the navbar and footer remain the same?
+
+This is because the `root.tsx` file is still rendering the `Outlet` component in the `root.tsx` file is still rendering the components that render these page elements, but the `Outlet` component is now rendering the `NewsPage` component as the new child of the `root.tsx` route.
+
+:::caution[Important - Remix route conventions]
+
+What we have created here is known as a **UI Route**. There are other types of route in Remix, but we don't need to worry about them for now.
+
+What _is_ important are the following conventions:
+
+- A UI route file must have a `.tsx` extension
+- It must be placed inside the `routes` folder
+- It must export a React component as the _default export_
+- The file name must match the route URL
+	- e.g. `routes/news.tsx` maps to `/news`.
+	- If we wanted an "about us" page, we would create a file called `about-us.tsx` in the `routes` folder so we could visit the `/about-us` URL.
+	- If we named the file `AboutUs.tsx`, then the URL would be `/AboutUs`, which is not what we want in a web app.
+
+![Remix route conventions](src/assets/png/about-us-file-to-route.png)
+
+These are important Remix conventions to remember. They form part of its file-based routing system, and allow Remix to render the correct component when the route is visited.
+
+:::
+
+## Nested routes
+
+So far, we've only used the `Outlet` component in the `root.tsx` file. But what if we want to create a nested route? For example, what if we want to create a nested page for each news **_category_**, e.g. `/news/technology`, `/news/sport`, `/news/entertainment` etc?
+
+Lets add another file to the `routes` folder called `news.technology.tsx`. Add the following code to it:
+
+```tsx title="app/routes/news.technology.tsx"
+export default function TechnologyNewsPage() {
+	return (
+		<div className="container py-16">
+			<h2 className="text-h2">Technology News</h2>
+		</div>
+	)
+}
+```
+
+Now, head back to your browser and type in the URL `http://localhost:3000/news/technology`. Hit return and...wait, what? The page stays the same?!
+
+![Technology news page not showing](src/assets/png/news-tech-no-outlet.png)
+
+:::note[Getting started with nested routes]
+
+### File names and URL conventions
+
+The problem here is that `news.tsx` and `news.technology.tsx` both have names that share the same base path: `/news`. The period (`.`) in the filename `news.technology.tsx` is what tells Remix that this file is a *child* of the `news` route.
+
+By naming our files in this way, we have promoted the `news.tsx` file to be a **parent layout route module**, just like `root.tsx` is the parent layout module for the whole app.
+
+![Parent and child routes](src/assets/png/file-names-and-url-conventions.png)
+
+:::
+
+### Adding `Outlet` to the parent route
+
+To see the **child** route code rendered in the browser, we need to add an `Outlet` component to the **parent** `news.tsx` file, just like we did earlier in the `root.tsx` file.
+
+Let's head back to `app/routes/news.tsx` and add one now:
+
+```diff lang="tsx" title="app/routes/news.tsx"
++import { Outlet } from '@remix-run/react'
+
+export default function NewsPage() {
+	return (
+		<main className="flex flex-col p-24">
+			<div className="container">
+				<h1 className="text-h1">News</h1>
+			</div>
++
++			<Outlet />
+		</main>
+	)
+}
+```
+
+Save the file again and head back to your browser. You should now see the "Technology News" route rendered as a child of the "News" page:
+
+![Technology news page](src/assets/png/tech-news-page.png)
+
+## Adding a navigation link
+
+Let's finish by adding a nav link to the technology news page in the `NewsPage` component:
+
+```diff lang="tsx" title="app/routes/news.tsx" ins="NavLink, "
+import { NavLink, Outlet } from '@remix-run/react'
+
+export default function NewsPage() {
+	return (
+		<main className="flex flex-col p-24">
+			<div className="container">
+				<h1 className="text-h1">News</h1>
++				<div className="flex space-x-4 py-4">
++					<NavLink
++						to="technology"
++						className={({ isActive }) =>
++							`${isActive ? 'text-blue-300 underline underline-offset-8' : 'text-blue-500'}`
++						}
++					>
++						Technology
++					</NavLink>
++				</div>
+			</div>
+
+			<Outlet />
+		</main>
+	)
+}
+```
+
+:::note[The NavLink component]
+
+The `NavLink` component is a special Remix `<Link>` that knows whether it is **"active"** or not.
+
+If it is **active** (i.e. the user is on the page that the `NavLink` links to), then we can apply a different style to it via a callback function.
+
+In the example here, we are applying a lighter blue color to the text and an underline to the link when it is active:
+
+```jsx
+<NavLink
+	to="technology"
+	className={({ isActive }) =>
+		`${isActive ? 'text-blue-300 underline underline-offset-8' : 'text-blue-500'}`
+	}
+>
+	Technology
+</NavLink>
+```
+
+#### More information
+
+You can read more about the `NavLink` component [here](https://remix.run/docs/en/main/components/nav-link) in the Remix documentation.
+:::
+
+:::tip[Challenge]
+
+Using your knowledge of parent/child routes and the `NavLink` component, add links to the other news categories in the `NewsPage` component:
+
+- Entertainment
+- Business
+- Reviews
+
+At the moment, the page just needs to render the name of the category in an `h2` tag, just like the `TechnologyNewsPage` component does. If you want to go further in your page design, feel free to do so!
+
+When you've finished, your final `NewsPage` component should behave something like this:
+
+![News page with nav links](src/assets/gif/news-page-with-nav-links.gif)
+:::
+
+## Summary
+
+In this lesson, we've looked at how Remix's file structure and naming conventions map to the URL structure of application paths in the browser.
+
+We've reviewed how the `root.tsx` file is the **parent** layout module for the whole app, and how **sibling** and **child** routes are created by adding files to the `routes` folder.
+
+We looked at how to create a nested route by naming a file with a period (`.`) in it, and how to render the child route in the parent route using the `Outlet` component.
+
+Finally, we've seen how to use the `NavLink` component to create navigation links between the different routes, and how to apply different styles to the links when they are active.

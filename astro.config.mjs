@@ -71,8 +71,12 @@ export default defineConfig({
               link: "guides/account-creation",
             },
             {
-              label: "🔀 Routing 2: Route file structure",
-              link: "guides/outlet",
+              label: "🔀 Routing 2: Nested routes",
+              link: "guides/nested-routes",
+            },
+            {
+              label: "🔀 Routing 3: Dynamic routes",
+              link: "guides/dynamic-routes",
             },
             {
               label: "Toast notifications",

@@ -243,7 +243,7 @@ const [csrfToken, csrfCookieHeader] = await csrf.commitToken();
 
 The function then generates the final page data and header data using the `generateRootJson` function, before returning this in the form of a JSON response.
 
-This response will be sent back to the client and later accessed in the page itself via the `useLoaderData` hook we have seen [previously](/code-monster/guides/light-and-dark-mode/02-adding-a-loader-function).
+This response will be sent back to the client and later accessed in the page itself via the `useLoaderData` hook we have seen [previously](/code-monster/guides/epic-news/light-and-dark-mode/02-adding-a-loader-function).
 
 ```tsx
 const { pageData, headerData } = generateRootJson({

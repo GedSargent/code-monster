@@ -2,7 +2,8 @@ import starlight from "@astrojs/starlight";
 import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
-const lightDarkModeDir = "guides/light-and-dark-mode";
+
+const lightDarkModeDir = "guides/epic-news/light-and-dark-mode";
 
 // https://astro.build/config
 export default defineConfig({
@@ -31,56 +32,62 @@ export default defineConfig({
           items: [
             {
               label: "The root.tsx file",
-              link: "guides/root-tsx",
+              link: "guides/epic-news/root-tsx",
             },
             {
-              label: "Light and Dark Mode",
+              label: "🌞 Light and Dark Mode",
               items: [
                 {
-                  label: "Setting up",
+                  label: "🌞 Setting up",
                   link: `${lightDarkModeDir}/01-setting-up`,
                 },
                 {
-                  label: "Add a loader function",
+                  label: "🌞 Add a loader function",
                   link: `${lightDarkModeDir}/02-adding-a-loader-function`,
                 },
                 {
-                  label: "From server to client - `useLoaderData`",
+                  label: "🌞 From server to client - `useLoaderData`",
                   link: `${lightDarkModeDir}/03-from-server-to-client`,
                 },
                 {
-                  label: "`action` functions - light and dark mode",
+                  label: "🌞 `action` functions - light and dark mode",
                   link: `${lightDarkModeDir}/04-action-functions`,
                 },
               ],
             },
             {
               label: "Navbar and Footer",
-              link: "guides/navbar-and-footer",
+              link: "guides/epic-news/navbar-and-footer",
             },
             {
-              label: "🔀 Routing 1: The `Outlet` component",
-              link: "guides/outlet",
+              label: "🔀 Routing in Remix",
+              items: [
+                {
+                  label: "🔀 The `Outlet` component",
+                  link: "guides/epic-news/routing/outlet",
+                },
+                {
+                  label: "🔀 Nested routes",
+                  link: "guides/epic-news/routing/nested-routes",
+                },
+                {
+                  label: "🔀 Dynamic routes",
+                  link: "guides/epic-news/routing/dynamic-routes",
+                },
+              ]
             },
+
             {
               label: "Authentication and security",
-              link: "guides/authentication-and-security",
+              link: "guides/epic-news/authentication-and-security",
             },
             {
               label: "Account creation and SSO",
-              link: "guides/account-creation",
-            },
-            {
-              label: "🔀 Routing 2: Nested routes",
-              link: "guides/nested-routes",
-            },
-            {
-              label: "🔀 Routing 3: Dynamic routes",
-              link: "guides/dynamic-routes",
+              link: "guides/epic-news/account-creation",
             },
             {
               label: "Toast notifications",
-              link: "guides/toast-notifications",
+              link: "guides/epic-news/toast-notifications",
             },
           ],
         },

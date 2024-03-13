@@ -28,6 +28,15 @@ export default defineConfig({
       },
       sidebar: [
         {
+          label: "Prisma",
+          items: [
+            {
+              label: "Getting started",
+              link: "guides/prisma/getting-started",
+            }
+          ]
+        },
+        {
           label: "Epic News",
           items: [
             {

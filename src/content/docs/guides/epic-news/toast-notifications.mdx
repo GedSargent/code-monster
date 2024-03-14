@@ -4,6 +4,7 @@ description: Keep users informed of a process or action with a toast notificatio
 ---
 
 import MonsterDetails from "src/components/MonsterDetails.astro";
+import MonsterKbd from 'src/components/MonsterKbd.astro'
 
 ## What is a toast notification?
 
@@ -96,7 +97,7 @@ return redirect(
 
 :::note
 
-Use <kbd>**CTRL + F**</kbd> (<kbd>**CMD + F**</kbd> on Mac) to search for "`return redirect`" in the `__note-editor.tsx` file:
+Use <MonsterKbd>**CTRL + F**</MonsterKbd> (<MonsterKbd>**CMD + F**</MonsterKbd> on Mac) to search for "`return redirect`" in the `__note-editor.tsx` file:
 
 ![Search for redirect method](src/assets/png/search-for-redirect.png)
 

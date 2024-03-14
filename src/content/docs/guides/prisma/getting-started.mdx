@@ -7,11 +7,9 @@ import MonsterDetails from 'src/components/MonsterDetails.astro'
 
 ## What is Prisma?
 
-Prisma is a modern database toolkit that makes database setup and access easy in any NodeJS-based project like Remix.
+Prisma is a modern database toolkit that makes database setup and access easy in a NodeJS-based project like Remix.
 
 It uses Typescript to define the database schema and provides a powerful query engine to access the database.
-
-It is a replacement for traditional ORMs and data access libraries.
 
 ### Example Prima Query
 
@@ -19,13 +17,44 @@ Take a look at the following example Prisma query:
 
 ![Prisma Query](src/assets/svg/prisma-query-example.svg)
 
-Take a minute to read through this carefully. Can you work out what this database query is looking for?
+Take a minute to read through this carefully. See if you can work out what the query is asking the database for before reading the solution below.
 
 <MonsterDetails>
   <div>
     1. Firstly, we are querying the `User` table.
-    2. We are asking for a unique user `where` the `email` field is `alice@prisma.io`.
+
+    ```tsx
+      await prisma.user
+    ```
+
+    2. We are asking the database to find a single, unique user `where` the `email` field is `alice@prisma.io`.
+
+    ```tsx
+      await prisma.user
+        .findUnique({
+          where: { email: 'alice@prisma.io' }
+        })
+    ```
+
     3. We are then asking for the `posts` that this user has written.
-    4. Finally, we are asking for the `post` where the `title` matches a certain condition which we haven't described yet.
+
+    ```tsx
+      .findUnique({
+        where: { email: 'alice@prisma.io' }
+      })
+      .posts
+    ```
+
+    4. Finally, we are asking for the `post` where the `title` `contains` a certain word or string which we haven't described yet.
+
+    ```tsx
+      .posts({
+        where: { title: { contains: '...' } }
+      })
+    ```
   </div>
 </MonsterDetails>
+
+There are lots of resources online to help you get started with Prisma. Some of the best have been collected for you in the resources section of this site.
+
+For now, let's get started with the Prisma schema.

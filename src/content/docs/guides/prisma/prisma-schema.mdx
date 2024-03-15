@@ -28,7 +28,7 @@ We will start by adding a [**model**](https://www.prisma.io/docs/orm/prisma-sche
 
 Let's go ahead, and add a `User` model to the schema:
 
-```tsx
+```tsx title="prisma/schema.prisma"
 model User {
   id    String @id @default(cuid())
   email String @unique
@@ -76,7 +76,7 @@ A migration is a file that translates the changes we've made to the Prisma schem
 
 If your server is still running, stop it by pressing <MonsterKbd>Ctrl + C</MonsterKbd> in your terminal.
 
-To create a migration, run the following command in your terminal:
+To create a migration with the name of `add-user-model`, run the following command in your terminal:
 
 ```bash
 npx prisma migrate dev --name add-user-model

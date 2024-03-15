@@ -31,16 +31,20 @@ export default defineConfig({
           label: "Prisma",
           items: [
             {
-              label: "Getting started",
+              label: "🗄️ Getting started",
               link: "guides/prisma/getting-started",
             },
             {
-              label: "The schema and migrations",
+              label: "🗄️ The schema and migrations",
               link: "guides/prisma/prisma-schema",
             },
             {
-              label: "Prisma Studio",
+              label: "🗄️ Prisma Studio",
               link: "guides/prisma/prisma-studio",
+            },
+            {
+              label: "🗄️ Database relationships",
+              link: "guides/prisma/database-relationships",
             },
           ]
         },

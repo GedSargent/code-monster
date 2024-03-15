@@ -1,0 +1,157 @@
+---
+title: Database relationships
+description: Linking database tables with Prisma
+---
+
+import MonsterDetails from 'src/components/MonsterDetails.astro'
+import MonsterKbd from 'src/components/MonsterKbd.astro'
+
+## What is a database relationship?
+
+A database [**relationship**](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations) is a connection between two tables. In a relational database, such as SQLite, tables can be connected to each other using [foreign keys](). These foreign keys are used to establish a link between the data in the two tables.
+
+:::note[Information]
+
+There are three main relationships that can be established between database tables:
+
+- [**One-to-one**](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/one-to-one-relations): Each record in the first table is related to one record in the second table.
+- [**One-to-many**](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/one-to-many-relations): Each record in the first table is related to one or more records in the second table.
+- [**Many-to-many**](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations): Each record in the first table is related to one or more records in the second table, and each record in the second table is related to one or more records in the first table.
+
+This sounds a bit abstract, but [**this video**](https://youtu.be/fpBYj55-zd8?si=nLyBxsfkBVdPzqKL) explains them in a very clear way.
+
+:::
+
+We are going to set up a database relationship using Prisma. We will create a new table called `Article` and link it to the `User` table.
+
+Each user can have multiple articles associated with them, and each article must belong to a user. From the three types of relationships described above, which one do you think this is? 🤔
+
+## Setting up a database relationship
+
+### Create the `Article` table
+
+We will start by creating a new table called `Article` in the `schema.prisma` file. This table will have a `title` and a `content` field, as well as a `createdAt` and `updatedAt` field to keep track of when the article was created and last updated._createMdxContent
+
+Add this model to the `schema.prisma` file directly beneath the `User` model we created in the [**previous lesson**](/code-monster/guides/prisma/prisma-schema):
+
+```diff lang="tsx" title="prisma/schema.prisma"
+model User {
+  id    String @id @default(cuid())
+  email String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
++
++model Article {
++  id        String @id @default(cuid())
++  title     String
++  content   String
++
++  createdAt DateTime @default(now())
++  updatedAt DateTime @updatedAt
++}
+```
+
+This adds a new `Article` model which shares several similar fields to the `User` model, but differs in the `title` and `content` fields.
+
+At the moment, the two tables are completely unaware of each other in the database. We need to change that.
+
+### Link the `Article` and `User` tables
+
+If every `Article` will belong to a single `User`, which fields do you think we can use to link the `Article` and `User` tables together? 🤔
+
+***HINT**: Remember that each user can have multiple articles associated with them, and each article must belong to a user.*
+
+<MonsterDetails>
+  <div>
+    <p>We can use the `id` field of the `User` table to link it to the `Article` table.</p>
+    <p>This is a common pattern in databases, where the `id` field of one table is used as a foreign key in another table.</p>
+  </div>
+</MonsterDetails>
+
+Let's implement this relationship now.
+
+1. Firstly, we will add a new field to the `Article` model called `authorId`. This field will be of type `String` and will store the `id` of the `User` who created the article.
+2. Next, we will add another new field called `author` to the same model. This field will be of type `User` and will link the `Article` and `User` tables together. We will add a `@relation` attribute to the `author` field to specify the fields that the relationship is based on.
+
+Make the changes shown below to the `Article` model in the `schema.prisma` file to implement the relationship.
+
+:::caution
+
+Don't worry about a red squiggly line appearing under the `author` field. We will fix that in the next step.
+
+:::
+
+```diff lang="tsx" title="prisma/schema.prisma"
+model Article {
+  id        String   @id @unique @default(cuid())
+  title     String
+  content   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
++  author    User     @relation(fields: [authorId], references: [id])
++  authorId  String
+}
+```
+
+The red squiggly line under the `author` field indicates that the `User` model doesn't yet share a relation field with the `Article` model.
+
+We need to fix this by adding a new field to the `User` model:
+
+```diff lang="tsx" title="prisma/schema.prisma"
+model User {
+  id        String    @id @unique @default(cuid())
+  email     String    @unique
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
++  Article   Article[]
+}
+```
+
+Make the changes shown above, then save the `schema.prisma` file.
+
+### Apply the changes to the database
+
+We have made changes to the `schema.prisma` file, but these changes have not yet been applied to the database.
+
+If you remember from our previous lesson, we can apply these changes to the database by generating a migration file. This migration will contain the SQL commands needed to update the database schema to match the new `schema.prisma` file.
+
+:::tip[Challenge]
+
+Can you can work out how to generate a migration file to apply the new changes to your database? 🤔
+
+#### TIPS
+
+- Refresh your memory of how to generate a migration file by reviewing the [**previous lesson**](http://localhost:4321/code-monster/guides/prisma/prisma-schema#creating-a-migration-file).
+- Remember that you will need to change the name of the migration file from `add-user-model` to something more appropriate for the changes we have made here.
+
+<MonsterDetails>
+  <div>
+    <p>Running the command below in your terminal window will generate the file you need:</p>
+    ```bash
+    npx prisma migrate dev --name add-article-model
+    ```
+    <p>Don't worry if you see the warning below:</p>
+    ![Article migration warning](src/assets/png/prisma/article-migration-warning.png)
+    <p>We don't have any data in the database yet, so can ignore this. Just hit <MonsterKbd>y</MonsterKbd> and continue 😎</p>
+  </div>
+</MonsterDetails>
+
+Finally, let's fire up Prisma Studio to check that the changes have been applied to the database.
+
+```bash
+npx prisma studio
+```
+
+If all is good, you should see the new table in your browser:
+
+![Prisma Studio with Article table](src/assets/png/prisma/prisma-studio-article-table.png)
+
+Next, we will learn how to create, read, update, and delete data in the database using Remix and Prisma together.
+
+🚀🚀🚀

@@ -1,0 +1,41 @@
+---
+title: Prisma Studio
+description: Manually checking the database with Prisma Studio
+---
+
+import MonsterKbd from 'src/components/MonsterKbd.astro'
+
+Once changes have been made to a database, it is often useful to manually check to ensure that the changes have been made correctly.
+
+Prisma Studio is a tool that allows you to do this, and is automatically installed as part of Prisma.
+
+To spin it up, run the following command:
+
+```bash
+npx prisma studio
+```
+
+This will open a new tab in your browser at `http://localhost:5555`, showing the database schema and the single `User` table currently within it:
+
+![Prisma Studio](src/assets/png/prisma/prisma-studio-dashboard.png)
+
+Click on the `User` table, and you will see the (empty) fields that are currently within it.
+
+You can add and delete new records directly from inside Prisma Studio. Let's add a new user manually by clicking on the **Add Record** button:
+
+![Prisma Studio Add Record](src/assets/png/prisma/prisma-studio-add-record.png)
+
+You'll see that most of the fields automatically have values added to them. This is because we have set default values for `id`, `createdAt` and `updatedAt` in the Prisma schema. All we need to do is add an `email` to the new user. Double click the `email` field and add a new email address. Remember to click :**Save 1 change** when you're done:
+
+![Add email and save](src/assets/png/prisma/add-email-and-save.png)
+
+:::tip[Challenge]
+
+1. Add two more users. What happens if you try to save more than one user with the same email address?
+2. Can you work out how to delete a user from the database using Prisma Studio? Delete all the users you created.
+
+:::
+
+Once you have a completely empty `User` table, you can close Prisma Studio by pressing <MonsterKbd>Ctrl + C</MonsterKbd> in the terminal window where you started it.
+
+Next, we will add a `Password` table, and link passwords to users with a foreign key.

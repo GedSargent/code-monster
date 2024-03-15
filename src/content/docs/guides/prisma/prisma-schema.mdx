@@ -1,0 +1,95 @@
+---
+title: The Prisma Schema and Migrations
+description: Defining your database tables, fields and relationships
+---
+
+import MonsterDetails from 'src/components/MonsterDetails.astro'
+import MonsterKbd from 'src/components/MonsterKbd.astro'
+
+All database interactions begin with the Prisma [**schema**](https://www.prisma.io/docs/orm/prisma-schema/overview).
+
+The schema is a file that defines the database tables and their fields. It also defines the relationships between the tables.
+
+Let's take a look at the Prisma schema for the starter Remix project you have been working from:
+
+![Prisma Schema](src/assets/png/prisma/prisma-schema-start.png)
+
+:::note[Info]
+
+So far, the schema is virtually empty. It defines `generator` that Prisma uses to generate the client library for the database, and source of the database Prisma will connect our application to.
+
+In this case, the source is a SQLite database, which is a file-based database that is easy to set up and use for development purposes.
+
+:::
+
+## Adding a Model to the Schema
+
+We will start by adding a [**model**](https://www.prisma.io/docs/orm/prisma-schema/data-model/models) to the schema. A model is just a description of how a table should be created in the database.
+
+Let's go ahead, and add a `User` model to the schema:
+
+```tsx
+model User {
+  id    String @id @default(cuid())
+  email String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+Take a moment to work out what you think this model doing. What fields does the `User` table have? What are the `@` symbols doing?
+
+<MonsterDetails title='Defining the User model'>
+  <div>
+    Let's break this down line by line:
+
+    ```tsx
+    id    String @id @default(cuid())
+    ```
+    `id` is a unique identifier for the user. It is a string and is a unique string of characters automatically generated using the `cuid()` function. The `@id` attribute tells Prisma that this field is the primary key for the table.
+
+    ```tsx
+    email String @unique
+    ```
+
+    `email` is a string, and of course stores the email address of the user. The `@unique` attribute tells Prisma that this field must be unique for each user. If more that one user tries to sign up with the same email address, the database will throw an error.
+
+    ```tsx
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    ```
+
+    `createdAt` and `updatedAt` are both date and time fields. `createdAt` is automatically set to the current date and time when a new user is created. `updatedAt` is automatically updated to the current date and time whenever the user is updated.
+  </div>
+</MonsterDetails>
+
+## Applying changes to the database
+
+So far, we've told Prisma how we want the User table to look in the database, but we haven't actually made any changes to the database itself yet.
+
+We need to push these changes to the database using something called a [**migration**](https://www.prisma.io/docs/orm/prisma-migrate/getting-started).
+
+A migration is a file that translates the changes we've made to the Prisma schema into SQL commands that can be run on the database.
+
+### Creating a migration file
+
+If your server is still running, stop it by pressing <MonsterKbd>Ctrl + C</MonsterKbd> in your terminal.
+
+To create a migration, run the following command in your terminal:
+
+```bash
+npx prisma migrate dev --name add-user-model
+```
+
+This command tells Prisma to create a new migration file with the name `add-user-model`. The `dev` flag tells Prisma to run the migration on the database.
+
+When you run this command, Prisma will generate a new migration file in the `prisma/migrations` directory. The file will contain the SQL commands needed to create the `User` table in the database.
+
+If all is well, you should see a confirmation message that looks something like this in your terminal:
+
+![User migrate confirmation](src/assets/png/prisma/user-migrate-confirmation.png)
+
+You should also be able to see the new migration file in the `prisma/migrations` directory.
+
+Next, we will use Prisma Studio to view the changes we've made to the database.

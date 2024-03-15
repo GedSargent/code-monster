@@ -33,7 +33,15 @@ export default defineConfig({
             {
               label: "Getting started",
               link: "guides/prisma/getting-started",
-            }
+            },
+            {
+              label: "The schema and migrations",
+              link: "guides/prisma/prisma-schema",
+            },
+            {
+              label: "Prisma Studio",
+              link: "guides/prisma/prisma-studio",
+            },
           ]
         },
         {

@@ -92,7 +92,7 @@ model Article {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-+  author    User     @relation(fields: [authorId], references: [id])
++  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 +  authorId  String
 }
 ```
@@ -109,7 +109,7 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-+  Article   Article[]
++  articles Article[]
 }
 ```
 

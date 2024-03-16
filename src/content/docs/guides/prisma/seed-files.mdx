@@ -1,0 +1,202 @@
+---
+title: Seed files
+description: Quickly generating data for your database
+---
+
+Before we can read or write data to our database, we need to have some data in it.
+
+We could manually add data to our database via Prisma Studio, but that would be time-consuming and error-prone.
+
+Instead, this is where seed files come in.
+
+## What is a seed file? 🌱
+
+Seed files are a way to quickly generate data for your database. They are typically written in your project's programming language of choice (JavaScript in our case), and used to populate your database with some initial data.
+
+In Prisma, the seed file is usually located in `prisma/seed.ts` or `prisma/seed.js`. For ease of use in this guide, we will use JavaScript (`.js`).
+
+## Add a seed command to Prisma
+
+To run our seed file, we need to add a new command to our `package.json` file.
+
+```diff lang="json" title="package.json"
+{
+	"name": "react-remix-tailwind",
+	// ...Code omitted for brevity...
++	"prisma": {
++    "seed": "node prisma/seed.js"
++  }
+}
+```
+
+:::caution
+
+Check carefully that you add the code above to the very bottom of the `package.json` file, just above the final closing bracket `}` of the file.
+
+:::
+
+## Create a seed file
+
+Create a new file at `prisma/seed.js`:
+
+![Add seed file](src/assets/png/prisma/add-seed-file.png)
+
+### Add a user
+
+Inside your new `prisma/seed.js` file, add the following code:
+
+```typescript title="prisma/seed.js"
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
+async function seed() {
+	const email = "test@email.com";
+
+  // cleanup the existing database
+  await prisma.user.delete({ where: { email } }).catch(() => {
+    // no worries if it doesn't exist yet
+  });
+
+	const user = await prisma.user.create({
+		data: {
+			email,
+		},
+	})
+}
+```
+
+Can you work out what this is doing?
+
+:::note[Info]
+
+1. First, we import the Prisma client and create a new instance of it. It is through this instance that we can interact with our database.
+
+```typescript title="prisma/seed.js"
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+```
+
+2. Then, we define an `async` function called `seed`. This is what we will call later to populate the database with data. Inside the `seed` function, we first create a generic `email` address for our new user.
+
+```typescript title="prisma/seed.js"
+async function seed() {
+	const email = "test@email.com";
+	// ...
+}
+```
+3. Then, we delete any existing user with a matching email address. This is to ensure we don't create duplicate users every time we run the seed file.
+
+```typescript title="prisma/seed.js"
+	// cleanup the existing database
+	await prisma.user.delete({ where: { email } }).catch(() => {
+		// no worries if it doesn't exist yet
+	});
+```
+4. Finally, we create a new user with the email `"test@email.com"`.
+```typescript title="prisma/seed.js"
+	const user = await prisma.user.create({
+		data: {
+			email,
+		},
+	})
+```
+
+:::
+
+### Adding articles
+
+Let's add some articles to our database, and associate these with the `user` we just created
+
+Add the code highlighted in green below, making sure you add it just inside the closing `}` of the `seed` function:
+
+```diff lang="typescript" title="prisma/seed.js"
+async function seed() {
+	// ...Code omitted for brevity...
+
+	const user = await prisma.user.create({
+		data: {
+			email: 'test@email.com',
+		},
+	})
+
++	await prisma.article.create({
++		data: {
++			title: 'My first article!',
++			content: 'Hello, world!',
++			authorId: user.id,
++		},
++	})
++
++	await prisma.article.create({
++		data: {
++			title: 'My second article',
++			content: 'Hello again, world!',
++			authorId: user.id,
++		},
++	})
++
++	console.log(`Database has been seeded. 🌱`)
+}
+```
+
+## Run the seed command
+
+Now that we have our `seed` function written, we should run it to populate our database with some initial data.
+
+To do this, we firstly need to add the code below to actually call and execute the function.
+
+:::caution
+
+Check carefully that you add the code below to the very bottom of the `prisma/seed.js` file, ***after*** the final closing bracket `}` of the `seed` function itself.
+
+:::
+
+
+
+```diff lang="typescript" title="prisma/seed.js"
+async function seed() {
+	// ...Code omitted for brevity...
+
+	console.log(`Database has been seeded. 🌱`)
+}
+
++seed()
++  .catch((e) => {
++    console.error(e);
++    process.exit(1);
++  })
++  .finally(async () => {
++    await prisma.$disconnect();
++  });
+```
+
+
+Now, with your seed file saved, run the following command in your terminal:
+
+```bash
+npx prisma db seed
+```
+
+If all went well, you should see the following output in your terminal:
+
+![Seed output](src/assets/png/prisma/seed-output.png)
+
+### Check Prisma Studio
+
+Let's finalise this section by checking that our seed file has produced the expected records in our database.
+
+Open Prisma Studio:
+
+```bash
+npx prisma studio
+```
+
+If all has gone well, you should see that some records have appeared in the `User` and `Article` tables:
+
+![Prisma Studio after seeding](src/assets/png/prisma/prisma-studio-after-seeding.png)
+
+Click into the tables to see the records in more detail.
+
+When you are ready, we can begin to read this data from our database using Remix's powerful data loading features.

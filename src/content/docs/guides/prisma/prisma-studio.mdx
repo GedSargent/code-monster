@@ -21,21 +21,25 @@ This will open a new tab in your browser at `http://localhost:5555`, showing the
 
 Click on the `User` table, and you will see the (empty) fields that are currently within it.
 
+## Adding a new user
+
 You can add and delete new records directly from inside Prisma Studio. Let's add a new user manually by clicking on the **Add Record** button:
 
 ![Prisma Studio Add Record](src/assets/png/prisma/prisma-studio-add-record.png)
 
-You'll see that most of the fields automatically have values added to them. This is because we have set default values for `id`, `createdAt` and `updatedAt` in the Prisma schema. All we need to do is add an `email` to the new user. Double click the `email` field and add a new email address. Remember to click :**Save 1 change** when you're done:
+You'll see that most of the fields automatically have values added to them. This is because we have set default values for `id`, `createdAt` and `updatedAt` in the [**Prisma schema**](/code-monster/guides/prisma/prisma-schema#adding-a-model-to-the-schema). All we need to do is manually add an `email` to the new user.
+
+Double click the `email` field and add a new email address. Remember to click <span className="py-1 px-2 bg-green-700 text-white font-bold rounded">Save 1 change</span> when you're done:
 
 ![Add email and save](src/assets/png/prisma/add-email-and-save.png)
 
 :::tip[Challenge]
 
-1. Add two more users. What happens if you try to save more than one user with the same email address?
-2. Can you work out how to delete a user from the database using Prisma Studio? Delete all the users you created.
+1. Add two more users. What happens if you try to save more than one user with the **same email address**?
+2. Can you work out how to **delete** a user from the database using Prisma Studio? Delete all the users you created.
 
 :::
 
-Once you have a completely empty `User` table, you can close Prisma Studio by pressing <MonsterKbd>Ctrl + C</MonsterKbd> in the terminal window where you started it.
+Once you have a completely empty `User` table, you can close Prisma Studio by typing <MonsterKbd>Ctrl + C</MonsterKbd> and hitting return in the terminal window.
 
 Next, we will add a `Password` table, and link passwords to users with a foreign key.

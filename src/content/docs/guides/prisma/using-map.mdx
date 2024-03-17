@@ -1,0 +1,198 @@
+---
+title: 🖥️ Displaying data - the `map` function
+description: Using map to loop through a list of objects
+---
+
+In our previous step, we learned how to pass information to child components in the form of props.
+
+The only problem is that we are defining the same component multiple times. This is not very efficient and can lead to a lot of repetition. It also doesn't scale well if we have a lot of items to display. And what if we don't know how many items we have to display?
+
+In this tutorial, we will learn how to use the `map` function to loop through a list of objects more efficiently.
+
+## The `map` function
+
+The `map` function in JavaScript allows us to loop through an array and apply a function to each element, returning a new array with the results.
+
+::::note[Info]
+
+Before we see how this can be applied in React, let's quickly see how the `map` function works with a simple JavaScript example.
+
+```javascript
+const numbers = [1, 2, 3];
+
+const doubledNumbers = numbers.map((number) => {
+  return number * 2;
+});
+
+console.log(doubledNumbers); // -> [2, 4, 6]
+console.log(numbers); // -> [1, 2, 3]
+```
+
+In this example, we have an array of `numbers`.
+
+We use the `map` function to loop through each number and multiply it by 2. The result is a ***new array*** with the doubled numbers.
+
+We store this new array in the `doubledNumbers` variable and log it to the console.
+
+:::caution
+
+Note that when we `console.log` the original `numbers` array, it remains unchanged.
+
+The `map` function ***does not modify the original array***, it returns a completely new one.
+
+:::
+
+If you want to learn more about the `map` function, I recommend reading the excellent [**MDN documentation**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) to understand it better.
+
+::::
+
+Now that we understand how the `map` function works, let's see how we can use it in React to display a list of items.
+
+## Rendering arrays in React components
+
+The first thing to understand is that React will automatically render any content of an array within JSX straight out to the screen.
+
+We can see this if we replace the main page title with an array of strings:
+
+```diff lang="tsx" title="src/routes/articles.tsx"
+export default function ArticlesRoute() {
+	const { articles } = useLoaderData<typeof loader>()
+
+	return (
+		<main className="min-h-screen">
+			<div className="container mx-auto py-28">
+				<HomeButton />
+				<h1 className="mb-32 text-center text-8xl font-bold text-white">
+-         Articles
++					{['My', 'Brillaint, 'Articles']}
+				</h1>
+
+				<div className="grid grid-cols-2 gap-4">
+					<Article title={articles[0].title} />
+					<Article title={articles[1].title} />
+				</div>
+			</div>
+		</main>
+	)
+}
+```
+
+If you check the browser now, you will see that the page title is now "MyBrilliantArticles":
+
+![MyBrilliantArticles](src/assets/png/prisma/my-brilliant-articles.png)
+
+### Arrays of React components
+
+If we take this a step further, what do you think will happen if we replace the plain strings inside this array with React components?
+
+```diff lang="tsx" title="src/routes/articles.tsx"
+export default function ArticlesRoute() {
+	const { articles } = useLoaderData<typeof loader>()
+
+	return (
+		<main className="min-h-screen">
+			<div className="container mx-auto py-28">
+				<HomeButton />
+				<h1 className="mb-32 text-center text-8xl font-bold text-white">
+-					{['My', 'Brilliant', 'Articles']}
++					{[
++						<span className="border border-red-500 p-2 text-red-500">My</span>,
++						<span className="border border-green-500 p-2 text-green-500">
++							Brilliant
++						</span>,
++						<span className="border border-blue-500 p-2 text-blue-500">
++							Articles
++						</span>,
++					]}
+				</h1>
+
+				<div className="grid grid-cols-2 gap-4">
+					<Article title={articles[0].title} />
+					<Article title={articles[1].title} />
+				</div>
+			</div>
+		</main>
+	)
+}
+```
+
+Head back to your browser, and you should see the page title has changed again:
+
+![MyBrilliantArticles styled](src/assets/png/prisma/my-brilliant-articles-styled.png)
+
+With this knowledge in mind, let's think how we can use the `map` function to dynamically render a list of `articles`.
+
+:::caution[Before you continue]
+
+If you were following the previous steps and altering code, make sure to revert your page title back to its original state before continuing.
+
+(Unless you like the new look, of course! 😄)
+
+:::
+
+## Using `map` to loop through an array of items
+
+Let's recap what we know so far:
+
+1. If we embed an array inside some JSX, React will automatically render the elements of this array straight out to the screen.
+2. The `map` function produces a new array from an existing one by applying a function to each element.
+
+:::tip[Aha!]
+
+<p class="text-center text-8xl">💡</p>
+
+This means that we can use the `map` function to loop through an array of items and return a ***new array of components***.
+
+:::
+
+Let's see how we can use this to display a list of articles.
+
+```diff lang="tsx" title="src/routes/articles.tsx"
+export default function ArticlesRoute() {
+	const { articles } = useLoaderData<typeof loader>()
+
+	return (
+		<main className="min-h-screen">
+			<div className="container mx-auto py-28">
+				<HomeButton />
+				<h1 className="mb-32 text-center text-8xl font-bold text-white">
+					Articles
+				</h1>
+
+				<div className="grid grid-cols-2 gap-4">
+-					<Article title={articles[0].title} />
+-					<Article title={articles[1].title} />
++					{articles.map(article => (
++						<Article key={article.id} title={article.title} />
++					))}
+				</div>
+			</div>
+		</main>
+	)
+}
+```
+
+Save the changes to your file and check the browser. You should see that the articles are still being displayed as before:
+
+![Articles with titles](src/assets/png/prisma/articles-with-titles.png)
+
+The big advantage this time, of course, is that if we add more articles to our `articles` array, they will be automatically displayed on the page without us having to define a new `Article` component for each one.
+
+This is a much more efficient way to display a list of items, and it scales well with the number of items we have.
+
+## Summary
+
+In this step, we learned how to use the `map` function to loop through an array of items and return a new array of components.
+
+This is a much more efficient way to display a list of items, and it scales well with the number of items we have.
+
+There are many more JavaScript array functions that can be used to manipulate arrays in different ways. Below are a few examples for you to research further and experiment with:
+
+- `find`: returns the first element that passes a test
+- `some`: returns `true` if at least one element in an array passes a test
+- `every`: returns `true` if all elements in an array pass a test
+- `includes`: returns `true` if an array contains a certain element
+- `filter`: returns a new array of elements that pass a certain test or condition
+- `reduce`: reduces an array to a single value
+
+Kent C. Dodds has a great article on [**JavaScript to know for React**](https://kentcdodds.com/blog/javascript-to-know-for-react#array-methods) that demonstrates these methods in action.

@@ -1,0 +1,159 @@
+---
+title: 🖥️ Displaying data - props and interfaces
+description: Using props to display data in a component
+---
+
+In our [**previous step**](/code-monster/guides/prisma/reading-data), we fetched a list of articles from the database and displayed them on the page.
+
+In this step, we will update the `Article` component to accept a `title` prop, and then use this prop to display the article title dynamically on screen.
+
+## Add props to the `Article` component
+
+If you look at the `Article` component, you will see that it is currently hardcoded to display the text "Article".
+
+We want to update this component to accept a `title` **prop**, and then use this prop to display the article title dynamically on screen.
+
+### What are props?
+
+In React, **props** are used to pass data from a parent component to a child component. They are read-only and help to make components reusable.
+
+:::tip
+
+You can learn more about props in the [**React docs**](https://react.dev/learn/passing-props-to-a-component).
+
+:::
+
+We will update the `Article` component to accept a `title` prop, and then use this prop to display the article `title` on screen.
+
+### Define props on a component
+
+Firstly, add the following code to the `Article` component:
+
+```diff title="app/routes/articles.tsx" ins="{ title }: ArticleProps" ins="{title}"
++interface ArticleProps {
++  title: string
++}
+
+function Article({ title }: ArticleProps) {
+  return (
+    <div className="flex h-96 w-96 items-center justify-center justify-self-center rounded-xl bg-white/20">
+      <p className="text-center text-4xl text-gray-300">{title}</p>
+    </div>
+  )
+}
+```
+
+:::note[Info]
+
+## What is an `interface`?
+
+### The problem with JavaScript
+
+Imagine that you have an object called `person` that you declare like this:
+
+```javascript
+const person = {
+  name: 'John',
+  age: 30
+}
+```
+
+Later in your code, you want to display the person's name. You might write something like this:
+
+```javascript
+const message = `Hello, ${person.Name}, how are you?`;
+```
+
+Take a second and look back at this code. Can you see the problem?
+
+<p class="text-8xl">🧐</p>
+
+The `person` object doesn't have a `Name` property, it has a `name` property.
+
+This means that the `message` will actually read `Hello, undefined, how are you?`. Definitely not what we wanted!
+
+Unfortunately, if we are coding in JavaScript, this bug will only be discovered at **runtime**, when the code is executed and already in our customer's browser. This can be a problem, especially in large applications.
+
+### TypeScript to the rescue
+
+To fix this problem, many developers now use [**TypeScript**](https://www.typescriptlang.org/), and this is the language Remix has adopted.
+
+TypeScript is built on top of JavaScript, and lets us annotate code with descriptions of what our variables, objects and functions should look like. This means that we can catch bugs like the one above while we are still coding, long before any customers see it.
+
+### Understanding `interfaces`
+
+With objects like `person` above, we can declare an `interface` to define a new custom [**type**](https://www.typescripttutorial.net/typescript-tutorial/typescript-types).
+
+In the `person` example, we could define an interface like this:
+
+```typescript
+interface Person {
+  name: string;
+  age: number;
+}
+```
+
+This means that we can now declare a new `person` object like this:
+
+```typescript ins=": Person"
+const person: Person = {
+  name: 'John',
+  age: 30
+}
+```
+
+The `: Person` annotation tells TypeScript that the object we are declaring should have the same properties as the `Person` interface.
+
+Now, if we try to access a `Name` property on the `person` object, TypeScript will throw an error. Our code editor knows in advance that the `person` object should have a property called `name`, not `Name`:
+
+![TypeScript error](src/assets/gif/typescript-error.gif)
+
+This lets TypeScript ensure that data is passed correctly throughout an application, which in turn helps to prevent bugs from occurring.
+
+:::
+
+OK. Back to our articles page code.
+
+We've now replaced the hardcoded "Article" placeholder text with the `title` prop. This means that when we pass a `title` prop to the `Article` component, it will display the title on screen.
+
+## Passing props to the `Article` component
+
+If you scroll down to where the `Article` component is called, you will see that TypeScript is angry.
+
+It's telling us that we need to pass a `title` prop to the `Article` component:
+
+![Title prop needed](src/assets/png/prisma/title-prop-needed.png)
+
+Let's fix this by passing the `title` of each `article` to the `Article` component:
+
+```diff lang="tsx" title="app/routes/articles.tsx" ins=" title={articles[0].title}" ins=" title={articles[1].title}"
+export default function ArticlesRoute() {
+	const { articles } = useLoaderData<typeof loader>()
+
+	console.log({ articles })
+
+	return (
+		<main className="min-h-screen">
+			<div className="container mx-auto py-28">
+				<HomeButton />
+				<h1 className="mb-32 text-center text-8xl font-bold text-white">
+					Articles
+				</h1>
+
+				<div className="grid grid-cols-2 gap-4">
+					<Article title={articles[0].title} />
+					<Article title={articles[1].title} />
+				</div>
+			</div>
+		</main>
+	)
+}
+```
+
+If all goes well, you should now see the titles of the articles displayed on the page:
+
+![Articles with titles](src/assets/png/prisma/articles-with-titles.png)
+
+So far, so good.
+
+But what if we want to display more than two articles? What if we don't know exactly how many articles we will have?

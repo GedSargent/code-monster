@@ -51,8 +51,16 @@ export default defineConfig({
               link: "guides/prisma/seed-files",
             },
             {
-              label: "🗄️ Reading data",
+              label: "🗄️ Reading data - loader functions",
               link: "guides/prisma/reading-data",
+            },
+            {
+              label: "🖥️ Displaying data - props and interfaces",
+              link: "guides/prisma/displaying-data",
+            },
+            {
+              label: "🖥️ Displaying data - the map function",
+              link: "guides/prisma/using-map",
             },
           ]
         },

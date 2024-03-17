@@ -8,6 +8,10 @@ import MonsterKbd from 'src/components/MonsterKbd.astro'
 
 All database interactions begin with the Prisma [**schema**](https://www.prisma.io/docs/orm/prisma-schema/overview).
 
+This can be found in the `prisma/schema.prisma` file in the root of the project.
+
+![Prisma Schema Folder](src/assets/png/prisma/prisma-schema-folder.png)
+
 The schema is a file that defines the database tables and their fields. It also defines the relationships between the tables.
 
 Let's take a look at the Prisma schema for the starter Remix project you have been working from:
@@ -16,7 +20,7 @@ Let's take a look at the Prisma schema for the starter Remix project you have be
 
 :::note[Info]
 
-So far, the schema is virtually empty. It defines `generator` that Prisma uses to generate the client library for the database, and source of the database Prisma will connect our application to.
+So far, the schema is virtually empty. It defines a `generator` that Prisma uses to generate the client library for the database, and source of the database file that Prisma will connect our application to.
 
 In this case, the source is a SQLite database, which is a file-based database that is easy to set up and use for development purposes.
 
@@ -48,13 +52,13 @@ The `.env` file is a place to keep sensitive information like database connectio
 
 Remember that every time you make a commit to a Git repository, you are potentially sharing your code with the world. If you commit a file that contains sensitive information, you are potentially sharing that information with the world too.
 
-To stop this from happening, we would usually add the `.env` file to the `.gitignore` file in the root of the project. This file contains a list of files and folders thats Git ignore when making commits.
+To stop this from happening, we would usually add the `.env` file to the `.gitignore` file in the root of the project. As the name suggests, this file contains a list of files and folders thats Git ignores when making commits.
 
 ![.gitignore file](src/assets/png/prisma/gitignore-file.png)
 
 #### But where is the .env file here?
 
-Because "Epic News" is an educational project and there is no sensitive information that will be added, we've removed the `.env` file from `.gitignore` to prevent any confusion during the initial setup stage.
+Because this is an educational project and there is no sensitive information that will be added, we've removed the `.env` file from `.gitignore` to prevent any confusion during the initial setup stage.
 
 In a real-world project, you would add the `.env` file to `.gitignore` and ensure it was never committed to the version control history from the outset.
 
@@ -64,16 +68,28 @@ In a real-world project, you would add the `.env` file to `.gitignore` and ensur
 
 We will start by adding a [**model**](https://www.prisma.io/docs/orm/prisma-schema/data-model/models) to the schema. A model is just a description of how a table should be created in the database.
 
-Let's go ahead, and add a `User` model to the schema:
+Let's go ahead, and add a `User` model to the very bottom of the schema file:
 
-```tsx title="prisma/schema.prisma"
-model User {
-  id    String @id @default(cuid())
-  email String @unique
+```diff lang="tsx" title="prisma/schema.prisma"
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+generator client {
+  provider = "prisma-client-js"
 }
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
++
++model User {
++  id    String @id @default(cuid())
++  email String @unique
++
++  createdAt DateTime @default(now())
++  updatedAt DateTime @updatedAt
++}
 ```
 
 Take a moment to work out what you think this model doing. What fields does the `User` table have? What are the `@` symbols doing?

@@ -23,6 +23,9 @@ To run our seed file, we need to add a new command to our `package.json` file.
 {
 	"name": "react-remix-tailwind",
 	// ...Code omitted for brevity...
+	"engines": {
+    "node": ">=18.0.0"
+  },
 +	"prisma": {
 +    "seed": "node prisma/seed.js"
 +  }
@@ -68,7 +71,7 @@ async function seed() {
 
 Can you work out what this is doing?
 
-:::note[Info]
+:::note[Code breakdown]
 
 1. First, we import the Prisma client and create a new instance of it. It is through this instance that we can interact with our database.
 
@@ -147,14 +150,6 @@ Now that we have our `seed` function written, we should run it to populate our d
 
 To do this, we firstly need to add the code below to actually call and execute the function.
 
-:::caution
-
-Check carefully that you add the code below to the very bottom of the `prisma/seed.js` file, ***after*** the final closing bracket `}` of the `seed` function itself.
-
-:::
-
-
-
 ```diff lang="typescript" title="prisma/seed.js"
 async function seed() {
 	// ...Code omitted for brevity...
@@ -172,6 +167,11 @@ async function seed() {
 +  });
 ```
 
+:::caution
+
+Check carefully that you add the code above to the very bottom of the `prisma/seed.js` file, ***after*** the final closing bracket `}` of the `seed` function itself.
+
+:::
 
 Now, with your seed file saved, run the following command in your terminal:
 

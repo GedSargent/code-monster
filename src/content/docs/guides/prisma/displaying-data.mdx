@@ -68,7 +68,7 @@ Take a second and look back at this code. Can you see the problem?
 
 <p class="text-8xl">🧐</p>
 
-The `person` object doesn't have a `Name` property, it has a `name` property.
+The `person` object doesn't have a `Name` property, it has a `name` property (with a lowercase "n").
 
 This means that the `message` will actually read `Hello, undefined, how are you?`. Definitely not what we wanted!
 
@@ -76,9 +76,9 @@ Unfortunately, if we are coding in JavaScript, this bug will only be discovered 
 
 ### TypeScript to the rescue
 
-To fix this problem, many developers now use [**TypeScript**](https://www.typescriptlang.org/), and this is the language Remix has adopted.
+To fix this problem and others like it, many developers now use [**TypeScript**](https://www.typescriptlang.org/), and this is the language Remix has adopted.
 
-TypeScript is built on top of JavaScript, and lets us annotate code with descriptions of what our variables, objects and functions should look like. This means that we can catch bugs like the one above while we are still coding, long before any customers see it.
+TypeScript is built on top of JavaScript, and lets us annotate code with descriptions of what our variables, objects and functions should look like. This means that we can catch bugs like the one above while we are still coding, long before any customers might come across it.
 
 ### Understanding `interfaces`
 

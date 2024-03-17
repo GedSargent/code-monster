@@ -64,7 +64,7 @@ export default function ArticlesRoute() {
 				<HomeButton />
 				<h1 className="mb-32 text-center text-8xl font-bold text-white">
 -         Articles
-+					{['My', 'Brillaint, 'Articles']}
++					{['My', 'Brilliant, 'Articles']}
 				</h1>
 
 				<div className="grid grid-cols-2 gap-4">
@@ -83,7 +83,7 @@ If you check the browser now, you will see that the page title is now "MyBrillia
 
 ### Arrays of React components
 
-If we take this a step further, what do you think will happen if we replace the plain strings inside this array with React components?
+If we take this a step further, what do you think will happen if we replace the plain strings inside this array with full React components?
 
 ```diff lang="tsx" title="src/routes/articles.tsx"
 export default function ArticlesRoute() {
@@ -120,7 +120,7 @@ Head back to your browser, and you should see the page title has changed again:
 
 ![MyBrilliantArticles styled](src/assets/png/prisma/my-brilliant-articles-styled.png)
 
-With this knowledge in mind, let's think how we can use the `map` function to dynamically render a list of `articles`.
+With this knowledge in mind, let's think how we can use the `map` function to dynamically render our list of `articles`.
 
 :::caution[Before you continue]
 
@@ -141,7 +141,7 @@ Let's recap what we know so far:
 
 <p class="text-center text-8xl">💡</p>
 
-This means that we can use the `map` function to loop through an array of items and return a ***new array of components***.
+This means that we can use the `map` function to loop through an array of objects (like our `articles` array) and return a ***new array of components***.
 
 :::
 
@@ -196,3 +196,12 @@ There are many more JavaScript array functions that can be used to manipulate ar
 - `reduce`: reduces an array to a single value
 
 Kent C. Dodds has a great article on [**JavaScript to know for React**](https://kentcdodds.com/blog/javascript-to-know-for-react#array-methods) that demonstrates these methods in action.
+
+:::tip[Challenge]
+
+1. Try adding more articles to the `articles` array and see how they are automatically displayed on the page. You could either do this via Prisma Studio or by adding more articles to the `articles` array with code.
+2. See if you can update the `Article` model to include a `description` field and display this alongside the `title` in the `Article` component.
+3. Add an `imageUrl` field to the `Article` model and display this as an image alongside the `title` and `description` in the `Article` component.
+4. Build out the rest of your articles page to include a full design and any other content you think would be useful.
+
+:::

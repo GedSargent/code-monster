@@ -7,12 +7,12 @@ hero:
   image:
     file: src/assets/svg/monster-hero.svg
   actions:
-    - text: Epic News
-      link: /code-monster/guides/epic-news/root-tsx
+    - text: Remix, React and Prisma
+      link: /code-monster/guides/prisma/getting-started
       icon: right-arrow
       variant: primary
     - text: References
-      link: /code-monster/reference/remix-learning-resources/
+      link: /code-monster/reference/prisma-learning-resources/
       icon: open-book
 ---
 
@@ -21,6 +21,11 @@ import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
 ## Get started
 
 <CardGrid>
+  <LinkCard
+    href="/code-monster/guides/prisma/getting-started"
+    title="Prisma and Remix"
+    description="Learn how to use Prisma with Remix to load data and display it in your app."
+  />
   <LinkCard
     href="/code-monster/guides/epic-news/root-tsx"
     title="Epic News"
@@ -31,10 +36,10 @@ import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
     title="Learn Remix"
     description="Get started with Remix, the web framework for building modern web apps."
   />
+  <LinkCard
+    href="/code-monster/reference/remix-learning-resources"
+    title="Learning Resources"
+    description="A collection of resources to help you get started with Remix"
+  />
 </CardGrid>
 
-<LinkCard
-  href="/code-monster/reference/remix-learning-resources"
-  title="Learning Resources"
-  description="A collection of resources to help you get started with Remix"
-/>

@@ -64,7 +64,7 @@ The makers of Remix got around this problem by introducing `loader` functions.
 
 ### Accessing server data with `loader` functions
 
-If a `loader` function is exported from a **route** file (i.e. a React file inside the `route` folder), then Remix will execute this code on the **server** _before_ the user interface (UI) is rendered. This ensures that any required data is accessed and processed before the UI is presented by the browser.
+If a `loader` function is exported from a **route** file (i.e. a `tsx` file inside the `routes` folder), then Remix will execute this code on the **server** _before_ the user interface (UI) is rendered. This ensures that any required data is accessed and processed before the UI is presented by the browser.
 
 In this case, the `loader` function is creating a new object - `requestInfo` - and populating it with values that are generated from several helper functions like `getHints`, `getDomainUrl` etc. These have already been written for us in the Epic Stack codebase, and are being `import`ed in from elsewhere.
 

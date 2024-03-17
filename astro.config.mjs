@@ -46,6 +46,14 @@ export default defineConfig({
               label: "🗄️ Database relationships",
               link: "guides/prisma/database-relationships",
             },
+            {
+              label: "🌱 Seed files",
+              link: "guides/prisma/seed-files",
+            },
+            {
+              label: "🗄️ Reading data",
+              link: "guides/prisma/reading-data",
+            },
           ]
         },
         {

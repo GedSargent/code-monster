@@ -7,9 +7,13 @@ description: "Learn how to create and embed components in React using JSX."
 
 Components are the building blocks of a React application.
 
-A component is a reusable piece of code that defines how a part of the user interface should look and behave. Components can be nested inside other components to create complex user interfaces.
+A component is a reusable piece of code that describes how a part of the user interface (UI) should look and behave.
 
-In React, components can be created using functions. These are called, unsurprisingly enough, "functional components". Here's an example of a simple functional component:
+Components can be nested inside other components to create complex user interfaces.
+
+In React, it is best to create components using [**functions**](https://www.javascripttutorial.net/javascript-function/). These are called, unsurprisingly enough, [**"functional components"**](https://react.dev/learn/your-first-component#defining-a-component).
+
+Here's an example of a simple functional component:
 
 ```jsx
 function Greeting() {
@@ -21,14 +25,14 @@ When this component is rendered, it will display a `<h1>` element with the text 
 
 ## Embedding components
 
-Of course, you can render this component in another component like this:
+You can render this component in another component like this:
 
 ```jsx
 function Greeting() {
   return <h1>Hello</h1>
 }
 
-function UserProfile() {
+function ProfileRoute() {
   return (
     <div>
       <Greeting />
@@ -51,13 +55,15 @@ function Avatar() {
 
 When this component is rendered, it will display an `<img>` element with the specified `src` and `alt` attributes.
 
-This image takes as its source a URL from [placeholder.com](https://placeholder.com/). This is a service that provides placeholder images for use in web development.
+This image takes as its source a URL from [**placeholder.com**](https://placeholder.com/). This is a service that provides placeholder images for use in web development.
 
 ## Importing images
 
 However, most of the time you would want to import images from your project's `assets` folder.
 
-You can do this by importing the image and using it as the `src` attribute of the `<img>` element. If we take the same example as above, but with an image imported from the `assets` folder:
+You can do this by importing the image, storing its path as a variable, then finally using it as the `src` attribute of the `<img>` element.
+
+If we take the same example as above, but with an image imported from the `assets` folder:
 
 ```jsx
 import avatar from './assets/avatar.png'
@@ -86,3 +92,72 @@ These examples were all taken from the React documentation on [embedding express
 
 :::
 
+## Challenges
+
+::::tip[Practicing with components]
+
+Make sure your server is running by typing the command below into your terminal and hitting 'Enter':
+
+```bash
+npm run dev
+```
+
+### 1. Create a new page in Remix
+
+- Create a new page in Remix with the route `/profiles` that simply renders a `<h1>` element with the text "Profiles". The title should be large, bold and centered.
+- Use the starter code below to get going:
+
+```tsx title="routes/profiles.tsx"
+export default function ProfilesRoute() {
+	return (
+		<div className="min-h-screen p-16">
+			<div>
+        {/* Replace this comment with your code here */}
+			</div>
+		</div>
+	)
+}
+```
+- Your page should look like this in the browser:
+
+![Profiles page](/src/assets/png/components/profiles-page.png)
+
+### 2. Create a new component
+
+- At the top of your `routes/profiles.tsx` file, Create a new component called `ProfileCard` that renders the following:
+  - a `<h4>` element with the text "User's Name".
+  - a `<p>` element with the text "User's Bio".
+- Embed this component in the `/profile` page, just below your `<h1>` element.
+- Your page should now look like this in the browser:
+
+![Greeting component start](/src/assets/png/components/greeting-component-start.png)
+
+### 3. Add an image
+
+1. Find and download a profile image from [**pexels.com**](https://www.pexels.com/search/face/?orientation=square).
+2. Save the image into the `assets` folder of your Remix project.
+3. Using a JavaScript `import` statement, import the image to the top of your `profile.tsx` page.
+
+:::note
+
+Remind yourself how to import images in React by revisiting the [**section above**](#importing-images).
+
+:::
+
+4. Update your `Greeting` component to render the image you imported in step 3. The image should have an `alt` attribute with the value "Profile Image".
+
+### 4. Style your component
+
+Using Tailwind CSS, style your component so that it looks like the image below:
+
+![Greeting component finish](/src/assets/png/components/greeting-component-finish.png)
+
+::::
+
+## Solution
+
+Watch the video below to see how I solved the challenges:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/xKibnD-JwXs?si=OZOjIFFoMIWJzn2i" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+Once you have your component set up, you can move on to the next section.

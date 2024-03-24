@@ -48,15 +48,14 @@ const CodePlayground = ({
   showConsole = false,
   showTabs = true,
 }: CodeSandboxProps) => {
-  const { width } = useWindowSize();
   const codeMirrorInstance = useRef<any>(undefined);
-
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const sandpackHeight = isFullScreen ? "calc(100vh - 26.5px)" : "36rem";
+
+  const sandpackHeight = isFullScreen ? "calc(100vh - 4rem)" : "auto";
 
   return (
     <div
-      className="relative"
+      className={`${isFullScreen ? "fixed inset-0 z-50 pl-[18.75rem] pt-16" : "relative py-8"}`}
       id="code-playground-wrapper"
     >
       <SandpackProvider
@@ -76,15 +75,16 @@ const CodePlayground = ({
               setIsFullScreen={setIsFullScreen}
             />
             {/* TODO: Option for adding <SandpackFileExplorer /> - probably needs complete new layout */}
-            <div className="w-full z-30">
-              <div>
+            <div className={`${isFullScreen ? "flex" : " block w-full z-30"}`}>
+              <div className={`${isFullScreen ? "w-1/2" : "w-full"}`}>
                 <LocalStorageCodeEditor
                   id={localStorageId}
                   codeMirrorInstance={codeMirrorInstance}
                   showTabs={showTabs}
+                  height={sandpackHeight}
                 />
               </div>
-            <div className="">
+            <div className={`${isFullScreen ? "w-1/2" : "w-full"}`}>
               <SandpackPreview
                 showOpenInCodeSandbox={false}
               />

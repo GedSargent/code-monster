@@ -3,6 +3,8 @@ title: "JSX components in React"
 description: "Learn how to create and embed components in React using JSX."
 ---
 
+import MonsterPlayground from "src/components/MonsterPlayground.astro"
+
 ## What are React components?
 
 Components are the building blocks of a React application.
@@ -85,4 +87,16 @@ You can only use curly braces in two ways inside JSX:
 These examples were all taken from the React documentation on [embedding expressions in JSX](https://react.dev/learn/javascript-in-jsx-with-curly-braces), and this page is a great resource to learn more about this topic.
 
 :::
+
+<MonsterPlayground localStorageId="first-component" files={{
+        "/App.js": {
+          active: true,
+          code: `export default function App() {
+  return (
+    <div>
+    <h1>Start here</h1>
+    </div>
+  )
+}`}
+}} />
 

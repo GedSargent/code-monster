@@ -1,7 +1,6 @@
 import FormatCodeBtn from "./FormatCodeBtn";
 import FullScreenBtn from "./FullScreenBtn";
 import ResetCodeBtn from "./ResetCodeBtn";
-import SandpackForkBtn from "./SandpackForkBtn";
 
 interface CustomControlsBarProps {
   title: string;

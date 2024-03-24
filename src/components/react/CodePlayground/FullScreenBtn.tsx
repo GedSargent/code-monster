@@ -19,7 +19,7 @@ const FullScreenBtn = ({
     >
       <Boop scale={1.1}>
         <Maximize
-          className={`h-auto w-4 stroke-neutral-400 shadow-sm hover:stroke-neutral-200 group-hover:stroke-neutral-200`}
+          className="h-auto w-4 stroke-neutral-400 shadow-sm hover:stroke-neutral-200 group-hover:stroke-neutral-200"
         />
       </Boop>
     </button>

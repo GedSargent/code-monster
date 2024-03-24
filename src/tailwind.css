@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#code-playground-wrapper * {
+  margin-top: 0;
+}

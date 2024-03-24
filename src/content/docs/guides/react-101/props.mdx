@@ -1,0 +1,172 @@
+---
+title: "Component props in React"
+description: "Learn how to pass data to components in React using props."
+---
+
+## What are props?
+
+At the moment, our `ProfileCard` component looks great, but it is **static**.
+
+It always displays the same information, no matter when it's used.
+
+![Static component](/src/assets/png/components/static-component.png)
+
+This is not very useful. We want to be able to pass different data to the `ProfileCard` component so that it can display different profiles.
+
+Props are a way to pass data to components in React. They are similar to arguments in functions. You can pass any data type to a component as a prop, including strings, numbers, arrays, objects, and functions.
+
+## Passing props to components
+
+Let's start with our simple `Greeting` component from the [**previous session**](/code-monster/guides/react-101/jsx-components):
+
+```jsx
+function Greeting() {
+  return <h1>Hello</h1>
+}
+```
+
+Like our `ProfileCard` component, this component is **static**. It always displays the same greeting. Let's make it dynamic by passing a `name` prop to it.
+
+### The `props` object
+
+When you pass a prop to a component, React stores it in a special object called `props`.
+
+With functional components, you can access the `props` object as an argument to the component function.
+
+Here's how you can pass a `name` prop to the `Greeting` component:
+
+```jsx
+function Greeting(props) {
+  return <h1>Hello, {props.name}</h1>
+}
+```
+
+Notice that we added a `name` prop to the `Greeting` component? We can now use the `Greeting` component like this:
+
+Now, you can use the `Greeting` component like this:
+
+```jsx
+<Greeting name="Alice" /> // Hello, Alice
+<Greeting name="Bob" /> // Hello, Bob
+<Greeting name="Charlie" /> // Hello, Charlie
+```
+
+### What happens if you don't pass a prop that is expected?
+
+If you don't pass a prop to a component that is expecting one, React will just set the value of the prop to `undefined`.
+
+For example, if you use the `Greeting` component above without a prop, look what happens:
+
+```jsx
+<Greeting />  // Hello, undefined
+<Greeting />  // Hello, undefined
+<Greeting />  // Hello, undefined
+```
+
+It is for this reason that Typescript is recommended for React projects.
+
+### Typescript and interfaces
+
+With Typescript, we can define something called an interface to define the shape of the props that a component expects.
+
+Let's modify the `Greeting` component to use an interface to define the shape of the props it expects:
+
+```diff lang="tsx" ins=": GreetingProps"
++interface GreetingProps {
++  name: string
++}
++
+function Greeting(props: GreetingProps) {
+  return <h1>Hello, {props.name}</h1>
+}
+```
+
+### Destructuring props
+
+In the `Greeting` component, we used the `props` object to access the `name` prop. This is a common pattern in React.
+
+To make the code cleaner, you can use [**destructuring**](https://javascript.plainenglish.io/destructuring-function-parameters-d110c59d7b8c) to extract the `name` prop from the `props` object:
+
+```diff lang="tsx" ins="{ name }"
+interface GreetingProps {
+  name: string
+}
+
+
+function Greeting({ name }: GreetingProps) {
+  return <h1>Hello, {name}</h1>
+}
+```
+
+Because we used destructuring to extract the `name` prop from the `props` object here, we can now access the `name` prop directly without write `props` before it.
+
+## Passing multiple props
+
+You can pass multiple props to a component. Here's an example:
+
+```jsx
+function UserCard(props) {
+  return (
+    <div>
+      <h1>{props.name}</h1>
+      <p>{props.bio}</p>
+    </div>
+  )
+}
+```
+
+You can use the `UserCard` component like this:
+
+```jsx
+<UserCard name="Alice" bio="Frontend developer" />
+<UserCard name="Bob" bio="Backend developer" />
+<UserCard name="Charlie" bio="Fullstack developer" />
+```
+
+Refer back to this guide when working on the challenges below.
+
+## Challenges
+
+:::tip[Add props to a component]
+
+### 1. Update the `ProfileCard` component to accept a `name` prop.
+
+The `ProfileCard` component should display the name of the profile passed to it. When finished, this means you can use the `ProfileCard` component like this:
+
+```tsx title="routes/profiles.tsx"
+<div>
+  <ProfileCard name="Alice Smith" />
+  <ProfileCard name="Bob Everett" />
+  <ProfileCard name="Charlie Jones" />
+</div>
+```
+
+### 2. Add an `image` prop.
+
+Update the `ProfileCard` component to accept an `image` prop. The `image` prop should be the URL of an image to display in the profile card.
+
+When finished, you should be able to use the `ProfileCard` component like this:
+
+```tsx title="routes/profiles.tsx"
+import alicePic from "~/assets/jpg/alice.jpg"
+import bobPic from "~/assets/jpg/bob.jpg"
+import charliePic from "~/assets/jpg/charlie.jpg"
+
+<div>
+  <ProfileCard name="Alice Smith" image={alicePic} />
+  <ProfileCard name="Bob Everett" image={bobPic} />
+  <ProfileCard name="Charlie Jones" image={charliePic} />
+</div>
+```
+
+Your final page should look something like this:
+
+![Profiles final](/src/assets/png/components/profiles-final.png)
+
+:::
+
+## Solution
+
+Watch the video below to see how to solve the challenges:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/xb-Zx1PeKCQ?si=qA5CjbC4CeSTF-Bn" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>

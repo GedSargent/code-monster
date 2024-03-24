@@ -1,0 +1,88 @@
+---
+title: "JSX components in React"
+description: "Learn how to create and embed components in React using JSX."
+---
+
+## What are React components?
+
+Components are the building blocks of a React application.
+
+A component is a reusable piece of code that defines how a part of the user interface should look and behave. Components can be nested inside other components to create complex user interfaces.
+
+In React, components can be created using functions. These are called, unsurprisingly enough, "functional components". Here's an example of a simple functional component:
+
+```jsx
+function Greeting() {
+  return <h1>Hello</h1>
+}
+```
+
+When this component is rendered, it will display a `<h1>` element with the text "Hello".
+
+## Embedding components
+
+Of course, you can render this component in another component like this:
+
+```jsx
+function Greeting() {
+  return <h1>Hello</h1>
+}
+
+function UserProfile() {
+  return (
+    <div>
+      <Greeting />
+    </div>
+  )
+}
+```
+
+When `UserProfile` is rendered, it will display a `<div>` element containing the `<Greeting>` component.
+
+## Rendering images
+
+Components can also render images. Here's an example of a component that renders an image:
+
+```jsx
+function Avatar() {
+  return <img src="https://via.placeholder.com/150" alt="Avatar" />
+}
+```
+
+When this component is rendered, it will display an `<img>` element with the specified `src` and `alt` attributes.
+
+This image takes as its source a URL from [placeholder.com](https://placeholder.com/). This is a service that provides placeholder images for use in web development.
+
+## Importing images
+
+However, most of the time you would want to import images from your project's `assets` folder.
+
+You can do this by importing the image and using it as the `src` attribute of the `<img>` element. If we take the same example as above, but with an image imported from the `assets` folder:
+
+```jsx
+import avatar from './assets/avatar.png'
+
+function Avatar() {
+  return <img src={avatar} alt="Avatar" />
+}
+```
+
+:::note[Expression slots in JSX]
+
+### Understanding expression slots
+
+Those curly braces in `<img src={avatar} alt="Avatar" />` can be thought of as [expression slots in JSX](https://react.dev/learn/javascript-in-jsx-with-curly-braces#using-curly-braces-a-window-into-the-javascript-world). They allow you to embed JavaScript [expressions (code that produces a value)](https://www.joshwcomeau.com/javascript/statements-vs-expressions/) inside JSX.
+
+### Where to use curly braces
+
+You can only use curly braces in two ways inside JSX:
+
+1. As text directly inside a JSX tag: `<h1>{name}'s To Do List</h1>` works, but `<{tag}>Gregorio Y. Zara's To Do List</{tag}>` will not.
+2. As attributes immediately following the `=` sign: `src={avatar}` will read the avatar variable, but `src="{avatar}"` will pass the string `"{avatar}"`.
+
+#### Learn more
+
+These examples were all taken from the React documentation on [embedding expressions in JSX](https://react.dev/learn/javascript-in-jsx-with-curly-braces), and this page is a great resource to learn more about this topic.
+
+:::
+

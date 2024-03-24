@@ -28,6 +28,23 @@ export default defineConfig({
       },
       sidebar: [
         {
+          label: "React 101",
+          items: [
+            {
+              label: "⚛️ Getting started",
+              link: "guides/react-101/getting-started",
+            },
+            {
+              label: "⚛️ JSX components",
+              link: "guides/react-101/jsx-components",
+            },
+            {
+              label: "⚛️ Props",
+              link: "guides/react-101/props",
+            },
+          ],
+        },
+        {
           label: "Prisma",
           items: [
             {

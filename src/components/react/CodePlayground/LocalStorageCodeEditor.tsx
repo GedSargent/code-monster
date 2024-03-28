@@ -1,4 +1,4 @@
-import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
+import { autocompletion } from "@codemirror/autocomplete";
 import { SandpackCodeEditor } from "@codesandbox/sandpack-react";
 import useLocalStorageCode from "../hooks/useLocalStorageCode";
 
@@ -6,14 +6,14 @@ interface LocalStorageCodeEditorProps {
   id: string;
   codeMirrorInstance: any;
   showTabs: boolean;
-  height?: string;
+  minHeight: string;
 }
 
 const LocalStorageCodeEditor = ({
   id,
   codeMirrorInstance,
   showTabs,
-  height = "auto"
+  minHeight
 }: LocalStorageCodeEditorProps) => {
   if (id) {
     useLocalStorageCode(id);
@@ -24,10 +24,9 @@ const LocalStorageCodeEditor = ({
       ref={codeMirrorInstance}
       style={{
         width: "100%",
-        height
+        minHeight
       }}
       extensions={[autocompletion()]}
-      extensionsKeymap={[completionKeymap]}
       showTabs={showTabs}
       showLineNumbers
       showInlineErrors

@@ -10,11 +10,12 @@ const ResetCodeBtn = () => {
   let timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const duration = 1500;
-  const bgColor = "#444344";
+  const bgColor = "#2b2b2b";
   const shadowStart = `60px_-60px_0_2px_${bgColor},_-60px_-60px_0_2px_${bgColor},_-60px_60px_0_2px_${bgColor},_60px_60px_0_2px_${bgColor},_0_0_0_2px_${bgColor}`;
 
   const handleOnMouseDown = () => {
     setIsPressingButton(true);
+
     timerRef.current = setTimeout(() => {
       sandpack.resetAllFiles();
       setIsPressingButton(false);

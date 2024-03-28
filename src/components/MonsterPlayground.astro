@@ -1,7 +1,6 @@
 ---
-import type { SandpackFiles, SandpackSetup, SandpackTheme } from '@codesandbox/sandpack-react/types';
-import CodePlayground from './react/CodePlayground'
-import { monokaiPro } from '@codesandbox/sandpack-themes';
+import type { SandpackFiles, SandpackSetup } from '@codesandbox/sandpack-react/types';
+import CodePlayground from './react/CodePlayground';
 
 interface Props {
   localStorageId: string;
@@ -17,7 +16,6 @@ interface Props {
     | "svelte"
     | "solid"
     | "test-ts";
-  theme?: SandpackTheme;
   title?: string;
   files: SandpackFiles;
   activeFile?: string;
@@ -30,7 +28,6 @@ const {
   localStorageId,
   title = "Code Playground",
   template = "react-ts",
-  theme = monokaiPro,
   files,
   showConsole = false,
   showTabs = true,
@@ -43,7 +40,6 @@ const {
   files={files}
   customSetup={customSetup}
   template={template}
-  theme={theme}
   title={title}
   showConsole={showConsole}
   showTabs={showTabs}

@@ -7,12 +7,11 @@ import {
   type SandpackFiles,
   type SandpackSetup
 } from "@codesandbox/sandpack-react";
-import { monokaiPro } from "@codesandbox/sandpack-themes";
-import type { SandpackTheme } from "@codesandbox/sandpack-themes/dist/types/types";
 import { useRef, useState } from "react";
 import { RemoveScroll } from "react-remove-scroll";
 import CustomControlsBar from "./CustomControlsBar";
 import LocalStorageCodeEditor from "./LocalStorageCodeEditor";
+import customThemeDark from "./customThemeDark";
 
 interface CodeSandboxProps {
   localStorageId: string;
@@ -28,7 +27,6 @@ interface CodeSandboxProps {
     | "svelte"
     | "solid"
     | "test-ts";
-  theme?: SandpackTheme;
   title?: string;
   files: SandpackFiles;
   activeFile?: string;
@@ -41,7 +39,6 @@ const CodePlayground = ({
   localStorageId,
   title = "Code Playground",
   template = "react-ts",
-  theme = monokaiPro,
   files,
   showConsole = false,
   showTabs = true,
@@ -65,7 +62,7 @@ const CodePlayground = ({
             files={files}
             customSetup={customSetup}
           >
-            <SandpackThemeProvider theme={theme}>
+            <SandpackThemeProvider theme={customThemeDark}>
               <SandpackLayout>
                 <CustomControlsBar
                   codeMirrorInstance={codeMirrorInstance}
@@ -73,7 +70,6 @@ const CodePlayground = ({
                   isFullScreen={isFullScreen}
                   setIsFullScreen={setIsFullScreen}
                 />
-                {/* TODO: Option for adding <SandpackFileExplorer /> - probably needs complete new layout */}
                 <div className={`block w-full`}>
                   <div className={`w-full`}>
                     <LocalStorageCodeEditor

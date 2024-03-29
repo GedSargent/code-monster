@@ -30,7 +30,7 @@ const FormatCodeBtn = ({ codeMirrorInstance }: FormatCodeBtnProps) => {
   };
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       // Check for CMD + S on macOS or CTRL + S on Windows/Linux
       if ((event.metaKey || event.ctrlKey) && event.key === 's') {
         event.preventDefault(); // Prevent the default save action

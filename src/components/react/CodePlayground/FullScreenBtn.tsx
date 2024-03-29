@@ -30,7 +30,7 @@ const FullScreenBtn = ({
   }, [isFullScreen, setIsFullScreen, wrapperRef])
 
   React.useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code === 'Escape' && isFullScreen) {
         handleToggleFullScreen();
       }

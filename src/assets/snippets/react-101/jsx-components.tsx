@@ -1,7 +1,7 @@
 export const AppTsx = `export default function App() {
   return (
-    <div>
-      <h1>Start here</h1>
+    <div className="p-8">
+      <h1>Hello from App.tsx - the parent component!</h1>
     </div>
   );
 }`

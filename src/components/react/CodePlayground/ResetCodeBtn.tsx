@@ -10,8 +10,6 @@ const ResetCodeBtn = () => {
   let timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const duration = 1500;
-  const bgColor = "#2b2b2b";
-  const shadowStart = `60px_-60px_0_2px_${bgColor},_-60px_-60px_0_2px_${bgColor},_-60px_60px_0_2px_${bgColor},_60px_60px_0_2px_${bgColor},_0_0_0_2px_${bgColor}`;
 
   const handleOnMouseDown = () => {
     setIsPressingButton(true);
@@ -30,7 +28,7 @@ const ResetCodeBtn = () => {
   return (
     <>
       <span
-        className={`w-4 overflow-hidden h-4 rounded-full bg-[${bgColor}] shadow-[${shadowStart}] ${
+        className={`w-4 overflow-hidden h-4 rounded-full bg-[#2b2b2b] shadow-[60px_-60px_0_2px_#2b2b2b,_-60px_-60px_0_2px_#2b2b2b,_-60px_60px_0_2px_#2b2b2b,_60px_60px_0_2px_#2b2b2b,_0_0_0_2px_#2b2b2b] ${
           isPressingButton ? "animate-draw-circle" : ""
         }`}
       />

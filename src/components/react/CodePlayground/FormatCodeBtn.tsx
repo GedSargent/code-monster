@@ -23,9 +23,27 @@ const FormatCodeBtn = ({ codeMirrorInstance }: FormatCodeBtnProps) => {
         });
 
         setPrettierCode(formatted);
-      } catch {}
+      } catch {
+        alert("Failed to format code - please refresh the page and try again.")
+      }
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      // Check for CMD + S on macOS or CTRL + S on Windows/Linux
+      if ((event.metaKey || event.ctrlKey) && event.key === 's') {
+        event.preventDefault(); // Prevent the default save action
+        runPrettier();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [runPrettier]);
 
   useEffect(() => {
     if (prettierCode) {
@@ -45,7 +63,6 @@ const FormatCodeBtn = ({ codeMirrorInstance }: FormatCodeBtnProps) => {
       }
 
       sandpack.updateFile(sandpack.activeFile, prettierCode);
-
       setPrettierCode("");
     }
   }, [prettierCode, codeMirrorInstance, sandpack]);

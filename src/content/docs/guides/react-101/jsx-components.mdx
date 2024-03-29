@@ -4,6 +4,8 @@ description: "Learn how to create and embed components in React using JSX."
 ---
 
 import MonsterPlayground from "src/components/MonsterPlayground.astro"
+import { AppTsx, GreetingTsx } from "src/assets/snippets/react-101/jsx-components.tsx"
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What are React components?
 
@@ -43,7 +45,63 @@ function ProfileRoute() {
 }
 ```
 
-When `UserProfile` is rendered, it will display a `<div>` element containing the `<Greeting>` component.
+When `ProfileRoute` is rendered, it will display a `<div>` element containing the `<Greeting>` component.
+
+## Importing components from other files
+
+Better still, you can define your components in **completely separate files** and import them into the file where you want to use them.
+
+Here's an example of how you can do this:
+
+<Tabs>
+  <TabItem label="Greeting.tsx">
+```diff lang="tsx"
+function Greeting() {
+  return <h1>Hello</h1>
+}
+
++export default Greeting;
+```
+  </TabItem>
+
+  <TabItem label="ProfileRoute.tsx">
+  ```diff lang="tsx"
++import Greeting from './Greeting';
+
+function ProfileRoute() {
+  return (
+    <div>
+      <Greeting />
+    </div>
+  )
+};
+  ```
+  </TabItem>
+</Tabs>
+
+:::tip[Challenge]
+
+### Try it yourself
+
+Look carefully at the code snippet below inside the 'Code Playground' box.
+
+Click between the two files, `App.tsx` and `Greeting.tsx`. You'll notice that only the `App.tsx` code is being displayed in the preview window to the right.
+
+Let's fix this. See if you can do the following:
+
+1. In `Greeting.tsx`, `export` the `Greeting` component.
+2. In `App.tsx`, `import` the `Greeting` component from the `Greeting.tsx` file.
+3. Embed the `Greeting` component in the `App` component, just below the `<h1>` element that says "Hello from App.tsx - the parent component!"
+
+<MonsterPlayground localStorageId="first-component" files={{
+  "/App.tsx": {
+    active: true,
+    code: AppTsx
+  },
+  "/Greeting.tsx": GreetingTsx
+}} />
+
+:::
 
 ## Rendering images
 

@@ -6,7 +6,7 @@ export const AppTsx = `export default function App() {
   );
 }`
 
-export const GreetingTsx = `export default function Greeting() {
+export const GreetingTsx = `function Greeting() {
   return <h1>Hello from Greeting</h1>
 }`
 
@@ -14,13 +14,12 @@ export const GreetingTsx = `export default function Greeting() {
 
 import MonsterPlayground from "src/components/MonsterPlayground.astro"
 
-<MonsterPlayground localStorageId="first-component" files={
-  {"/App.js": {
-      active: true,
-      code: AppTsx
-    },
-    "/Greeting.js": GreetingTsx
-  }
-} />
+<MonsterPlayground localStorageId="first-component" files={{
+  "/Greeting.tsx": GreetingTsx,
+  "/App.tsx": {
+    active: true,
+    code: AppTsx
+  },
+}} />
 
 */

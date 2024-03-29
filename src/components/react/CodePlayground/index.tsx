@@ -46,7 +46,7 @@ const CodePlayground = ({
   const codeMirrorInstance = useRef<any>(undefined);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  const minHeight = isFullScreen ? "calc((100vh - 6rem) / 2)" : "20rem";
+  const panelHeight = isFullScreen ? "calc((100vh - 6rem) / 2)" : "20rem";
 
   return (
       <RemoveScroll enabled={isFullScreen}>
@@ -76,13 +76,13 @@ const CodePlayground = ({
                       id={localStorageId}
                       codeMirrorInstance={codeMirrorInstance}
                       showTabs={showTabs}
-                      minHeight={minHeight}
+                      height={panelHeight}
                     />
                   </div>
                 <div className={`w-full`}>
                   <SandpackPreview
                     showOpenInCodeSandbox={false}
-                    style={{minHeight: minHeight}}
+                    style={{height: panelHeight}}
                   />
                 </div>
                 </div>

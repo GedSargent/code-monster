@@ -6,14 +6,14 @@ interface LocalStorageCodeEditorProps {
   id: string;
   codeMirrorInstance: any;
   showTabs: boolean;
-  minHeight: string;
+  height: string;
 }
 
 const LocalStorageCodeEditor = ({
   id,
   codeMirrorInstance,
   showTabs,
-  minHeight
+  height
 }: LocalStorageCodeEditorProps) => {
   if (id) {
     useLocalStorageCode(id);
@@ -22,15 +22,15 @@ const LocalStorageCodeEditor = ({
   return (
     <SandpackCodeEditor
       ref={codeMirrorInstance}
+      className="overflow-auto"
       style={{
-        width: "100%",
-        minHeight
+        height
       }}
       extensions={[autocompletion()]}
       showTabs={showTabs}
-      showLineNumbers
-      showInlineErrors
-      wrapContent
+      showLineNumbers={true}
+      showInlineErrors={true}
+      wrapContent={true}
     />
   );
 };

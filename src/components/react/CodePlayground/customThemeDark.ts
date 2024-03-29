@@ -10,8 +10,8 @@ const customThemeDark: SandpackTheme = {
     disabled: "#4D4D4D",
     hover: "#C5C5C5",
     accent: "#cb90d4",
-    error: "#d0021b",
-    errorSurface: "#ffe2e2"
+    error: "#FEF2F2",
+    errorSurface: "#7F1D1D"
   },
   syntax: {
     plain: "#ffffff",
@@ -30,7 +30,7 @@ const customThemeDark: SandpackTheme = {
   font: {
     body: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\"",
     mono: "\"Fira Mono\", \"DejaVu Sans Mono\", Menlo, Consolas, \"Liberation Mono\", Monaco, \"Lucida Console\", monospace",
-    size: "0.9rem",
+    size: "1rem",
     lineHeight: "1.6rem",
   }
 }

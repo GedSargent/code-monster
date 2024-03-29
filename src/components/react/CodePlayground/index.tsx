@@ -9,6 +9,7 @@ import {
 } from "@codesandbox/sandpack-react";
 import { useRef, useState } from "react";
 import { RemoveScroll } from "react-remove-scroll";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import CustomControlsBar from "./CustomControlsBar";
 import LocalStorageCodeEditor from "./LocalStorageCodeEditor";
 import customThemeDark from "./customThemeDark";
@@ -44,15 +45,18 @@ const CodePlayground = ({
   showTabs = true,
 }: CodeSandboxProps) => {
   const codeMirrorInstance = useRef<any>(undefined);
+  const wrapperRef = useRef<any>(null);
+
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  const panelHeight = isFullScreen ? "calc((100vh - 6rem) / 2)" : "20rem";
+  const panelHeight = isFullScreen ? "calc(100vh - 4rem)" : "20rem";
 
   return (
       <RemoveScroll enabled={isFullScreen}>
         <div
-          className={`${isFullScreen ? "fixed inset-0 z-50 px-[18.75rem] pt-16" : "relative py-8"}`}
+          className={`${isFullScreen ? "fixed inset-0 p-8" : "relative py-8"}`}
           id="code-playground-wrapper"
+          ref={wrapperRef}
         >
           <SandpackProvider
             options={{
@@ -63,29 +67,31 @@ const CodePlayground = ({
             customSetup={customSetup}
           >
             <SandpackThemeProvider theme={customThemeDark}>
-              <SandpackLayout>
+              <SandpackLayout className={isFullScreen ? `flex` : `block`}>
                 <CustomControlsBar
                   codeMirrorInstance={codeMirrorInstance}
                   title={title}
                   isFullScreen={isFullScreen}
                   setIsFullScreen={setIsFullScreen}
+                  wrapperRef={wrapperRef}
                 />
-                <div className={`block w-full`}>
-                  <div className={`w-full`}>
+                <PanelGroup direction="horizontal" className={isFullScreen ? `flex` : `block`}>
+                  <Panel className={`w-full`}>
                     <LocalStorageCodeEditor
                       id={localStorageId}
                       codeMirrorInstance={codeMirrorInstance}
                       showTabs={showTabs}
                       height={panelHeight}
                     />
-                  </div>
-                <div className={`w-full`}>
+                  </Panel>
+                <PanelResizeHandle className="w-2 transition duration-500 hover:bg-neutral-200/50" />
+                <Panel className={`w-full`}>
                   <SandpackPreview
                     showOpenInCodeSandbox={false}
                     style={{height: panelHeight}}
                   />
-                </div>
-                </div>
+                </Panel>
+                </PanelGroup>
                 {showConsole && (
                   <div className="w-full">
                     <SandpackConsole className="w-full border-b-0" />

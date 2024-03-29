@@ -1,3 +1,4 @@
+import React from 'react';
 import { Maximize } from "react-feather";
 import Boop from "../Boop";
 
@@ -12,8 +13,7 @@ const FullScreenBtn = ({
   setIsFullScreen,
   wrapperRef,
 }: FullScreenBtnProps) => {
-
-  const handleToggleFullScreen = () => {
+  const handleToggleFullScreen = React.useCallback(() => {
     const elem = wrapperRef.current;
 
     if (elem && !isFullScreen) {
@@ -27,7 +27,30 @@ const FullScreenBtn = ({
         setIsFullScreen(!isFullScreen);
       }
     }
-  }
+  }, [isFullScreen, setIsFullScreen, wrapperRef])
+
+  React.useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.code === 'Escape' && isFullScreen) {
+        handleToggleFullScreen();
+      }
+    };
+
+    const syncFullScreenState = () => {
+      const isCurrentlyFullScreen = document?.fullscreenElement != null;
+      setIsFullScreen(isCurrentlyFullScreen);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('fullscreenchange', syncFullScreenState);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('fullscreenchange', syncFullScreenState);
+    };
+  }, [isFullScreen, handleToggleFullScreen, setIsFullScreen]);
+
+
 
   return (
     <button

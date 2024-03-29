@@ -1,5 +1,5 @@
 import React from 'react';
-import { Maximize } from "react-feather";
+import { Maximize, Minimize } from "react-feather";
 import Boop from "../Boop";
 
 interface FullScreenBtnProps {
@@ -50,7 +50,7 @@ const FullScreenBtn = ({
     };
   }, [isFullScreen, handleToggleFullScreen, setIsFullScreen]);
 
-
+  const btnClassName = `h-auto w-4 stroke-neutral-400 shadow-sm hover:stroke-neutral-200 transition duration-300 ${isFullScreen ? 'hover:scale-75' : 'hover:scale-[1.3]'} group-hover:stroke-neutral-200`
 
   return (
     <button
@@ -59,10 +59,11 @@ const FullScreenBtn = ({
       className="mx-1 bg-transparent"
       onClick={handleToggleFullScreen}
     >
-      <Boop scale={1.1}>
-        <Maximize
-          className="h-auto w-4 stroke-neutral-400 shadow-sm hover:stroke-neutral-200 group-hover:stroke-neutral-200"
-        />
+      <Boop scale={isFullScreen ? 1.25 : 0.9}>
+        {isFullScreen ?
+          <Minimize className={btnClassName} /> :
+          <Maximize className={btnClassName}/>
+        }
       </Boop>
     </button>
   );

@@ -1,3 +1,4 @@
+import type { SandpackFiles } from "@codesandbox/sandpack-react/types";
 import FormatCodeBtn from "./FormatCodeBtn";
 import FullScreenBtn from "./FullScreenBtn";
 import ResetCodeBtn from "./ResetCodeBtn";
@@ -8,6 +9,7 @@ interface CustomControlsBarProps {
   isFullScreen: boolean;
   setIsFullScreen: React.Dispatch<React.SetStateAction<boolean>>;
   wrapperRef: any;
+  originalFiles: SandpackFiles
 }
 
 const CustomControlsBar = ({
@@ -15,7 +17,8 @@ const CustomControlsBar = ({
   title,
   isFullScreen,
   setIsFullScreen,
-  wrapperRef
+  wrapperRef,
+  originalFiles
 }: CustomControlsBarProps) => {
   return (
     <div className="flex min-w-full items-center justify-between overflow-hidden rounded-t-xl px-2 py-1">
@@ -23,7 +26,7 @@ const CustomControlsBar = ({
         {title}
       </span>
       <div className="flex items-center">
-        <ResetCodeBtn />
+        <ResetCodeBtn originalFiles={originalFiles} />
         <FullScreenBtn
           isFullScreen={isFullScreen}
           setIsFullScreen={setIsFullScreen}

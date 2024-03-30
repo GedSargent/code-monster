@@ -1,7 +1,9 @@
+import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
+import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections'
+import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
 import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
-import react from "@astrojs/react";
 
 const lightDarkModeDir = "guides/epic-news/light-and-dark-mode";
 
@@ -16,6 +18,18 @@ export default defineConfig({
       customCss: ["./src/tailwind.css"],
       components: {
         Hero: "/src/components/MonsterHero.astro",
+      },
+      expressiveCode: {
+        plugins: [pluginCollapsibleSections(), pluginLineNumbers()],
+        styleOverrides: {
+          borderRadius: '0.25rem',
+          codeFontWeight: '500',
+          codeFontSize: '1rem',
+          uiFontSize: '1rem',
+          uiFontWeight: '600',
+          codeLineHeight: '1.7',
+        },
+        themes: ["dark-plus", "light-plus"],
       },
       logo: {
         dark: "/src/assets/png/cm-logo-light.png",

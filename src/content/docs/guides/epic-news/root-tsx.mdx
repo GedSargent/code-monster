@@ -29,12 +29,49 @@ npm run dev
 
 This command starts a local development server. Once 's up and running, you can view your project in a web browser by going to `http://localhost:3000`.
 
-### 2. Update Text on the Screen
+### 2. Locate the `app/root.tsx` file
+
+The `root.tsx` file is located in the `app` directory of your project.
+
+#### File Path Conventions
+
+It is convention to write the path to a file starting from the root of the project. Each folder - or **directory** - is separated by a `/`.
+
+In this case, the, because the `root.tsx` file is inside the `app` folder, the path to the `root.tsx` file is written as `app/root.tsx`.
+
+Look carefully through the project structure to find it in the VS Code file explorer (or your own code editor):
+
+![root.tsx file location](src/assets/png/epic-news/root-tsx.png)
+
+### 3. Open and update `root.tsx`
 
 To change the existing text, locate the `<h1>` tag inside the `App` function in your `root.tsx` file:
 
-```tsx title="app/root.tsx"
-<h1 className="text-mega">Welcome to Epic News!</h1>
+```tsx showLineNumbers title="app/root.tsx"
+import { type LinksFunction } from '@remix-run/node'
+import Document from '~/components/shared-layout/Document.tsx'
+import rootLinkElements from './utils/providers/rootLinkElements'
+import { useNonce } from '~/utils/nonce-provider.ts'
+
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
+
+export default function App() {
+	const nonce = useNonce()
+
+	return (
+		<Document nonce={nonce}>
+			<div className="flex h-screen flex-col justify-between">
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Your Journey Begins!</h1>
+					</main>
+				</div>
+			</div>
+		</Document>
+	)
+}
 ```
 
 Change `"Welcome to Epic News!"` to any message you like, such as `Your Journey Begins!`.

@@ -7,13 +7,9 @@ import MonsterDetails from "src/components/MonsterDetails.astro";
 
 # The Remix `root.tsx` file
 
-:::note[Understanding the `root.tsx` file]
-The `root.tsx` file in a Remix project serves as the entry point for your application's user interface. It renders the initial HTML structure of your project, and provides the foundation for the rest of your application's components and pages to be displayed.
+This tutorial will guide you through updating the user interface (UI) in one of the most important files of a Remix project: the `root.tsx` file.
 
-Think of it as the starting point where all the UI elements come together and get rendered on the screen.
-:::
-
-This tutorial will guide you through updating the user interface (UI) in the `root.tsx` file of a Remix project. We'll start with the basics, so don't worry if you're not familiar with these technologies yet. Let's dive in!
+We'll start with the basics, so don't worry if you're not familiar with these technologies yet. Let's dive in!
 
 ## Getting Started
 
@@ -35,17 +31,29 @@ This command starts a local development server. Once it is up and running, you c
 
 The `root.tsx` file is located in the `app` directory of your project.
 
+:::note
+
 #### File Path Conventions
 
 It is convention to write the path to a file starting from the root of the project. Each folder - or **directory** - is separated by a `/`.
 
 In this case, the, because the `root.tsx` file is inside the `app` folder, the path to the `root.tsx` file is written as `app/root.tsx`.
 
+:::
+
 Look carefully through the project structure to find it in the VS Code file explorer (or your own code editor):
 
 ![root.tsx file location](src/assets/png/epic-news/root-tsx.png)
 
 ### 3. Open and update `root.tsx`
+
+#### Understanding the `root.tsx` file
+
+The `root.tsx` file in a Remix project serves as the entry point for your application's user interface. It renders the initial HTML structure of your project, and provides the foundation for the rest of your application's components and pages to be displayed.
+
+Think of it as the starting point where all the UI elements come together and get rendered on the screen.
+
+#### Updating the text
 
 To change the existing text, locate the `<h1>` tag inside the `App` function of your `root.tsx` file:
 

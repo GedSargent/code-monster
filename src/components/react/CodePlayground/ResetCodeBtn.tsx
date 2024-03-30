@@ -1,16 +1,11 @@
-import { useActiveCode, useSandpack, type SandpackFiles } from "@codesandbox/sandpack-react";
+import { useSandpack } from "@codesandbox/sandpack-react";
 import { useRef, useState } from "react";
 import { SkipBack } from "react-feather";
 import Boop from "../Boop";
 
-interface ResetCodeBtnProps {
-  originalFiles: SandpackFiles;
-}
-
-const ResetCodeBtn = ({ originalFiles }: ResetCodeBtnProps) => {
+const ResetCodeBtn = () => {
   const [isPressingButton, setIsPressingButton] = useState(false);
   const { sandpack } = useSandpack();
-  const { code: _code, updateCode } = useActiveCode();
 
   let timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -21,12 +16,6 @@ const ResetCodeBtn = ({ originalFiles }: ResetCodeBtnProps) => {
 
     timerRef.current = setTimeout(() => {
       sandpack.resetAllFiles();
-
-      const { activeFile } = sandpack;
-      const originalFile = originalFiles[activeFile];
-      const revertedCode = typeof originalFile === "string" ? originalFile : originalFile.code;
-
-      updateCode(revertedCode);
       setIsPressingButton(false);
     }, duration);
   };

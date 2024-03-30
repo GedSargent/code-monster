@@ -74,7 +74,6 @@ const CodePlayground = ({
                   isFullScreen={isFullScreen}
                   setIsFullScreen={setIsFullScreen}
                   wrapperRef={wrapperRef}
-                  originalFiles={files}
                 />
                 <PanelGroup direction="horizontal" className={isFullScreen ? `flex` : `block`}>
                   <Panel className={`w-full`}>

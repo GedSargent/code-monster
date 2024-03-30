@@ -21,6 +21,9 @@ export default defineConfig({
       },
       expressiveCode: {
         plugins: [pluginCollapsibleSections(), pluginLineNumbers()],
+        defaultProps: {
+          showLineNumbers: false,
+        },
         styleOverrides: {
           borderRadius: '0.25rem',
           codeFontWeight: '500',

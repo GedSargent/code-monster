@@ -54,7 +54,7 @@ const CodePlayground = ({
   return (
       <RemoveScroll enabled={isFullScreen}>
         <div
-          className={`${isFullScreen ? "fixed inset-0 p-8" : "relative py-8"}`}
+          className={`${isFullScreen ? "fixed inset-0 p-8" : "relative pt-8"}`}
           id="code-playground-wrapper"
           ref={wrapperRef}
         >
@@ -67,7 +67,7 @@ const CodePlayground = ({
             customSetup={customSetup}
           >
             <SandpackThemeProvider theme={customThemeDark}>
-              <SandpackLayout className={isFullScreen ? `flex` : `block`}>
+              <SandpackLayout className={isFullScreen ? `flex` : `block shadow-lg shadow-black/20`}>
                 <CustomControlsBar
                   codeMirrorInstance={codeMirrorInstance}
                   title={title}
@@ -84,7 +84,7 @@ const CodePlayground = ({
                       height={panelHeight}
                     />
                   </Panel>
-                <PanelResizeHandle className="w-2 transition duration-500 hover:bg-neutral-200/50" />
+                <PanelResizeHandle className="w-2 border-x border-neutral-700 transition duration-500 hover:bg-neutral-700 hover:border-neutral-600" />
                 <Panel className={`w-full`}>
                   <SandpackPreview
                     showOpenInCodeSandbox={false}

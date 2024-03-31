@@ -15,7 +15,7 @@ export default defineConfig({
     starlight({
       title: "Code Monster",
       favicon: "/src/assets/favicon/favicon.ico",
-      customCss: ["./src/tailwind.css"],
+      customCss: ["./src/tailwind.css", "./src/fonts/font-face.css"],
       components: {
         Hero: "/src/components/MonsterHero.astro",
       },
@@ -31,6 +31,11 @@ export default defineConfig({
           uiFontSize: '1rem',
           uiFontWeight: '600',
           codeLineHeight: '1.7',
+          textMarkers: {
+            borderOpacity: '50%',
+            markBackground: ['lch(100% 0 0 / 7%)', 'lch(0% 0 0 / 20%)'],
+            markBorderColor: ['lch(100% 0 0 / 20%)', 'lch(0% 0 0 / 30%)'],
+          }
         },
         themes: ["dark-plus", "light-plus"],
       },

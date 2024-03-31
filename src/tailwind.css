@@ -2,6 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --custom-base-font-size: 1.3rem;
+  --custom-p-margin-top: 1.5rem;
+  --custom-margin-top-headings: 3rem;
+  --custom-code-border-radius: 0.25rem;
+  --custom-aside-title-margin-top: 0.25rem;
+  --custom-header-font: 'novelaregular', sans-serif;
+  --custom-body-font: 'wotfardregular', sans-serif;
+  --sl-text-code-sm: 1.1rem;
+}
+
+main {
+  font-family: var(--custom-body-font);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: var(--custom-margin-top-headings) !important;
+  font-family: var(--custom-header-font);
+}
+
+p {
+  font-size: var(--custom-base-font-size); /* Adjust the font size as needed */
+}
+
+code {
+  border-radius: var(--custom-code-border-radius);
+}
+
+.sl-markdown-content
+	:not(a, strong, em, del, span, input, code, svg), :where(.content *) {
+    margin-top: var(--custom-p-margin-top);
+}
+
+.starlight-aside {
+  border-radius: var(--custom-code-border-radius);
+}
+
+.starlight-aside__title {
+  margin-top: var(--custom-aside-title-margin-top) !important;
+}
+
 #code-playground-wrapper * {
   margin-top: 0;
 }

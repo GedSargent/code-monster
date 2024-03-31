@@ -3,11 +3,66 @@ title: Handling form data with an action function
 description: Understanding how to toggle light and dark mode with useTheme
 ---
 
+import MonsterKbd from 'src/components/MonsterKbd.astro'
+
 ## Adding `useTheme`
 
-Open `app/root.tsx` and add the line highlighted in green below:
+Open `app/root.tsx` and carefully add the code highlighted below:
 
-![image-20240211170056416](src/assets/png/image-20240211170056416.png)
+```diff lang="tsx" title="app/root.tsx" ins=" theme={theme}" showLineNumbers collapse={1-12, 16-31, 40-47}
+import {
+	json,
+	type LinksFunction,
+	type LoaderFunctionArgs,
+} from '@remix-run/node'
+import Document from '~/components/shared-layout/Document.tsx'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import { getHints } from '~/utils/client-hints'
+import { getDomainUrl } from '~/utils/misc'
+import { getTheme } from '~/utils/theme.server'
+import { useLoaderData } from '@remix-run/react'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
+
+export async function loader({ request }: LoaderFunctionArgs) {
+	const requestInfo = {
+		hints: getHints(request),
+		origin: getDomainUrl(request),
+		path: new URL(request.url).pathname,
+		userPrefs: {
+			theme: getTheme(request),
+		},
+	}
+
+	return json({ requestInfo })
+}
+
+export default function App() {
+	const data = useLoaderData<typeof loader>()
+	const nonce = useNonce()
++	const theme = useTheme()
+
+	return (
+		<Document nonce={nonce} theme={theme}>
+			<div className="flex h-screen flex-col justify-between">
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
+					</main>
+				</div>
+				<div className="container flex justify-between pb-5">
+					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+				</div>
+			</div>
+		</Document>
+	)
+}
+
+```
 
 Notice the red underline? This is because `useTheme` is a custom function, but we haven't defined it yet. Let's fix that now.
 
@@ -18,27 +73,44 @@ Notice the red underline? This is because `useTheme` is a custom function, but w
 
 ![image-20240211170500977](src/assets/png/image-20240211170500977.png)
 
-3. This automatically `import`s the code from the file in the project, and the red underline disappears. You should be able to see the `import` statement at the top of your code window:
+3. This automatically `import`s the code from the file in the project, and the red underline disappears.
 
-![Import statement at top of code window](src/assets/png/image-20240211170747133.png)
+You should be able to see the `import` statement at the top of your code window:
 
-### Passing the `theme` to the `Document` component
-
-Now that we have the `useTheme` function imported, we can pass the `theme` directly into the `<Document />` component:
-
-```tsx ins="theme={theme}"
-export default function App() {
-  const data = useLoaderData<typeof loader>();
-  const nonce = useNonce();
-  const theme = useTheme();
-
-  return (
-    <Document nonce={nonce} theme={theme}>
-      {/* code omitted for brevity */}
-    </Document>
-  );
-}
+```tsx title="app/root.tsx" {14}
+import {
+	json,
+	type LinksFunction,
+	type LoaderFunctionArgs,
+} from '@remix-run/node'
+import Document from '~/components/shared-layout/Document.tsx'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import { getHints } from '~/utils/client-hints'
+import { getDomainUrl } from '~/utils/misc'
+import { getTheme } from '~/utils/theme.server'
+import { useLoaderData } from '@remix-run/react'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import useTheme from './hooks/useTheme'
 ```
+
+:::tip
+
+### Auto-sort imports
+
+When you use the 'Quick Fix' feature to add an `import` statement, VS Code automatically places the new `import` statement in the correct place at the top of your file. This helps to keep your code organized and easy to read.
+
+However, imports can quickly become disorganised over time. This can lead to unnecessary merge conflicts in Git when working in a team, or across multiple machines.
+
+If you use the VS Code keyboard shortcut <MonsterKbd>Shift + Alt + O</MonsterKbd> (on Windows) or <MonsterKbd>Shift + Option + O</MonsterKbd> (on Mac) to organize your imports, it will also sort the `import` statements in your file whenever you need to.
+
+Try it now in your `app/root.tsx` file to see how it works!
+
+![Auto sort imports](src/assets/gif/auto-sort-imports.gif)
+
+Just remember to save your file afterwards to keep the changes!
+
+:::
 
 ## Adding an `action` function
 
@@ -71,17 +143,52 @@ import Document from '~/components/shared-layout/Document.tsx'
 import { useNonce } from '~/utils/nonce-provider.ts'
 import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'
 import ThemeSwitch from './components/shared-layout/ThemeSwitch'
-import useTheme from './hooks/useTheme'
 import { getHints } from './utils/client-hints'
 import { getDomainUrl } from './utils/misc'
 import { getTheme, setTheme } from './utils/theme.server'
+import useTheme from './hooks/useTheme'
 ```
 
 ### Defining the `action` function
 
 Next, add the following `action` function to the `app/root.tsx` file, directly beneath the `loader` function we added earlier:
 
-```diff lang="tsx" title="app/root.tsx"
+```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-21, 62-81}
+import { parse } from '@conform-to/zod'
+import {
+	json,
+	type ActionFunctionArgs,
+	type LinksFunction,
+	type LoaderFunctionArgs,
+} from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import { z } from 'zod'
+import Document from '~/components/shared-layout/Document.tsx'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import { getHints } from '~/utils/client-hints'
+import { getDomainUrl } from '~/utils/misc'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { getTheme, setTheme } from '~/utils/theme.server'
+import useTheme from './hooks/useTheme'
+
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
+
+export async function loader({ request }: LoaderFunctionArgs) {
+	const requestInfo = {
+		hints: getHints(request),
+		origin: getDomainUrl(request),
+		path: new URL(request.url).pathname,
+		userPrefs: {
+			theme: getTheme(request),
+		},
+	}
+
+	return json({ requestInfo })
+}
+
 +const ThemeFormSchema = z.object({
 +	theme: z.enum(['system', 'light', 'dark']),
 +})
@@ -107,6 +214,27 @@ Next, add the following `action` function to the `app/root.tsx` file, directly b
 +
 +	return json({ success: true, submission }, responseInit)
 +}
+
+export default function App() {
+	const data = useLoaderData<typeof loader>()
+	const nonce = useNonce()
+	const theme = useTheme()
+
+	return (
+		<Document nonce={nonce} theme={theme}>
+			<div className="flex h-screen flex-col justify-between">
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
+					</main>
+				</div>
+				<div className="container flex justify-between pb-5">
+					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+				</div>
+			</div>
+		</Document>
+	)
+}
 ```
 
 Like the `loader` function, the `action` function takes a `request` object as an argument, which we use to access the form data.

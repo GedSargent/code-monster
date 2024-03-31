@@ -47,11 +47,13 @@ Look carefully through the project structure to find it in the VS Code file expl
 
 ### 3. Open and update `root.tsx`
 
-#### Understanding the `root.tsx` file
+#### What is the `root.tsx` file?
 
 The `root.tsx` file in a Remix project serves as the entry point for your application's user interface. It renders the initial HTML structure of your project, and provides the foundation for the rest of your application's components and pages to be displayed.
 
 Think of it as the starting point where all the UI elements come together and get rendered on the screen.
+
+At the moment, it doesn't seem all that impressive, but we'll change that soon!
 
 #### Updating the text
 
@@ -60,7 +62,7 @@ To change the existing text, locate the `<h1>` tag inside the `App` function of 
 ```tsx showLineNumbers title="app/root.tsx" collapse={1-9} {18}
 import { type LinksFunction } from '@remix-run/node'
 import Document from '~/components/shared-layout/Document.tsx'
-import rootLinkElements from './utils/providers/rootLinkElements'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
 import { useNonce } from '~/utils/nonce-provider.ts'
 
 export const links: LinksFunction = () => {

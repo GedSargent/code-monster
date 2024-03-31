@@ -22,6 +22,10 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--custom-header-font);
 }
 
+li {
+  font-size: var(--custom-base-font-size);
+}
+
 p {
   font-size: var(--custom-base-font-size); /* Adjust the font size as needed */
 }

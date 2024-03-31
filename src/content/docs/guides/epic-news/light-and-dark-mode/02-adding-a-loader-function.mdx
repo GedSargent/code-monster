@@ -11,7 +11,7 @@ Let's start by defining a `loader` function at the top of `root.tsx`, just below
 
 :::danger[Take care]
 
-## Place code **carefully**
+## 🧐 Place code **with care**
 
 Look carefully where the highlighted code is added in relation to the code that is already there.
 
@@ -19,20 +19,20 @@ Take the time to slot these lines into _exactly_ the same places in your own cod
 
 :::
 
-```diff lang="tsx" title="app/root.tsx"
+Add the code below into your own copy of `app/root.tsx`:
+
+```diff lang="tsx" title="app/root.tsx" collapse={30-44}
 import {
-  json,
-+  type LinksFunction,
-+  type LoaderFunctionArgs
-} from "@remix-run/node";
-import AppProvider from "~/components/shared-layout/AppProvider";
++	json,
+	type LinksFunction,
++	type LoaderFunctionArgs,
+} from '@remix-run/node'
 import Document from "~/components/shared-layout/Document.tsx";
 import { useNonce } from "~/utils/nonce-provider.ts";
 import rootLinkElements from "~/utils/rootProviders/rootLinkElements.ts";
-import useTheme from "./hooks/useTheme";
-+import { getHints } from "./utils/client-hints";
-+import { getDomainUrl } from "./utils/misc";
-+import { getTheme } from "./utils/theme.server";
++import { getHints } from "~/utils/client-hints";
++import { getDomainUrl } from "~/utils/misc";
++import { getTheme } from "~/utils/theme.server";
 
 export const links: LinksFunction = () => {
   return rootLinkElements;
@@ -50,6 +50,22 @@ export const links: LinksFunction = () => {
 +
 +  return json({ requestInfo });
 +}
+
+export default function App() {
+	const nonce = useNonce()
+
+	return (
+		<Document nonce={nonce}>
+			<div className="flex h-screen flex-col justify-between">
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
+					</main>
+				</div>
+			</div>
+		</Document>
+	)
+}
 ```
 
 ::::note[Info]
@@ -64,26 +80,30 @@ The makers of Remix got around this problem by introducing `loader` functions.
 
 ### Accessing server data with `loader` functions
 
-If a `loader` function is exported from a **route** file (i.e. a `tsx` file inside the `routes` folder), then Remix will execute this code on the **server** _before_ the user interface (UI) is rendered. This ensures that any required data is accessed and processed before the UI is presented by the browser.
+If a `loader` function is **exported** from a **route** file with the `export` keyword (i.e. a `tsx` file inside the `routes` folder), then Remix will execute this code on the **server** _before_ the user interface (UI) is rendered. This ensures that any required data is accessed and processed before the UI is presented by the browser.
 
-In this case, the `loader` function is creating a new object - `requestInfo` - and populating it with values that are generated from several helper functions like `getHints`, `getDomainUrl` etc. These have already been written for us in the Epic Stack codebase, and are being `import`ed in from elsewhere.
+In this case, the `loader` function is creating a new object - `requestInfo` - and populating it with values that are generated from several helper functions like `getHints`, `getDomainUrl` etc. These have already been written for us in the Epic Stack codebase, and so all we have to do is `import` them from elsewhere.
 
 :::tip
 
-You'll notice each of these helper functions are being passed the `request`, which is being passed into the `loader` function as an argument:
+You'll notice the `loader` function is being passed a `request` object as an argument:
 
-```tsx ins="{ request }"
+```tsx "{ request }"
 export async function loader({ request }: LoaderFunctionArgs) {
   // ... more code here...
 }
 ```
 
-This `request` object carries crucial information about the incoming request to the server, such as the URL the user is trying to access, any search parameters they've included, headers, and more. Think of it as a toolbox that the loader function uses to understand exactly what the user is asking for.
+This `request` object carries crucial information about the incoming request to the server, such as the URL the user is trying to access, any search parameters they've included, headers, and more.
 
-By analyzing the details carried by the `request` object, the loader can decide, like we are doing here, which pieces of data are needed to fulfill the user's current needs. This allows your web application to be incredibly responsive and tailored to the user's specific requests, enhancing their overall experience on your site.
+Think of it as a toolbox that the `loader` function uses to understand exactly what the user is asking for.
+
+By analyzing the details carried by the `request` object, the `loader` can decide which pieces of data are needed to fulfill the user's current needs. This allows your web application to be incredibly responsive and tailored to the user's specific requests, enhancing their overall experience on your site.
 
 :::
 
 You can learn more about `loader` functions via the [**Remix docs**](https://remix.run/docs/en/main/route/loader).
 
 ::::
+
+Now that we've added the `loader` function, we can move on to the next step: passing this data through to the browser so that the user can toggle between the 'light' and 'dark' themes themselves.

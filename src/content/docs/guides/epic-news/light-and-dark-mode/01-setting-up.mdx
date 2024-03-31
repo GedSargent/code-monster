@@ -3,7 +3,7 @@ title: Setting up
 description: Understanding where light and dark mode is implemented in the Epic Stack, and how to manually switch between the two.
 ---
 
-Allowing users to switch between a 'light' and 'dark' mode on your website is something most users expect from a modern web application. It also helps improve accessibility for the site, allowing users to settle on a theme that suits them best.
+Allowing users to switch between a 'light' and 'dark' mode on your website is something most people expect from a modern web application. It also helps improve accessibility for the site, allowing users to settle on a theme that suits them best.
 
 The only problem is that implementing a light and dark mode is surprisingly difficult. Luckily, the Epic Stack has most of the code for this already included.
 
@@ -11,23 +11,32 @@ All we need to do is implement it 🚀.
 
 ## Trigger 'light' and 'dark' mode with code
 
-Open `app/root.tsx` and look at the `App` function being exported:
+Open `app/root.tsx` and look carefully at the `App` function being exported:
 
-```tsx title="app/root.tsx"
+```tsx title="app/root.tsx" {10-24} collapse={1-4}
+import { type LinksFunction } from '@remix-run/node'
+import Document from '~/components/shared-layout/Document.tsx'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { useNonce } from '~/utils/nonce-provider.ts'
+
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
+
 export default function App() {
-  const nonce = useNonce();
+	const nonce = useNonce()
 
-  return (
-    <Document nonce={nonce}>
-      <div className="flex h-screen flex-col justify-between">
-        <div className="flex-1">
-          <main className="grid h-full place-items-center">
-            <h1 className="text-mega">Welcome to Epic News!</h1>
-          </main>
-        </div>
-      </div>
-    </Document>
-  );
+	return (
+		<Document nonce={nonce}>
+			<div className="flex h-screen flex-col justify-between">
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
+					</main>
+				</div>
+			</div>
+		</Document>
+	)
 }
 ```
 
@@ -43,7 +52,34 @@ Don't worry, the fundamentals of this process remain the same.
 
 Notice the `Document` component that wraps everything being returned from the `App` function?
 
-Right-click the opening `Document` tag, and select 'Go to Source Definition' from the options:
+```tsx title="app/root.tsx" collapse={1-9} {14, 22}
+import { type LinksFunction } from '@remix-run/node'
+import Document from '~/components/shared-layout/Document.tsx'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { useNonce } from '~/utils/nonce-provider.ts'
+
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
+
+export default function App() {
+	const nonce = useNonce()
+
+	return (
+		<Document nonce={nonce}>
+			<div className="flex h-screen flex-col justify-between">
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
+					</main>
+				</div>
+			</div>
+		</Document>
+	)
+}
+```
+
+Right-click the opening `Document` tag, and select '**Go to Source Definition**' from the option menu:
 
 ![Selecting Go to source definition](src/assets/png/image-20240211152140693.png)
 
@@ -89,24 +125,26 @@ export default function Document({
 }
 ```
 
-:::note
+::::note
 
 ### Interfaces, props and children
 
 Let's take a moment to look at the code here.
 
+#### Interfaces
+
 At the top of the file is an `interface`. But what is it for?
 
 In TypeScript, an [**interface**](https://prismic.io/blog/typescript-interfaces#:~:text=Interfaces%20are%20a%20feature%20of,type%2Drelated%20errors%20during%20development.) is like a blueprint for an object. It describes what [**properties**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_objects) an object should have and what type of data each property should hold.
 
-Here, `DocumentProps` is an interface:
+Here is the `DocumentProps` interface:
 
 ```tsx
 interface DocumentProps {
   children: React.ReactNode;
   nonce: string;
   theme?: Theme;
-  env?: Record<string, string;
+  env?: Record<string, string>;
 }
 ```
 
@@ -116,9 +154,15 @@ It's saying that any object we want to pass as a `DocumentProps` object should h
 
 - `nonce`: This should be a `string`, which is a sequence of characters like "hello" or "1234".
 
-> _In our app, a `nonce` is a unique string that's used to prevent [**cross-site scripting (XSS)**](https://developer.mozilla.org/en-US/docs/Glossary/Cross-site_scripting) attacks. We don't need to worry about this for now, but it's good to know what it is._
+:::caution
 
-- `theme`: This is an optional property (that's what the `?` means), and it should be of type `Theme`. We don't see a definition for `Theme` in this file, but it's being `import`ed at the top from the file at `app/utils/theme.server.ts`:
+_In our app, a `nonce` is a unique string that's used to prevent [**cross-site scripting (XSS)**](https://developer.mozilla.org/en-US/docs/Glossary/Cross-site_scripting) attacks._
+
+_We don't need to worry about this for now, but we will come back to it soon._
+
+:::
+
+- `theme`: This is an optional property (that's what the `?` means), and it should be of type `Theme`. We don't see a definition for `Theme` in this file, but it's being `import`ed at the top from the file `app/utils/theme.server.ts`:
 
   ```tsx
   import { Theme } from "~/utils/theme.server";
@@ -136,7 +180,108 @@ It's saying that any object we want to pass as a `DocumentProps` object should h
 
 So, if you have an object and you want to make sure it fits the `DocumentProps` blueprint, it needs to have these properties with these types.
 
-:::
+#### Props
+
+Remember that the `Document` function is a [**React component**](https://react.dev/learn/passing-props-to-a-component).
+
+Because of this, it's a function that can take an object called `props` as an argument and returns some JSX.
+
+Props are a way of passing data into a component from elsewhere in the codebase. In this case, the `Document` component is expecting an object that fits the `DocumentProps` interface. Wherever we use the `Document` component, we need to pass it an object that has the properties `children` and `nonce`. The `theme`, and `env` properties are optional - we can pass them if we want to, but we don't have to.
+
+##### Refresher tutorial
+
+If you need a refresher on props in React, check out the previous lesson on [**Props**](/code-monster/guides/react-101/props) in our React 101 section, or visit the [**React documentation**](https://react.dev/learn/passing-props-to-a-component).
+
+#### Children
+
+The `children` property is a special prop in React. It's used to pass any content between the opening and closing tags of a component.
+
+For example, in the example of the `Document` component, the `children` prop is used to pass in the content that should be rendered between the `<body>` tags of the HTML document.
+
+```tsx title="app/components/shared-layout/Document.tsx" showLineNumbers collapse={1-16, 26-32} {34}
+import {
+	Links,
+	LiveReload,
+	Meta,
+	Scripts,
+	ScrollRestoration,
+} from '@remix-run/react'
+import { ClientHintCheck } from '~/utils/client-hints'
+import { Theme } from '~/utils/theme.server'
+
+interface DocumentProps {
+	children: React.ReactNode
+	nonce: string
+	theme?: Theme
+	env?: Record<string, string>
+}
+
+export default function Document({
+	children,
+	nonce,
+	theme = 'dark',
+	env = {},
+}: DocumentProps) {
+	return (
+		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
+			<head>
+				<ClientHintCheck nonce={nonce} />
+				<Meta />
+				<meta charSet="utf-8" />
+				<meta name="viewport" content="width=device-width,initial-scale=1" />
+				<Links />
+			</head>
+			<body className="bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground">
+				{children}
+				<script
+					nonce={nonce}
+					dangerouslySetInnerHTML={{
+						__html: `window.ENV = ${JSON.stringify(env)}`,
+					}}
+				/>
+				<ScrollRestoration nonce={nonce} />
+				<Scripts nonce={nonce} />
+				<LiveReload nonce={nonce} />
+			</body>
+		</html>
+	)
+}
+```
+
+This unassuming little prop actually does a lot of work behind the scenes. It's what allows us to nest components inside other components, and it's what makes React so powerful.
+
+If you look back at the `App` function in `app/root.tsx`, you can see that the `Document` component is being used to wrap the content of the page:
+
+```tsx title="app/root.tsx" collapse={1-9} {14, 22}
+import { type LinksFunction } from '@remix-run/node'
+import Document from '~/components/shared-layout/Document.tsx'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { useNonce } from '~/utils/nonce-provider.ts'
+
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
+
+export default function App() {
+	const nonce = useNonce()
+
+	return (
+		<Document nonce={nonce}>
+			<div className="flex h-screen flex-col justify-between">
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
+					</main>
+				</div>
+			</div>
+		</Document>
+	)
+}
+```
+
+Nesting components within each other like this is a common pattern in React. It allows us to build up complex user interfaces from lots of smaller building blocks.
+
+::::
 
 ## Manually updating from 'light' to 'dark' themes
 
@@ -144,7 +289,7 @@ Find the line that reads `theme = 'dark'`.
 
 Change this to `theme = 'light'` and save the file:
 
-```diff lang="tsx" title="app/components/shared-layout/Document.tsx"
+```diff lang="tsx" title="app/components/shared-layout/Document.tsx" showLineNumbers startLineNumber={18}
 export default function Document({
 	children,
 	nonce,
@@ -168,6 +313,8 @@ Take a closer look at the opening `html` component being `return`ed from the `Do
 
 Can you see how the `theme` variable has been slotted into the `className` **property** (or '**prop**')? This is called **interpolation**, and is a way of inserting the value of a variable into a string in JavaScript.
 
-What we need now is a way of users to control the value of `theme` dynamically from the front end, so they can switch easily between both from the front-end.
+What we need now is a way for **users** to control the value of `theme` dynamically from the front-end, so they can switch easily between both.
 
-Let's add a button that users can click to toggle between the two states. We will start by adding something called a `loader` function in the next step.
+In our next tutorial, let's add a button that users can click to toggle between the two states.
+
+We will start by adding something called a `loader` function in the next step.

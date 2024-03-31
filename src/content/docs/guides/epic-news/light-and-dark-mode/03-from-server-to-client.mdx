@@ -6,29 +6,32 @@ description: Learn how to use the useLoaderData hook to pass data from the serve
 import MonsterDetails from "src/components/MonsterDetails.astro";
 import MonsterKbd from 'src/components/MonsterKbd.astro'
 
-If the `loader` function loads prepares data on the server, then `useLoaderData` is the bridge that carries this data across into the user's browser.
+If the `loader` function loads and sends data across from the server, then `useLoaderData` is the vehicle that carries it into the user's browser.
 
 ## Adding `useLoaderData` to the `App` component
 
-This a [hook](https://react.dev/learn/reusing-logic-with-custom-hooks) supplied by Remix, and is easily called:
+`useLoaderData` is a React [**hook**](https://react.dev/learn/reusing-logic-with-custom-hooks) supplied for us by Remix.
 
-```diff lang="tsx" title="app/root.tsx"
+Making sure you are still inside `app/root.tsx`, carefully add the highlighted code below:
+
+```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-10, 15-30}
 import {
   json,
   type LinksFunction,
   type LoaderFunctionArgs
 } from "@remix-run/node";
-+import { useLoaderData } from '@remix-run/react'
 import Document from '~/components/shared-layout/Document.tsx'
 import { useNonce } from '~/utils/nonce-provider.ts'
 import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'
-+import ThemeSwitch from './components/shared-layout/ThemeSwitch'
-import useTheme from './hooks/useTheme'
-import { getHints } from './utils/client-hints'
-import { getDomainUrl } from './utils/misc'
-import { getTheme } from './utils/theme.server'
+import { getHints } from '~/utils/client-hints'
+import { getDomainUrl } from '~/utils/misc'
+import { getTheme } from '~/utils/theme.server'
++import { useLoaderData } from '@remix-run/react'
++import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
 
-// Other code omitted for brevity...
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const requestInfo = {
@@ -46,10 +49,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function App() {
 +	const data = useLoaderData<typeof loader>();
 	const nonce = useNonce();
-	const theme = useTheme();
 
 	return (
-		<Document nonce={nonce} theme={theme}>
+		<Document nonce={nonce}>
 			<div className="flex h-screen flex-col justify-between">
 				<div className="flex-1">
 					<main className="grid h-full place-items-center">
@@ -59,6 +61,7 @@ export default function App() {
 +				<div className="container flex justify-between pb-5">
 +					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
 +				</div>
+			</div>
 		</Document>
 	)
 }

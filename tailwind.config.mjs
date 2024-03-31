@@ -11,6 +11,9 @@ export default {
 	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
 	theme: {
 		extend: {
+      fontFamily: {
+        hero: "var(--sl-font)"
+      },
 			animation: {
         "spin-slow": "spin 30s linear infinite",
         "draw-circle": "border 1500ms ease-in-out 1 forwards",

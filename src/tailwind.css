@@ -13,6 +13,12 @@
   --sl-text-code-sm: 1.1rem;
 }
 
+@layer components {
+  .gradient-header {
+    @apply from-lime-700 bg-gradient-to-r via-lime-600 to-lime-400 bg-clip-text text-transparent drop-shadow-[0_2px_1px_rgba(0,0,0,0.3)]
+  }
+}
+
 main {
   font-family: var(--custom-body-font);
 }

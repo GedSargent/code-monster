@@ -50,8 +50,12 @@ if (image) {
   </div>
 	<div class="py-8">
 		<div class="pb-8 lg:pb-16">
-			<h1 class="font-hero text-center pb-4 leading-10 md:text-left"><span class="text-5xl font-black lg:text-7xl">Welcome to <span class="from-lime-700 bg-gradient-to-r via-lime-600 to-lime-400 bg-clip-text text-transparent drop-shadow-[0_2px_1px_rgba(0,0,0,0.3)]">Code Monster</span></span></h1>
-			{tagline ? <div class="text-gray-400 text-xl text-center md:text-left md:text-2xl" set:html={tagline} /> : null}
+			<h1 class="font-hero text-center pb-4 leading-10 md:text-left">
+        <span class="text-5xl font-black lg:text-7xl">Welcome to
+          <span class="gradient-header">Code Monster</span>
+        </span>
+      </h1>
+			{tagline ? <div class="text-gray-400 text-xl text-center md:text-left md:text-3xl" set:html={tagline} /> : null}
 		</div>
     <div class="flex justify-center gap-6 md:justify-start">
       {actions.map(({ text, variant, link }: HeroActionArgs) => (

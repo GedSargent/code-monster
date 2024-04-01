@@ -150,7 +150,7 @@ So what exactly is happening here?? Why is the `Outlet` component rendering the 
 
 ::::tip[Deep Dive]
 
-## The `Outlet` component
+### `Outlet` component deep dive
 
 `Outlet` is a special Remix component that tells the browser to render a **child route** that matches the current URL.
 
@@ -158,7 +158,7 @@ This is quite a strange concept to understand at first, so let's take some time 
 
 :::info
 
-### 1.- What is a "route"? 🔀
+### 1. What is a "route"? 🔀
 
 In a normal web application, a "route" is a URL that corresponds to a specific **page** or **view** in the app. This is usually served from a specific file in the project.
 
@@ -178,7 +178,7 @@ http://localhost:3000/about-us
 
 The "route" in this case would then be served from another file in the code base. In a Remix app, this file would typically be found inside the `routes` folder, and called `about-us.tsx`.
 
-### Introducing "parent" and "child" routes
+### 2. Introducing "parent" and "child" routes
 
 However, in a Remix application, we can make use of something much more powerful - "parent" and "child" routes.
 

@@ -5,11 +5,11 @@ description: Remix's file structure and how it relates to routes in the applicat
 
 import NestedRouting from "src/components/epicNews/NestedRouting.astro";
 
-As we looked at in the [`Outlet` component lesson](/code-monster/guides/epic-news/routing/outlet), Remix uses a file-based routing system. This means that the file structure of your project maps directly to the URL structure of your app.
+As we looked at in the [**`Outlet` component lesson**](/code-monster/guides/epic-news/routing/outlet), Remix uses a [**file-based routing**](https://thevalleyofcode.com/remix/3-file-based-routing) system. This means that the file structure of your project maps directly to the URL structure of your app.
 
 But how does it map exactly? Let's take a look at the file structure of the Epic News app to see how it relates to the URL structure.
 
-The Epic News app uses an NPM package called `remix-flat-routes` which you can read about in detail [here](https://github.com/kiliman/remix-flat-routes). Below is a summary of it's main naming conventions for mapping project files to URL routes:
+The Epic News app uses an NPM package called `remix-flat-routes` which you can read about in detail [**here**](https://github.com/kiliman/remix-flat-routes). Below is a summary of it's main naming conventions for mapping project files to URL routes:
 
 ## The root route
 
@@ -48,7 +48,7 @@ Save the file and head back to your browser. Refresh the page and you should see
 
 See how the navbar and footer remain the same?
 
-This is because the `root.tsx` file is still rendering the `Outlet` component in the `root.tsx` file is still rendering the components that render these page elements, but the `Outlet` component is now rendering the `NewsPage` component as the new child of the `root.tsx` route.
+This is because the `root.tsx` file is still rendering the code for the header and footer, but the `Outlet` component we placed between these elements [**earlier**](http://localhost:4321/code-monster/guides/epic-news/routing/outlet#the-outlet-component) is now rendering the `NewsPage` component as the child route.
 
 :::caution[Important - Remix route conventions]
 
@@ -58,21 +58,21 @@ What _is_ important are the following conventions:
 
 - A UI route file must have a `.tsx` extension
 - It must be placed inside the `routes` folder
-- It must export a React component as the _default export_
-- The file name must match the route URL
-	- e.g. `routes/news.tsx` maps to `/news`.
-	- If we wanted an "about us" page, we would create a file called `about-us.tsx` in the `routes` folder so we could visit the `/about-us` URL.
-	- If we named the file `AboutUs.tsx`, then the URL would be `/AboutUs`, which is not what we want in a web app.
+- It must `export` a React component as the _default export_
+- The file name must match the route URL, e.g.
+	- `routes/news.tsx` maps to `/news`.
+	- `routes/about-us.tsx` maps to the `/about-us` URL.
+	- Spelling, case and special characters are important. If we named the file `AboutUs.tsx`, then the URL would be `/AboutUs`, which is not what we want in a web app.
 
 ![Remix route conventions](src/assets/png/about-us-file-to-route.png)
 
-These are important Remix conventions to remember. They form part of its file-based routing system, and allow Remix to render the correct component when the route is visited.
+These are crucial Remix conventions to remember. They form part of its file-based routing system, and allow Remix to render the correct component when the route is visited.
 
 :::
 
 ## Nested routes
 
-So far, we've only used the `Outlet` component in the `root.tsx` file. But what if we want to create a nested route? For example, what if we want to create a nested page for each news **_category_**, e.g. `/news/technology`, `/news/sport`, `/news/entertainment` etc?
+So far, we've only used the `Outlet` component in the `root.tsx` file. But what if we want to create a *nested route*? For example, what if we want to create a page for each news **_category_**, e.g. `/news/technology`, `/news/sport`, `/news/entertainment` etc?
 
 Lets add another file to the `routes` folder called `news.technology.tsx`. Add the following code to it:
 
@@ -179,7 +179,7 @@ In the example here, we are applying a lighter blue color to the text and an und
 
 #### More information
 
-You can read more about the `NavLink` component [here](https://remix.run/docs/en/main/components/nav-link) in the Remix documentation.
+You can read more about the `NavLink` component [**here**](https://remix.run/docs/en/main/components/nav-link) in the Remix documentation.
 :::
 
 :::tip[Challenge]

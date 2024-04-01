@@ -148,7 +148,7 @@ function Buttons({ handleHover }) {
       <div
         onMouseEnter={() => handleHover("parent")}
         onMouseLeave={() => handleHover(null)}
-        className="cursor-pointer inline-block text-xs font-semibold text-blue-400 px-8 py-4 rounded-3xl shadow shadow-black/30 transition duration-500 bg-blue-800 border-t border-blue-700 hover:shadow-md hover:shadow-black/40 hover:border-blue-600 !mt-0"
+        className="cursor-pointer inline-block text-lg font-semibold text-blue-300 px-8 py-4 rounded-full shadow shadow-black/30 transition duration-500 bg-blue-800 border-t border-blue-700 hover:shadow-md hover:shadow-black/40 hover:border-blue-600 !mt-0"
       >
         {"<root.tsx>"}
       </div>
@@ -156,7 +156,7 @@ function Buttons({ handleHover }) {
         onMouseEnter={() => handleHover("child")}
         onMouseLeave={() => handleHover(null)}
         style={{ marginTop: 0 }}
-        className="cursor-pointer inline-block text-xs font-semibold text-teal-400 px-8 py-4 rounded-3xl shadow shadow-black/30 transition duration-500 bg-teal-800 border-t border-teal-700 hover:shadow-md hover:shadow-black/40 hover:border-teal-600"
+        className="cursor-pointer inline-block text-lg font-semibold text-teal-300 px-8 py-4 rounded-full shadow shadow-black/30 transition duration-500 bg-teal-800 border-t border-teal-700 hover:shadow-md hover:shadow-black/40 hover:border-teal-600"
       >
         {"<_index.tsx>"}
       </div>

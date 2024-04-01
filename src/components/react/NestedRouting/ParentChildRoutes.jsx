@@ -11,8 +11,8 @@ export function BrowserChrome({ url, children }) {
 
 function URLBar({ url }) {
   return (
-    <div className="relative flex items-center px-1 md:px-2 md:pt-2">
-      <div className="w-1/6 flex items-end justify-center gap-2">
+    <div className="!mt-0 relative flex items-center px-1 md:px-2 md:pt-2">
+      <div className="!mt-0 w-1/6 flex items-end justify-center gap-2">
         <Circle />
         <Circle />
         <Circle />
@@ -26,7 +26,7 @@ function URLBar({ url }) {
 }
 
 function Circle() {
-  return <div className="h-2 w-2 rounded-full bg-gray-400 md:h-3 md:w-3" />;
+  return <div className="!mt-4 h-2 w-2 rounded-full bg-gray-400 md:h-3 md:w-3" />;
 }
 
 function Refresh({ className }) {
@@ -55,22 +55,21 @@ function Refresh({ className }) {
 
 function Header({ isHovering }) {
   return (
-    <div className="relative bg-white/10 p-4 flex justify-end">
-      <div className="flex gap-4">
-        <div className="bg-white px-3 py-2 w-64 rounded text-slate-800 text-xs">
+    <div className="!mt-0 relative bg-white/10 p-4 flex justify-end">
+      <div className="!mt-0 flex gap-4">
+        <div className="!mt-0 bg-white px-3 py-2 w-64 rounded text-slate-800 text-xs">
           Search
         </div>
       </div>
       <div
-        style={{ marginTop: 0 }}
-        className="flex items-center pr-4 pl-8 font-semibold text-slate-100"
+        className="!mt-0 flex items-center pr-4 pl-8 font-semibold text-slate-100"
       >
         Log in
       </div>
       {isHovering && (
         <div
           style={{ marginTop: 0 }}
-          className="absolute grid content-center inset-0 bg-blue-400/10 border-4 border-blue-500 shadow shadow-black backdrop-blur-sm"
+          className="absolute grid content-center inset-0 bg-blue-400/10 border-4 border-blue-500 shadow-lg shadow-black/30 backdrop-blur-sm"
         >
           <span className="text-blue-500 font-bold uppercase text-4xl text-center drop-shadow shadow-black">
             Parent
@@ -84,11 +83,10 @@ function Header({ isHovering }) {
 function Body({ isHovering }) {
   return (
     <div
-      style={{ marginTop: 0 }}
-      className="relative flex items-center justify-center h-48 bg-black/10"
+      className="!mt-0 relative flex items-center justify-center h-48 bg-black/10"
     >
-      <div className="w-1/2">
-        <h3 className="text-center">
+      <div className="!mt-0 w-1/2">
+        <h3 className="!mt-0 text-center">
           <span className="text-4xl font-black">
             Hello from{" "}
             <pre className="bg-white/10 rounded w-fit mx-auto">
@@ -100,7 +98,7 @@ function Body({ isHovering }) {
       {isHovering && (
         <div
           style={{ marginTop: 0 }}
-          className="absolute grid content-center inset-0 bg-teal-400/10 border-4 border-teal-500 shadow shadow-black backdrop-blur-sm"
+          className="absolute grid content-center inset-0 bg-teal-400/10 border-4 border-teal-500 shadow-lg shadow-black/50 backdrop-blur-sm"
         >
           <span className="text-teal-500 font-bold uppercase text-4xl text-center drop-shadow shadow-black">
             Child
@@ -113,10 +111,10 @@ function Body({ isHovering }) {
 
 function Footer({ isHovering }) {
   return (
-    <div style={{ marginTop: 0 }} className="relative bg-white/10 px-4">
-      <div>
-        <div className="flex justify-between border-b border-white px-8 py-4">
-          <div className="bg-white rounded-full w-10 h-10" />
+    <div className="!mt-0 relative bg-white/10 px-4">
+      <div className="!mt-0">
+        <div className="!mt-0 flex justify-between border-b border-white px-8 py-4">
+          <div className="!mt-0 bg-white rounded-full w-10 h-10" />
           <div
             style={{ marginTop: 0 }}
             className="flex items-center gap-4 font-bold"
@@ -133,7 +131,7 @@ function Footer({ isHovering }) {
       {isHovering && (
         <div
           style={{ marginTop: 0 }}
-          className="absolute grid content-center inset-0 bg-blue-400/10 border-4 border-blue-500 shadow shadow-black backdrop-blur-sm"
+          className="absolute grid content-center inset-0 bg-blue-400/10 border-4 border-blue-500 shadow-lg shadow-black/30 backdrop-blur-sm"
         >
           <span className="text-blue-500 font-bold uppercase text-4xl text-center drop-shadow shadow-black">
             Parent
@@ -146,11 +144,11 @@ function Footer({ isHovering }) {
 
 function Buttons({ handleHover }) {
   return (
-    <div className="flex justify-around gap-4 pt-8 pb-6">
+    <div className="flex justify-around gap-4 pt-8 pb-6 !mt-0">
       <div
         onMouseEnter={() => handleHover("parent")}
         onMouseLeave={() => handleHover(null)}
-        className="cursor-pointer inline-block text-xs font-semibold text-blue-400 px-8 py-4 rounded-3xl bg-blue-800"
+        className="cursor-pointer inline-block text-xs font-semibold text-blue-400 px-8 py-4 rounded-3xl shadow shadow-black/30 transition duration-500 bg-blue-800 border-t border-blue-700 hover:shadow-md hover:shadow-black/40 hover:border-blue-600 !mt-0"
       >
         {"<root.tsx>"}
       </div>
@@ -158,7 +156,7 @@ function Buttons({ handleHover }) {
         onMouseEnter={() => handleHover("child")}
         onMouseLeave={() => handleHover(null)}
         style={{ marginTop: 0 }}
-        className="cursor-pointer inline-block text-xs font-semibold text-teal-400 px-8 py-4 rounded-3xl bg-teal-800"
+        className="cursor-pointer inline-block text-xs font-semibold text-teal-400 px-8 py-4 rounded-3xl shadow shadow-black/30 transition duration-500 bg-teal-800 border-t border-teal-700 hover:shadow-md hover:shadow-black/40 hover:border-teal-600"
       >
         {"<_index.tsx>"}
       </div>
@@ -176,7 +174,7 @@ export default function EpicNews() {
   };
 
   return (
-    <div className="mt-4 pt-4 bg-white/10">
+    <div className="pt-4 bg-white/10">
       <Buttons handleHover={handleHover} />
       <BrowserChrome url="http://localhost:3000">
         <Header isHovering={currentlyHovering === "parent"} />

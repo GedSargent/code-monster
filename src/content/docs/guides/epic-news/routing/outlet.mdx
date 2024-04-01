@@ -13,18 +13,77 @@ So far, we've been using the `root.tsx` file to render the only page in our app.
 
 Let's start by swapping out the title text in our `root.tsx` file with a special component that Remix supplies for us: the `Outlet` component.
 
-```diff lang="tsx" title="app/root.tsx" ins="Outlet, "
+:::danger[Take care]
+
+#### 🚨 Remember!
+
+Code highlighted in green should be **added** to your files, and code highlighted in red should be **removed**.
+
+:::
+
+```diff lang="tsx" title="app/root.tsx" ins="Outlet, " showLineNumbers collapse={10-19, 21-62}
 import { parse } from '@conform-to/zod'
 import {
 	json,
 	type ActionFunctionArgs,
-	type LoaderFunctionArgs,
 	type LinksFunction,
+	type LoaderFunctionArgs,
 } from '@remix-run/node'
 import { Outlet, useLoaderData } from '@remix-run/react'
 import { z } from 'zod'
+import Document from '~/components/shared-layout/Document.tsx'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import { getHints } from '~/utils/client-hints'
+import { getDomainUrl } from '~/utils/misc'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { getTheme, setTheme } from '~/utils/theme.server'
+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import useTheme from './hooks/useTheme'
 
-// Code omitted for brevity
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
+
+export async function loader({ request }: LoaderFunctionArgs) {
+	const requestInfo = {
+		hints: getHints(request),
+		origin: getDomainUrl(request),
+		path: new URL(request.url).pathname,
+		userPrefs: {
+			theme: getTheme(request),
+		},
+	}
+
+	return json({ requestInfo })
+}
+
+const ThemeFormSchema = z.object({
+	theme: z.enum(['system', 'light', 'dark']),
+})
+
+export async function action({ request }: ActionFunctionArgs) {
+	const formData = await request.formData()
+	const submission = parse(formData, {
+		schema: ThemeFormSchema,
+	})
+
+	if (submission.intent !== 'submit') {
+		return json({ status: 'idle', submission } as const)
+	}
+
+	if (!submission.value) {
+		return json({ status: 'error', submission } as const, { status: 400 })
+	}
+	const { theme } = submission.value
+
+	const responseInit = {
+		headers: { 'set-cookie': setTheme(theme) },
+	}
+
+	return json({ success: true, submission }, responseInit)
+}
 
 export default function App() {
 	const data = useLoaderData<typeof loader>()
@@ -54,7 +113,9 @@ export default function App() {
 }
 ```
 
-Save your changes and head back across to your browser. Make sure you are on the home page at [http://localhost:3000](http://localhost:3000). You should see the welcome message has changed:
+Save your changes and head back across to your browser. but *make sure you are on the home page at [http://localhost:3000](http://localhost:3000).*
+
+You should see the welcome message has changed:
 
 ![Hello from _index.tsx screenshot](src/assets/png/hello-from-index-tsx.png)
 
@@ -85,7 +146,7 @@ export default function Index() {
 }
 ```
 
-So what exactly is happening here??
+So what exactly is happening here?? Why is the `Outlet` component rendering the `_index.tsx` file?
 
 ::::tip[Deep Dive]
 
@@ -93,21 +154,21 @@ So what exactly is happening here??
 
 `Outlet` is a special Remix component that tells the browser to render a **child route** that matches the current URL.
 
-This is quite a strange concept to understand at first, so let's take some time to understand what this means.
+This is quite a strange concept to understand at first, so let's take some time to understand what it means.
 
 :::info
 
-### 🔀 What is a "route"? 🔀
+### 1.- What is a "route"? 🔀
 
 In a normal web application, a "route" is a URL that corresponds to a specific **page** or **view** in the app. This is usually served from a specific file in the project.
 
 For example, when we run a Remix application on our local machines, the **base URL** is
 
 ```bash
-http://localhost:3000/
+http://localhost:3000
 ```
 
-In a Remix app, this is initially served from the file at `app/root.tsx`.
+In a Remix app, this is initially served from the file at `app/root.tsx` - the very file we have been working on until now.
 
 However, if we wanted to navigate to a different page - say the 'About Us' page - then we would typically add a new **path** onto the end of the base URL like so:
 
@@ -117,29 +178,29 @@ http://localhost:3000/about-us
 
 The "route" in this case would then be served from another file in the code base. In a Remix app, this file would typically be found inside the `routes` folder, and called `about-us.tsx`.
 
-### "Parent" and "child" routes
+### Introducing "parent" and "child" routes
 
 However, in a Remix application, we can make use of something much more powerful - "parent" and "child" routes.
 
-A "child route" is a route that is nested _within_ another route, which we call a "parent route". As soon as we place the `Outlet` component inside a parent route, it tells Remix to render both the parent and the matching child route through it.
+A "child route" is a route that is nested _within_ another route, which we call a "parent route". As soon as we place the `Outlet` component inside a parent route, it tells Remix to render **both** the parent **and** the matching child route through it.
 
 #### The main index page of a website
 
 In the case of our app at the moment, the `root.tsx` file is being served as the "parent" route, and the `_index.tsx` file is the "child" route.
 
-The reason we can still see the navbar and footer is because this is code being served from the **parent** `root.tsx` file. The content that we see in the middle of the page is being served from the `_index.tsx` file as the **child**:
+The reason we can still see the navbar and footer is because this is code being served from the **parent** `root.tsx` file. However, the content that we see in the middle of the page is now being served from the `_index.tsx` file through the `Outlet` component.
+
+Hover your cursor over the two buttons below to see how this works in practice:
 
 <NestedRouting />
-
-This is a powerful feature of Remix that will explore in more detail later.
 
 ::::
 
 ## The route structure
 
-Routes in Remix are represented by files and folders in your project. The structure of your files and folders directly maps to the structure of your routes.
+Routes in Remix are represented by files and folders in your project. The structure of your files and folders directly maps to the structure of your routes in the browser URL bar.
 
-Think of the `Outlet` component as a "window" or "placeholder" for the child route. It's a way of telling Remix where to render the child route inside the parent route.
+Think of the `Outlet` component as a "window" or "placeholder" for the child route. It's a way of telling Remix where to render the child route **inside** the parent route.
 
 We can see this in action by adding a new route to our app. Let's add a dummy 'about us' page.
 
@@ -153,7 +214,7 @@ Create a new file at `app/routes/about-us.tsx`:
 
 ### Route file names in Remix
 
-Take extra care when naming your route files in Remix. The file name must **match** the URL path that you want to serve from it.
+Take extra care when naming your route files in Remix. The file name **must match** the URL path that you want to serve from it.
 
 For example, because we want to serve a page from the URL path `/about-us`, then the file name must **also** be `about-us.tsx`.
 
@@ -179,13 +240,13 @@ Head back over to your browser and navigate to [http://localhost:3000/about-us](
 
 Notice how the navbar, footer and theme switcher are still present on the page? This is because `/about-us` is a direct child of the base URL, so the `Outlet` component in the `root.tsx` file now provides a "window" into the `about-us.tsx` code.
 
-This is a powerful feature of Remix that we will be exploring in more detail later.
+This is a powerful feature of Remix that we will continue to explore in more detail later.
 
 :::tip[Your turn]
 
 ### Challenge
 
-Add a new routes to your app that serve pages from the URL paths below. For the time being, you can just add a simple title to each page.
+Add a new routes to your app that serve pages from the URL paths below. For the time being, you can just add a simple title to each page in the same way we did for `/about-us`.
 
 1. `/contact-us`
 2. `/news`

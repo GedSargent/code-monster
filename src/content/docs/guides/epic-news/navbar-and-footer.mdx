@@ -4,24 +4,76 @@ description: Adding a navigation bar and footer to our site
 ---
 
 import MonsterDetails from "src/components/MonsterDetails.astro";
+import MonsterKbd from 'src/components/MonsterKbd.astro'
 
 Now that we have light and dark mode, let's add a navigation bar to our site. We'll use the `<HeaderWithSearch />` component that is included with the Epic Stack.
 
 ## Importing `HeaderWithSearch`
 
-First, let's add the component to our `root.tsx` file.
+First, let's add the component to our `app/root.tsx` file.
 
-```diff lang="tsx"
-// Code omitted for brevity
-import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'
-+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
-import ThemeSwitch from './components/shared-layout/ThemeSwitch'
+```diff lang="tsx" title="app/root.tsx" collapse={1-16, 20-61, 79-82}
+import { parse } from '@conform-to/zod'
+import {
+	json,
+	type ActionFunctionArgs,
+	type LinksFunction,
+	type LoaderFunctionArgs,
+} from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import { z } from 'zod'
+import Document from '~/components/shared-layout/Document.tsx'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import { getHints } from '~/utils/client-hints'
+import { getDomainUrl } from '~/utils/misc'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { getTheme, setTheme } from '~/utils/theme.server'
 import useTheme from './hooks/useTheme'
-import { getHints } from './utils/client-hints'
-import { getDomainUrl } from './utils/misc'
-import { getTheme, setTheme } from './utils/theme.server'
++import HeaderWithSearch from './components/organisms/HeaderWithSearch'
 
-// Code omitted for brevity
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
+
+export async function loader({ request }: LoaderFunctionArgs) {
+	const requestInfo = {
+		hints: getHints(request),
+		origin: getDomainUrl(request),
+		path: new URL(request.url).pathname,
+		userPrefs: {
+			theme: getTheme(request),
+		},
+	}
+
+	return json({ requestInfo })
+}
+
+const ThemeFormSchema = z.object({
+	theme: z.enum(['system', 'light', 'dark']),
+})
+
+export async function action({ request }: ActionFunctionArgs) {
+	const formData = await request.formData()
+	const submission = parse(formData, {
+		schema: ThemeFormSchema,
+	})
+
+	if (submission.intent !== 'submit') {
+		return json({ status: 'idle', submission } as const)
+	}
+
+	if (!submission.value) {
+		return json({ status: 'error', submission } as const, { status: 400 })
+	}
+	const { theme } = submission.value
+
+	const responseInit = {
+		headers: { 'set-cookie': setTheme(theme) },
+	}
+
+	return json({ success: true, submission }, responseInit)
+}
 
 export default function App() {
 	const data = useLoaderData<typeof loader>()
@@ -74,15 +126,28 @@ For this solution, I'm going to use the `FooterMenuRight` component, but you can
 
 #### Import the component
 
-First, let's import the component directly above our `HeaderWithSearch` import at the top of our `root.tsx` file:
+First, let's `import` the component at the top of our `root.tsx` file:
 
-```diff lang="tsx" title="app/root.tsx"
-
-// Code omitted for brevity
-import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'
-+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-16}
+import { parse } from '@conform-to/zod'
+import {
+	json,
+	type ActionFunctionArgs,
+	type LinksFunction,
+	type LoaderFunctionArgs,
+} from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import { z } from 'zod'
+import Document from '~/components/shared-layout/Document.tsx'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import { getHints } from '~/utils/client-hints'
+import { getDomainUrl } from '~/utils/misc'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { getTheme, setTheme } from '~/utils/theme.server'
+import useTheme from './hooks/useTheme'
 import HeaderWithSearch from './components/organisms/HeaderWithSearch'
-// Code omitted for brevity
++import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 ```
 
 #### Add `FooterMenuRight` to the UI
@@ -110,8 +175,8 @@ export default function App() {
 					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
 				</div>
 
-+			<FooterMenuRight />
 			</div>
++			<FooterMenuRight />
 		</Document>
 	)
 }
@@ -122,6 +187,8 @@ export default function App() {
 Save your work and check the browser. Scroll the page down, and you should see a footer at the bottom of the page:
 
 ![Footer](src/assets/png/footer.png)
+
+Finally, remember to tidy up your imports at the top of the file using the VS Code keyboard shortcut <MonsterKbd>Shift + Alt + O</MonsterKbd> (on Windows) or <MonsterKbd>Shift + Option + O</MonsterKbd> (on Mac).
 
 </div>
 </MonsterDetails>

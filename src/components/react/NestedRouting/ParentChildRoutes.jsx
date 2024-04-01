@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export function BrowserChrome({ url, children }) {
   return (
-    <div className="relative mx-2 overflow-hidden rounded bg-gray-700 shadow-md md:mx-4 md:rounded-lg lg:mx-auto lg:max-w-4xl">
+    <div className="relative mx-2 overflow-hidden rounded bg-gray-700 shadow-md border-t border-gray-600 md:mx-4 md:rounded-lg lg:mx-auto lg:max-w-4xl">
       <URLBar url={url} />
       <div className="px-2 pb-2 pt-1 md:px-4 md:pb-4 md:pt-2">{children}</div>
     </div>
@@ -174,7 +174,7 @@ export default function EpicNews() {
   };
 
   return (
-    <div className="pt-4 bg-white/10">
+    <div className="p-4 bg-white/10 ">
       <Buttons handleHover={handleHover} />
       <BrowserChrome url="http://localhost:3000">
         <Header isHovering={currentlyHovering === "parent"} />

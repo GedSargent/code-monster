@@ -3,6 +3,8 @@ title: Authentication and security
 description: Ensure your application is secure and users are authenticated
 ---
 
+import MonsterKbd from 'src/components/MonsterKbd.astro'
+
 We need a way to authenticate users in our application. Let's by adding some important functions to our `app/root.tsx` file.
 
 These will eventually supply the data needed to authenticate users, measure performance and secure the app against malicicious attacks.
@@ -394,6 +396,8 @@ export default function App() {
 ```
 
 As you can see, we pass in the `csrfToken` and `honeyProps` from the `data` object that is provided by our updated `loader` function to the `AuthenticityTokenProvider` and `HoneypotProvider` components respectively.
+
+Before moving on to the next step, make sure you rearrange the imports at the top of the `app/root.tsx` file by using the VS Code keyboard shortcut <MonsterKbd>SHIFT + ALT + O</MonsterKbd> (Windows) or <MonsterKbd>SHIFT + OPT + O</MonsterKbd> (Mac)
 
 ## Summary
 

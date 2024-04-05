@@ -8,27 +8,104 @@ import MonsterKbd from 'src/components/MonsterKbd.astro'
 
 ## What is a toast notification?
 
-A toast notification is a message that appears on the surface of the UI to inform the user of a process or action. It appears in a small, unobtrusive window, usually at the top or bottom of the screen, then disappears after a certain amount of time. Toast notifications are often used to inform users of a process or action that has occurred, such as a successful login, a new message, or a system update.
+A [**toast notification**](https://www.suprsend.com/post/the-ultimate-guide-to-toast-messages---what-are-toasts-their-use-cases-and-react-native-toast-message-implementation) is a message that appears on the surface of the UI to inform the user of a process or action. It appears in a small, unobtrusive window, usually at the top or bottom of the screen, then disappears after a certain amount of time. Toast notifications are often used to inform users of a process or action that has occurred, such as a successful login, a new message, or a system update.
 
 For example, in the Epic News app, a toast notification appears when users delete a 'Note':
 
 ![Delete note toast notification](src/assets/gif/delete-note-toast.gif)
 
-Adding a toast notification is easy in Epic News. We just need to call the `redirectWithToast` method at the end of a successful `action` function.
+## Adding app-wide 'toast' notifications
+
+Because we want toast notifications to be available across the whole app, let's add a new hook called `useToast` to the `App` component inside `app/root.tsx`.
+
+First, let's `import` the components highlighted in green to the end of your import list at the top of `app/root.tsx`:
+
+```diff lang="tsx" title="app/root.tsx" collapse={1-25}
+import { getUser } from '#server/user.server'
+import { parse } from '@conform-to/zod'
+import {
+	json,
+	type ActionFunctionArgs,
+	type HeadersFunction,
+	type LinksFunction,
+	type LoaderFunctionArgs,
+} from '@remix-run/node'
+import { Outlet, useLoaderData, type MetaFunction } from '@remix-run/react'
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
+import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import { z } from 'zod'
+import Document from '~/components/shared-layout/Document.tsx'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import { getUserId, logout } from '~/utils/auth.server'
+import { csrf } from '~/utils/csrf.server'
+import { honeypot } from '~/utils/honeypot.server'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { setTheme } from '~/utils/theme.server'
+import { makeTimings, time } from '~/utils/timing.server'
+import { getToast } from '~/utils/toast.server'
+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import useTheme from './hooks/useTheme'
+import generateRootJson from './utils/rootProviders/generateRootJson'
++import { useToast } from './components/toaster'
++import { EpicToaster } from './components/molecules/Sonner'
++import { EpicProgress } from './components/molecules/ProgressBar'
+```
+
+Next, add the following code to the bottom of the `app/root.tsx` file:
+
+```diff lang="tsx" title="app/root.tsx"
+export default function App() {
+	const data = useLoaderData<typeof loader>()
+	const nonce = useNonce()
+	const theme = useTheme()
+
++	useToast(data.toast)
+
+	return (
+		<Document nonce={nonce} theme={theme}>
+      <div className="flex h-screen flex-col justify-between">
+        <HeaderWithSearch />
+
+        <div className="flex-1">
+          <Outlet />
+        </div>
+
+        <div className="container flex justify-between pb-5">
+          <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+        </div>
+
++        <EpicToaster closeButton position="top-center" theme={theme} />
++        <EpicProgress />
+        <FooterMenuRight />
+      </div>
+    </Document>
+	)
+}
+```
+
+## Notify users when a note is updated
+
+Adding a toast notification is easy in Epic News. We just need to call the `redirectWithToast` method at the end of a successful `action` function if we want to inform the user of something.
+
+This method has already been written for you in the `utils/toast.server.ts` file - we just need to import it and use it in the places we need via Remix's `action` functions.
 
 :::note
 
-### `action` function recap
+### The `action` function - recap
 
-If you remember from our [previous lesson](/code-monster/guides/epic-news/light-and-dark-mode/04-action-functions), `action` functions are only executed on the the **server**, and can only be placed directly on `route` components (i.e. `tsx` files stored in the `routes` folder). They are used to perform an action when a user interacts with the UI, such as clicking a button or submitting a form.
+If you remember from our [**previous lesson**](/code-monster/guides/epic-news/light-and-dark-mode/04-action-functions), `action` functions are only executed on the the **server**, and can only be placed directly on `route` components (i.e. `tsx` files stored in the `routes` folder).
 
-We introduced `action` functions in the ['Light and Dark Mode'](/code-monster/guides/epic-news/light-and-dark-mode/04-action-functions) tutorial, and you can read more about them in the [Remix Docs](https://remix.run/docs/en/main/route/action).
+They are used to perform an action when a user interacts with the UI, such as clicking a button or submitting a form.
+
+You can read more about them in the [**Remix Docs**](https://remix.run/docs/en/main/route/action).
 
 :::
 
-## Adding a toast notification
+At the moment, a toast notification is shown when a user **deletes** a note.
 
-At the moment, a toast notification is shown when a user **deletes** a note. Let's add another toast notification to inform users when they have **added** a note successfully.
+Let's add another toast notification to confirm when users have **updated** a note successfully.
 
 ### 1. Locating the correct route file
 
@@ -42,7 +119,7 @@ http://localhost:3000/users/<user-name>/notes/new
 
 :::tip[Locate the file]
 
-Using Remix's naming convention that we looked at together in the ['Nested Routes'](/code-monster/guides/epic-news/nested-routes) guide, can you locate and open the project file that serves the page at `http://localhost:3000/users/<user-name>/notes/new`?
+Using Remix's naming convention that we looked at together in the [**'Nested Routes'**](/code-monster/guides/epic-news/nested-routes) guide, can you locate and open the project file that serves the page at `http://localhost:3000/users/<user-name>/notes/new`?
 
 <MonsterDetails>
   <div>
@@ -72,7 +149,9 @@ export { action }
 export default NoteEditor
 ```
 
-As you can see, the `action` function is actually being imported from another file called `__note-editor.tsx`. This is fine, as we are still exporting the `action` function from our route file, so as far as Remix is concerned, this is where it lives.
+As you can see, the `action` function is actually being imported from another file called `__note-editor.tsx`.
+
+This is unusual, but still absolutely fine; we are still exporting the `action` function from our route file, and so as far as Remix is concerned, this is where it lives.
 
 When you open this file, you'll see why it was extracted: it's very complicated!
 
@@ -80,26 +159,238 @@ Luckily, we don't need to understand the entire file to add a toast notification
 
 Firstly, let's `import` the `redirectWithToast` function at the end of all the other `imports`:
 
-```diff lang="tsx" title="app/routes/users+/$username_+/notes.new.tsx"
-// Code omitted for brevity
+```diff lang="tsx" title="app/routes/users+/$username_+/__note-editor.tsx" collapse={1-33}
+import {
+	conform,
+	list,
+	useFieldList,
+	useFieldset,
+	useForm,
+	type FieldConfig,
+} from '@conform-to/react'
+import { getFieldsetConstraint, parse } from '@conform-to/zod'
+import { createId as cuid } from '@paralleldrive/cuid2'
+import { type Note, type NoteImage } from '@prisma/client'
+import {
+	unstable_createMemoryUploadHandler as createMemoryUploadHandler,
+	json,
+	unstable_parseMultipartFormData as parseMultipartFormData,
+	redirect,
+	type ActionFunctionArgs,
+	type SerializeFrom,
+} from '@remix-run/node'
+import { Form, useActionData } from '@remix-run/react'
+import { useRef, useState } from 'react'
 import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
 import { z } from 'zod'
+import { GeneralErrorBoundary } from '#app/components/ErrorBoundary'
+import { floatingToolbarClassName } from '#app/components/floating-toolbar.tsx'
+import { ErrorList, Field, TextareaField } from '#app/components/forms.tsx'
+import { Button } from '#app/components/atoms/Button'
+import { Icon } from '#app/components/atoms/Icon'
+import { Label } from '#app/components/atoms/Label'
+import { StatusButton } from '#app/components/molecules/StatusButton'
+import { Textarea } from '#app/components/atoms/TextArea'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { validateCSRF } from '#app/utils/csrf.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
+import { cn, getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
 +import { redirectWithToast } from '~/utils/toast.server'
 ```
 
 Locate the `redirect` method in question. It is around line 176, and looks like this:
 
-```tsx title="app/routes/users+/$username_+/__note-editor.tsx"
-return redirect(
-  `/users/${updatedNote.owner.username}/notes/${updatedNote.id}`,
-)
+```tsx title="app/routes/users+/$username_+/__note-editor.tsx" showLineNumbers collapse={1-174} {176-178}
+import {
+	conform,
+	list,
+	useFieldList,
+	useFieldset,
+	useForm,
+	type FieldConfig,
+} from '@conform-to/react'
+import { getFieldsetConstraint, parse } from '@conform-to/zod'
+import { createId as cuid } from '@paralleldrive/cuid2'
+import { type Note, type NoteImage } from '@prisma/client'
+import {
+	unstable_createMemoryUploadHandler as createMemoryUploadHandler,
+	json,
+	unstable_parseMultipartFormData as parseMultipartFormData,
+	redirect,
+	type ActionFunctionArgs,
+	type SerializeFrom,
+} from '@remix-run/node'
+import { Form, useActionData } from '@remix-run/react'
+import { useRef, useState } from 'react'
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
+import { z } from 'zod'
+import { GeneralErrorBoundary } from '#app/components/ErrorBoundary'
+import { floatingToolbarClassName } from '#app/components/floating-toolbar.tsx'
+import { ErrorList, Field, TextareaField } from '#app/components/forms.tsx'
+import { Button } from '#app/components/atoms/Button'
+import { Icon } from '#app/components/atoms/Icon'
+import { Label } from '#app/components/atoms/Label'
+import { StatusButton } from '#app/components/molecules/StatusButton'
+import { Textarea } from '#app/components/atoms/TextArea'
+import { requireUserId } from '#app/utils/auth.server.ts'
+import { validateCSRF } from '#app/utils/csrf.server.ts'
+import { prisma } from '#app/utils/db.server.ts'
+import { cn, getNoteImgSrc, useIsPending } from '#app/utils/misc.tsx'
+import { redirectWithToast } from '~/utils/toast.server'
+
+const titleMinLength = 1
+const titleMaxLength = 100
+const contentMinLength = 1
+const contentMaxLength = 10000
+
+const MAX_UPLOAD_SIZE = 1024 * 1024 * 3 // 3MB
+
+const ImageFieldsetSchema = z.object({
+	id: z.string().optional(),
+	file: z
+		.instanceof(File)
+		.optional()
+		.refine(file => {
+			return !file || file.size <= MAX_UPLOAD_SIZE
+		}, 'File size must be less than 3MB'),
+	altText: z.string().optional(),
+})
+
+type ImageFieldset = z.infer<typeof ImageFieldsetSchema>
+
+function imageHasFile(
+	image: ImageFieldset,
+): image is ImageFieldset & { file: NonNullable<ImageFieldset['file']> } {
+	return Boolean(image.file?.size && image.file?.size > 0)
+}
+
+function imageHasId(
+	image: ImageFieldset,
+): image is ImageFieldset & { id: NonNullable<ImageFieldset['id']> } {
+	return image.id != null
+}
+
+const NoteEditorSchema = z.object({
+	id: z.string().optional(),
+	title: z.string().min(titleMinLength).max(titleMaxLength),
+	content: z.string().min(contentMinLength).max(contentMaxLength),
+	images: z.array(ImageFieldsetSchema).max(5).optional(),
+})
+
+export async function action({ request }: ActionFunctionArgs) {
+	const userId = await requireUserId(request)
+
+	const formData = await parseMultipartFormData(
+		request,
+		createMemoryUploadHandler({ maxPartSize: MAX_UPLOAD_SIZE }),
+	)
+	await validateCSRF(formData, request.headers)
+
+	const submission = await parse(formData, {
+		schema: NoteEditorSchema.superRefine(async (data, ctx) => {
+			if (!data.id) return
+
+			const note = await prisma.note.findUnique({
+				select: { id: true },
+				where: { id: data.id, ownerId: userId },
+			})
+			if (!note) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: 'Note not found',
+				})
+			}
+		}).transform(async ({ images = [], ...data }) => {
+			return {
+				...data,
+				imageUpdates: await Promise.all(
+					images.filter(imageHasId).map(async i => {
+						if (imageHasFile(i)) {
+							return {
+								id: i.id,
+								altText: i.altText,
+								contentType: i.file.type,
+								blob: Buffer.from(await i.file.arrayBuffer()),
+							}
+						} else {
+							return {
+								id: i.id,
+								altText: i.altText,
+							}
+						}
+					}),
+				),
+				newImages: await Promise.all(
+					images
+						.filter(imageHasFile)
+						.filter(i => !i.id)
+						.map(async image => {
+							return {
+								altText: image.altText,
+								contentType: image.file.type,
+								blob: Buffer.from(await image.file.arrayBuffer()),
+							}
+						}),
+				),
+			}
+		}),
+		async: true,
+	})
+
+	if (submission.intent !== 'submit') {
+		return json({ submission } as const)
+	}
+
+	if (!submission.value) {
+		return json({ submission } as const, { status: 400 })
+	}
+
+	const {
+		id: noteId,
+		title,
+		content,
+		imageUpdates = [],
+		newImages = [],
+	} = submission.value
+
+	const updatedNote = await prisma.note.upsert({
+		select: { id: true, owner: { select: { username: true } } },
+		where: { id: noteId ?? '__new_note__' },
+		create: {
+			ownerId: userId,
+			title,
+			content,
+			images: { create: newImages },
+		},
+		update: {
+			title,
+			content,
+			images: {
+				deleteMany: { id: { notIn: imageUpdates.map(i => i.id) } },
+				updateMany: imageUpdates.map(updates => ({
+					where: { id: updates.id },
+					data: { ...updates, id: updates.blob ? cuid() : updates.id },
+				})),
+				create: newImages,
+			},
+		},
+	})
+
+	return redirect(
+		`/users/${updatedNote.owner.username}/notes/${updatedNote.id}`,
+	)
+}
 ```
 
-:::note
+:::note[Tip]
+
+Finding code in longer files like this can be tricky and time-consuming.
 
 Use <MonsterKbd>**CTRL + F**</MonsterKbd> (<MonsterKbd>**CMD + F**</MonsterKbd> on Mac) to search for "`return redirect`" in the `__note-editor.tsx` file:
 
 ![Search for redirect method](src/assets/png/search-for-redirect.png)
+
+Remember this tip when you are searching for specific text in the future!
 
 :::
 
@@ -122,17 +413,25 @@ Save your changes, and then select a note for editing. Once you click the 'Submi
 
 :::tip[Challenge]
 
-Head to the 'Login' screen in your browser at the following URL:
+## Challenge - notify users when they log in
+
+Can you add a toast notification to inform users when they have logged in successfully to the website? Follow the tips below to help you get started:
+
+1. Make sure you are signed out of any existing user accounts.
+2. Head to the 'Login' screen in your browser at the following URL:
 
 ```bash
 http://localhost:3000/login
 ```
 
-Find the correct route file for this page, and add a toast notification to inform users when they have logged in successfully to the website.
+3. Open the correct route file for the 'Login' screen - `app/routes/_auth+/login.tsx`.
+4. Work out where to add a toast notification to inform users when they have logged in successfully to the website.
 
-There are **two* places where we need to swap out `redirect` for `redirectWithToast` in the `action` function. Can you find them both?
+**HINTS**
 
-The toast message should have a `type` of 'success', a `title` of 'Welcome back!', and a `description` of 'You have logged in successfully':
+- There are ***two*** places where we need to swap out `redirect` for `redirectWithToast` in the `action` function. Can you find them both?
+- You'll notice that the current `redirect` methods have a second argument of a function called `combineResponseInits`. This will become the **third** argument in the `redirectWithToast` method.
+- The toast message should have a `type` of 'success', a `title` of 'Welcome back!', and a `description` of 'You have logged in successfully':
 
 ![Login toast notification](src/assets/gif/login-toast.gif)
 
@@ -212,7 +511,7 @@ The toast message should have a `type` of 'success', a `title` of 'Welcome back!
 
     This is the code that gets executed if the user logs in without two factor authentication.
 
-    Test your solution by loggging in with both methods and checking that the toast notification appears.
+    Test your solution by logging in with both methods and checking that the toast notification appears.
   </div>
 </MonsterDetails>
 
@@ -222,4 +521,6 @@ The toast message should have a `type` of 'success', a `title` of 'Welcome back!
 
 In this tutorial, we learned about toast notifications and how to add them to the Epic News app. We also learned how to locate the correct route file, and how to swap out the `redirect` method for the `redirectWithToast` method in the `action` function of a route file.
 
-As you build your application, you can use toast notifications to keep users informed of a process or action that has occurred. This can help to improve the user experience and make your app more user-friendly.
+As you build your application, you can use toast notifications to keep users informed of a process or action that has occurred. Users appreciate being kept up-to-date with what is happening in the app, and toast notifications are a great way to do this.
+
+This can help to improve the overall user experience (UX) and make your app more user-friendly.

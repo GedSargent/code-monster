@@ -70,36 +70,48 @@ export default defineConfig({
           label: "Prisma",
           items: [
             {
-              label: "🗄️ Getting started",
-              link: "guides/prisma/getting-started",
+              label: "🗄️ Database config",
+              collapsed: true,
+              items: [
+                {
+                  label: "🗄️ Getting started",
+                  link: "guides/prisma/getting-started",
+                },
+                {
+                  label: "🗄️ The schema and migrations",
+                  link: "guides/prisma/prisma-schema",
+                },
+                {
+                  label: "🗄️ Prisma Studio",
+                  link: "guides/prisma/prisma-studio",
+                },
+                {
+                  label: "🗄️ Database relationships",
+                  link: "guides/prisma/database-relationships",
+                },
+                {
+                  label: "🌱 Seed files",
+                  link: "guides/prisma/seed-files",
+                },
+                {
+                  label: "🗄️ Reading data - loader functions",
+                  link: "guides/prisma/reading-data",
+                }
+              ]
             },
             {
-              label: "🗄️ The schema and migrations",
-              link: "guides/prisma/prisma-schema",
-            },
-            {
-              label: "🗄️ Prisma Studio",
-              link: "guides/prisma/prisma-studio",
-            },
-            {
-              label: "🗄️ Database relationships",
-              link: "guides/prisma/database-relationships",
-            },
-            {
-              label: "🌱 Seed files",
-              link: "guides/prisma/seed-files",
-            },
-            {
-              label: "🗄️ Reading data - loader functions",
-              link: "guides/prisma/reading-data",
-            },
-            {
-              label: "🖥️ Displaying data - props and interfaces",
-              link: "guides/prisma/displaying-data",
-            },
-            {
-              label: "🖥️ Displaying data - the map function",
-              link: "guides/prisma/using-map",
+              label: "🖥️ Displaying data",
+              collapsed: true,
+              items: [
+                {
+                  label: "🖥️ Props and interfaces",
+                  link: "guides/prisma/displaying-data",
+                },
+                {
+                  label: "🖥️ The map function",
+                  link: "guides/prisma/using-map",
+                }
+              ]
             },
           ]
         },
@@ -107,11 +119,12 @@ export default defineConfig({
           label: "Epic News",
           items: [
             {
-              label: "The root.tsx file",
+              label: "⚙️ The root.tsx file",
               link: "guides/epic-news/root-tsx",
             },
             {
               label: "🌞 Light and Dark Mode",
+              collapsed: true,
               items: [
                 {
                   label: "🌞 Setting up",
@@ -132,11 +145,12 @@ export default defineConfig({
               ],
             },
             {
-              label: "Navbar and Footer",
+              label: "⚙️ Navbar and Footer",
               link: "guides/epic-news/navbar-and-footer",
             },
             {
               label: "🔀 Routing in Remix",
+              collapsed: true,
               items: [
                 {
                   label: "🔀 The `Outlet` component",
@@ -152,27 +166,33 @@ export default defineConfig({
                 },
               ]
             },
-
             {
-              label: "Authentication and security",
-              link: "guides/epic-news/authentication-and-security",
+              label: "🔒 Security",
+              collapsed: true,
+              items: [
+                {
+                  label: "🔒 Authentication and security",
+                  link: "guides/epic-news/authentication-and-security",
+                },
+                {
+                  label: "🔒 Account creation",
+                  link: "guides/epic-news/account-creation",
+                },
+                {
+                  label: "🔒 Single Sign-On",
+                  link: "guides/epic-news/single-sign-on",
+                },
+              ]
             },
             {
-              label: "Account creation",
-              link: "guides/epic-news/account-creation",
-            },
-            {
-              label: "Single Sign-On",
-              link: "guides/epic-news/single-sign-on",
-            },
-            {
-              label: "Toast notifications",
+              label: "⚙️ Toast notifications",
               link: "guides/epic-news/toast-notifications",
-            },
+            }
           ],
         },
         {
           label: "Reference",
+          collapsed: true,
           autogenerate: {
             directory: "reference",
           },

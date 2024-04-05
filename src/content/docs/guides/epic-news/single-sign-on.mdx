@@ -1,0 +1,136 @@
+---
+title: Single-sign-on (SSO)
+description: Learn how to configure single-sign-on (SSO) with Github for your application.
+---
+
+Another way to sign up for an account is with a single-sign-on (SSO) provider. Using a SSO provider like GitHub is a great way to reduce the number of passwords a user has to remember. A single digital identity can be used to access multiple applications.
+
+In this guide, we'll use GitHub, which is pre-installed in the Epic Stack, but it's possible to add more if you want to.
+
+## What is SSO and OAuth?
+
+Tranditionally, when a user signs up for an account on a website, they create a username and password. This is known as a "local" account.
+
+With SSO, a user can sign up for an account using an existing account with a third-party provider, like GitHub.
+
+OAuth is a protocol that allows a user to grant a third-party application access to their account without sharing their password. When you sign up for an account using GitHub, you are using OAuth to authenticate with GitHub.
+
+## Set up a GitHub OAuth application
+
+To use GitHub as an SSO provider, you need to create an OAuth application in your GitHub account. This will give you a `client_id` and `client_secret` that you can use to authenticate users. Let's go through the steps to set this up.
+
+1. Log in to your GitHub account.
+2. Click your profile icon on the top right of your screen and go to `Settings -> Developer settings -> OAuth Apps`.
+
+![Navigate to Github OAuth Apps](src/assets/png/epic-news/navigate-to-github-oauth.png)
+
+3. Hit the "**Register a new application**" button.
+
+![Github registerr new app](src/assets/png/epic-news/github-register-new-app.png)
+
+4. Type in `http://localhost:3000` for "Homepage URL" and `http://localhost:3000/auth/github/callback` for "Authorization callback URL". As for the Application name set to something meaningful (because your users will see the app's name), e.g. `EPIC_NEWS`.
+
+![Register app form details](src/assets/png/epic-news/register-app-form-details.png)
+
+6. Hit the "Register application" button.
+7. You will be redirected to the page with your newly created OAuth app's details. You will see your app has got 0 users and no client secrets just yet, but the Client ID has already been assigned to your app.
+
+![New OAuth Details](src/assets/png/epic-news/new-oauth-details.png)
+
+8. Copy over the `Client ID` value and paste it as the `GITHUB_CLIENT_ID` in your `.env` file.
+
+![Copy Client ID to env file](src/assets/png/epic-news/copy-client-id-to-env.png)
+
+9. Now hit the "Generate client secret" button.
+
+![Generate new secret client button](src/assets/png/epic-news/generate-new-client-secret-button.png)
+
+10. Copy over the newly generted secret to `GITHUB_CLIENT_SECRET` in the `.env` file.
+
+![Copy Client Secret to env file](src/assets/png/epic-news/copy-client-secret-to-env.png)
+
+10. Hit the `Update application` button at the bottom of your GitHub OAuth app page.
+
+![Update application button](src/assets/png/epic-news/update-application-button.png)
+
+Your final `.env` file should now resemble this (values have been redacted):
+
+```sh title=".env" frame="none" showLineNumbers collapse={1-9} {13, 14}
+LITEFS_DIR="/litefs/data"
+DATABASE_PATH="./prisma/data.db"
+DATABASE_URL="file:./data.db?connection_limit=1"
+CACHE_DATABASE_PATH="./other/cache.db"
+SESSION_SECRET="super-duper-s3cret"
+HONEYPOT_SECRET="super-duper-s3cret"
+INTERNAL_COMMAND_TOKEN="some-made-up-token"
+RESEND_API_KEY="re_blAh_blaHBlaHblahBLAhBlAh"
+SENTRY_DSN="your-dsn"
+
+# the mocks and some code rely on these two being prefixed with "MOCK_"
+# if they aren't then the real github api will be attempted
+GITHUB_CLIENT_ID="72fa***************a"
+GITHUB_CLIENT_SECRET="b2c6d323b**************************eae016"
+GITHUB_TOKEN="MOCK_GITHUB_TOKEN"
+```
+
+:::danger[Important]
+
+Before continuing, be sure to **restart your application** to pick up the new environment variables.
+
+You can do this by stopping the server with `Ctrl + C` in your terminal, and then running `npm run dev` again.
+
+:::
+
+## Create a website user account via Github SSO
+
+Make sure you are signed out of any existing user accounts on your Epic News application by clicking the "Logout" button in the top right corner of the screen.
+
+![Sign out](src/assets/png/epic-news/sign-out.png)
+
+Next, in the address bar of your browser, navigate to the `/signup` route.
+
+```bash title="Epic News signup URL"
+http://localhost:3000/signup
+```
+
+This time, click on the "Signup with GitHub" button.
+
+![Epic News signup screen](src/assets/png/signup-with-github.png)
+
+You'll be told that you don't have any connections yet. Click "**Connect with GitHub**":
+
+![No connections prompt](src/assets/png/epic-news/no-connections-prompt.png)
+
+If you are not already logged in to GitHub, you will be prompted to do so. Once you are logged in, you will be asked fill in your user details.
+
+You will notice that this time, your username and avatar have been pre-filled from your GitHub account. Add your name, accept the Terms of Service, then click "**Create an account**".
+
+![Github user details](src/assets/png/sso-user-details.png)
+
+:::tip[Challenge]
+
+Once you have created an account, spend some time exploring the different functionality available to authenticated users.
+
+You can access the features listed below via the user actions dropdown in the top right corner of the screen:
+
+![User actions dropdown](src/assets/png/epic-news/user-actions-dropdown.png)
+
+For example, you can:
+
+- View your profile page.
+- Edit your email address and password.
+- Manage 'connections' - a feature that allows you to see and edit which SSO providers your account is connected to.
+- Download your data. What data is stored in the application about you?.
+- See which active sessions are currently logged in to your account. **TIP**: Try logging in to your account from another browser or an incognito session to see this feature in action.
+- Create, edit, read and delete 'notes'.
+- Delete your account.
+
+![Profile actions](src/assets/png/profile-actions.png)
+
+## Summary
+
+In this guide, you learned how to set up a GitHub OAuth application and use it to authenticate users in your Epic News application.
+
+You also explored the different features available to authenticated users, such as managing connections, viewing active sessions, and creating, editing, reading, and deleting notes.
+
+In the next guide, you will learn how to add 'toast' notifications to your application.

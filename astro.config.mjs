@@ -158,8 +158,12 @@ export default defineConfig({
               link: "guides/epic-news/authentication-and-security",
             },
             {
-              label: "Account creation and SSO",
+              label: "Account creation",
               link: "guides/epic-news/account-creation",
+            },
+            {
+              label: "Single Sign-On",
+              link: "guides/epic-news/single-sign-on",
             },
             {
               label: "Toast notifications",

@@ -34,7 +34,7 @@ if (image) {
 }
 ---
 
-<div class="container md:flex md:flex-row-reverse md:gap-24 md:py-24">
+<div class="container -mb-8 md:flex md:mb-0 md:flex-row-reverse md:gap-24 md:py-8">
 	<div class="flex justify-center">
     {
       darkImage && (
@@ -48,7 +48,7 @@ if (image) {
     {lightImage && <Image src={lightImage} {...imageAttrs} class="dark:sl-hidden" />}
     {rawHtml && <div class="hero-html sl-flex" set:html={rawHtml} />}
   </div>
-	<div class="py-8">
+	<div class="flex items-center">
 		<div class="pb-8 lg:pb-16">
 			<h1 class="font-hero text-center pb-4 leading-10 md:text-left">
         <span class="text-5xl font-black lg:text-7xl">Welcome to
@@ -57,11 +57,6 @@ if (image) {
       </h1>
 			{tagline ? <div class="text-gray-400 text-xl text-center md:text-left md:text-3xl" set:html={tagline} /> : null}
 		</div>
-    <div class="flex justify-center gap-6 md:justify-start">
-      {actions.map(({ text, variant, link }: HeroActionArgs) => (
-      <CallToAction variant={variant} link={link} set:html={text} />
-    ))}
-    </div>
 	</div>
 </div>
 

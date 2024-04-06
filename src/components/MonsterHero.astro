@@ -1,15 +1,8 @@
 ---
-import CallToAction from '@astrojs/starlight/components/CallToAction.astro';
 import { Image } from 'astro:assets';
 
-interface HeroActionArgs {
-  text: string;
-  variant: "primary" | "secondary" | "minimal";
-  link: string;
-}
-
 const { data } = Astro.props.entry;
-const { tagline, image, actions = [] } = data.hero || {};
+const { tagline, image } = data.hero || {};
 
 const imageAttrs = {
 	loading: 'eager' as const,

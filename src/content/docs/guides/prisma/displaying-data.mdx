@@ -29,7 +29,7 @@ We will update the `Article` component to accept a `title` prop, and then use th
 
 Firstly, add the following code to the `Article` component:
 
-```diff title="app/routes/articles.tsx" ins="{ title }: ArticleProps" ins="{title}"
+```diff lang="tsx" title="app/routes/articles.tsx" ins="{ title }: ArticleProps" ins="{title}"
 +interface ArticleProps {
 +  title: string
 +}
@@ -157,3 +157,5 @@ If all goes well, you should now see the titles of the articles displayed on the
 So far, so good.
 
 But what if we want to display more than two articles? What if we don't know exactly how many articles we will have?
+
+This is precisely what the `.map()` function can help us with, and we will explore this in the next step.

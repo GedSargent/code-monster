@@ -1,0 +1,474 @@
+---
+title: Schema updates
+description: Add articles to the app, associate them with users and display some raw article data on the front-end.
+---
+
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Objectives
+
+In this section, we will begin the process of adding articles to the app, associating them with users and displaying some raw article data on the front-end. This will involve:
+
+1. Updating the Prisma schema found at `prisma/schema.prisma`
+2. Updating the seed data generated in `prisma/seed.ts` to populate our database with some dummy articles
+3. Changing the file structure of the project to replace 'notes' with 'articles'
+4. Display some raw, unstyled article data in the `/news/$category.tsx` route file that we created in a [**previous lesson**](/code-monster/guides/epic-news/routing/dynamic-routes#creating-a-dynamic-route)
+
+🚀 **Let's get started!** 🚀
+
+## The schema file
+
+If you remember from our [**previous lesson**](/code-monster/guides/prisma/prisma-schema), a Prisma schema serves as a blueprint for your database, defining the structure of your data.
+
+Open the Prisma schema for the project which can be found at `prisma/schema.prisma`.
+
+:::note
+
+In a Prisma schema, you define your data models, each representing a table in the database. For each model, you specify the fields (which correspond to columns in the database table), their types, and any constraints or relations they might have.
+
+:::
+
+In the code snippet below is a copy of the `User`, `Note` and `NoteImage` models from the project.
+
+Click on the collapsed lines to expand them one at a time, and look carefully at the links between them.
+
+Can you see how they are related to each other? 🧐
+
+```prisma showLineNumbers collapse={2-15, 19-34, 38-50}
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  username String  @unique
+  name     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  image       UserImage?
+  password    Password?
+  notes       Note[]
+  roles       Role[]
+  sessions    Session[]
+  connections Connection[]
+}
+
+model Note {
+  id      String @id @default(cuid())
+  title   String
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId String
+
+  images NoteImage[]
+
+  // non-unique foreign key
+  @@index([ownerId])
+  // This helps our order by in the user search a LOT
+  @@index([ownerId, updatedAt])
+}
+
+model NoteImage {
+  id          String  @id @default(cuid())
+  altText     String?
+  contentType String
+  blob        Bytes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  noteId String
+
+  // non-unique foreign key
+  @@index([noteId])
+}
+```
+
+<MonsterReveal title="Understanding the model relationships">
+
+Let's take each of the models in turn:
+
+### `User`
+
+- A user can have many `notes`, `roles`, `sessions` and `connections`.
+- A user can also have an `image` and a `password`. Note that the `image` and `password` fields are optional. We can tell this because they are defined with a `?` at the end of the type declaration.
+
+```prisma
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  username String  @unique
+  name     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  image       UserImage?
+  password    Password?
+  notes       Note[]
+  roles       Role[]
+  sessions    Session[]
+  connections Connection[]
+}
+```
+
+### `Note`
+
+- A note can have many `images`.
+- A note belongs to a `user` (the `owner` field). This is known as a **one-to-many relationship**, as a user can have many `notes`, but a `note` can only belong to one `user`.
+- The `ownerId` field is a foreign key that references the `id` field of the `User` model.
+- The `ownerId` field and the `updatedAt` field are indexed to improve performance. We can tell this because of the `@@index` directive at the end of the model.
+
+```prisma
+model Note {
+  id      String @id @default(cuid())
+  title   String
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId String
+
+  images NoteImage[]
+
+  // non-unique foreign key
+  @@index([ownerId])
+  // This helps our order by in the user search a LOT
+  @@index([ownerId, updatedAt])
+}
+```
+
+### `NoteImage`
+
+- A `noteImage` belongs to a `note`. This is known as a **one-to-many relationship**, as a `note` can have many `images`, but an `image` can only belong to one `note`.
+- The `noteId` field is a foreign key that references the `id` field of the `Note` model.
+- The `noteId` field is indexed to improve performance. We can tell this because of the `@@index` directive at the end of the model.
+
+```prisma
+model NoteImage {
+  id          String  @id @default(cuid())
+  altText     String?
+  contentType String
+  blob        Bytes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  noteId String
+
+  // non-unique foreign key
+  @@index([noteId])
+}
+```
+
+</MonsterReveal>
+
+## What does an `Article` model need?
+
+Think carefully about what an `Article` model needs to have in order to be useful for our app. 🤔
+
+To get you started, an `Article` model should have:
+
+- a `title` and `content` field.
+- an `owner` field that references a `User`.
+- an `images` field that references an `ArticleImage`. The `ArticleImage` should be a separate model. But what should it contain?
+
+:::tip[Challenge]
+
+1. Can you think of any other fields that an `Article` model might need? For example:
+    - how could you indicate that an `Article` is published or draft?
+    - how could you organise articles into categories such as 'news', 'reviews', 'tutorials' etc.?
+    - should should everything related to an `Article` be contained within the `Article` model, or should some fields require a separate model?
+    - If there are some fields that require separate models, what should these separate models contain? How would you link them to the `Article` model?
+
+2. Using the `Note` model as a reference, sketch out an `Article` model in a FigJam diagram that meets the requirements above.
+  - For each field, include the:
+    - field name
+    - data type (e.g. `String`, `DateTime`, `Boolean` etc.)
+    - whether it is **required** or **optional**
+    - if the field should have a **default value** and what that value should be
+    - any **constraints** or **relationships** that the field should have
+  - Don't worry about writing the actual code for this now, just focus on the fields and relationships that you think an `Article` model should have.
+
+<MonsterReveal>
+
+### Requirements for an `Article` model
+
+An `Article` model should have the following:
+- a `title` and `content` field. These fields should be
+- An `Article` should have an `owner` field that references a `User`.
+
+
+</MonsterReveal>
+
+:::
+
+## Converting the `Note` model to an `Article` model
+
+As you've probably realised by now, we are very lucky. Many of the features that we need for articles are already present in the `Note` model.
+
+For example, the `title`, `content`, `createdAt`, `updatedAt` and `owner` fields are already present in the `Note` model. Similarly, the `images` field is already present in the `Note` model, and the `NoteImage` model can be easily refactored to become an `ArticleImage` model instead.
+
+### 1. Rename models
+
+Let's start by simply renaming the `Note` model to `Article` and the `NoteImage` model to `ArticleImage`:
+
+```diff lang="prisma" showLineNumbers collapse={5-13, 25-32}
+-model Note {
++model Article {
+  id      String @id @default(cuid())
+  title   String
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId String
+
+  images NoteImage[]
+
+  // non-unique foreign key
+  @@index([ownerId])
+  // This helps our order by in the user search a LOT
+  @@index([ownerId, updatedAt])
+}
+
+-model NoteImage {
++model ArticleImage {
+  id          String  @id @default(cuid())
+  altText     String?
+  contentType String
+  blob        Bytes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  noteId String
+
+  // non-unique foreign key
+  @@index([noteId])
+}
+```
+
+You'll notice several red underlines have appeared in the schema.
+
+This is because the `Note` and `NoteImage` models have been removed, so we need to update the references to these in the `User` `Article` and `ArticleImage` models.
+
+### 2. Update `User` and `Article`
+
+Let's start with just the `User` and `Article` models:
+
+```diff lang="prisma" collapse={2-8, 20-27, 34-36}
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  username String  @unique
+  name     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  image       UserImage?
+  password    Password?
+-  notes       Note[]
++  articles    Article[]
+  roles       Role[]
+  sessions    Session[]
+  connections Connection[]
+}
+
+model Article {
+  id      String @id @default(cuid())
+  title   String
+  content String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId String
+
+-  images NoteImage[]
++  images ArticleImage[]
+
+  // non-unique foreign key
+  @@index([ownerId])
+  // This helps our order by in the user search a LOT
+  @@index([ownerId, updatedAt])
+}
+```
+
+These are both straightforward changes. We've simply replaced the `notes` field in the `User` model with `articles`, and the `images` field in the `Article` model with `ArticleImage`.
+
+### 3. Update the `ArticleImage` model
+
+The `ArticleImage` model is a little more complex, as it references the `Article` model as the parent.
+
+In other words, each `ArticleImage` belongs to a single `Article` that it needs to reference via a foreign key.
+
+We therefore need to make several changes here:
+
+- rename the `note` field to `article`
+- reference the `Article` model instead of the `Note` model
+- rename the `noteId` field to `articleId`
+- reference the `id` field of the `Article` model instead of the `Note` model
+- update the `@@index` directive to reference `articleId` instead of `noteId`
+
+:::danger[Extra care needed!]
+
+This is a complex change, so take your time to place the code snippets exactly where shown in the diff below.
+
+Remember, green lines are additions, and red lines are deletions.
+
+:::
+
+```diff lang="prisma"
+model ArticleImage {
+  id          String    @id @default(cuid())
+  altText     String?
+  contentType String
+  blob        Bytes
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+-  note        Note      @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
++  article     Article   @relation(fields: [articleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+-  noteId      String
++  articleId   String
+
+  // non-unique foreign key
+-  @@index([noteId])
++  @@index([articleId])
+}
+```
+
+### 4. Additional `Article` fields
+
+Finally, we need to add some additional fields to the `Article` model to indicate whether an article is published or draft, and when it was published:
+
+```diff lang="prisma" showLineNumbers collapse={11-19}
+model Article {
+  id          String @id @default(cuid())
+  title       String
+  content     String
++  isPublished Boolean @default(false)
+
++  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner       User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId     String
+
+  images      ArticleImage[]
+
+  // non-unique foreign key
+  @@index([ownerId])
+  // This helps our order by in the user search a LOT
+  @@index([ownerId, updatedAt])
+}
+```
+
+Notice that the `isPublished` field is a `Boolean` type with a default value of `false`. Similarly, the `publishedAt` field is a `DateTime` type that is optional.
+
+Why do you think the `publishedAt` field is optional, and `isPublished` has an initial value of `false`? 🤔
+
+<MonsterReveal>
+- The `isPublished` field is a `Boolean` type because it can only have two values: `true` or `false`. It has a default value of `false` because an article is usually a draft when it is first created. When the article is published, the `isPublished` field will be set to `true`.
+- The `publishedAt` field is optional because an article might be a draft and not yet published. In this case, the `publishedAt` field would be `null`.
+</MonsterReveal>
+
+:::tip[Challenge]
+
+## Add a `Category` model and link to an `Article`
+
+It's always a good idea to organise articles into categories such as 'Tech', 'Business', 'Gaming' etc.
+
+1. Create an `ArticleCategory` model in the Prisma schema.
+2. The `ArticleCategory` model should have the following fields:
+    - an `id` field of type `String` that is the primary key, and has a default value of `cuid()`
+    - a `name` field of type `String`
+    - a `slug` field of type `String` that is unique
+    - a `createdAt` field of type `DateTime` that has a default value of `now()`
+    - an `updatedAt` field of type `DateTime` that is updated automatically
+
+3. Each article should belong to a single category. Add a `category` field to the `Article` model that references the `ArticleCategory` model.
+4. The `category` field should be optional, as an article might not belong to any category.
+5. Update the `Article` model to include a `categoryId` field that references the `id` field of the `ArticleCategory` model.
+6. The `category` field should be set to cascade on delete and update.
+7. The `categoryId` field should be indexed to improve performance.
+
+#### 🦉 TIP
+
+- Look back at the `Note` model to see how the `owner` field is linked to the `User` model. You will need to do something similar for the `category` field in the `Article` model.
+
+### Solution
+
+After you've had a go at the challenge, click the section below to reveal the solution.
+
+<MonsterReveal>
+1. Create an `ArticleCategory` model in the Prisma schema.
+
+```prisma
+model ArticleCategory {
+  id          String @id @default(cuid())
+  name        String
+  slug        String @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  articles    Article[]
+}
+```
+
+2. Link the `Article` model to the new `ArticleCategory` model.
+```diff lang="prisma"
+model Article {
+  id          String @id @default(cuid())
+  title       String
+  content     String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner       User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId     String
+
++  category    ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
++  categoryId  String?
+
+  images      ArticleImage[]
+
+  // non-unique foreign key
+  @@index([ownerId])
++  @@index([categoryId])
+  // This helps our order by in the user search a LOT
+  @@index([ownerId, updatedAt])
+}
+```
+</MonsterReveal>
+
+## Summary
+
+In this section, we have:
+
+- Updated the Prisma schema to include an `Article` model and an `ArticleImage` model.
+- Updated the `User` model to include an `articles` field that references the `Article` model.
+- Updated the `Article` model to include an `isPublished`, `publishedAt` and `category` field.
+- Updated the `ArticleImage` model to reference the `Article` model instead of the `Note` model.
+
+## What's next?
+
+In the next tutorial, we will modify the seed data to include some categories and dummy articles that will be used to populate the database.
+
+:::

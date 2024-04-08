@@ -187,6 +187,16 @@ export default defineConfig({
             {
               label: "⚙️ Toast notifications",
               link: "guides/epic-news/toast-notifications",
+            },
+            {
+              label: '🗄️ Prisma database updates',
+              collapsed: true,
+              items: [
+                {
+                  label: '🗄️ Schema updates',
+                  link: 'guides/epic-news/prisma/schema-updates'
+                }
+              ]
             }
           ],
         },

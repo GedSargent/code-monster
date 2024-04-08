@@ -11,7 +11,7 @@ const { title = "Hover to reveal" } = Astro.props;
     <slot />
   </div>
 
-  <div class="grid content-center absolute inset-0 border-2 border-gray-200 rounded-2xl shadow-2xl transition duration-500 backdrop-blur-lg !mt-0 dark:backdrop-blur-2xl dark:bg-white/5 dark:border-gray-700 group-hover:backdrop-blur-0 dark:group-hover:backdrop-blur-0 group-hover:cursor-pointer group-hover:shadow-sm">
-    <div class="text-gray-600 text-5xl text-center font-black drop-shadow-lg transition duration-500 dark:text-gray-200 group-hover:text-transparent md:text-6xl">{title}</div>
+  <div class="grid absolute inset-0 border-2 border-gray-200 rounded-2xl shadow-2xl transition duration-500 backdrop-blur-lg !mt-0 dark:backdrop-blur-2xl dark:bg-white/5 dark:border-gray-700 group-hover:backdrop-blur-0 dark:group-hover:backdrop-blur-0 group-hover:cursor-pointer group-hover:shadow-sm">
+    <div class="place-self-center text-gray-600 text-5xl text-center font-black text-shadow text-shadow-y-3 transition duration-500 dark:text-gray-200 group-hover:text-transparent group-hover:text-shadow-transparent md:text-6xl">{title}</div>
   </div>
 </div>

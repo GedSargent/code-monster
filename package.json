@@ -18,6 +18,7 @@
     "@astrojs/tailwind": "^5.1.0",
     "@codesandbox/sandpack-react": "^2.13.5",
     "@codesandbox/sandpack-themes": "^2.0.21",
+    "@designbycode/tailwindcss-text-shadow": "^2.0.0",
     "@expressive-code/plugin-collapsible-sections": "^0.33.5",
     "@expressive-code/plugin-line-numbers": "^0.33.5",
     "@react-spring/web": "^9.7.3",

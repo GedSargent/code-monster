@@ -1,4 +1,5 @@
 import starlightPlugin from '@astrojs/starlight-tailwind';
+import textShadowPlugin from '@designbycode/tailwindcss-text-shadow';
 
 // Generated color palettes
 const accent = { 200: '#b3c7ff', 600: '#364bff', 900: '#182775', 950: '#131e4f' };
@@ -40,5 +41,10 @@ export default {
 			colors: { accent, gray },
 		},
 	},
-	plugins: [starlightPlugin()],
+	plugins: [starlightPlugin(), textShadowPlugin({
+    shadowColor: "rgba(0, 0, 0, 0.7)",
+    shadowBlur: "3px",
+    shadowOffsetX: "0px",
+    shadowOffsetY: "2px",
+  })],
 };

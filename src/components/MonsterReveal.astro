@@ -1,5 +1,5 @@
 ---
-import MonsterReveal from './react/MonsterReveal'
+import Reveal from './react/MonsterReveal'
 interface Props {
   title?: string;
 }
@@ -7,6 +7,6 @@ interface Props {
 const { title = "Click to reveal" } = Astro.props;
 ---
 
-<MonsterReveal client:only title={title}>
+<Reveal client:only title={title}>
   <slot />
-</MonsterReveal>
+</Reveal>

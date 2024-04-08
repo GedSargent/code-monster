@@ -3,7 +3,7 @@ title: Database relationships
 description: Linking database tables with Prisma
 ---
 
-import MonsterDetails from 'src/components/MonsterDetails.astro'
+import MonsterReveal from 'src/components/MonsterReveal.astro'
 import MonsterKbd from 'src/components/MonsterKbd.astro'
 
 ## What is a database relationship?
@@ -63,12 +63,12 @@ If every `Article` will belong to a single `User`, which fields do you think we 
 
 ***HINT**: Remember that each user can have multiple articles associated with them, and each article must belong to a user.*
 
-<MonsterDetails>
+<MonsterReveal>
   <div>
     <p>We can use the `id` field of the `User` table to link it to the `Article` table.</p>
     <p>This is a common pattern in databases, where the `id` field of one table is used as a foreign key in another table.</p>
   </div>
-</MonsterDetails>
+</MonsterReveal>
 
 Let's implement this relationship now.
 
@@ -130,7 +130,7 @@ Can you can work out how to generate a migration file to apply the new changes t
 - Refresh your memory of how to generate a migration file by reviewing the [**previous lesson**](/code-monster/guides/prisma/prisma-schema#creating-a-migration-file).
 - Remember that you will need to change the name of the migration file from `add-user-model` to something more appropriate for the changes we have made here.
 
-<MonsterDetails>
+<MonsterReveal>
   <div>
     <p>Running the command below in your terminal window will generate the file you need:</p>
     ```bash
@@ -140,7 +140,7 @@ Can you can work out how to generate a migration file to apply the new changes t
     ![Article migration warning](src/assets/png/prisma/article-migration-warning.png)
     <p>We don't have any data in the database yet, so can ignore this. Just hit <MonsterKbd>y</MonsterKbd> and continue 😎</p>
   </div>
-</MonsterDetails>
+</MonsterReveal>
 
 Finally, let's fire up Prisma Studio to check that the changes have been applied to the database.
 

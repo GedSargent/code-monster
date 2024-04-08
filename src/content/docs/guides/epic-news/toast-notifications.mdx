@@ -3,7 +3,7 @@ title: Toast Notifications
 description: Keep users informed of a process or action with a toast notification.
 ---
 
-import MonsterDetails from "src/components/MonsterDetails.astro";
+import MonsterReveal from "src/components/MonsterReveal.astro";
 import MonsterKbd from 'src/components/MonsterKbd.astro'
 
 ## What is a toast notification?
@@ -121,13 +121,13 @@ http://localhost:3000/users/<user-name>/notes/new
 
 Using Remix's naming convention that we looked at together in the [**'Nested Routes'**](/code-monster/guides/epic-news/nested-routes) guide, can you locate and open the project file that serves the page at `http://localhost:3000/users/<user-name>/notes/new`?
 
-<MonsterDetails>
+<MonsterReveal>
   <div>
     This graphic shows the relationship between file location and route URL in the Epic News app:
 
     ![Epic News route file structure](src/assets/png/route-file-naming-convention.png)
   </div>
-</MonsterDetails>
+</MonsterReveal>
 
 :::
 
@@ -435,7 +435,7 @@ http://localhost:3000/login
 
 ![Login toast notification](src/assets/gif/login-toast.gif)
 
-<MonsterDetails>
+<MonsterReveal>
   <div>
     The first place we need to swap out `redirect` for `redirectWithToast` is around line 77 in the `app/routes/_auth+/login.tsx` file.
 
@@ -513,7 +513,7 @@ http://localhost:3000/login
 
     Test your solution by logging in with both methods and checking that the toast notification appears.
   </div>
-</MonsterDetails>
+</MonsterReveal>
 
 :::
 

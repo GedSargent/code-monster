@@ -3,7 +3,7 @@ title: The Prisma Schema and Migrations
 description: Defining your database tables, fields and relationships
 ---
 
-import MonsterDetails from 'src/components/MonsterDetails.astro'
+import MonsterReveal from 'src/components/MonsterReveal.astro'
 import MonsterKbd from 'src/components/MonsterKbd.astro'
 
 All database interactions begin with the Prisma [**schema**](https://www.prisma.io/docs/orm/prisma-schema/overview).
@@ -94,7 +94,7 @@ datasource db {
 
 Take a moment to work out what you think this model doing. What fields does the `User` table have? What are the `@` symbols doing?
 
-<MonsterDetails title='Defining the User model'>
+<MonsterReveal title='Defining the User model'>
   <div>
     Let's break this down line by line:
 
@@ -116,7 +116,7 @@ Take a moment to work out what you think this model doing. What fields does the 
 
     `createdAt` and `updatedAt` are both date and time fields. `createdAt` is automatically set to the current date and time when a new user is created. `updatedAt` is automatically updated to the current date and time whenever the user is updated.
   </div>
-</MonsterDetails>
+</MonsterReveal>
 
 ## Applying changes to the database
 

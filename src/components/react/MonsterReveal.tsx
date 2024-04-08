@@ -19,7 +19,7 @@ export default function MonsterReveal({ children, title }: MonsterRevealProps) {
 
   return (
 		<ClickOutside onClick={handleClickOutside}>
-			<div onClick={handleClickInside} className={`relative rounded-2xl bg-white/50 border-2 border-gray-200 p-8 shadow-2xl shadow-black/40 transition duration-500 ${isBlurred ? 'cursor-pointer' : 'cursor-auto'} hover:shadow-md dark:border-gray-700 dark:bg-white/5`}>
+			<div onClick={handleClickInside} className={`relative rounded-2xl bg-white/50 border-2 border-gray-200 p-8 shadow-black/40 ${isBlurred ? 'shadow-2xl' : 'shadow-md shadow-black-20'} transition duration-500 ${isBlurred ? 'cursor-pointer' : 'cursor-auto'} hover:shadow-md hover:shadow-black/20 dark:border-gray-700 dark:bg-white/5`}>
 				<div className={`relative !mt-0 select-none transition duration-500 ${isBlurred ? `blur-xl select-none` : `blur-0 select-auto`}`}>
 					{children}
 				</div>

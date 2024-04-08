@@ -30,7 +30,6 @@ export default function MonsterReveal({ children, title }: MonsterRevealProps) {
 					</div>
 				</div>
 			</div>
-
 		</ClickOutside>
   );
 }

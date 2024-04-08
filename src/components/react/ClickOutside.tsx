@@ -1,43 +1,78 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react'
 
 interface ClickOutsideProps {
-  children: React.ReactNode;
-  exceptionRef?: React.RefObject<any>;
-  onClick: () => void;
-  className?: string;
+	children: React.ReactNode
+	exceptionRef?: React.RefObject<any>
+	onClick: () => void
+	className?: string
 }
 
-export default function ClickOutside({ children, exceptionRef, onClick, className }: ClickOutsideProps) {
-  const wrapperRef = useRef< HTMLDivElement | null >(null);
+export function ClickOutside({
+	children,
+	exceptionRef,
+	onClick,
+	className,
+}: ClickOutsideProps) {
+	const wrapperRef = useRef<HTMLDivElement | null>(null)
 
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickListener);
+	useEffect(() => {
+		document.addEventListener('mousedown', handleClickListener)
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickListener);
-    };
-  }, []);
+		return () => {
+			document.removeEventListener('mousedown', handleClickListener)
+		}
+	}, [])
 
-  const handleClickListener = (event: Event) => {
-    let clickedInside: Boolean | undefined = false;
+	const handleClickListener = (event: Event) => {
+		let clickedInside: Boolean | undefined = false
 
-    // Ensure wrapperRef?.current and exceptionRef?.current are treated as Node when calling contains
-    const target = event.target as Node; // Safely asserting event.target as Node
+		// Ensure wrapperRef?.current and exceptionRef?.current are treated as Node when calling contains
+		const target = event.target as Node // Safely asserting event.target as Node
+		const { nodeName } = target
+		const parentNodeName = target.parentNode?.nodeName
+		const isNotInsideButton = parentNodeName !== 'BUTTON'
+		const nodesToTriggerOutsideClick = [
+			'DIV',
+			'P',
+			'H1',
+			'H2',
+			'H3',
+			'H4',
+			'H5',
+			'H6',
+			'IMG',
+			'SVG',
+			'KBD',
+			'DL',
+			'DT',
+			'DD',
+			'OL',
+			'UL',
+			'LI',
+		]
 
-    if (exceptionRef && exceptionRef.current) {
-      clickedInside = wrapperRef?.current?.contains(target) || exceptionRef.current === target || exceptionRef.current.contains(target);
-    } else {
-      clickedInside = wrapperRef?.current?.contains(target);
-    }
+		const shouldTriggerOutsideClick =
+			!clickedInside &&
+			nodesToTriggerOutsideClick.includes(nodeName) &&
+			isNotInsideButton
 
-    if (!clickedInside) {
-      onClick();
-    }
-  };
+		if (exceptionRef && exceptionRef.current) {
+			clickedInside =
+				wrapperRef?.current?.contains(target) ||
+				exceptionRef.current === target ||
+				exceptionRef.current.contains(target)
+		} else {
+			clickedInside = wrapperRef?.current?.contains(target)
+		}
 
-  return (
-    <div ref={wrapperRef} className={`${className || ''}`}>
-      {children}
-    </div>
-  );
-};
+		if (shouldTriggerOutsideClick) {
+			onClick()
+		}
+	}
+
+	return (
+		<div ref={wrapperRef} className={`${className || ''}`}>
+			{children}
+		</div>
+	)
+}

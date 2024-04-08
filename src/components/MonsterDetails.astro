@@ -1,19 +1,12 @@
 ---
-import { Icon } from "@astrojs/starlight/components";
+import MonsterReveal from './react/MonsterReveal'
 interface Props {
   title?: string;
 }
 
-const { title = "Solution" } = Astro.props;
+const { title = "Click to reveal" } = Astro.props;
 ---
 
-
-<details class="p-4 border-l-4 border-lime-700 bg-green-100 dark:bg-lime-950 dark:border-lime-700 dark:text-white [&_svg]:open:rotate-90">
-  <summary class="flex items-end list-none h-fit hover:cursor-pointer">
-    <Icon name="right-caret" size="2rem" class="pb-1 pr-2 fill-lime-900 rotate-0 transform h-fit transition-all duration-300 dark:fill-lime-300"/>
-    <h2><span class="text-lime-900 dark:text-lime-300">🦦 {title}</span></h2>
-  </summary>
-
+<MonsterReveal client:only title={title}>
   <slot />
-
-</details>
+</MonsterReveal>

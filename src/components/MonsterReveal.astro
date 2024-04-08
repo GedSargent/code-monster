@@ -7,6 +7,6 @@ interface Props {
 const { title = "Click to reveal" } = Astro.props;
 ---
 
-<Reveal client:only title={title}>
+<Reveal client:load title={title}>
   <slot />
 </Reveal>

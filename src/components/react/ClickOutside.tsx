@@ -7,7 +7,7 @@ interface ClickOutsideProps {
 	className?: string
 }
 
-export function ClickOutside({
+export default function ClickOutside({
 	children,
 	exceptionRef,
 	onClick,
@@ -30,6 +30,7 @@ export function ClickOutside({
 		const target = event.target as Node // Safely asserting event.target as Node
 		const { nodeName } = target
 		const parentNodeName = target.parentNode?.nodeName
+
 		const isNotInsideButton = parentNodeName !== 'BUTTON'
 		const nodesToTriggerOutsideClick = [
 			'DIV',

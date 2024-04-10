@@ -437,7 +437,9 @@ model Article {
   id          String @id @default(cuid())
   title       String
   content     String
+  isPublished Boolean @default(false)
 
+  publishedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

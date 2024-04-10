@@ -195,6 +195,10 @@ export default defineConfig({
                 {
                   label: '🗄️ Schema updates',
                   link: 'guides/epic-news/prisma/schema-updates'
+                },
+                {
+                  label: '🌱 Modify seed file',
+                  link: 'guides/epic-news/prisma/modify-seed-file'
                 }
               ]
             }

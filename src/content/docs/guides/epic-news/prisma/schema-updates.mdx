@@ -460,6 +460,44 @@ model Article {
 
 :::
 
+## Migrate changes to database
+
+Now that we've made all the necessary changes to the Prisma schema, we need to apply these changes to the database.
+
+To do this, run the following command in your terminal:
+
+```bash
+npx prisma migrate dev --name "replace-notes-with-articles"
+```
+
+:::caution
+
+Because we are dropping the `Note` and `NoteImage` models, Prisma will ask you to confirm that you want to delete the data in these tables:
+
+![Drop notes warning](src/assets/png/epic-news/drop-notes-warning.png)
+
+This is fine - just hit `y` to confirm.
+
+Once the process has finished, you should see a a new migration file has appeared inside your `prisma/migrations` folder:
+
+![Article migration file](src/assets/png/epic-news/article-migration-file.png)
+
+:::
+
+### Check database changes
+
+Let's check the database to confirm the changes have been applied. Run the following command in your terminal:
+
+```bash
+npx prisma studio
+```
+
+This will open the Prisma Studio interface in your browser. You should see the `Article`, `ArticleImage` and `ArticleCategory` models at the top of your models list:
+
+![Check article migration](src/assets/png/epic-news/check-article-migration.png)
+
+Currently, these tables will be empty, as we haven't added any seed data yet. We'll do that in the next section.
+
 ## Summary
 
 In this section, we have:
@@ -468,6 +506,7 @@ In this section, we have:
 - Updated the `User` model to include an `articles` field that references the `Article` model.
 - Updated the `Article` model to include an `isPublished`, `publishedAt` and `category` field.
 - Updated the `ArticleImage` model to reference the `Article` model instead of the `Note` model.
+- Migration the changes to the database.
 
 ## What's next?
 

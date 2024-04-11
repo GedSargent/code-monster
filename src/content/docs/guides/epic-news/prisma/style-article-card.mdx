@@ -1,0 +1,260 @@
+---
+title: Styling a dummy article
+description: Style a dummy article ready for display on the page.
+---
+
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Display information on screen
+
+Take a closer look at the **structure** of the mock articles we have created by expanding the first element of our `mockArticles` array in your browser console.
+
+You should see something like this:
+
+### Mock article stucture
+
+![Mock article structure](src/assets/png/epic-news/mock-article-structure.png)
+
+As you can see, the first mock article, found at index `0` of the `mockArticles` array, has several properties. For example, it has
+- a `category` of `"technology"`
+- a `title` of `Article 1`
+- an `image` value of `"https://picsum.photos/800/600"`
+
+Let's capture this first mock article in a variable so that we can experiment with accessing the properties it contains.
+
+Add the code below to the `NewsCategoryPage` component:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx"
+export default function NewsCategoryPage() {
+	const { category, mockArticles } = useLoaderData<typeof loader>()
+
+	console.log({ category, mockArticles })
+
++	const firstArticle = mockArticles[0]
+
+  // [... Code omitted for brevity ...]
+}
+```
+:::note
+
+### Capturing an item from an array
+
+Notice how we captured the first item from the `mockArticles` array with square brackets `[]` and the index `0`?
+
+```tsx
+const firstArticle = mockArticles[0]
+```
+
+If we wanted to access the second item in the array, we would use `mockArticles[1]`, the third item would be `mockArticles[2]` and so on.
+
+This is how you access an individual array item in JavaScript.
+
+:::
+
+
+Finally, let's display the first article's `title`, `image` and `category` on the page:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx"
+export default function NewsCategoryPage() {
+	const { category, mockArticles } = useLoaderData<typeof loader>()
+
+	console.log({ category, mockArticles })
+
+	const firstArticle = mockArticles[0]
+
+  	return (
+		<div className="container py-8 lg:py-16">
+			<h2 className="mb-16 text-h2">{category}</h2>
+
++			<div>
++				<img src={firstArticle.image} alt={firstArticle.title} />
++				<h3>{firstArticle.title}</h3>
++				<span>{firstArticle.category}</span>
++			</div>
+		</div>
+	)
+}
+
+```
+
+Having to write out the `firstArticle` variable and then access its properties is a bit verbose. We can simplify this by using object destructuring.
+
+:::tip[Challenge]
+
+### Simplify the code with object destructuring
+
+1. Can you simplify the code by using [**object destructuring**](https://vinodht.medium.com/javascript-object-destructing-cheat-sheet-66dedfdc412) to extract the `title`, `image` and `category` properties from the `firstArticle` object?
+
+    :::note
+
+    **TIP**: When destructuring the `category` property, you will need to rename it to `articleCategory` to avoid a naming conflict with the `category` variable.
+
+    Check how to do this in the [**object destructuring**](https://vinodht.medium.com/javascript-object-destructing-cheat-sheet-66dedfdc412) cheat sheet (look for the heading "**Rename after destructing**").
+
+    :::
+
+2. After destructuring each property, replace all the `firstArticle` references with direct property names.
+
+    For example, instead of writing `<h3>{firstArticle.title}</h3>`, you can write `<h3>{title}</h3>`. Or instead of `<img src={firstArticle.image} alt={firstArticle.title} />`, you can write `<img src={image} alt={title} />`.
+
+Try it out yourself, then check your solution against the one below.
+
+<MonsterReveal>
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" ins="{image}" ins="{title}" ins="{articleCategory}"
+export default function NewsCategoryPage() {
+	const { category, mockArticles } = useLoaderData<typeof loader>()
+
+	console.log({ category, mockArticles })
+
+-	const firstArticle = mockArticles[0]
++	const { image, title, category: articleCategory } = mockArticles[0]
+
+	return (
+		<div className="container py-8 lg:py-16">
+			<h2 className="mb-16 text-h2">{category}</h2>
+
+			<div>
+				<img src={image} alt={title} />
+				<h3>{title}</h3>
+				<span>{articleCategory}</span>
+			</div>
+		</div>
+	)
+}
+```
+
+</MonsterReveal>
+
+:::
+
+### The initial article display
+
+If you've followed the steps correctly, you should see the first article's image, title and category displayed on the page:
+
+:::caution[Different images]
+
+Your own article image is likely different from that shown below.
+
+This is because we are using a dummy placeholder image that is generated at random from a site called [**Lorem Picsum**](https://picsum.photos/).
+
+If you refresh your page, you should see a different image each time!
+
+We will soon be swapping these placeholder images for real images from the database.
+
+:::
+
+![Displaying the first article](src/assets/png/epic-news/displaying-first-article.png)
+
+Although this does the job, it doesn't look all that great!
+
+Let's wrap the article in a parent `div` that applies the `grid` class to organise its children. This will allow us to style the article more effectively.
+
+```diff lang="tsx" title="app/routes/news.$category.tsx"
+export default function NewsCategoryPage() {
+	const { category, mockArticles } = useLoaderData<typeof loader>()
+
+	console.log({ category, mockArticles })
+
+	const { image, title, category: articleCategory } = mockArticles[0]
+
+	return (
+		<div className="container py-8 lg:py-16">
+			<h2 className="mb-16 text-h2">{category}</h2>
+
++			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
+				<div>
+					<img src={image} alt={title} />
+					<h3>{title}</h3>
+
+					<span>{articleCategory}</span>
+				</div>
++			</div>
+		</div>
+	)
+}
+```
+
+This will give us a more organised layout for our article:
+
+![Organised article layout](src/assets/png/epic-news/organised-article-layout.png)
+
+:::tip[Challenge]
+
+### Style the article card
+
+Now that we have the article wrapped inside a `grid` layout, let's style the article card to make it look more presentable.
+
+Using Tailwind's utility classes, see if you can recreate the card layout shown below.
+
+### Tips
+
+- The correct Tailwind height class of the image and text area are shown below in the reference image.
+- The colours used in the bottom half of the card are customised, and defined in the `app/utils/tailwind/extended-theme.ts` file. They are responsive to both light and dark themes. These include:
+		- The background colour, which is `bg-card dark:bg-dark-card`.
+		- The text colour of the heading, which is `text-foreground dark:text-dark-foreground`.
+		- The text colour of the category label, which is `text-muted-foreground dark:text-dark-muted-foreground`.
+
+![Styled article card](src/assets/png/epic-news/styled-article-card.png)
+
+<MonsterReveal>
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={2-6}
+export default function NewsCategoryPage() {
+	const { category, mockArticles } = useLoaderData<typeof loader>()
+
+	console.log({ category, mockArticles })
+
+	const { image, title, category: articleCategory } = mockArticles[0]
+
+	return (
+		<div className="container py-8 lg:py-16">
+			<h2 className="mb-16 text-h2">{category}</h2>
+
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
++				<div>
++					<div className={`relative h-44 lg:h-52`}>
++						<div className="absolute inset-0">
++							<img
++								className="h-full w-full object-cover"
++								src={image}
++								alt={title}
++							/>
++						</div>
++					</div>
++					<div
++						className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
++					>
++						<h3
++							className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
++						>
++							{title}
++						</h3>
++						<div className="flex items-center gap-3">
++							<img src={techIcon} alt={category} className="h-6 w-6" />
++							<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
++								{category.toUpperCase()}
++							</span>
++						</div>
++					</div>
++				</div>
++			</div>
++		</div>
+	)
+}
+```
+
+</MonsterReveal>
+
+:::
+
+## Summary
+
+In this lesson, we learned how to:
+
+- Display information from the server on the page.
+- Access individual items from an array.
+- Use object destructuring to simplify our code.
+- Style a dummy article card ready for display on the page.
+
+In the next lesson, we will learn how to create a reusable custom component from our styled article card, loop through an array of articles to display them all, and finally load real articles from the database and display them on the page.

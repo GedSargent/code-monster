@@ -199,6 +199,14 @@ export default defineConfig({
                 {
                   label: '🌱 Modify seed file',
                   link: 'guides/epic-news/prisma/modify-seed-file'
+                },
+                {
+                  label: '🖥️ Loading Dummy Articles',
+                  link: 'guides/epic-news/prisma/loading-dummy-articles'
+                },
+                {
+                  label: '🎨 Style Dummy Articles',
+                  link: 'guides/epic-news/prisma/style-article-card'
                 }
               ]
             }

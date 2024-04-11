@@ -1,0 +1,181 @@
+---
+title: Loading Dummy Articles
+description: Load dummy articles ready for display on the page.
+---
+
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Objectives
+
+Now that we have updated the seed data, we can load articles directly from the database and display them on an articles index page.
+
+1. Load articles from the database in a `loader` function.
+2. Pass the articles to the page component.
+3. Display articles on the page.
+4. Filter articles by category.
+
+Let's get started!
+
+## Load Articles in a `loader` function
+
+The first thing we need to do is load the articles from the database. We will do this firstly from the `app/routes/news.$category.tsx` route file.
+
+### Adding a `loader` function
+
+If you remember from a [**previous lesson**](/code-monster/guides/epic-news/light-and-dark-mode/02-adding-a-loader-function#what-is-a-loader-function), a Remix `loader` function is used to execute code on the server before a page is rendered in the browser. One such common job is to load data before the page is rendered.
+
+:::tip[Challenge]
+
+### Set up a dummy `loader` function
+
+1. Open the `app/routes/news.$category.tsx` file.
+
+2. Update your `loader` function inside `app/routes/news.$category.tsx` file to look like the following:
+
+    ```tsx title="app/routes/news.$category.tsx"
+    import { invariant } from '@epic-web/invariant';
+    import { json, type LoaderFunctionArgs } from "@remix-run/node";
+    import { useLoaderData } from '@remix-run/react'
+
+    export async function loader({ params }: LoaderFunctionArgs) {
+      const { category } = params;
+
+      invariant(typeof category === 'string', 'Category not found');
+
+      const mockArticles = Array.from({ length: 9 }).map((_, index) => {
+        const articleId = index + 1;
+
+        return {
+          id: articleId,
+          title: `Article ${articleId}`,
+          category,
+          image: `https://picsum.photos/800/600`,
+        };
+      });
+
+      return // ------------- Your code here -------------
+    }
+    ```
+
+3. The `loader` function should return a JSON object containing both the `mockArticles` array and the `category` string.
+
+#### TIPS
+
+- Remix has a `json` helper function that can be used to return JSON data from a loader function.
+- Properties inside an object are separated by commas - remember you need to return both the `mockArticles` array and the `category` string as properties of the object.
+- In JavaScript, if an object has a property with the same name and value, you can simply omit the value. For example, `{ category: category }` can be written simply as `{ category }`.
+
+<MonsterReveal>
+
+See the solution highlighted in green below:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" ins="json({ category, mockArticles });" collapse={6-22}
+import { invariant } from '@epic-web/invariant';
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from '@remix-run/react'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+  const { category } = params;
+
+  invariant(typeof category === 'string', 'Category not found');
+
+      const mockArticles = Array.from({q length: 9 }).map((_, index) => {
+        const articleId = index + 1;
+
+        return {
+          id: articleId,
+          title: `Article ${articleId}`,
+          category,
+          image: `https://picsum.photos/800/600`,
+        };
+      });
+
+  return json({ category, mockArticles });
+}
+```
+
+</MonsterReveal>
+
+:::
+
+## Pass Articles to the Page Component
+
+### Using the `useLoaderData` hook
+
+Again, from a [**previous lesson**](/code-monster/guides/epic-news/light-and-dark-mode/03-from-server-to-client), you may remember that we can use the `useLoaderData` hook provided by Remix to access the data returned from the `loader` function in the page component.
+
+:::tip[Challenge]
+
+### Pass the articles to the page component
+
+1. Open the `app/routes/news.$category.tsx` file.
+2. Import the `useLoaderData` hook from `@remix-run/react`.
+3. Use the `useLoaderData` hook to access the `data` returned from the `loader` function.
+4. For the time being, simply log the `data` object to the console (with `console.log({ data }))`.
+5. Check the console in your browser to see the data object.
+6. 🚀 **EXTRA CREDIT**: Use JavaScript [**object destructuring**](https://vinodht.medium.com/javascript-object-destructing-cheat-sheet-66dedfdc412) to extract the `category` and `mockArticles` values from the `data` object in a single line. 🤔
+
+#### TIPS
+
+- The `useLoaderData` hook is imported from `@remix-run/react`.
+- The `useLoaderData` hook returns the `data` object returned from the `loader` function.
+- Check how we accessed the `data` object in our [**previous lesson**](/code-monster/guides/epic-news/light-and-dark-mode/03-from-server-to-client)
+
+<MonsterReveal>
+
+See the solution highlighted in green below:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={1-22}
+import { invariant } from '@epic-web/invariant';
+import { json, type LoaderFunctionArgs } from "remix";
+import { useLoaderData } from '@remix-run/react'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+  const { category } = params;
+
+  invariant(typeof category === 'string', 'Category not found');
+
+      const mockArticles = Array.from({q length: 9 }).map((_, index) => {
+        const articleId = index + 1;
+
+        return {
+          id: articleId,
+          title: `Article ${articleId}`,
+          category,
+          image: `https://picsum.photos/800/600`,
+        };
+      });
+
+  return json({ category, mockArticles });
+}
+
+export default function NewsCategoryPage() {
++  const { category, mockArticles } = useLoaderData<typeof loader>();
++
++  console.log({ category, mockArticles });
+
+  return (
+    <div>
+      <h1>{category}</h1>
+    </div>
+  );
+}
+```
+
+Opening your browser devtools should reveal the `category` and `mockArticles` that were retrieved from the database:
+
+![Logging mock articles](src/assets/png/epic-news/logging-mock-articles.png)
+
+</MonsterReveal>
+
+:::
+
+## Summary
+
+In this lesson, we learned how to:
+
+- Define dummy articles and pass them to the page component.
+- We also learned how to access the data object returned from the `loader` function using the `useLoaderData` hook.
+- Finally, we logged the `category` and `mockArticles` to the console.
+
+In the next lesson, we will style an article card ready to use on the page.

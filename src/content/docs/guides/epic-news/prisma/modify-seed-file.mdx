@@ -7,7 +7,7 @@ import MonsterReveal from "src/components/MonsterReveal.astro";
 
 ## Objectives
 
-Now that we have updated the Prisma schema to include `Category` and `Article` models, we need to update the seed data to include some categories and dummy articles that will be used to populate the database.
+Now that we have [**updated the Prisma schema**](/code-monster/guides/epic-news/prisma/schema-updates) to include `Category` and `Article` models, we need to update the seed data to include some categories and dummy articles that will be used to populate the database.
 
 This will involve:
 
@@ -376,13 +376,13 @@ async function seed() {
 
 -	// TODO: create categories
 +	const techCategory = await prisma.articleCategory.create({
-+		data: { name: 'Tech', slug: 'tech' },
++		data: { name: 'Technology', slug: 'technology' },
 +	})
-+	const gamesCategory = await prisma.articleCategory.create({
-+		data: { name: 'Games', slug: 'games' },
++	const entertainmentCategory = await prisma.articleCategory.create({
++		data: { name: 'Entertainment', slug: 'entertainment' },
 +	})
-+	const aiCategory = await prisma.articleCategory.create({
-+		data: { name: 'Artificial Intelligence', slug: 'artificial-intelligence' },
++	const businessCategory = await prisma.articleCategory.create({
++		data: { name: 'Business', slug: 'business' },
 +	})
 +
   const totalUsers = 5
@@ -400,7 +400,7 @@ You'll notice that we have captured all of the created categories as variables, 
 
 ```ts title="prisma/seed.ts" ins="const techCategory = "
 const techCategory = await prisma.articleCategory.create({
-  data: { name: 'Tech', slug: 'tech' },
+  data: { name: 'Technology', slug: 'technology' },
 })
 ```
 
@@ -690,14 +690,14 @@ async function seed() {
 						images: {
 							create: [kodyImages.koalaCuddle],
 						},
-+						categoryId: gamesCategory.id,
++						categoryId: entertainmentCategory.id,
 					},
 					{
 						id: '260366b1',
 						title: 'Not bears',
 						content:
 							"Although you may have heard people call them koala 'bears', these awesome animals aren’t bears at all – they are in fact marsupials. A group of mammals, most marsupials have pouches where their newborns develop.",
-+						categoryId: aiCategory.id,
++						categoryId: businessCategory.id,
 +						isPublished: true,
 +						publishedAt: faker.date.recent(),
 					},
@@ -709,7 +709,7 @@ async function seed() {
 						images: {
 							create: [kodyImages.mountain],
 						},
-+						categoryId: aiCategory.id,
++						categoryId: businessCategory.id,
 +						isPublished: true,
 +						publishedAt: faker.date.recent(),
 					},
@@ -742,7 +742,7 @@ async function seed() {
 						images: {
 							create: [kodyImages.koalaMentor],
 						},
-+						categoryId: gamesCategory.id,
++						categoryId: entertainmentCategory.id,
 					},
 					{
 						id: '3199199e',
@@ -783,6 +783,7 @@ async function seed() {
 						images: {
 							create: [kodyImages.koalaSoccer],
 						},
++						categoryId: entertainmentCategory.id,
 					},
 				],
 			},

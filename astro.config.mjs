@@ -207,7 +207,11 @@ export default defineConfig({
                 {
                   label: '🎨 Style Dummy Articles',
                   link: 'guides/epic-news/prisma/style-article-card'
-                }
+                },
+                {
+                  label: '🖥️ Display an array of articles',
+                  link: 'guides/epic-news/prisma/display-array-of-articles'
+                },
               ]
             }
           ],

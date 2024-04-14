@@ -197,20 +197,38 @@ export default defineConfig({
                   link: 'guides/epic-news/prisma/schema-updates'
                 },
                 {
+                  label: '🗂️ Modify project structure',
+                  link: 'guides/epic-news/prisma/modify-project-structure'
+                },
+                {
                   label: '🌱 Modify seed file',
                   link: 'guides/epic-news/prisma/modify-seed-file'
                 },
+              ]
+            },
+            {
+              label: "🖥️ Articles index page",
+              collapsed: true,
+              items: [
                 {
                   label: '🖥️ Loading Dummy Articles',
-                  link: 'guides/epic-news/prisma/loading-dummy-articles'
+                  link: 'guides/epic-news/articles-index-page/loading-dummy-articles'
                 },
                 {
-                  label: '🎨 Style Dummy Articles',
-                  link: 'guides/epic-news/prisma/style-article-card'
+                  label: '🖥️ Style Dummy Articles',
+                  link: 'guides/epic-news/articles-index-page/style-article-card'
                 },
                 {
-                  label: '🖥️ Display an array of articles',
-                  link: 'guides/epic-news/prisma/display-array-of-articles'
+                  label: '🖥️ Display an array of dummy articles',
+                  link: 'guides/epic-news/articles-index-page/display-array-of-dummy-articles'
+                },
+                {
+                  label: '🖥️ Load and display all real articles',
+                  link: 'guides/epic-news/articles-index-page/load-and-display-all-real-articles'
+                },
+                {
+                  label: '🖥️ Filter articles by category',
+                  link: 'guides/epic-news/articles-index-page/filter-articles-by-category'
                 },
               ]
             }

@@ -501,7 +501,7 @@ Here is the full updated `seed` function with new code highlighted in green, and
 
 If it helps, you can copy the entire code below and paste it into your `prisma/seed.ts` file to completely replace the existing code.
 
-```diff lang="ts" title="prisma/seed.ts" showlineNumbers startLineNumber=1 ins="getArticleImages," ins="'article', 'articleCategory'" collapse={15-20, 27-73, 111-153, 243-289}
+```diff lang="ts" title="prisma/seed.ts" showlineNumbers startLineNumber=1 ins="getArticleImages," ins="'article', 'articleCategory'" collapse={15-20, 27-73, 122-164, 254-289}
 import { faker } from '@faker-js/faker'
 import { promiseHash } from 'remix-utils/promise'
 import { prisma } from '#app/utils/db.server.ts'
@@ -582,7 +582,17 @@ async function seed() {
 
 	for (let index = 0; index < totalUsers; index++) {
 		const userData = createUser()
-+		const isPublished = faker.datatype.boolean()
++		const isPublished = faker.datatype.boolean({ probability: 0.8 })
++		const categoryIds = [
++			techCategory.id,
++			entertainmentCategory.id,
++			businessCategory.id,
++		]
++		const randomCategoryIdIndex = faker.number.int({
++			min: 0,
++			max: categoryIds.length - 1,
++		})
+
 		await prisma.user
 			.create({
 				select: { id: true },
@@ -608,6 +618,7 @@ async function seed() {
 							},
 +							isPublished,
 +							publishedAt: isPublished ? faker.date.recent() : null,
++							categoryId: categoryIds[randomCategoryIdIndex],
 						})),
 					},
 				},

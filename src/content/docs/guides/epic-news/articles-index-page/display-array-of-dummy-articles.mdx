@@ -1,0 +1,293 @@
+---
+title: Display an array of dummy articles
+description: Learn how to use the map function to loop through an array of dummy articles and display them on the page.
+---
+
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Objectives
+
+Now that we have loaded articles from the database, we can display them on the page.
+
+In this guide, we will:
+
+1. Create a reusable `ArticleCard` component from the code we have already written.
+2. Loop through the mock articles using JavaScript's `map` function and display them on the page.
+3. Load real articles from the database and display them on the page.
+
+## Create a reusable `ArticleCard` component
+
+In the previous guide, we created a `NewsCategoryPage` component that displays a single article. Let's refactor this component to create a reusable `ArticleCard` component.
+
+:::note
+
+You will now have your own code in the `NewsCategoryPage`, so don't worry about the code examples below being different.
+
+What matters when creating a reusable component is that you can pass the elements that will change in each card as [**props**](https://react.dev/learn/passing-props-to-a-component), a topic that we have already covered in a [**previous tutorial**](/code-monster/guides/prisma/displaying-data).
+
+:::
+
+In this case, the `image`, `title`, and `category` of the article will become props, and the code highlighted below will become the basis of our new custom component:
+
+```tsx title="app/routes/news.$category.tsx" collapse={2-6} mark={13-38} showLineNumbers
+export default function NewsCategoryPage() {
+	const { category, mockArticles } = useLoaderData<typeof loader>()
+
+	console.log({ category, mockArticles })
+
+	const { image, title, category: articleCategory } = mockArticles[0]
+
+	return (
+		<div className="container py-8 lg:py-16">
+			<h2 className="mb-16 text-h2">{category}</h2>
+
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
+				<div>
+					<div className={`relative h-44 lg:h-52`}>
+						<div className="absolute inset-0">
+							<img
+								className="h-full w-full object-cover"
+								src={image}
+								alt={title}
+							/>
+						</div>
+					</div>
+					<div
+						className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
+					>
+						<h3
+							className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
+						>
+							{title}
+						</h3>
+						<div className="flex items-center gap-3">
+							<img src={techIcon} alt={category} className="h-6 w-6" />
+							<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
+								{category}
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
+```
+
+Let's get started.
+
+:::tip[Challenge]
+
+### Challenge: build a reusable component
+
+1. Using your knowledge of how components work from our [**previous tutorial**](/code-monster/guides/prisma/displaying-data), create a new component called `ArticleCard` that receives the following props:
+
+		- `image` - this should be a `String`
+		- `title` - this should be a `String`
+		- `category` - this should be a `String`
+
+		For the time being, create your new component somewhere inside the `app/routes/news.$category.tsx` file, and we will move it to a separate file later.
+
+2. Remember that you will need to create an accompanying TypeScript [**interface**](/code-monster/guides/prisma/displaying-data#what-is-an-interface) describing the above props that the `ArticleCard` component should receive.
+
+3. Pass the props to your new `ArticleCard` component in the `NewsCategoryPage` component where the old code used to be.
+
+Once you've finished, compare your solution with the one below:
+
+<MonsterReveal>
+
+First, let's create the `ArticleCard` component together with an accompanying TypeScript interface:
+
+```tsx title="app/routes/news.$category.tsx"
+interface ArticleCardProps {
+	image: string
+	title: string
+	category: string
+}
+
+function ArticleCard({ image, title, category }: ArticleCardProps) {
+	return (
+		<div>
+			<div className={`relative h-44 lg:h-52`}>
+				<div className="absolute inset-0">
+					<img className="h-full w-full object-cover" src={image} alt={title} />
+				</div>
+			</div>
+			<div
+				className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
+			>
+				<h3
+					className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
+				>
+					{title}
+				</h3>
+				<div className="flex items-center gap-3">
+					<img src={techIcon} alt={category} className="h-6 w-6" />
+					<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
+						{category}
+					</span>
+				</div>
+			</div>
+		</div>
+	)
+}
+```
+
+As you can see, all the code inside the `return` statement of the `ArticleCard` component is the same as the code we highlighted above in the `NewsCategoryPage` component. All that was needed was to cut and paste the code straight across.
+
+Next, we can replace the old code in the `NewsCategoryPage` component with the new `ArticleCard` component, and pass it the props that it requires:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" collapse={2-6}
+export default function NewsCategoryPage() {
+	const { category, mockArticles } = useLoaderData<typeof loader>()
+
+	console.log({ category, mockArticles })
+
+	const { image, title, category: articleCategory } = mockArticles[0]
+
+	return (
+		<div className="container py-8 lg:py-16">
+			<h2 className="mb-16 text-h2">{category}</h2>
+
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
+-				<div>
+-					<div className={`relative h-44 lg:h-52`}>
+-						<div className="absolute inset-0">
+-							<img
+-								className="h-full w-full object-cover"
+-								src={image}
+-								alt={title}
+-							/>
+-						</div>
+-					</div>
+-					<div
+-						className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
+-					>
+-						<h3
+-							className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
+-						>
+-							{title}
+-						</h3>
+-						<div className="flex items-center gap-3">
+-							<img src={techIcon} alt={category} className="h-6 w-6" />
+-							<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
+-								{category}
+-							</span>
+-						</div>
+-					</div>
+-				</div>
++				<ArticleCard title={title} category={articleCategory} image={image} />
+			</div>
+		</div>
+	)
+}
+```
+Not only is this code more readable (because having a component named `ArticleCard` makes it much easier to infer what the intention of the code is), but it also makes it easier to reuse the `ArticleCard` component in other parts of your application.
+
+</MonsterReveal>
+
+:::
+
+## Displaying all mock articles
+
+Now that we've got a reusable `ArticleCard` component, we can loop through all of the mock articles and display them on the page.
+
+To do this, we will use JavaScript's `map` function to loop through the `mockArticles` array and render an `ArticleCard` component for each article.
+
+:::tip[Challenge]
+
+### Challenge: display all mock articles
+
+We looked at how to use the `map` function in a [**previous tutorial**](/code-monster/guides/prisma/using-map), so if you need a refresher, feel free to check it out.
+
+1. Inside the `NewsCategoryPage` component, replace the `ArticleCard` component with a `map` function that loops through the `mockArticles` array and renders an `ArticleCard` component for each article.
+2. Pass the `image`, `title`, and `category` of each article as props to the `ArticleCard` component.
+3. Use the `id` of each article as the `key` prop for the `ArticleCard` component inside the `map` function.
+
+Your final result on screen should look something like this:
+
+![Display all mock articles](src/assets/png/epic-news/display-all-mock-articles.png)
+
+Once you've got a solution, compare it with the one below:
+
+<MonsterReveal>
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" collapse={2-4, 8-31}
+interface ArticleCardProps {
+	image: string
+	title: string
+	category: string
+}
+
+function ArticleCard({ image, title, category }: ArticleCardProps) {
+	return (
+		<div>
+			<div className={`relative h-44 lg:h-52`}>
+				<div className="absolute inset-0">
+					<img className="h-full w-full object-cover" src={image} alt={title} />
+				</div>
+			</div>
+			<div
+				className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
+			>
+				<h3
+					className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
+				>
+					{title}
+				</h3>
+				<div className="flex items-center gap-3">
+					<img src={techIcon} alt={category} className="h-6 w-6" />
+					<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
+						{category}
+					</span>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+export default function NewsCategoryPage() {
+	const { category, mockArticles } = useLoaderData<typeof loader>()
+
+-	console.log({ category, mockArticles })
+-
+-	const { image, title, category: articleCategory } = mockArticles[0]
+-
+	return (
+		<div className="container py-8 lg:py-16">
+			<h2 className="mb-16 text-h2">{category}</h2>
+
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
+-				<ArticleCard title={title} category={articleCategory} image={image} />
++				{mockArticles.map(({ id, title, category: articleCategory, image }) => {
++					return (
++						<ArticleCard
++							key={id}
++							title={title}
++							category={articleCategory}
++							image={image}
++						/>
++					)
++				})}
+			</div>
+		</div>
+	)
+}
+```
+
+</MonsterReveal>
+
+:::
+
+## Summary
+
+In this tutorial, we:
+
+- Created a reusable `ArticleCard` component.
+- Used the `map` function to loop through an array of dummy articles and display them on the page.
+- Revised how to pass props to a component.
+- Ensured that the props passed to the `ArticleCard` component were correctly typed using a TypeScript interface.
+
+## What's next?
+
+In the next tutorial, we will load real articles from the database and display them on the page.

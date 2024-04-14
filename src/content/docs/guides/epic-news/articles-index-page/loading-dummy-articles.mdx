@@ -7,22 +7,27 @@ import MonsterReveal from "src/components/MonsterReveal.astro";
 
 ## Objectives
 
-Now that we have updated the seed data, we can load articles directly from the database and display them on an articles index page.
+Now that we have [**updated the seed data**](/code-monster/guides/epic-news/prisma/modify-seed-file), we can load articles directly from the database and display them on an articles index page.
 
-1. Load articles from the database in a `loader` function.
+In this tutorial we will:
+
+1. Load dummy articles in a `loader` function.
 2. Pass the articles to the page component.
-3. Display articles on the page.
-4. Filter articles by category.
+3. Log out the articles to the console.
 
 Let's get started!
 
 ## Load Articles in a `loader` function
 
-The first thing we need to do is load the articles from the database. We will do this firstly from the `app/routes/news.$category.tsx` route file.
+Eventually, we will need to load the articles from our database. We will do this firstly from the `app/routes/news.$category.tsx` route file.
+
+Open this file now in your code editor.
 
 ### Adding a `loader` function
 
-If you remember from a [**previous lesson**](/code-monster/guides/epic-news/light-and-dark-mode/02-adding-a-loader-function#what-is-a-loader-function), a Remix `loader` function is used to execute code on the server before a page is rendered in the browser. One such common job is to load data before the page is rendered.
+If you remember from a [**previous lesson**](/code-monster/guides/epic-news/light-and-dark-mode/02-adding-a-loader-function#what-is-a-loader-function), a Remix `loader` function is used to execute code on the server before a page is rendered in the browser.
+
+This is the perfect place to load data ready for a page to rendered.
 
 :::tip[Challenge]
 
@@ -32,44 +37,62 @@ If you remember from a [**previous lesson**](/code-monster/guides/epic-news/ligh
 
 2. Update your `loader` function inside `app/routes/news.$category.tsx` file to look like the following:
 
-    ```tsx title="app/routes/news.$category.tsx"
-    import { invariant } from '@epic-web/invariant';
-    import { json, type LoaderFunctionArgs } from "@remix-run/node";
-    import { useLoaderData } from '@remix-run/react'
+```diff lang="tsx" title="app/routes/news.$category.tsx"
+import { invariant } from '@epic-web/invariant';
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from '@remix-run/react'
 
-    export async function loader({ params }: LoaderFunctionArgs) {
-      const { category } = params;
+export async function loader({ params }: LoaderFunctionArgs) {
++  const { category } = params;
++
++  invariant(typeof category === 'string', 'Category not found');
++
++  const mockArticles = Array.from({ length: 9 }).map((_, index) => {
++    const articleId = index + 1;
++
++    return {
++      id: articleId,
++      title: `Article ${articleId}`,
++      category,
++      image: `https://picsum.photos/800/600`,
++    };
++  });
++
++  return // ------------- Your code here -------------
+}
+```
 
-      invariant(typeof category === 'string', 'Category not found');
+3. Can you replace the comment at the end with the correct code to return the `mockArticles` array and the `category` string as a JSON object.
 
-      const mockArticles = Array.from({ length: 9 }).map((_, index) => {
-        const articleId = index + 1;
+### Tips
 
-        return {
-          id: articleId,
-          title: `Article ${articleId}`,
-          category,
-          image: `https://picsum.photos/800/600`,
-        };
-      });
+- Remix has [**a `json` helper function**](https://remix.run/docs/en/main/utils/json) that can be used to return JSON data from a loader function.
+- Properties inside any JavaScript object are separated by commas, for example:
 
-      return // ------------- Your code here -------------
-    }
+    ```tsx mark=","
+    { name: 'John', age: 25 }
     ```
 
-3. The `loader` function should return a JSON object containing both the `mockArticles` array and the `category` string.
+    Remember you need to include both the `mockArticles` array and the `category` string as properties of the object you are returning via the `json` helper function.
+- In JavaScript, if an object has a property with the same name and value, you can simply omit the value.
 
-#### TIPS
+    For example,
 
-- Remix has a `json` helper function that can be used to return JSON data from a loader function.
-- Properties inside an object are separated by commas - remember you need to return both the `mockArticles` array and the `category` string as properties of the object.
-- In JavaScript, if an object has a property with the same name and value, you can simply omit the value. For example, `{ category: category }` can be written simply as `{ category }`.
+    ```tsx
+    { category: category }
+    ```
+
+    can be written simply as
+
+    ```tsx
+    { category }
+    ```
 
 <MonsterReveal>
 
 See the solution highlighted in green below:
 
-```diff lang="tsx" title="app/routes/news.$category.tsx" ins="json({ category, mockArticles });" collapse={6-22}
+```diff lang="tsx" title="app/routes/news.$category.tsx" ins="json({ category, mockArticles });" showLineNumbers collapse={6-20}
 import { invariant } from '@epic-web/invariant';
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from '@remix-run/react'
@@ -79,7 +102,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
   invariant(typeof category === 'string', 'Category not found');
 
-      const mockArticles = Array.from({q length: 9 }).map((_, index) => {
+      const mockArticles = Array.from({ length: 9 }).map((_, index) => {
         const articleId = index + 1;
 
         return {
@@ -135,7 +158,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
   invariant(typeof category === 'string', 'Category not found');
 
-      const mockArticles = Array.from({q length: 9 }).map((_, index) => {
+      const mockArticles = Array.from({ length: 9 }).map((_, index) => {
         const articleId = index + 1;
 
         return {
@@ -162,7 +185,7 @@ export default function NewsCategoryPage() {
 }
 ```
 
-Opening your browser devtools should reveal the `category` and `mockArticles` that were retrieved from the database:
+Opening your browser devtools should reveal the `category` and `mockArticles` that were returned from the `loader` function:
 
 ![Logging mock articles](src/assets/png/epic-news/logging-mock-articles.png)
 

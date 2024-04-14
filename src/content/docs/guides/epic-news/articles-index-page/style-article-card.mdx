@@ -5,6 +5,19 @@ description: Style a dummy article ready for display on the page.
 
 import MonsterReveal from "src/components/MonsterReveal.astro";
 
+## Objectives
+
+In our [**previous tutorial**](/code-monster/guides/epic-news/articles-index-page/loading-dummy-articles), we loaded dummy articles in a `loader` function and passed them to the page component.
+
+In this tutorial, we will:
+
+1. Display information from the server on the page.
+2. Access individual items from an array.
+3. Use object destructuring to simplify our code.
+4. Style a dummy article card ready for display on the page.
+
+Let's get started!
+
 ## Display information on screen
 
 Take a closer look at the **structure** of the mock articles we have created by expanding the first element of our `mockArticles` array in your browser console.
@@ -15,7 +28,10 @@ You should see something like this:
 
 ![Mock article structure](src/assets/png/epic-news/mock-article-structure.png)
 
-As you can see, the first mock article, found at index `0` of the `mockArticles` array, has several properties. For example, it has
+The first mock article, found at index `0` of the `mockArticles` array, has several properties that we can display on screen.
+
+For example, it has:
+
 - a `category` of `"technology"`
 - a `title` of `Article 1`
 - an `image` value of `"https://picsum.photos/800/600"`
@@ -23,6 +39,14 @@ As you can see, the first mock article, found at index `0` of the `mockArticles`
 Let's capture this first mock article in a variable so that we can experiment with accessing the properties it contains.
 
 Add the code below to the `NewsCategoryPage` component:
+
+:::caution
+
+Note that we have jumped into the `NewsCategoryPage` component in the code snippet below.
+
+As always, take extra care to ensure you are adding the code to the correct place in your file.
+
+:::
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx"
 export default function NewsCategoryPage() {
@@ -51,6 +75,7 @@ This is how you access an individual array item in JavaScript.
 
 :::
 
+## Display the first article
 
 Finally, let's display the first article's `title`, `image` and `category` on the page:
 
@@ -77,7 +102,7 @@ export default function NewsCategoryPage() {
 
 ```
 
-Having to write out the `firstArticle` variable and then access its properties is a bit verbose. We can simplify this by using object destructuring.
+Having to write out the `firstArticle` variable and then access its properties is a bit verbose. We can simplify this by using [**object destructuring**](https://vinodht.medium.com/javascript-object-destructing-cheat-sheet-66dedfdc412).
 
 :::tip[Challenge]
 
@@ -95,7 +120,17 @@ Having to write out the `firstArticle` variable and then access its properties i
 
 2. After destructuring each property, replace all the `firstArticle` references with direct property names.
 
-    For example, instead of writing `<h3>{firstArticle.title}</h3>`, you can write `<h3>{title}</h3>`. Or instead of `<img src={firstArticle.image} alt={firstArticle.title} />`, you can write `<img src={image} alt={title} />`.
+    For example, instead of writing:
+
+		```tsx
+		<img src={firstArticle.image} alt={firstArticle.title} />
+		```
+
+		you can write:
+
+		```tsx
+		<img src={image} alt={title} />
+		```
 
 Try it out yourself, then check your solution against the one below.
 
@@ -199,6 +234,8 @@ Using Tailwind's utility classes, see if you can recreate the card layout shown 
 
 <MonsterReveal>
 
+Please note that your own solution will likely look different from the one shown below. As long as yours works, don't worry if it's not exactly the same!
+
 ```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={2-6}
 export default function NewsCategoryPage() {
 	const { category, mockArticles } = useLoaderData<typeof loader>()
@@ -233,13 +270,13 @@ export default function NewsCategoryPage() {
 +						<div className="flex items-center gap-3">
 +							<img src={techIcon} alt={category} className="h-6 w-6" />
 +							<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
-+								{category.toUpperCase()}
++								{category}
 +							</span>
 +						</div>
 +					</div>
 +				</div>
-+			</div>
-+		</div>
+			</div>
+		</div>
 	)
 }
 ```

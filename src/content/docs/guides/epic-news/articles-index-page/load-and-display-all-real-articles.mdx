@@ -1,0 +1,337 @@
+---
+title: Load and display all real articles
+description: Learn how to load and display all real articles on the Epic News index page.
+---
+
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Load real articles from the database
+
+Now that we have successfully displayed all the mock articles on the page, we can replace the mock articles with real articles from the database.
+
+To do this, we will use the `prisma` client to fetch all articles from the database and display them on the page.
+
+### Remove mock articles
+
+Let's start by removing the mock articles array from the `loader` function:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" del=", mockArticles"
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { category } = params
+
+	invariant(typeof category === 'string', 'Category not found')
+
+-	const mockArticles = Array.from({ length: 9 }).map((_, index) => {
+-		const articleId = index + 1
+-
+-		return {
+-			id: articleId,
+-			title: `Article ${articleId}`,
+-			category,
+-			image: `https://picsum.photos/800/600`,
+-		}
+-	})
+
+	return json({ category, mockArticles })
+}
+
+```
+
+### Import the `prisma` client
+
+Add an `import` to the `prisma` client at the top of the file:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx"
+import { invariant } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import techIcon from '~/assets/png/news-categories/tech-logo@2x.png'
++import { prisma } from '~/utils/db.server.ts'
+```
+
+### Fetch all database articles
+
+Next, let's fetch all articles from the database using the `prisma` client inside the `loader` function, and then export them as JSON:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" ins=", allArticles" collapse={1-5}
+import { invariant } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import techIcon from '~/assets/png/news-categories/tech-logo@2x.png'
+import { prisma } from '~/utils/db.server.ts'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { category } = params
+
+	invariant(typeof category === 'string', 'Category not found')
+
++	const allArticles = await prisma.article.findMany({
++		select: {
++			id: true,
++			title: true,
++			category: { select: { name: true } },
++			images: { select: { id: true } },
++		},
++	})
+
+	return json({ category, allArticles })
+}
+```
+
+:::note
+
+### Understanding the `select` option
+
+The `select` option is used to specify which fields from each record to include in the query result.
+
+```tsx mark={2-6}
+  const allArticles = await prisma.article.findMany({
+    select: {
+      id: true,
+      title: true,
+      category: { select: { name: true } },
+      images: { select: { id: true } },
+    },
+  })
+```
+
+In this case, we are fetching the `id`, `title`, `category`, and `images` fields from the `article` table. We don't need the `content` of each article as this is an index page, so we are only fetching the fields that we need.
+
+The `category` field is a relation to the `category` table, so we are fetching the `name` field from the `category` table.
+
+Similarly, the `images` field is a relation to the `image` table, so we are fetching the `id` field from the `image` table.
+
+:::
+
+### Finding article images
+
+We are currently only fetching the `id` of each image from the database. To display the images on the page, we will need to generate a `src` for each image using a utility function from the Epic Stack.
+
+The Epic Stack currently has a helper function for this called `getNoteImgSrc`. We need to update the function to work with articles.
+
+Firstly, open the file `app/utils/misc.tsx` and update the entire function `getNoteImgSrc` inside here like so:
+
+```diff lang="tsx" title="app/utils/misc.tsx" collapse={1-10}
+import { useFormAction, useNavigation } from '@remix-run/react'
+import { clsx, type ClassValue } from 'clsx'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSpinDelay } from 'spin-delay'
+import { extendTailwindMerge } from 'tailwind-merge'
+import { extendedTheme } from './tailwind/extended-theme.ts'
+
+export function getUserImgSrc(imageId?: string | null) {
+	return imageId ? `/resources/user-images/${imageId}` : '/img/user.png'
+}
+
+-export function getNoteImgSrc(imageId: string) {
+-	return `/resources/note-images/${imageId}`
+-}
++export function getArticleImgSrc(imageId: string) {
++	return `/resources/article-images/${imageId}`
++}
+
+```
+
+:::note[What is a resource route?]
+
+### Understanding resource routes
+
+If you look closely, this function is actually returning a string that represents a URL route:
+
+```tsx file="app/utils/misc.tsx"
+export function getArticleImgSrc(imageId: string) {
+	return `/resources/article-images/${imageId}`
+}
+```
+
+What is going on here?
+
+This is a special type of route called a **resource route**. A resource route is a route that returns a resource, such as an image, a file, or any other type of data that is not a specific user interface component.
+
+Unlike the UI routes that we have been using so far, resource routes don't render an actual component on the screen, but can return any type of valid web response.
+
+In this case, we are returning an image file directly from the database, via something called a <u>**blob**</u> - short for a "<u>**b**</u>inary <u>**l**</u>arge <u>**ob**</u>ject" (yes, there are some ***very*** weird names in web development) - that represents our image in binary.
+
+You can read more about resource routes in the [**Remix documentation**](https://remix.run/docs/en/main/guides/resource-routes).
+
+:::
+
+Like any other route in Remix, we can locate the corresponding route file in the `app/routes` directory.
+
+In this case, the file we need is called `app/routes/resources+/note-images.$imageId.tsx`.
+
+Firstly, let's **rename** (i.e. ***don't*** delete) the file to `app/routes/resources+/article-images.$imageId.tsx`:
+
+![Replace note images route](src/assets/png/epic-news/replace-note-image-route.png)
+
+Next, lets update the code inside `app/routes/resources+/article-images.$imageId.tsx` to reference `prisma.articleImage` instead of `prisma.noteImage`:
+
+```diff lang="tsx" title="app/routes/resources+/article-image.$imageId.tsx" collapse={1-3, 13-22}
+import { invariantResponse } from '@epic-web/invariant'
+import { type LoaderFunctionArgs } from '@remix-run/node'
+import { prisma } from '#app/utils/db.server.ts'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+	invariantResponse(params.imageId, 'Image ID is required', { status: 400 })
+-	const image = await prisma.noteImage.findUnique({
++	const image = await prisma.articleImage.findUnique({
+		where: { id: params.imageId },
+		select: { contentType: true, blob: true },
+	})
+
+	invariantResponse(image, 'Not found', { status: 404 })
+
+	return new Response(image.blob, {
+		headers: {
+			'Content-Type': image.contentType,
+			'Content-Length': Buffer.byteLength(image.blob).toString(),
+			'Content-Disposition': `inline; filename="${params.imageId}"`,
+			'Cache-Control': 'public, max-age=31536000, immutable',
+		},
+	})
+}
+```
+
+### Display real articles on the page
+
+Back inside `app/routes/news.$category.tsx`, we will need to import our new function to generate a `src` from our image id:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" collapse={1-3}
+import { invariant } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import techIcon from '~/assets/png/news-categories/tech-logo@2x.png'
+import { prisma } from '~/utils/db.server.ts'
++import { getArticleImgSrc } from '~/utils/misc.tsx'
+```
+
+Finally, let's replace the `mockArticles` array with all the real articles from our database.
+
+:::tip[Challenge]
+
+Can you swap out the old `mockArticles` array with the new `allArticles` array yourself?
+
+### Tips
+
+1. Remember that `useLoaderData` will now return `allArticles` instead of `mockArticles`. Use `console.log` on the new `allArticles` array to see what it looks like in the browser console.
+2. Use the `map` function to loop through the `allArticles` array and render an `ArticleCard` component for each article.
+3. `ArticleCard` has a prop called `image`. This prop needs an image `src` passing into it.
+
+    You can generate this by calling the `getArticleImgSrc` function with the `id` of **the first image** in the `images` array (i.e. `getArticleImgSrc(images[0].id)`).
+
+4. If there are no `images` at all (because remember that `images` are optional for articles), you can use a placeholder image URL like `https://picsum.photos/800/600` instead.
+
+		You could make use of a [**ternary operator**](https://www.codecademy.com/learn/introduction-to-javascript/modules/learn-javascript-control-flow/cheatsheet) for this.
+
+5. Use the `id` of each article as the `key` prop for the `ArticleCard` component inside the `map` function.
+
+If all goes well, your final news category index screen should look something like this:
+
+![Display all articles](src/assets/png/epic-news/display-all-articles.png)
+
+See if you can find a solution independently, and then compare it with the one below.
+
+I've included all the changes in this file for reference.
+
+<MonsterReveal>
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" ins=", allArticles" showLineNumbers collapse={1-3, 24-56}
+import { invariant } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import techIcon from '~/assets/png/news-categories/tech-logo@2x.png'
+import { prisma } from '~/utils/db.server.ts'
++import { getArticleImgSrc } from '~/utils/misc.tsx'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { category } = params
+
+	invariant(typeof category === 'string', 'Category not found')
+
++	const allArticles = await prisma.article.findMany({
++		select: {
++			id: true,
++			title: true,
++			category: { select: { name: true } },
++			images: { select: { id: true } },
++		},
++	})
+
+	return json({ category, allArticles })
+}
+
+interface ArticleCardProps {
+	image: string
+	title: string
+	category: string
+}
+
+function ArticleCard({ image, title, category }: ArticleCardProps) {
+	return (
+		<div>
+			<div className={`relative h-44 lg:h-52`}>
+				<div className="absolute inset-0">
+					<img className="h-full w-full object-cover" src={image} alt={title} />
+				</div>
+			</div>
+			<div
+				className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
+			>
+				<h3
+					className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
+				>
+					{title}
+				</h3>
+				<div className="flex items-center gap-3">
+					<img src={techIcon} alt={category} className="h-6 w-6" />
+					<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
+						{category}
+					</span>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+export default function NewsCategoryPage() {
+	const { category, allArticles } = useLoaderData<typeof loader>()
+
+	return (
+		<div className="container py-8 lg:py-16">
+			<h2 className="mb-16 text-h2">{category}</h2>
+
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
++				{allArticles.map(({ id, title, category: articleCategory, images }) => {
++					const imageSrc = images[0]?.id
++						? getArticleImgSrc(images[0].id)
++						: 'https://picsum.photos/800/600'
++
++					return (
++						<ArticleCard
++							key={id}
++							title={title}
++							category={articleCategory?.name ?? 'Uncategorized'}
++							image={imageSrc}
++						/>
++					)
++				})}
+			</div>
+		</div>
+	)
+}
+```
+
+</MonsterReveal>
+
+:::
+
+## Summary
+
+In this guide, we learned how to:
+
+- Load real articles from the database and display them on the page.
+- Loop through these real articles using JavaScript's `map` function and display them on the page.
+- Revise the `getNoteImgSrc` function into `getArticleImgSrc` to work with articles.
+- Updated the `notes-images` resource route into `article-images`.
+
+In the next guide, we will learn how to filter articles by the correct category.

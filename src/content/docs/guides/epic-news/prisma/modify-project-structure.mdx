@@ -1,0 +1,140 @@
+---
+title: Modify the project structure
+description: Swap notes for articles throughout the project
+---
+
+import { Icon } from "@astrojs/starlight/components";
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Objectives
+
+Now that we have updated the Prisma schema and pushed these changes to the database, we need to update the project structure to reflect these changes.
+
+## Update permissions
+
+The first thing we need to do is update the permissions in the `app/utils/permissions.ts` file.
+
+Permissions describe what actions a user can perform on a specific entity. In our case, we have two entities: `user` and `article`.
+
+We will update the `Entity` type to accept `'article'` instead of `'note'`, around line 69:
+
+```diff lang="tsx" title="app/utils/permissions.ts" showLineNumbers collapse={1-66, 72-85}
+import { json } from '@remix-run/node'
+import { requireUserId } from './auth.server.ts'
+import { prisma } from './db.server.ts'
+import { type useUser } from './user.ts'
+
+export async function requireUserWithPermission(
+	request: Request,
+	permission: PermissionString,
+) {
+	const userId = await requireUserId(request)
+	const permissionData = parsePermissionString(permission)
+
+	const user = await prisma.user.findFirst({
+		select: { id: true },
+		where: {
+			id: userId,
+			roles: {
+				some: {
+					permissions: {
+						some: {
+							...permissionData,
+							access: permissionData.access
+								? { in: permissionData.access }
+								: undefined,
+						},
+					},
+				},
+			},
+		},
+	})
+
+	if (!user) {
+		throw json(
+			{
+				error: 'Unauthorized',
+				requiredPermission: permissionData,
+				message: `Unauthorized: required permissions: ${permission}`,
+			},
+			{ status: 403 },
+		)
+	}
+
+	return user.id
+}
+
+export async function requireUserWithRole(request: Request, name: string) {
+	const userId = await requireUserId(request)
+
+	const user = await prisma.user.findFirst({
+		select: { id: true },
+		where: { id: userId, roles: { some: { name } } },
+	})
+
+	if (!user) {
+		throw json(
+			{
+				error: 'Unauthorized',
+				requiredRole: name,
+				message: `Unauthorized: required role: ${name}`,
+			},
+			{ status: 403 },
+		)
+	}
+
+	return user.id
+}
+
+type Action = 'create' | 'read' | 'update' | 'delete'
+-type Entity = 'user' | 'note'
++type Entity = 'user' | 'article'
+type Access = 'own' | 'any' | 'own,any' | 'any,own'
+type PermissionString = `${Action}:${Entity}` | `${Action}:${Entity}:${Access}`
+function parsePermissionString(permissionString: PermissionString) {
+	const [action, entity, access] = permissionString.split(':') as [
+		Action,
+		Entity,
+		Access | undefined,
+	]
+
+	return {
+		action,
+		entity,
+		access: access ? (access.split(',') as Array<Access>) : undefined,
+	}
+}
+
+// ...Code omitted for brevity...
+```
+
+## Replace notes with articles
+
+Head over to your VS Code file explore and navigate to the folder `app/routes/users+/$username_+`.
+
+You will see a group of files all prefixed with `article`. These files are responsible for rendering the articles for a specific user.
+
+To updating each of these files to reflect the changes we made to the Prisma schema would take a long time
+
+To to speed things along, you can download the updated folder here:
+
+<a href="/code-monster/downloads/epic-news/$username_+.zip" class="group inline-flex border-2 gap-4 mt-8 px-8 py-4 text-xl rounded-full no-underline transition bg-blue-200 border-blue-400 hover:border-blue-600 hover:bg-blue-100 dark:bg-blue-600 dark:border-blue-400 dark:hover:border-blue-300 dark:hover:bg-blue-700">
+<Icon name="seti:folder" class="fill-blue-600 transition group-hover:scale-125 group-hover:fill-blue-800 dark:fill-blue-100 dark:group-hover:fill-blue-50" /> <span class="text-blue-600 transition group-hover:text-blue-800 dark:text-blue-100 dark:group-hover:text-blue-50">$username_+.zip</span>
+</a>
+
+Once you have downloaded the folder, unzip it and replace the existing `app/routes/users+/$username_+` folder with the new one.
+
+The easiest way to do this is simply drag and drop the new folder into the parent `users+` folder:
+
+![Copy article files to project](src/assets/gif/copy-article-files-to-project.gif)
+
+## Summary
+
+In this tutorial, we updated the project structure to reflect the changes we made to the Prisma schema.
+
+- We updated the permissions in the `app/utils/permissions.ts` file to reflect the new entity name.
+- We replaced the `note` files in the `app/routes/users+/$username_+` folder with the updated `article` files.
+
+## What's next?
+
+In the next tutorial, we will modify the seed data to include some categories and dummy articles that will be used to populate the database.

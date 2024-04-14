@@ -97,6 +97,8 @@ The `select` option is used to specify which fields from each record to include 
 
 In this case, we are fetching the `id`, `title`, `category`, and `images` fields from the `article` table. We don't need the `content` of each article as this is an index page, so we are only fetching the fields that we need.
 
+If we filter out only the fields we need from each record, we can reduce the amount of data that needs to be transferred from the database to the server, thereby improving performance.
+
 The `category` field is a relation to the `category` table, so we are fetching the `name` field from the `category` table.
 
 Similarly, the `images` field is a relation to the `image` table, so we are fetching the `id` field from the `image` table.
@@ -329,6 +331,7 @@ export default function NewsCategoryPage() {
 
 In this guide, we learned how to:
 
+- Learned about the `select` option in Prisma to only return the fields we need from the database.
 - Load real articles from the database and display them on the page.
 - Loop through these real articles using JavaScript's `map` function and display them on the page.
 - Revise the `getNoteImgSrc` function into `getArticleImgSrc` to work with articles.

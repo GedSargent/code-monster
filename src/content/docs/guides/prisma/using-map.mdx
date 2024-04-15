@@ -64,7 +64,7 @@ export default function ArticlesRoute() {
 				<HomeButton />
 				<h1 className="mb-32 text-center text-8xl font-bold text-white">
 -         Articles
-+					{['My', 'Brilliant, 'Articles']}
++					{['My', 'Brilliant', 'Articles']}
 				</h1>
 
 				<div className="grid grid-cols-2 gap-4">
@@ -96,11 +96,16 @@ export default function ArticlesRoute() {
 				<h1 className="mb-32 text-center text-8xl font-bold text-white">
 -					{['My', 'Brilliant', 'Articles']}
 +					{[
-+						<span className="border border-red-500 p-2 text-red-500">My</span>,
-+						<span className="border border-green-500 p-2 text-green-500">
++						<span key="1" className="border border-red-500 p-2 text-red-500">
++							My
++						</span>,
++						<span
++							key="2"
++							className="border border-green-500 p-2 text-green-500"
++						>
 +							Brilliant
 +						</span>,
-+						<span className="border border-blue-500 p-2 text-blue-500">
++						<span key="3" className="border border-blue-500 p-2 text-blue-500">
 +							Articles
 +						</span>,
 +					]}
@@ -135,7 +140,13 @@ If you were following the previous steps and altering code, make sure to revert 
 Let's recap what we know so far:
 
 1. If we embed an array inside some JSX, React will automatically render the elements of this array straight out to the screen.
-2. The `map` function produces a new array from an existing one by applying a function to each element.
+2. The `map` function ***produces a new array from an existing one*** by applying a **callback function** to each element, e.g.
+
+```ts mark="(number) => {" mark="  return number * 2" mark="}"
+const doubledNumbers = numbers.map((number) => {
+  return number * 2;
+});
+```
 
 :::tip[Aha!]
 

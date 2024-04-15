@@ -69,7 +69,7 @@ We now need to fetch the articles from the database and display them on the page
 
 We will do this by adding a Remix [**loader function**](https://remix.run/docs/en/main/route/loader) to the `articles.tsx` file:
 
-```diff lang="tsx" title="app/routes/articles.tsx"
+```diff lang="tsx" title="app/routes/articles.tsx" showLineNumbers collapse={14-20, 27-41}
 +import { PrismaClient } from '@prisma/client'
 +import { json } from '@remix-run/node'
 +import { useLoaderData } from '@remix-run/react'
@@ -83,14 +83,34 @@ import HomeButton from '~/components/challenges/HomeButton'
 +	return json({ articles })
 +}
 
-// ...Code omitted for brevity...
+function Article() {
+	return (
+		<div className="flex h-96 w-96 items-center justify-center justify-self-center rounded-xl bg-white/20">
+			<p className="text-center text-4xl text-gray-300">Article</p>
+		</div>
+	)
+}
 
 export default function ArticlesRoute() {
 +	const { articles } = useLoaderData<typeof loader>()
 +
 +	console.log({ articles })
 
-  // ...Code omitted for brevity...
+	return (
+		<main className="min-h-screen">
+			<div className="container mx-auto py-28">
+				<HomeButton />
+				<h1 className="mb-32 text-center text-8xl font-bold text-white">
+					Articles
+				</h1>
+
+				<div className="grid grid-cols-2 gap-4">
+					<Article />
+					<Article />
+				</div>
+			</div>
+		</main>
+	)
 }
 ```
 

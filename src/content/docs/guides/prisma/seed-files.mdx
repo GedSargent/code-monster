@@ -19,7 +19,7 @@ In Prisma, the seed file is usually located in `prisma/seed.ts` or `prisma/seed.
 
 To run our seed file, we need to add a new command to our `package.json` file.
 
-```diff lang="json" title="package.json"
+```diff lang="json" title="package.json" ins="},"
 {
 	"name": "react-remix-tailwind",
 	// ...Code omitted for brevity...
@@ -34,7 +34,10 @@ To run our seed file, we need to add a new command to our `package.json` file.
 
 :::caution
 
-Check carefully that you add the code above to the very bottom of the `package.json` file, just above the final closing bracket `}` of the file.
+Check carefully that you:
+
+- add a comma to the closing brack of the `"engines"` object
+- add the code above to the very bottom of the `package.json` file, just above the final closing bracket `}` of the file.
 
 :::
 
@@ -47,6 +50,18 @@ Create a new file at `prisma/seed.js`:
 ### Add a user
 
 Inside your new `prisma/seed.js` file, add the following code:
+
+:::caution
+
+Ignore the red underlines that will appear under `seed` and `user` after you add the code below.
+
+If you hover your cursor over the underlined text, you will see a message that says the variable is declared but its value is never read. This is because we haven't yet called the `seed` function anywhere yet:
+
+![Ignore the red underlines](src/assets/png/prisma/ignore-red-underlines.png)
+
+This is absolutely fine - we will call the `seed` function and `user` variable later in the guide.
+
+:::
 
 ```typescript title="prisma/seed.js"
 import { PrismaClient } from '@prisma/client'

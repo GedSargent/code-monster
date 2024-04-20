@@ -59,15 +59,17 @@ At the moment, it doesn't seem all that impressive, but we'll change that soon!
 
 To change the existing text, locate the `<h1>` tag inside the `App` function of your `root.tsx` file:
 
-```tsx showLineNumbers title="app/root.tsx" collapse={1-9} {18}
+```tsx showLineNumbers title="app/root.tsx" collapse={1-10} {20}
 import { type LinksFunction } from '@remix-run/node'
-import Document from '~/components/shared-layout/Document.tsx'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
+import Document from '~/components/shared-layout/Document'
 import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
 
 export const links: LinksFunction = () => {
 	return rootLinkElements
 }
+export { headers, meta } from './__root.client.tsx'
+export { action, loader } from './__root.server.tsx'
 
 export default function App() {
 	const nonce = useNonce()
@@ -98,7 +100,7 @@ Save the file and your browser should automatically refresh, displaying the new 
 
 Let's add a new paragraph (`<p>`) element below the `<h1>` tag. This will demonstrate how to insert new content into your page.
 
-```diff lang="tsx" title="app/root.tsx" showLineNumbers startLineNumber=17
+```diff lang="tsx" title="app/root.tsx" showLineNumbers startLineNumber=19
 <main className="grid h-full place-items-center">
   <h1 className="text-mega">Your Journey Begins!</h1>
 +  <p>Welcome to Epic News, where the latest developments in tech are found.</p>
@@ -109,7 +111,7 @@ Let's add a new paragraph (`<p>`) element below the `<h1>` tag. This will demons
 
 To style the paragraph, we'll use [TailwindCSS](https://tailwindcss.com/), a utility-first CSS framework. If you're not familiar with Tailwind, it lets you style elements by adding class names directly in your HTML (or JSX in this case).
 
-```tsx title="app/root.tsx" ins='className="text-base text-gray-600"' showLineNumbers startLineNumber=19
+```tsx title="app/root.tsx" ins='className="text-base text-gray-600"' showLineNumbers startLineNumber=21
 <p className="text-base text-gray-600">
   Welcome to Epic News, where the latest developments in tech are found.
 </p>
@@ -119,17 +121,60 @@ To style the paragraph, we'll use [TailwindCSS](https://tailwindcss.com/), a uti
 
 Tailwind makes creating responsive designs straightforward. To demonstrate, let's make the font size of our paragraph larger on medium (`md`) and large (`lg`) screens.
 
-```tsx title="app/root.tsx" ins='md:text-lg lg:text-xl' showLineNumbers startLineNumber=19
+```tsx title="app/root.tsx" ins='md:text-lg lg:text-xl' showLineNumbers startLineNumber=21
 <p className="text-base text-gray-600 md:text-lg lg:text-xl">
   Welcome to Epic News, where the latest developments in tech are found.
 </p>
 ```
 
-In Tailwind, `md:` and `lg:` are [prefixes](https://tailwindcss.com/docs/responsive-design) that apply styles at their given breakpoints, allowing for mobile-first designs.
+:::note
+
+### Responsive Design
+
+In web design, [**responsive design**](https://www.codecademy.com/resources/videos/web-design/responsive-web-design-best-practices) is an approach that makes web pages render well on a variety of devices and window or screen sizes.
+
+Traditionally, responsive design is achieved using [**media queries**](https://css-tricks.com/a-complete-guide-to-css-media-queries/) in CSS. For example, let's say we have a class called `element`, that should have a blue background:
+
+```css
+.element {
+  background-color: blue;
+}
+```
+
+Now, let's say that on devices that are at least 768px wide, we want the `.element` class to have a red background instead. We can use a media query to achieve this:
+
+```css
+/* When the browser is at least 768px and above */
+@media screen and (min-width: 768px) {
+  .element {
+    background-color: red;
+  }
+}
+```
+
+Now, as soon at the page width (or the viewport) reaches 768px, the background colour will turn red.
+
+This is a simple example, but it shows how we can use media queries to make our design responsive.
+
+### Tailwind's Responsive Design prefixes
+
+In Tailwind, `md:` and `lg:` are [**prefixes**](https://tailwindcss.com/docs/responsive-design) that make writing responsive styles much simpler.
+
+Rather than writing full media-queries, we just apply classes at specific given breakpoints, allowing for mobile-first designs.
+
+```tsx title="app/root.tsx" ins='md:text-lg lg:text-xl' showLineNumbers startLineNumber=21
+<p className="text-base text-gray-600 md:text-qlg lg:text-xl">
+  Welcome to Epic News, where the latest developments in tech are found.
+</p>
+```
+
+In this example, the text size will be `lg` (large) on screens that are at least 1024px wide, and `xl` (extra large) on screens that are at least 1280px wide.
 
 Try making your browser window wider and narrower. Notice how the text size changes according to the width of your viewport.
 
-::::tip[Did You Know?]
+:::
+
+::::tip[Challenge]
 
 # Code Challenges
 

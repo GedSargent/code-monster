@@ -153,91 +153,11 @@ export default defineConfig({
                   link: "guides/epic-news/ui/import-image-to-navbar-and-footer",
                 },
                 {
-                  label: "🖥️ Toast notifications",
-                  link: "guides/epic-news/ui/toast-notifications",
+                  label: "🖥️ Adding links",
+                  link: "guides/epic-news/ui/adding-links",
                 },
               ]
             },
-            {
-              label: "🔀 Routing in Remix",
-              collapsed: true,
-              items: [
-                {
-                  label: "🔀 The `Outlet` component",
-                  link: "guides/epic-news/routing/outlet",
-                },
-                {
-                  label: "🔀 Nested routes",
-                  link: "guides/epic-news/routing/nested-routes",
-                },
-                {
-                  label: "🔀 Dynamic routes",
-                  link: "guides/epic-news/routing/dynamic-routes",
-                },
-              ]
-            },
-            {
-              label: "🔒 Security",
-              collapsed: true,
-              items: [
-                {
-                  label: "🔒 Authentication and security",
-                  link: "guides/epic-news/authentication-and-security",
-                },
-                {
-                  label: "🔒 Account creation",
-                  link: "guides/epic-news/account-creation",
-                },
-                {
-                  label: "🔒 Single Sign-On",
-                  link: "guides/epic-news/single-sign-on",
-                },
-              ]
-            },
-            {
-              label: '🗄️ Prisma database updates',
-              collapsed: true,
-              items: [
-                {
-                  label: '🗄️ Schema updates',
-                  link: 'guides/epic-news/prisma/schema-updates'
-                },
-                {
-                  label: '🗂️ Modify project structure',
-                  link: 'guides/epic-news/prisma/modify-project-structure'
-                },
-                {
-                  label: '🌱 Modify seed file',
-                  link: 'guides/epic-news/prisma/modify-seed-file'
-                },
-              ]
-            },
-            {
-              label: "🖥️ Articles index page",
-              collapsed: true,
-              items: [
-                {
-                  label: '🖥️ Loading Dummy Articles',
-                  link: 'guides/epic-news/articles-index-page/loading-dummy-articles'
-                },
-                {
-                  label: '🖥️ Style Dummy Articles',
-                  link: 'guides/epic-news/articles-index-page/style-article-card'
-                },
-                {
-                  label: '🖥️ Display an array of dummy articles',
-                  link: 'guides/epic-news/articles-index-page/display-array-of-dummy-articles'
-                },
-                {
-                  label: '🖥️ Load and display all real articles',
-                  link: 'guides/epic-news/articles-index-page/load-and-display-all-real-articles'
-                },
-                {
-                  label: '🖥️ Filter articles by category',
-                  link: 'guides/epic-news/articles-index-page/filter-articles-by-category'
-                },
-              ]
-            }
           ],
         },
         {

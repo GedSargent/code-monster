@@ -131,22 +131,32 @@ export default defineConfig({
                   link: `${lightDarkModeDir}/01-setting-up`,
                 },
                 {
-                  label: "🌞 Add a loader function",
-                  link: `${lightDarkModeDir}/02-adding-a-loader-function`,
-                },
-                {
                   label: "🌞 From server to client - `useLoaderData`",
                   link: `${lightDarkModeDir}/03-from-server-to-client`,
-                },
-                {
-                  label: "🌞 `action` functions - light and dark mode",
-                  link: `${lightDarkModeDir}/04-action-functions`,
                 },
               ],
             },
             {
-              label: "⚙️ Navbar and Footer",
-              link: "guides/epic-news/navbar-and-footer",
+              label: "🖥️ User Interface",
+              collapsed: true,
+              items: [
+                {
+                  label: "🖥️ Add Navbar and Footer",
+                  link: "guides/epic-news/ui/add-navbar-and-footer",
+                },
+                {
+                  label: "🖥️ Logo Design",
+                  link: "guides/epic-news/ui/logo-design",
+                },
+                {
+                  label: "🖥️ Importing images in React",
+                  link: "guides/epic-news/ui/import-image-to-navbar-and-footer",
+                },
+                {
+                  label: "🖥️ Toast notifications",
+                  link: "guides/epic-news/ui/toast-notifications",
+                },
+              ]
             },
             {
               label: "🔀 Routing in Remix",
@@ -183,10 +193,6 @@ export default defineConfig({
                   link: "guides/epic-news/single-sign-on",
                 },
               ]
-            },
-            {
-              label: "⚙️ Toast notifications",
-              link: "guides/epic-news/toast-notifications",
             },
             {
               label: '🗄️ Prisma database updates',

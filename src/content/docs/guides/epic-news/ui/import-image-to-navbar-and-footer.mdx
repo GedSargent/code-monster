@@ -1,0 +1,142 @@
+---
+title: 'Importing images in React'
+description: 'Importing images in React'
+---
+
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+In this guide, we'll learn how to import images in React. We'll cover:
+
+- Importing images from project folders
+- Using images in components
+
+## Importing images from project folders
+
+To import images from your project folders, you can use the `import` statement in JavaScript, just like we have done previously for modules and functions.
+
+As with modules, you need to specify the path to the image file. You can call the image anything that makes sense to you.
+
+### Moving your image to the project folder
+
+Firstly, you will need to move your logo to the `app/assets/png` folder. This is where we will store all PNG images in the Epic News project.
+
+The easiest way to do this is to simply drag and drop the image file into the `app/assets/png` folder in your code editor:
+
+![Drag and drop logo](src/assets/gif/drag-and-drop-logo.gif)
+
+### Importing the image
+
+Now that the image is in the correct folder, you can import it into your component:
+
+```diff lang="tsx" title="HeaderWithSearch.tsx"
+import { useMatches } from '@remix-run/react'
+import { SearchBar } from '../molecules/SearchBar'
+import LoginOrUserDropdown from './LoginOrUserDropdown'
++import logo from '~/assets/png/epic-news-logo.png';
+```
+
+### Using the image
+
+To actually use the image in your component, you can use the `img` tag and set the `src` attribute to the imported image. You can also set an `alt` attribute to describe the image.
+
+Add the line of code below inside the `div` that you created in the previous tutorial:
+
+```diff lang="tsx" title="HeaderWithSearch.tsx" showLineNumbers collapse={1-4, 18-24}
+import { useMatches } from '@remix-run/react'
+import { SearchBar } from '../molecules/SearchBar'
+import LoginOrUserDropdown from './LoginOrUserDropdown'
+import logo from '~/assets/png/epic-news-logo.png'
+
+export default function HeaderWithSearch() {
+	const matches = useMatches()
+	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+
+	return (
+		<header className="dark:bg-dark-primary/10 bg-primary/10 py-6">
+			<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+				<div>
++					<img src={logo} alt="Epic News Logo" className="w-16" />
+					<span className="text-sm text-foreground">Epic News</span>
+				</div>
+				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
+					{searchBar}
+				</div>
+				<div className="flex items-center gap-10">
+					<LoginOrUserDropdown />
+				</div>
+				<div className="block w-full sm:hidden">{searchBar}</div>
+			</nav>
+		</header>
+	)
+}
+```
+
+With this code saved, your logo should now appear just above the site title in the navigation bar:
+
+![Logo above text](src/assets/png/epic-news/logo-above-text.png)
+
+:::tip[Challenge]
+
+## Use flexbox to position the logo and site title horizontally
+
+Now that you have the logo and site title in the navigation bar, use flexbox to position them horizontally.
+
+- The logo should be on the left, and the site title should be on the right.
+- There should be a small gap between the two to separate them.
+- The site title should be centred vertically with the logo.
+
+Once you've had a go, check the your code against the solution below:
+
+<MonsterReveal title="Flexbox solution">
+```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" ins=" className="flex items-center gap-4"" showLineNumbers collapse={1-4, 18-24}
+import { useMatches } from '@remix-run/react'
+import { SearchBar } from '../molecules/SearchBar'
+import LoginOrUserDropdown from './LoginOrUserDropdown'
+import logo from '~/assets/png/epic-news-logo.png'
+
+export default function HeaderWithSearch() {
+	const matches = useMatches()
+	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+
+	return (
+		<header className="dark:bg-dark-primary/10 bg-primary/10 py-6">
+			<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+				<div className="flex items-center gap-4">
+					<img src={logo} alt="Epic News Logo" className="w-16" />
+					<span className="text-sm text-foreground">Epic News</span>
+				</div>
+				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
+					{searchBar}
+				</div>
+				<div className="flex items-center gap-10">
+					<LoginOrUserDropdown />
+				</div>
+				<div className="block w-full sm:hidden">{searchBar}</div>
+			</nav>
+		</header>
+	)
+}
+```
+
+With this code in place, your site logo and title should now be positioned correctly in the navigation bar:
+
+![Logo and title positioned correctly](src/assets/png/epic-news/logo-title-positioned.png)
+
+</MonsterReveal>
+
+:::
+
+## Summary
+
+In this tutorial, we have:
+
+- Moved an image to the `app/assets/png` folder
+- Imported the image into a component
+- Used the image as the `src` attribute in an `img` tag
+- Positioned the image and text in the navigation bar correctly using flexbox
+
+## What's next?
+
+In the next tutorial, we'll customise the navigation bar and footer by adding links to different pages in the site.

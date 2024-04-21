@@ -1,54 +1,47 @@
 ---
-title: From server to client - `useLoaderData`
+title: The `useLoaderData` hook
 description: Learn how to use the useLoaderData hook to pass data from the server to the client in Remix.
 ---
 
 import MonsterReveal from "src/components/MonsterReveal.astro";
-import MonsterKbd from 'src/components/MonsterKbd.astro'
+import MonsterKbd from "src/components/MonsterKbd.astro"
 
-If the `loader` function loads and sends data across from the server, then `useLoaderData` is the vehicle that carries it into the user's browser.
+## Frontend and backend code
 
-## Adding `useLoaderData` to the `App` component
+In any given website, there are two main parts to the code that drives it:
 
-`useLoaderData` is a React [**hook**](https://react.dev/learn/reusing-logic-with-custom-hooks) supplied for us by Remix.
+1. **Frontend code**: This is the code that runs in the user's browser. It's written in JavaScript and is responsible for rendering the website and handling user interactions.
 
-Making sure you are still inside `app/root.tsx`, carefully add the highlighted code below:
+2. **Backend code**: This is the code that runs on the server. It's written in a server-side language like Node.js, Python, or Ruby, and is responsible for fetching data from a database, processing it, and sending it to the frontend.
 
-```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-10, 15-30}
-import {
-  json,
-  type LinksFunction,
-  type LoaderFunctionArgs
-} from "@remix-run/node";
-import Document from '~/components/shared-layout/Document.tsx'
+In a traditional website, the frontend and backend code are separate and communicate with each other using HTTP requests. The frontend code makes a request to the backend code, which processes the request and sends back a response.
+
+![Front and backend code](src/assets/gif/front-and-backend-code.gif)
+
+In Remix, the frontend and backend code are combined into a single file called a **route module**. The file we have been working in - `root.tsx` - is an example of a route module.
+
+This file contains both the frontend code (React components) and the backend code needed to render a particular page.
+
+So far, we have been working exclusively on the frontend code. So where is the backend code? Let's take a look...
+
+## The `loader` and `action` functions
+
+Take another look at the `app/root.tsx` file:
+
+```tsx title="app/root.tsx" showLineNumbers {10}
+import { type LinksFunction } from '@remix-run/node'
+import Document from '~/components/shared-layout/Document'
 import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/rootProviders/rootLinkElements.ts'
-import { getHints } from '~/utils/client-hints'
-import { getDomainUrl } from '~/utils/misc'
-import { getTheme } from '~/utils/theme.server'
-+import { useLoaderData } from '@remix-run/react'
-+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
 
 export const links: LinksFunction = () => {
 	return rootLinkElements
 }
-
-export async function loader({ request }: LoaderFunctionArgs) {
-	const requestInfo = {
-		hints: getHints(request),
-		origin: getDomainUrl(request),
-		path: new URL(request.url).pathname,
-		userPrefs: {
-			theme: getTheme(request),
-		},
-	}
-
-	return json({ requestInfo })
-}
+export { headers, meta } from './__root.client.tsx'
+export { action, loader } from './__root.server.tsx'
 
 export default function App() {
-+	const data = useLoaderData<typeof loader>();
-	const nonce = useNonce();
+	const nonce = useNonce()
 
 	return (
 		<Document nonce={nonce}>
@@ -58,6 +51,130 @@ export default function App() {
 						<h1 className="text-mega">Welcome to Epic News!</h1>
 					</main>
 				</div>
+			</div>
+		</Document>
+	)
+}
+```
+
+You'll notice that we are exporting two functions from this file: `action` and `loader`.
+
+```tsx
+export { action, loader } from './__root.server.tsx'
+```
+
+These functions are responsible for fetching data from the server and processing it before it is sent to the frontend.
+
+But where are these functions defined? The line highlighted above says that the `action` and `loader` functions are being exported somehow, but we don't see them in this file. 🧐
+
+That's because they are defined in a completely separate file: `__root.server.tsx`. We can communicate between two files in JavaScript using `import` and `export` statements.
+
+:::note[Deep Dive]
+
+### `import` and `export` statements
+
+JavaScript allows us to split our code into multiple files and then `import` and `export` functions and variables between them.
+
+This helps to keep our code organized and makes it much better to work with.
+
+Having smaller, more focused files makes it easier for humans to understand what is going on in each part of the code.
+
+That's precisely what the `import` statements are doing at the top of each file in the project, e.g.:
+
+```tsx title="app/root.tsx" showLineNumbers
+import { type LinksFunction } from '@remix-run/node'
+import Document from '~/components/shared-layout/Document'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+```
+
+Each `import` statement is bringing in a function or variable from another file, so that it can be used in the current file.
+
+:::
+
+If you are interested, open up the `__root.server.tsx` file and take a look at the `loader` function. You'll see that it is responsible for fetching data from the server and sending it to the frontend.
+
+We will be looking more closely at the `loader` function in a later tutorial.
+
+For now, we just need to get the data from the `loader` function into the frontend component. Let's see how we can do that...
+
+## Adding `useLoaderData` to the `App` component
+
+`useLoaderData` is a custom React [**hook**](https://react.dev/learn/reusing-logic-with-custom-hooks) supplied for us by Remix.
+
+:::note
+
+### What is a hook?
+
+In React, a [**hook**](https://react.dev/reference/react/hooks) is a function that lets you use state and other React features inside a function component.
+
+In this case, [**`useLoaderData`**](https://remix.run/docs/en/main/hooks/use-loader-data) is a custom hook that Remix provides to us.
+
+It allows us to access the data returned from the `loader` function running on the backend, and pass it into the frontend component.
+
+At this stage, we don't need to worry about how it works, we just need to know that it returns the `data` from a `loader` function executed on the server.
+
+:::
+
+### Updating the `import` statements
+
+Making sure you are still inside `app/root.tsx`, let's start by updating the `import` statements at the top of the file:
+
+```diff lang="tsx" title="app/root.tsx" showLineNumbers
+import { type LinksFunction } from '@remix-run/node'
+import Document from '~/components/shared-layout/Document'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
++import { useLoaderData } from '@remix-run/react'
++import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
++import { loader } from './__root.server'
++import useTheme from './hooks/useTheme.tsx'
+```
+
+Next, carefully add the code highlighted in green below to the `App` component function:
+
+:::danger[Take care]
+
+## 🧐 Place code **with care**
+
+Look carefully where the highlighted code is added in relation to the code that is already there.
+
+As you get more confident with JavaScript and Remix, you will learn where to place code like this more instinctively.
+
+However, while you are finding your feet, _**take the time to slot these lines into <u>exactly</u> the same places in your own code**_.
+
+:::
+
+```diff lang="tsx" title="app/root.tsx" showLineNumbers ins=" theme={theme}" collapse={1-14}
+import { type LinksFunction } from '@remix-run/node'
+import Document from '~/components/shared-layout/Document'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { useLoaderData } from '@remix-run/react'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import { loader } from './__root.server'
+import useTheme from './hooks/useTheme.tsx'
+
+export const links: LinksFunction = () => {
+	return rootLinkElements
+}
+export { headers, meta } from './__root.client.tsx'
+export { action, loader } from './__root.server.tsx'
+
+export default function App() {
++	const data = useLoaderData<typeof loader>();
+	const nonce = useNonce();
++	const theme = useTheme()
+
+	return (
+		<Document nonce={nonce} theme={theme}>
+			<div className="flex h-screen flex-col justify-between">
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
+					</main>
+				</div>
++
 +				<div className="container flex justify-between pb-5">
 +					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
 +				</div>
@@ -67,7 +184,7 @@ export default function App() {
 }
 ```
 
-:::tip
+:::note[Deep Dive]
 
 ### Review your code
 
@@ -87,15 +204,21 @@ When you are ready, open the explanation below.
     const data = useLoaderData<typeof loader>()
     ```
 
-    The `useLoaderData` hook provides whatever value is returned from the `loader` function. In this case, we are calling this value `data`, but it's just a variable name, and could be anything we wanted it to be. `useLoaderData` is the bridge connecting the server to the browser.
+    The `useLoaderData` hook provides whatever value is returned from the `loader` function. In this case, we are calling this value `data`, but it's just a variable name, and could be anything we wanted it to be.
 
-    So, the `data` variable here represents the object being returned from the `loader` function defined previously. A few lines down, we pass this into the `ThemeSwitch` component:
+		This is precisely how `useLoaderData` can be thought of as the bridge connecting the server to the browser.
 
-    ```tsx title="app/root.tsx"
+		Any code returned from the `loader` that is generated on the server is captured and passed straight into the browser by this simple hook.
+
+    So, the `data` variable here represents the object being returned from the `loader` function that we have imported from the `app/__root.client.tsx` file.
+
+		A few lines down, we pass this into the `ThemeSwitch` component:
+
+    ```tsx title="app/root.tsx" mark="data.requestInfo.userPrefs.theme"
     <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
     ```
 
-    As you can probably guess, this particular bit of the `data` object contains the user's `theme` preferences (i.e. 'light' or 'dark'), and is read directly from a browser [cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies).
+    As you can probably guess, this particular bit of the `data` object contains the user's `theme` preferences (i.e. 'light' or 'dark'), and is read directly from a browser [**cookie**](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies).
 
     #### 2. The `ThemeSwitch` component
 
@@ -107,10 +230,37 @@ When you are ready, open the explanation below.
 
 :::
 
-## 🤨 But `ThemeSwitch` doesn't work..!
+## Testing the light and dark mode toggle button
 
-Try clicking on the theme switch icon. Unfortunately it doesn't work yet...
+Save your changes, then head back to the browser. You should now be able to toggle the theme between light and dark mode by clicking the button:
 
-![ThemeSwitch doesn't work...](src/assets/gif/theme-switch-not-working.gif)
+![Light and dark mode toggle button](src/assets/gif/theme-switch-toggle.gif)
 
-What's going on here? Let's fix it in the next tutorial...
+## 🎉 Congratulations! 🎉
+
+You now have a working light and dark mode toggle button in your Remix app! 🚀
+
+:::tip[Report writing]
+
+## Report writing
+
+You have now completed the implementation of the light and dark mode toggle button in your Remix app.
+
+It's time to start the report you will be submitting that documents the process of building the app.
+
+If you haven't already, create a new Word document in your OneDrive folder and give it a suitable name, e.g. `Building a news app with Remix`.
+
+Remember to include the following parts from this tutorial in your report:
+
+- What is 'light' and 'dark' mode in a web app?
+- Why is [**light and dark mode important in a web app**](https://blogs.perficient.com/2022/03/04/dark-mode-and-digital-accessibility-who-it-helps-and-without-it-who-it-may-hinder/)?
+- What [**accessibility considerations**](https://uxdesign.cc/dark-matters-342ff2c7cc) should be taken into account when implementing light and dark mode?
+- What is meant by the terms 'frontend' and 'backend' in a web app?
+- What are [**`loader`**](https://remix.run/docs/en/main/route/loader) and [**`action`**](https://remix.run/docs/en/main/route/action) functions typically responsible for in a Remix app, and where are the executed (i.e. server or browser)?
+- What is the [**`useLoaderData`**](https://remix.run/docs/en/main/hooks/use-loader-data) hook responsible for in a Remix app?
+- Show how you have used the `useLoaderData` hook in your app to update the `theme` preference in the `ThemeSwitch` component.
+- How did you test the light and dark mode toggle button in the browser?
+
+Support your explanations with screenshots and code snippets where necessary.
+
+:::

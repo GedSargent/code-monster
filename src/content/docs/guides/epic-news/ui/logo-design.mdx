@@ -1,0 +1,148 @@
+---
+title: 'Logo Design'
+description: 'Design a logo for the app ready for the navbar'
+---
+
+import MonsterKbd from "src/components/MonsterKbd.astro"
+import MonsterReveal from "src/components/MonsterReveal.astro"
+
+Now that we have a navigation bar and footer, let's customise them by adding:
+
+- A logo to the navigation bar and footer
+- A custom footer message
+- Links to other pages in the website
+
+## Customising the Navigation Bar
+
+### Adding a Logo
+
+To add a logo to the navigation bar, we need to update the `HeaderWithSearch` component.
+
+Open the `HeaderWithSearch` component in your code editor. This is found at `app/components/organisms/HeaderWithSearch.tsx`.
+
+:::tip
+
+### Jump to file in VS Code
+
+You can jump straight to any project file in VS Code by typing <MonsterKbd>CTRL + P</MonsterKbd> (or <MonsterKbd>CMD + P</MonsterKbd> on macOS), or clicking the search bar at the top of your screen, and typing in the start of the filename.
+
+You will see a list of files that match your search. Select the file you want to open.
+
+![Jump to file in VS Code](src/assets/gif/vscode-jump-to-file.gif)
+
+:::
+
+## Adding a section for the logo
+
+Look carefully at your navbar header in the browser, and think carefully where you want to place the logo.
+
+Typically, the logo is placed on the left side of the navigation bar:
+
+![Nav Logo Position](src/assets/png/epic-news/nav-logo-position.png)
+
+:::tip[Challenge]
+
+Look carefully at the `HeaderWithSearch` component and decide where you should place a new `div` to encapsulate the new logo.
+
+```tsx title="HeaderWithSearch.tsx"
+import { useMatches } from '@remix-run/react'
+import { SearchBar } from '../molecules/SearchBar'
+import LoginOrUserDropdown from './LoginOrUserDropdown'
+
+export default function HeaderWithSearch() {
+	const matches = useMatches()
+	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+
+	return (
+		<header className="bg-primary/10 py-6 dark:bg-dark-primary/10">
+			<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
+					{searchBar}
+				</div>
+				<div className="flex items-center gap-10">
+					<LoginOrUserDropdown />
+				</div>
+				<div className="block w-full sm:hidden">{searchBar}</div>
+			</nav>
+		</header>
+	)
+}
+```
+
+For the time being, just place the code below at the spot you think is best:
+
+```tsx
+<div>
+  <span className="text-sm text-foreground">Epic News</span>
+</div>
+```
+
+When you have added your text, compare your solution with the one below:
+
+<MonsterReveal>
+```diff lang="tsx" title="HeaderWithSearch.tsx" showLineNumbers collapse={}
+import { useMatches } from '@remix-run/react'
+import { SearchBar } from '../molecules/SearchBar'
+import LoginOrUserDropdown from './LoginOrUserDropdown'
+
+export default function HeaderWithSearch() {
+	const matches = useMatches()
+	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+
+	return (
+		<header className="dark:bg-dark-primary/10 bg-primary/10 py-6">
+			<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
++				<div>
++					<span className="text-sm text-foreground">Epic News</span>
++				</div>
+				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
+					{searchBar}
+				</div>
+				<div className="flex items-center gap-10">
+					<LoginOrUserDropdown />
+				</div>
+				<div className="block w-full sm:hidden">{searchBar}</div>
+			</nav>
+		</header>
+	)
+}
+```
+
+With this in place, your navbar should look something like this:
+
+![Placeholder logo text](src/assets/png/epic-news/placeholder-logo-text.png)
+</MonsterReveal>
+
+:::
+
+## Create a logo - Figma
+
+Now that we have a placeholder for our logo, let's create a logo for our site.
+
+Open the Figma file for your Epic News wireframes, and create a logo that fits the design of the site.
+
+:::tip
+
+Pick up some tips for a simple but effective logo design in the video below:
+
+<iframe height="520" src="https://www.youtube.com/embed/XI_TQg_QnMc?si=tjwTa73fqeqSPPgj" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+:::
+
+Once you are happy with your logo, export it as an PNG file.
+
+<iframe height="520" src="https://www.youtube.com/embed/6565-CUn-_0?si=cctR36RCTMxzEfPZ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+## Summary
+
+In this tutorial we have:
+
+- Added a placeholder for the logo in the navigation bar
+- Created a logo for the site using Figma
+- Exported the logo as a PNG file
+
+## Next Steps
+
+In the next section, we will add the logo to the navigation bar and footer.

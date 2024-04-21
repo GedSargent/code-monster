@@ -12,68 +12,22 @@ Now that we have light and dark mode, let's add a navigation bar to our site. We
 
 First, let's add the component to our `app/root.tsx` file.
 
-```diff lang="tsx" title="app/root.tsx" collapse={1-16, 20-61, 79-82}
-import { parse } from '@conform-to/zod'
-import {
-	json,
-	type ActionFunctionArgs,
-	type LinksFunction,
-	type LoaderFunctionArgs,
-} from '@remix-run/node'
+```diff lang="tsx" title="app/root.tsx" collapse={1-6, 11-20, 27-35} showLineNumbers
+import { type LinksFunction } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
-import { z } from 'zod'
-import Document from '~/components/shared-layout/Document.tsx'
+import Document from '~/components/shared-layout/Document'
 import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-import { getHints } from '~/utils/client-hints'
-import { getDomainUrl } from '~/utils/misc'
 import { useNonce } from '~/utils/nonce-provider.ts'
 import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { getTheme, setTheme } from '~/utils/theme.server'
-import useTheme from './hooks/useTheme'
+import { loader } from './__root.server'
+import useTheme from './hooks/useTheme.tsx'
 +import HeaderWithSearch from './components/organisms/HeaderWithSearch'
 
 export const links: LinksFunction = () => {
 	return rootLinkElements
 }
-
-export async function loader({ request }: LoaderFunctionArgs) {
-	const requestInfo = {
-		hints: getHints(request),
-		origin: getDomainUrl(request),
-		path: new URL(request.url).pathname,
-		userPrefs: {
-			theme: getTheme(request),
-		},
-	}
-
-	return json({ requestInfo })
-}
-
-const ThemeFormSchema = z.object({
-	theme: z.enum(['system', 'light', 'dark']),
-})
-
-export async function action({ request }: ActionFunctionArgs) {
-	const formData = await request.formData()
-	const submission = parse(formData, {
-		schema: ThemeFormSchema,
-	})
-
-	if (submission.intent !== 'submit') {
-		return json({ status: 'idle', submission } as const)
-	}
-
-	if (!submission.value) {
-		return json({ status: 'error', submission } as const, { status: 400 })
-	}
-	const { theme } = submission.value
-
-	const responseInit = {
-		headers: { 'set-cookie': setTheme(theme) },
-	}
-
-	return json({ success: true, submission }, responseInit)
-}
+export { headers, meta } from './__root.client.tsx'
+export { action, loader } from './__root.server.tsx'
 
 export default function App() {
 	const data = useLoaderData<typeof loader>()
@@ -108,17 +62,21 @@ Head across to your browser and you should see the navigation bar at the top of 
 
 You'll notice that if you click the **Log in** button, nothing happens. This is because we haven't implemented the login functionality yet. We'll do that in a later section. For now, let's add a footer to our site.
 
-## Challenge: Adding a Footer
+:::tip[Challenge]
 
-Now that we have a navigation bar, let's add a footer.
+## Adding a Footer
 
-If you look inside the `app/components/organisms/Footer` directory, you'll see **three** different footer components.
+Now that we have a navigation bar, let's add a footer by importing one from our `components` folder .
+
+If you look closely inside the `app/components/organisms/Footer` directory, you'll see **three** different footer components.
 
 ![Footer Components](src/assets/png/footer-components.png)
 
-Using the same techniques we used to add the navigation bar, add a footer to your site yourself. You can choose any of the three above to get started, and if you want to customise them later, feel free!
+Using the same techniques we learned about to add the [**navigation bar**](#importing-headerwithsearch) above, add a footer to your site yourself.
 
-If you get stuck, you can find the solution below.
+You can choose any of the three above to get started (i.e. `Basic`, `FooterLogoCentre` or `FooterRight`). You will be customising them later.
+
+After you've tried this yourself, or if you get stuck, you can find the solution below.
 
 <MonsterReveal title="Adding a footer">
 <div>
@@ -128,24 +86,15 @@ For this solution, I'm going to use the `FooterMenuRight` component, but you can
 
 First, let's `import` the component at the top of our `root.tsx` file:
 
-```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-16}
-import { parse } from '@conform-to/zod'
-import {
-	json,
-	type ActionFunctionArgs,
-	type LinksFunction,
-	type LoaderFunctionArgs,
-} from '@remix-run/node'
+```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-7}
+import { type LinksFunction } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
-import { z } from 'zod'
-import Document from '~/components/shared-layout/Document.tsx'
+import Document from '~/components/shared-layout/Document'
 import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-import { getHints } from '~/utils/client-hints'
-import { getDomainUrl } from '~/utils/misc'
 import { useNonce } from '~/utils/nonce-provider.ts'
 import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { getTheme, setTheme } from '~/utils/theme.server'
-import useTheme from './hooks/useTheme'
+import { loader } from './__root.server'
+import useTheme from './hooks/useTheme.tsx'
 import HeaderWithSearch from './components/organisms/HeaderWithSearch'
 +import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 ```
@@ -174,7 +123,7 @@ export default function App() {
 				<div className="container flex justify-between pb-5">
 					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
 				</div>
-
++
 +				<FooterMenuRight />
 			</div>
 		</Document>
@@ -193,8 +142,22 @@ Finally, remember to tidy up your imports at the top of the file using the VS Co
 </div>
 </MonsterReveal>
 
+:::
+
 ## 🎉 Congratulations! 🎉
 
 You now have a professional navigation bar and footer on your site! 😎
 
-In the next section, we'll look at how to add more pages using Remix's powerful nesting routing system.
+How can we start to customise it?
+
+## Summary
+
+In this tutorial we:
+
+- Revised how to `import` components into our `root.tsx` file.
+- Added a navigation bar to our site using the `<HeaderWithSearch />` component.
+- Added a footer to our site using the `<FooterMenuRight />` component.
+
+## What's next?
+
+In the next section, we'll look at how we can begin to customise the colours and content of our navigation bar and footer.

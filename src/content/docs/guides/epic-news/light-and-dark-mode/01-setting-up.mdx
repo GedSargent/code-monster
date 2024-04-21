@@ -13,7 +13,7 @@ All we need to do is implement it 🚀.
 
 Open `app/root.tsx` and look carefully at the `App` function being exported:
 
-```tsx title="app/root.tsx" {10-24} collapse={1-4}
+```tsx title="app/root.tsx" {12-26} collapse={1-4}
 import { type LinksFunction } from '@remix-run/node'
 import Document from '~/components/shared-layout/Document.tsx'
 import rootLinkElements from '~/utils/providers/rootLinkElements'
@@ -22,6 +22,8 @@ import { useNonce } from '~/utils/nonce-provider.ts'
 export const links: LinksFunction = () => {
 	return rootLinkElements
 }
+export { headers, meta } from './__root.client.tsx'
+export { action, loader } from './__root.server.tsx'
 
 export default function App() {
 	const nonce = useNonce()
@@ -52,7 +54,7 @@ Don't worry, the fundamentals of this process remain the same.
 
 Notice the `Document` component that wraps everything being returned from the `App` function?
 
-```tsx title="app/root.tsx" collapse={1-9} {14, 22}
+```tsx title="app/root.tsx" collapse={6-10} {2, 16, 24}
 import { type LinksFunction } from '@remix-run/node'
 import Document from '~/components/shared-layout/Document.tsx'
 import rootLinkElements from '~/utils/providers/rootLinkElements'
@@ -61,6 +63,8 @@ import { useNonce } from '~/utils/nonce-provider.ts'
 export const links: LinksFunction = () => {
 	return rootLinkElements
 }
+export { headers, meta } from './__root.client.tsx'
+export { action, loader } from './__root.server.tsx'
 
 export default function App() {
 	const nonce = useNonce()
@@ -87,41 +91,45 @@ This will open the file where the `Document` component code is held:
 
 ```tsx title="app/components/shared-layout/Document.tsx"
 interface DocumentProps {
-  children: React.ReactNode;
-  nonce: string;
-  theme?: Theme;
-  env?: Record<string, string>;
+	children: React.ReactNode
+	nonce: string
+	theme?: Theme
+	env?: Record<string, string>
+	allowIndexing?: boolean
 }
 
 export default function Document({
-  children,
-  nonce,
-  theme = "dark",
-  env = {},
+	children,
+	nonce,
+	theme = 'dark',
+	env = {},
+	allowIndexing = true,
 }: DocumentProps) {
-  return (
-    <html lang="en" className={`${theme} h-full overflow-x-hidden`}>
-      <head>
-        <ClientHintCheck nonce={nonce} />
-        <Meta />
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <Links />
-      </head>
-      <body className="dark:bg-dark-background dark:text-dark-foreground bg-background text-foreground">
-        {children}
-        <script
-          nonce={nonce}
-          dangerouslySetInnerHTML={{
-            __html: `window.ENV = ${JSON.stringify(env)}`,
-          }}
-        />
-        <ScrollRestoration nonce={nonce} />
-        <Scripts nonce={nonce} />
-        <LiveReload nonce={nonce} />
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
+			<head>
+				<ClientHintCheck nonce={nonce} />
+				<Meta />
+				<meta charSet="utf-8" />
+				<meta name="viewport" content="width=device-width,initial-scale=1" />
+				{allowIndexing ? null : (
+					<meta name="robots" content="noindex, nofollow" />
+				)}
+				<Links />
+			</head>
+			<body className="bg-background text-foreground">
+				{children}
+				<script
+					nonce={nonce}
+					dangerouslySetInnerHTML={{
+						__html: `window.ENV = ${JSON.stringify(env)}`,
+					}}
+				/>
+				<ScrollRestoration nonce={nonce} />
+				<Scripts nonce={nonce} />
+			</body>
+		</html>
+	)
 }
 ```
 
@@ -145,6 +153,7 @@ interface DocumentProps {
   nonce: string;
   theme?: Theme;
   env?: Record<string, string>;
+	allowIndexing?: boolean
 }
 ```
 
@@ -176,7 +185,13 @@ _We don't need to worry about this for now, but we will come back to it soon._
 
   This means that `Theme` must be one of two possible strings: `'light'` or `'dark'`. We'll be looking at this in more detail later.
 
-- `env`: This is also optional, and it should be of the type `Record<string, string`. This is a fancy way of saying it's an object where all the keys and values are strings. For example, `{ "key1": "value1", "key2": "value2" }` would be a valid `env`.
+- `env`: This is also optional, and it should be of the type `Record<string, string`.
+
+		This is a fancy way of saying it's an object where all the keys and values are strings. For example, `{ "key1": "value1", "key2": "value2" }` would be a valid `env`.
+
+- `allowIndexing`: This is also optional, and it should be of the type `boolean`.
+
+		This is a flag that tells search engines like Google whether they should index the page or not. If `allowIndexing` is `true`, the page will be indexed. If it's `false`, the page won't be indexed.
 
 So, if you have an object and you want to make sure it fits the `DocumentProps` blueprint, it needs to have these properties with these types.
 
@@ -186,7 +201,9 @@ Remember that the `Document` function is a [**React component**](https://react.d
 
 Because of this, it's a function that can take an object called `props` as an argument and returns some JSX.
 
-Props are a way of passing data into a component from elsewhere in the codebase. In this case, the `Document` component is expecting an object that fits the `DocumentProps` interface. Wherever we use the `Document` component, we need to pass it an object that has the properties `children` and `nonce`. The `theme`, and `env` properties are optional - we can pass them if we want to, but we don't have to.
+Props are a way of passing data into a component from elsewhere in the codebase. In this case, the `Document` component is expecting an object that fits the `DocumentProps` interface.
+
+Wherever we use the `Document` component, we _must_ pass it an object that has the properties `children` and `nonce`. The `theme`, `env` and `allowIndexing` properties are _optional_ - we can pass them if we want to, but we don't have to.
 
 ##### Refresher tutorial
 
@@ -196,16 +213,10 @@ If you need a refresher on props in React, check out the previous lesson on [**P
 
 The `children` property is a special prop in React. It's used to pass any content between the opening and closing tags of a component.
 
-For example, in the example of the `Document` component, the `children` prop is used to pass in the content that should be rendered between the `<body>` tags of the HTML document.
+In the example of the `Document` component, the `children` prop is used to pass in the content that should be rendered between the `<body>` tags of the HTML document.
 
-```tsx title="app/components/shared-layout/Document.tsx" showLineNumbers collapse={1-16, 26-32} {34}
-import {
-	Links,
-	LiveReload,
-	Meta,
-	Scripts,
-	ScrollRestoration,
-} from '@remix-run/react'
+```tsx title="app/components/shared-layout/Document.tsx" showLineNumbers collapse={1-11, 22-31} {14, 33}
+import { Links, Meta, Scripts, ScrollRestoration } from '@remix-run/react'
 import { ClientHintCheck } from '~/utils/client-hints'
 import { Theme } from '~/utils/theme.server'
 
@@ -214,6 +225,7 @@ interface DocumentProps {
 	nonce: string
 	theme?: Theme
 	env?: Record<string, string>
+	allowIndexing?: boolean
 }
 
 export default function Document({
@@ -221,6 +233,7 @@ export default function Document({
 	nonce,
 	theme = 'dark',
 	env = {},
+	allowIndexing = true,
 }: DocumentProps) {
 	return (
 		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
@@ -229,9 +242,12 @@ export default function Document({
 				<Meta />
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
+				{allowIndexing ? null : (
+					<meta name="robots" content="noindex, nofollow" />
+				)}
 				<Links />
 			</head>
-			<body className="bg-background text-foreground dark:bg-dark-background dark:text-dark-foreground">
+			<body className="bg-background text-foreground">
 				{children}
 				<script
 					nonce={nonce}
@@ -241,7 +257,6 @@ export default function Document({
 				/>
 				<ScrollRestoration nonce={nonce} />
 				<Scripts nonce={nonce} />
-				<LiveReload nonce={nonce} />
 			</body>
 		</html>
 	)
@@ -252,7 +267,7 @@ This unassuming little prop actually does a lot of work behind the scenes. It's 
 
 If you look back at the `App` function in `app/root.tsx`, you can see that the `Document` component is being used to wrap the content of the page:
 
-```tsx title="app/root.tsx" collapse={1-9} {14, 22}
+```tsx title="app/root.tsx" collapse={6-10} {2, 16, 24}
 import { type LinksFunction } from '@remix-run/node'
 import Document from '~/components/shared-layout/Document.tsx'
 import rootLinkElements from '~/utils/providers/rootLinkElements'
@@ -261,6 +276,8 @@ import { useNonce } from '~/utils/nonce-provider.ts'
 export const links: LinksFunction = () => {
 	return rootLinkElements
 }
+export { headers, meta } from './__root.client.tsx'
+export { action, loader } from './__root.server.tsx'
 
 export default function App() {
 	const nonce = useNonce()
@@ -285,7 +302,9 @@ Nesting components within each other like this is a common pattern in React. It 
 
 ## Manually updating from 'light' to 'dark' themes
 
-Find the line that reads `theme = 'dark'`.
+Head back over to `app/components/shared-layout/Document.tsx` if you are not in it already.
+
+Find the line that reads `theme = 'dark'`, around line 16.
 
 Change this to `theme = 'light'` and save the file:
 
@@ -305,16 +324,60 @@ You should see the website in the browser looks completely different:
 
 ### Why? Tailwind classes and string interpolation
 
-Take a closer look at the opening `html` component being `return`ed from the `Document` function:
+Take a closer look at the opening `html` component being returned from the `Document` function:
 
-```tsx
-<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
+```tsx mark='${theme}' {4} showLineNumbers collapse={10-30}
+export default function Document({
+	children,
+	nonce,
+	theme = 'light',
+	env = {},
+	allowIndexing = true,
+}: DocumentProps) {
+	return (
+		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
+			<head>
+				<ClientHintCheck nonce={nonce} />
+				<Meta />
+				<meta charSet="utf-8" />
+				<meta name="viewport" content="width=device-width,initial-scale=1" />
+				{allowIndexing ? null : (
+					<meta name="robots" content="noindex, nofollow" />
+				)}
+				<Links />
+			</head>
+			<body className="bg-background text-foreground">
+				{children}
+				<script
+					nonce={nonce}
+					dangerouslySetInnerHTML={{
+						__html: `window.ENV = ${JSON.stringify(env)}`,
+					}}
+				/>
+				<ScrollRestoration nonce={nonce} />
+				<Scripts nonce={nonce} />
+			</body>
+		</html>
+	)
+}
 ```
 
-Can you see how the `theme` variable has been slotted into the `className` **property** (or '**prop**')? This is called **interpolation**, and is a way of inserting the value of a variable into a string in JavaScript.
+Can you see how the value of the `theme` variable has been slotted into the `className` **property** (or '**prop**')?
+
+This is called [**interpolation**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), and is a way of inserting the value of a variable into a string in JavaScript.
+
+## Summary
+
+In this tutorial, we've learned:
+
+- How to switch between 'light' and 'dark' themes in the Epic Stack.
+- How to manually update the theme from 'dark' to 'light' in the `Document` component.
+- How to use string interpolation to insert the value of a variable into a string.
+- How to use TypeScript interfaces to define the shape of an object.
+- How to use React props to pass data into a component.
+
+## What's next?
 
 What we need now is a way for **users** to control the value of `theme` dynamically from the front-end, so they can switch easily between both.
 
-In our next tutorial, let's add a button that users can click to toggle between the two states.
-
-We will start by adding something called a `loader` function in the next step.
+In our next tutorial, we add a button that users can click to toggle between the two states.

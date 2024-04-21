@@ -10,6 +10,7 @@
   --custom-aside-title-margin-top: 0.25rem;
   --custom-header-font: 'novelaregular', sans-serif;
   --custom-body-font: 'wotfardregular', sans-serif;
+  --custom-box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
   --sl-text-code-sm: 1.1rem;
 }
 
@@ -43,6 +44,13 @@ code {
 .sl-markdown-content
 	:not(a, strong, em, del, span, input, code, svg), :where(.content *) {
     margin-top: var(--custom-p-margin-top);
+}
+
+.sl-markdown-content :is(iframe):not(:where(.not-content *)) {
+  width: 100%;
+  height: revert-layer !important;
+  box-shadow: var(--custom-box-shadow);
+  border-radius: var(--custom-code-border-radius);
 }
 
 .starlight-aside {

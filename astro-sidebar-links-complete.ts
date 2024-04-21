@@ -1,3 +1,5 @@
+import { lightDarkModeDir } from "astro.config.mjs"
+
 const sidebarLinks = [
   {
     label: "React 101",

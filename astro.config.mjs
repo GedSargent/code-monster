@@ -5,7 +5,7 @@ import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
 import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
 
-const lightDarkModeDir = "guides/epic-news/light-and-dark-mode";
+export const lightDarkModeDir = "guides/epic-news/light-and-dark-mode";
 
 // https://astro.build/config
 export default defineConfig({

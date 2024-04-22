@@ -131,7 +131,7 @@ export default defineConfig({
               collapsed: true,
               items: [
                 {
-                  label: "🌞 Setting up",
+                  label: "🌞 From 'dark' to 'light' mode",
                   link: `${lightDarkModeDir}/01-setting-up`,
                 },
                 {

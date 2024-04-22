@@ -118,7 +118,28 @@ At this stage, we don't need to worry about how it works, we just need to know t
 
 ### Updating the `import` statements
 
-Making sure you are still inside `app/root.tsx`, let's start by updating the `import` statements at the top of the file:
+Making sure you are still inside `app/root.tsx`, let's start by updating the `import` statements at the top of the file.
+
+:::caution[Red and yellow lines]
+
+### Errors and warnings in VS Code
+
+When you paste the code below into your file, you may see some lines underlined in red and yellow:
+
+![Red and yellow lines in VS Code](src/assets/png/epic-news/red-and-yellow-lines.png)
+
+This is because:
+
+1. We haven't used the values, variables and functions that we are importing yet, and VS Code is warning us about this. 
+2. VS Code expects the imports to be organised in a certain order, and we have added new imports that don't follow this order (yet).
+
+You can see both of these warnings if you hover over the underlined code in VS Code.
+
+Don't worry about these for now. We will be using these imports in the next steps, and we will organise them properly later on in the tutorial.
+
+:::
+
+Add the code highlighted in green to the end of your `import` statements in `app/root.tsx`:
 
 ```diff lang="tsx" title="app/root.tsx" showLineNumbers
 import { type LinksFunction } from '@remix-run/node'
@@ -127,11 +148,11 @@ import { useNonce } from '~/utils/nonce-provider.ts'
 import rootLinkElements from '~/utils/providers/rootLinkElements'
 +import { useLoaderData } from '@remix-run/react'
 +import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-+import { loader } from './__root.server'
++import { type loader } from './__root.server'
 +import useTheme from './hooks/useTheme.tsx'
 ```
 
-Next, carefully add the code highlighted in green below to the `App` component function:
+Next, carefully add the code highlighted in green below to the `App` component function itself:
 
 :::danger[Take care]
 
@@ -239,6 +260,23 @@ Save your changes, then head back to the browser. You should now be able to togg
 ## 🎉 Congratulations! 🎉
 
 You now have a working light and dark mode toggle button in your Remix app! 🚀
+
+## Automatically organise imports in VS Code
+
+Finally, lets fix the yellow underlines that might still be showing under your new `import` statements.
+
+As mentioned [**earlier**](#errors-and-warnings-in-vs-code), VS Code is warning us that we haven't used the values, variables and functions that we are importing yet.
+
+Thankfully, VS Code provides us with a keyboard shortcut to automatically organise our imports in the correct order.
+
+1. **Windows**: <MonsterKbd>SHIFT + ALT + O</MonsterKbd>
+2. **Mac**: <MonsterKbd>SHIFT + OPTION + O</MonsterKbd>
+
+Press this shortcut now to automatically organise your imports at the top of your file:
+
+![Auto sort imports in root.tsx](src/assets/gif/auto-sort-imports-root-tsx.gif)
+
+Remember to save your file after you have done this, and commit your changes to Git.
 
 :::tip[Report writing]
 

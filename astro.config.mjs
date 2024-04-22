@@ -119,6 +119,10 @@ export default defineConfig({
           label: "Epic News",
           items: [
             {
+              label: "🛠 Project setup",
+              link: "guides/epic-news/project-setup",
+            },
+            {
               label: "⚙️ The root.tsx file",
               link: "guides/epic-news/root-tsx",
             },

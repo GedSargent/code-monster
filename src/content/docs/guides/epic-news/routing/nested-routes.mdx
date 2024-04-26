@@ -4,24 +4,35 @@ description: Remix's file structure and how it relates to routes in the applicat
 ---
 
 import NestedRouting from "src/components/epicNews/NestedRouting.astro";
+import MonsterReveal from "src/components/MonsterReveal.astro";
 
 As we looked at in the [**`Outlet` component lesson**](/code-monster/guides/epic-news/routing/outlet), Remix uses a [**file-based routing**](https://thevalleyofcode.com/remix/3-file-based-routing) system. This means that the file structure of your project maps directly to the URL structure of your app.
 
-But how does it map exactly? Let's take a look at the file structure of the Epic News app to see how it relates to the URL structure.
+But what does it mean to say this? How does it map exactly?
 
-The Epic News app uses an NPM package called `remix-flat-routes` which you can read about in detail [**here**](https://github.com/kiliman/remix-flat-routes). Below is a summary of it's main naming conventions for mapping project files to URL routes:
+Let's take a look at the file structure of the Epic News app to see how it relates to the URL structure.
 
-## The root route
+## The "root" route and the base URL
 
-`root.tsx`, and by extension `_index.tsx` once we add the `Outlet` component to it, maps to `/` (or the base URL of the app - `http://localhost:3000/` in our case).
+`root.tsx`, and by extension `_index.tsx` (once we add the `Outlet` component to `root.tsx`), maps to `/`, or the base URL of the app - `http://localhost:3000/` in our case.
+
+If the app was deployed to a live website, the base URL would be the domain name of the site, e.g. `https://epicnews.com/`.
 
 If you remember from our previous lesson, the `Outlet` component is used to render the **child** routes of the current parent. This means that the `root.tsx` file is the **parent** for all other routes in the app.
 
 <NestedRouting />
 
+But how does Remix know which files are related to one another? How does it know which files are ***siblings*** and which are ***children***?
+
+The answer lies in the naming conventions of the files themselves.
+
 ## Sibling routes
 
-Files that sit at the same level as others in the `routes` folder are called **siblings**. Any file that we add next to the `_index.tsx` file will map to a sibling route of the root route.
+Files that sit at the same level as others in the `routes` folder are called **siblings**.
+
+Any fileS that we add next to the `_index.tsx` file will become **siblings** of `_index.tsx`, and direct **children** of `root.tsx`:
+
+![Parent and sibling routes](src/assets/png/epic-news/parent-and-sibling-routes@2x.png)
 
 For example, head back over to your browser, and type in the URL `http://localhost:3000/news`. Hit return and you should see a page not found message:
 
@@ -32,7 +43,7 @@ This is to be expected. We haven't created a route file for `/news` yet. Let's c
 ```tsx title="app/routes/news.tsx"
 export default function NewsPage() {
 	return (
-		<main className="flex flex-col p-24">
+		<main className="flex flex-col py-24">
 			<div className="container">
 				<h1 className="text-h1">News</h1>
 			</div>
@@ -48,7 +59,9 @@ Save the file and head back to your browser. Refresh the page and you should see
 
 See how the navbar and footer remain the same?
 
-This is because the `root.tsx` file is still rendering the code for the header and footer, but the `Outlet` component we placed between these elements [**earlier**](/code-monster/guides/epic-news/routing/outlet#the-outlet-component) is now rendering the `NewsPage` component as the child route.
+This is because the `root.tsx` file is still rendering the code for the header and footer, but now the `Outlet` component we placed between these elements [**earlier**](/code-monster/guides/epic-news/routing/outlet#the-outlet-component) is rendering the `NewsPage` component as the child route.
+
+<NestedRouting childFilename="news.tsx" childUrl="/news"/>
 
 :::caution[Important - Remix route conventions]
 
@@ -56,15 +69,24 @@ What we have created here is known as a **UI Route**. There are other types of r
 
 What _is_ important are the following conventions:
 
-- A UI route file must have a `.tsx` extension
+- A UI route file must be named with a `.tsx` extension
 - It must be placed inside the `routes` folder
-- It must `export` a React component as the _default export_
+- It must `export` a React component as the _default export_, e.g.
+		```tsx title="app/routes/news.tsx" mark="export default "
+		export default function NewsPage() {
+			// component code here
+		}
+		```
 - The file name must match the route URL, e.g.
 	- `routes/news.tsx` maps to `/news`.
 	- `routes/about-us.tsx` maps to the `/about-us` URL.
-	- Spelling, case and special characters are important. If we named the file `AboutUs.tsx`, then the URL would be `/AboutUs`, which is not what we want in a web app.
+	- Spelling, case and special characters are important.
+
+		If we named the file `AboutUs.tsx`, then the URL would be `/AboutUs`, which is not what we want in a web app.
 
 ![Remix route conventions](src/assets/png/about-us-file-to-route.png)
+
+<NestedRouting childFilename="about-us.tsx" childUrl="/about-us"/>
 
 These are crucial Remix conventions to remember. They form part of its file-based routing system, and allow Remix to render the correct component when the route is visited.
 
@@ -74,7 +96,11 @@ These are crucial Remix conventions to remember. They form part of its file-base
 
 So far, we've only used the `Outlet` component in the `root.tsx` file. But what if we want to create a *nested route*? For example, what if we want to create a page for each news **_category_**, e.g. `/news/technology`, `/news/sport`, `/news/entertainment` etc?
 
-Lets add another file to the `routes` folder called `news.technology.tsx`. Add the following code to it:
+Lets add another file to the `routes` folder called `news.technology.tsx`.
+
+![Add News Tech route file](src/assets/png/epic-news/add-news-tech-route-file.png)
+
+Once created, add the following code to it:
 
 ```tsx title="app/routes/news.technology.tsx"
 export default function TechnologyNewsPage() {
@@ -86,7 +112,9 @@ export default function TechnologyNewsPage() {
 }
 ```
 
-Now, head back to your browser and type in the URL `http://localhost:3000/news/technology`. Hit return and...wait, what? The page stays the same?!
+Now, head back to your browser and type in the URL `http://localhost:3000/news/technology`. Hit return and...
+
+Wait, what? The page stays the same?!
 
 ![Technology news page not showing](src/assets/png/news-tech-no-outlet.png)
 
@@ -94,7 +122,9 @@ Now, head back to your browser and type in the URL `http://localhost:3000/news/t
 
 ### File names and URL conventions
 
-The problem here is that `news.tsx` and `news.technology.tsx` both have names that share the same base path: `/news`. The period (`.`) in the filename `news.technology.tsx` is what tells Remix that this file is a *child* of the `news` route.
+The files `news.tsx` and `news.technology.tsx` both have names that share the same ***base path***: `/news`.
+
+The period (`.`) in the filename `news.technology.tsx` is what tells Remix that this file is a *child* of the `news` route.
 
 By naming our files in this way, we have promoted the `news.tsx` file to be a **parent layout route module**, just like `root.tsx` is the parent layout module for the whole app.
 
@@ -113,7 +143,7 @@ Let's head back to `app/routes/news.tsx` and add one now:
 
 export default function NewsPage() {
 	return (
-		<main className="flex flex-col p-24">
+		<main className="flex flex-col py-24">
 			<div className="container">
 				<h1 className="text-h1">News</h1>
 			</div>
@@ -137,7 +167,7 @@ import { NavLink, Outlet } from '@remix-run/react'
 
 export default function NewsPage() {
 	return (
-		<main className="flex flex-col p-24">
+		<main className="flex flex-col py-24">
 			<div className="container">
 				<h1 className="text-h1">News</h1>
 +				<div className="flex space-x-4 py-4">
@@ -184,7 +214,7 @@ You can read more about the `NavLink` component [**here**](https://remix.run/doc
 
 :::tip[Challenge]
 
-Using your knowledge of parent/child routes and the `NavLink` component, add links to the other news categories in the `NewsPage` component:
+1. Using your knowledge of parent/child routes and the `NavLink` component, add links to the other news categories in the `NewsPage` component:
 
 - Entertainment
 - Business
@@ -195,6 +225,120 @@ At the moment, the page just needs to render the name of the category in an `h2`
 When you've finished, your final `NewsPage` component should behave something like this:
 
 ![News page with nav links](src/assets/gif/news-page-with-nav-links.gif)
+
+2. Remember the code we [**commented out**](/code-monster/guides/epic-news/routing/outlet#commenting-code-in-jsx) in `app/root.tsx`? Open the file, select all the commented code, then cut it so it can be pasted elsewhere:
+
+![Cut commented code](src/assets/png/epic-news/cut-commented-code.png)
+
+	Open `app/routes/_index.tsx`. Replace the JSX currnetly inside the `return` statement brackets by pasting the copied code over it.
+
+	```diff lang="tsx" title="app/routes/_index.tsx"
+	import { type MetaFunction } from '@remix-run/node'
+
+	export const meta: MetaFunction = () => [{ title: 'Epic News' }]
+
+	export default function Index() {
+		return (
+-			<main className="grid h-full place-items-center">
+-				<h1 className="text-mega">
+-					Hello from{' '}
+-					<pre className="prose rounded-lg bg-primary p-6 text-primary-foreground">
+-						app/routes/_index.tsx
+-					</pre>
+-				</h1>
+-			</main>
++			{/* <main className="grid h-full place-items-center">
++				<h1 className="text-mega">Your Journey Begins!</h1>
++				<p className="text-base text-gray-600 md:text-lg lg:text-xl">
++					Welcome to Epic News, where the latest developments in tech are found.
++				</p>
++			</main> */}
+		)
+	}
+	```
+
+3. Uncomment the code by removing `{/* ` and ` */}` from the beginning and end of the code block, then save it:
+
+	```tsx title="app/routes/_index.tsx" del="{/* " del=" */}"
+	import { type MetaFunction } from '@remix-run/node'
+
+	export const meta: MetaFunction = () => [{ title: 'Epic News' }]
+
+	export default function Index() {
+		return (
+			{/* <main className="grid h-full place-items-center">
+				<h1 className="text-mega">Your Journey Begins!</h1>
+				<p className="text-base text-gray-600 md:text-lg lg:text-xl">
+					Welcome to Epic News, where the latest developments in tech are found.
+				</p>
+			</main> */}
+		)
+	}
+	```
+
+	If you visit `http://localhost:3000/` in your browser, you should see your original code from the [**`root.tsx`**](/code-monster/guides/epic-news/root-tsx) lesson displayed on the page:
+
+	![Index page with original code](src/assets/png/epic-news/index-page-original-code.png)
+
+	This is because any child root file that named `_index.tsx` will be rendered directly with the parent URL, in this case `http://localhost:3000/`.
+
+	Remember this step for the next challenge!
+
+## 🚀 Extra credit
+
+We've got a little problem: if we visit `http://localhost:3000/news` directly, the page looks pretty empty:
+
+![Empty news page](src/assets/png/epic-news/empty-news-page.png)
+
+Using what you have learned about the `_index.tsx` special filename, can you work out how to diplay the text below when someone visits the `http://localhost:3000/news` URL?
+
+![News page with welcome text](src/assets/png/epic-news/news-page-welcome-text.png)
+
+When the user clicks on a category, the welcome message above should be replaced with the category page.
+
+You can use the code below for the news welcome page content.
+
+```tsx title="app/routes/news._index.tsx"
+export default function NewsPageIndex() {
+	return (
+		<main className="container py-24">
+			<h2 className="text-4xl">
+				Select a news category from the choices above...
+			</h2>
+		</main>
+	)
+}
+```
+
+The question is: where will you place it?
+
+**TIP:** You will need to create a new file in the `routes` folder to solve this challenge. But what will you call it?
+
+After you've had a go, check you solution with the one below.
+
+<MonsterReveal>
+
+Because the `news.tsx` file is the parent route, we can follow Remix's naming conventions and create a file called `news._index.tsx` to render the welcome message when the user visits the `/news` URL.
+
+```tsx title="app/routes/news._index.tsx"
+export default function NewsPageIndex() {
+	return (
+		<main className="container py-24">
+			<h2 className="text-4xl">
+				Select a news category from the choices above...
+			</h2>
+		</main>
+	)
+}
+```
+
+With this code in place, when the user visits `http://localhost:3000/news`, they will see the welcome message displayed on the page, and this will then be replaced by the different category pages when they click on a link:
+
+![News index with categories](src/assets/gif/news-index-with-categories.gif)
+
+</MonsterReveal>
+
+
 :::
 
 ## Summary
@@ -205,4 +349,10 @@ We've reviewed how the `root.tsx` file is the **parent** layout module for the w
 
 We looked at how to create a nested route by naming a file with a period (`.`) in it, and how to render the child route in the parent route using the `Outlet` component.
 
+We saw, in the extension challenge above, how to use the `_index.tsx` naming convention to render a welcome message when the user visits the parent route URL.
+
 Finally, we've seen how to use the `NavLink` component to create navigation links between the different routes, and how to apply different styles to the links when they are active.
+
+## What's next?
+
+In the next tutorial, we will look at how to incorporate dynamic routes into our app, and how access the dynamic parts of the URL inside a `loader` function.

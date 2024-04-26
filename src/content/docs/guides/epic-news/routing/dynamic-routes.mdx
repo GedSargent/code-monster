@@ -1,6 +1,6 @@
 ---
-title: Dynamic routing in Remix
-description: Learn how to use route params to create dynamic routes in Remix.
+title: Dynamic routes and loader functions in Remix
+description: Learn how to use route params to create dynamic routes in Remix, and access their values using loader functions.
 ---
 
 In our previous lesson on [**nested routes**](/code-monster/guides/epic-news/routing/nested-routes), we created "News" route that enabled users to switch between different news categories.
@@ -35,50 +35,112 @@ Now, head back to your browser and refresh your page. Try clicking the links to 
 
 ![Single dynamic route](src/assets/gif/single-dynamic-route.gif)
 
-When we click each link, the URL route changes, but the content remains the same. Why?
+When we click each link, the URL changes in the browser's address bar, but the content in the window remains the same.
+
+Why?
 
 ## Route params
 
-The `$` sign in the file name `news/$category.tsx` is a special character that tells Remix that this route is **dynamic**. It means that the route can match any URL that starts with `/news/`, but then has a unique value for `category`.
+The `$` sign in the file name `news/$category.tsx` is actually a special character that tells Remix that this route is **dynamic**. It means that the route can match any base URL that starts with `/news/`, but then has a unique value for `category`.
 
-The `category` value is called a **route param** (where "param" is short for "parameter"). It is a variable that can be different for each URL that matches this route.
+So, for example, if we visited the URL:
 
-At the moment, we are not doing anything with the `category` value. We need to update our `news/$category.tsx` file to read the `category` value from the URL and use it to display the correct data.
-
-:::note[Route Params]
-
-### What are "route params"?
-
-Route params (or "parameters") are a way to pass data to a route.
-
-In Remix, when we add a `$` to a route filename, anything after the `$` is considered a **route param**. For example, in the filename `news.$category.tsx`, `$category` becomes the route param that Remix will look for when a user visits the corresponding URL.
-
-So, for example, consider the URL below:
-
-```bash ins="business"
+```bash mark="business"
 http://localhost:3000/news/business
-
 ```
 
-Because we have named the file handling this route `news/$category.tsx`, Remix will pass the string value `business` into the file as a variable called `category`. If the route was `http://localhost:3000/news/reviews`, the value of `category` would then be `reviews`, and so on.
+...the `category` value would be the string "`business`".
 
-The name of this variable can be anything we choose, but it makes sense to name it after the value it represents.
+However, if we visited
+
+```bash mark="reviews"
+http://localhost:3000/news/reviews
+```
+
+...the `category` value would then be the string "`reviews`", and so on.
+
+:::note[Deep Dive]
+
+### Why use route params?
+
+Route params provide an easy way to pass values to a route.
+
+They are essentially variables that can represent different value for each URL that matches a particular base route.
+
+In Remix, when we add a `$` to a route filename, anything before the `$` can be thought of as the base route, and anything immediately after it is considered a **route param**.
 
 :::
+
+At the moment, we are not doing anything with the `category` value. We need to update our `news/$category.tsx` file to read the `category` value from the URL and use it to display the correct data.
 
 In our case, the reason why we see the same content for each category is because we are not yet reading the `category` value from the URL.
 
 Let's fix that.
 
-## Reading route params
+## Reading route params with the `loader` function
 
-To read the `category` value from the URL, we need to add a `loader` function to our `news/$category.tsx` file.
+To read the `category` value from the URL, we need to add something called a `loader` function to our `news/$category.tsx` file.
 
-You will remember from our [**previous tutorial**](/code-monster/guides/epic-news/light-and-dark-mode/02-adding-a-loader-function#accessing-server-data-with-loader-functions) that `loader` functions are executed by Remix ***before*** the UI is rendered in the browser.
+But what is a `loader` function?
 
-As a result, this function will be called by Remix as soon as the route is requested, and, again as before, it will receive the route `params` as an argument.
+::::note[Info]
 
-At first, let's just log this value out to the console and see what it looks like:
+## What is a `loader` function?
+
+### Client vs. server code
+
+Traditionally, React code is only ever executed by the **client**, or inside the user's browser.
+
+This is great for creating engaging user interactions, but the problem is that many crucial website actions, such as loading database information or accessing route parameters, can only be done on the **server**.
+
+The makers of Remix got around this problem by introducing the concept of `loader` functions:
+
+```tsx
+export async function loader({ params }: LoaderFunctionArgs) {
+	// Server-side code here...
+}
+```
+
+### Accessing server data with `loader` functions
+
+Any code placed inside a Remix `loader` function is only ever executed on the **server**.
+
+To make this work two, things need to happen:
+
+1. The `loader` function needs to be placed inside a **route** file (i.e. a `tsx` file inside the `routes` folder)
+
+2. It should prefixed with the `export` keyword so that Remix can access it.
+
+		```tsx mark="export "
+		export async function loader({ params }: LoaderFunctionArgs) {
+			// Server-side code here...
+		}
+		```
+
+Crucially, Remix will then execute this code on the server _**before**_ the user interface (UI) is rendered. This ensures that any required data is accessed and processed before the UI is presented by the browser.
+
+:::tip
+
+You'll notice the `loader` function is being passed a `request` object as an argument:
+
+```tsx "{ request }"
+export async function loader({ request }: LoaderFunctionArgs) {
+  // ... more code here...
+}
+```
+
+This `request` object carries crucial information about the incoming request to the server, such as the URL the user is trying to access, any search parameters they've included, headers, and more.
+
+Think of it as a toolbox that the `loader` function uses to understand exactly what the user is asking for.
+:::
+
+You can learn more about `loader` functions via the [**Remix docs**](https://remix.run/docs/en/main/route/loader).
+
+::::
+
+At first, let's just log this value out to the console and see what it looks like.
+
+Carefully add the following code to your `news/$category.tsx` file:
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx"
 +import { type LoaderFunctionArgs, json } from '@remix-run/node'
@@ -112,14 +174,21 @@ Success! We are now reading the `category` value from the URL 🎉. We can use t
 
 Let's update the `loader` function so it returns this value in title-case as part of the `json` response.
 
-:::caution
+::::caution
 
 After updating the code below, you'll see a red line under `category` because TypeScript doesn't know what data type it is.
 
 Don't worry about this yet - we can fix it later.
 
-For now, let's just return the `categoryTitle` value as part of the `json` response. Rememeber - take extra care to delete lines that are highlighted in red, and add the new lines in green.
+For now, let's just return the `categoryTitle` value as part of the `json` response.
+
+:::danger[Extra care]
+
+***Remember - take extra care to delete lines that are highlighted in red, and add the new lines in green exactly where shown.***
+
 :::
+
+::::
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx" ins="{ categoryTitle }"
 import { json, type LoaderFunctionArgs } from '@remix-run/node'
@@ -161,20 +230,25 @@ export default function NewsCategoryPage() {
 
 #### Code review
 
+That's a lot of changes! Let's break it down:
+
 - We've added a new function called `toTitleCase` that takes a string and returns it in title-case format (in other words, with every first letter of a word capitalized).
-```tsx
-function toTitleCase(str: string) {
-	return str
-		.toLowerCase()
-		.split('-')
-		.map(function (word) {
-			return word.charAt(0).toUpperCase() + word.slice(1)
-		})
-		.join(' ')
-}
-```
+
+	So, the string `technology` would become `Technology` and so on.
+
+	```tsx
+	function toTitleCase(str: string) {
+		return str
+			.toLowerCase()
+			.split('-')
+			.map(function (word) {
+				return word.charAt(0).toUpperCase() + word.slice(1)
+			})
+			.join(' ')
+	}
+	```
 ---
-- We call this function inside the `loader` function to convert the `category` value to title-case.
+- We the call the `toTitleCase` function inside the `loader` function to convert the `category` value to title-case.
 - We return the `categoryTitle` value as part of the `json` response.
 ```tsx {4, 6}
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -186,7 +260,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 ```
 ---
-- We call Remix's `useLoaderData` hook to read the `categoryTitle` value from the `loader` function.
+- We call Remix's `useLoaderData` hook to read the `categoryTitle` value inside the `NewsCategoryPage` component on the browser.
 ```tsx
 	const { categoryTitle } = useLoaderData<typeof loader>()
 ```
@@ -255,7 +329,7 @@ The red line has disappeared, and TypeScript now knows that `categoryTitle` will
 
 ## 🚀 Challenge
 
-1. Try adding three-five new categories to your `news` route. You don't need to create a new file for it - just add a new link to your `app/routes/index.tsx` file.
+1. Try adding three-five new categories to your `news` route. You don't need to create a new file for each one - just add a new link to your `app/routes/index.tsx` file.
 2. Update the layout of the `NewsCategoryPage` page by adding some dummy news story summary areas. These can be simple coloured rectangles at the moment to get an idea of layout. We will add real data to them later.
 
 Use this code as a quick wireframe component to drop into your `NewsCategoryPage`:

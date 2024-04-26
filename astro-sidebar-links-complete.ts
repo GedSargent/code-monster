@@ -1,6 +1,6 @@
 import { lightDarkModeDir } from "astro.config.mjs"
 
-const sidebarLinks = [
+export const sidebarLinksComplete = [
   {
     label: "React 101",
     items: [
@@ -71,6 +71,10 @@ const sidebarLinks = [
     label: "Epic News",
     items: [
       {
+        label: "🛠 Project setup",
+        link: "guides/epic-news/project-setup",
+      },
+      {
         label: "⚙️ The root.tsx file",
         link: "guides/epic-news/root-tsx",
       },
@@ -89,7 +93,7 @@ const sidebarLinks = [
         ],
       },
       {
-        label: "🖥️ User Interface",
+        label: "🖥️ User Interface - Basics",
         collapsed: true,
         items: [
           {
@@ -108,14 +112,10 @@ const sidebarLinks = [
             label: "🖥️ Adding links",
             link: "guides/epic-news/ui/adding-links",
           },
-          {
-            label: "🖥️ Toast notifications",
-            link: "guides/epic-news/ui/toast-notifications",
-          },
         ]
       },
       {
-        label: "🔀 Routing in Remix",
+        label: "🔀 Routes and loaders",
         collapsed: true,
         items: [
           {
@@ -127,7 +127,7 @@ const sidebarLinks = [
             link: "guides/epic-news/routing/nested-routes",
           },
           {
-            label: "🔀 Dynamic routes",
+            label: "🔀 Dynamic routes and loader functions",
             link: "guides/epic-news/routing/dynamic-routes",
           },
         ]

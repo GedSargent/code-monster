@@ -80,18 +80,21 @@ function Header({ isHovering }) {
   );
 }
 
-function Body({ isHovering }) {
+function Body({ isHovering, childFilename }) {
+  const isRootIndex = childFilename === "_index.tsx";
+  const pageTitle = childFilename.replace(".tsx", "").replace("_", "").replace("-", " ").split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+
   return (
     <div
       className="!mt-0 relative flex items-center justify-center h-48 bg-black/10"
     >
       <div className="!mt-0 w-1/2">
-        <h3 className="!mt-0 text-center">
+        <h3 className={`!mt-0 ${isRootIndex ? 'text-center' : 'text-left'}`}>
           <span className="text-4xl font-black text-white">
-            Hello from{" "}
+            {isRootIndex ? <>Hello from{" "}
             <pre className="bg-white/10 rounded w-fit mx-auto">
               app/routes/_index.tsx
-            </pre>
+            </pre></> : <span className="font-sans text-left">{pageTitle}</span>}
           </span>
         </h3>
       </div>
@@ -142,7 +145,7 @@ function Footer({ isHovering }) {
   );
 }
 
-function Buttons({ handleHover }) {
+function Buttons({ handleHover, parentFilename, childFilename}) {
   return (
     <div className="flex justify-around gap-4 pt-8 pb-6 !mt-0">
       <div
@@ -150,7 +153,7 @@ function Buttons({ handleHover }) {
         onMouseLeave={() => handleHover(null)}
         className="cursor-pointer inline-block text-lg font-semibold text-blue-300 px-8 py-4 rounded-full shadow shadow-black/30 transition duration-500 bg-blue-800 border-t border-blue-700 hover:shadow-md hover:shadow-black/40 hover:border-blue-600 !mt-0"
       >
-        {"<root.tsx>"}
+        {parentFilename}
       </div>
       <div
         onMouseEnter={() => handleHover("child")}
@@ -158,7 +161,7 @@ function Buttons({ handleHover }) {
         style={{ marginTop: 0 }}
         className="cursor-pointer inline-block text-lg font-semibold text-teal-300 px-8 py-4 rounded-full shadow shadow-black/30 transition duration-500 bg-teal-800 border-t border-teal-700 hover:shadow-md hover:shadow-black/40 hover:border-teal-600"
       >
-        {"<_index.tsx>"}
+        {childFilename}
       </div>
     </div>
   );
@@ -166,7 +169,7 @@ function Buttons({ handleHover }) {
 
 const currentYear = new Date().getFullYear();
 
-export default function EpicNews() {
+export default function EpicNews({ parentFilename, childFilename, childUrl}) {
   const [currentlyHovering, setCurrentlyHovering] = useState(null);
 
   const handleHover = (hovering) => {
@@ -175,10 +178,10 @@ export default function EpicNews() {
 
   return (
     <div className="p-4 bg-slate-900/10 dark:bg-white/10 rounded-lg">
-      <Buttons handleHover={handleHover} />
-      <BrowserChrome url="http://localhost:3000">
+      <Buttons handleHover={handleHover} parentFilename={parentFilename} childFilename={childFilename} />
+      <BrowserChrome url={`http://localhost:3000${childUrl}`}>
         <Header isHovering={currentlyHovering === "parent"} />
-        <Body isHovering={currentlyHovering === "child"} />
+        <Body isHovering={currentlyHovering === "child"} childFilename={childFilename} />
         <Footer isHovering={currentlyHovering === "parent"} />
       </BrowserChrome>
     </div>

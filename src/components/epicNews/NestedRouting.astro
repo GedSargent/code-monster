@@ -1,5 +1,16 @@
 ---
 import NestedRoutingReactModule from '../react/NestedRouting/ParentChildRoutes.jsx'
+interface Props {
+  parentFilename?: string;
+  childFilename?: string;
+  childUrl?: string;
+}
+
+const { parentFilename = "root.tsx", childFilename = "_index.tsx", childUrl = "" } = Astro.props;
 ---
 
-<NestedRoutingReactModule client:visible={true} />
+<NestedRoutingReactModule
+  client:visible={true}
+  parentFilename={parentFilename}
+  childFilename={childFilename}
+  childUrl={childUrl} />

@@ -131,7 +131,7 @@ export default defineConfig({
               collapsed: true,
               items: [
                 {
-                  label: "🌞 From 'dark' to 'light' mode",
+                  label: "🌞 Setting up",
                   link: `${lightDarkModeDir}/01-setting-up`,
                 },
                 {
@@ -141,7 +141,7 @@ export default defineConfig({
               ],
             },
             {
-              label: "🖥️ User Interface",
+              label: "🖥️ User Interface - Basics",
               collapsed: true,
               items: [
                 {
@@ -159,6 +159,24 @@ export default defineConfig({
                 {
                   label: "🖥️ Adding links",
                   link: "guides/epic-news/ui/adding-links",
+                },
+              ]
+            },
+            {
+              label: "🔀 Routes and loaders",
+              collapsed: true,
+              items: [
+                {
+                  label: "🔀 The `Outlet` component",
+                  link: "guides/epic-news/routing/outlet",
+                },
+                {
+                  label: "🔀 Nested routes",
+                  link: "guides/epic-news/routing/nested-routes",
+                },
+                {
+                  label: "🔀 Dynamic routes and loader functions",
+                  link: "guides/epic-news/routing/dynamic-routes",
                 },
               ]
             },

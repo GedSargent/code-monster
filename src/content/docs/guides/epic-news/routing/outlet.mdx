@@ -209,7 +209,7 @@ Hover your cursor over the two buttons below to see how this works in practice:
 
 ::::
 
-But how does Remix know which route files should be "children" of the parent? The answer lies in Remix's file naming conventions.
+But how does Remix know which route files are related? How does it know which should be "children" of the parent? The answer lies in Remix's file naming conventions.
 
 ## The route structure
 
@@ -264,11 +264,25 @@ This is a powerful feature of Remix that we will continue to explore in more det
 Add a new routes to your app that serve pages from the URL paths below. For the time being, you can just add a simple title to each page in the same way we did for `/about-us`.
 
 1. `/contact-us`
-2. `/news`
-3. `/account`
+2. `/my-account`
 
-#### Extra credit 🚀🚀
+Visit each page in your browser to check that they are being served correctly:
 
-What other top-level pages do you think a site like Epic News might need? Add them to your app and give them each a simple placeholder title for the time being.
+1. Visiting `http://localhost:3000/contact-us` should show a page with the title "Contact us"
+2. `http://localhost:3000/my-account` should show a page with the title "My account".
+3. Make sure the navbar, footer and theme switcher are still present on each page.
 
 :::
+
+## Summary
+
+In this tutorial we have:
+
+- Learned how to use the `Outlet` component to render child routes inside a parent route
+- Discovered how to create a new route file in Remix
+- Understood how the file naming conventions in Remix map to the URL paths in the browser
+- Added new routes to our app and seen how they are served from the correct URL paths
+
+## What's next?
+
+In the next lesson, we will learn how to create sibling routes with their own children. This will allow us to create a more complex route structure that can serve multiple pages from the same level in the app.

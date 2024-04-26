@@ -4,20 +4,27 @@ description: Learn how to create a nested route with the 'Outlet' component and 
 ---
 
 import NestedRouting from "src/components/epicNews/NestedRouting.astro";
+import MonsterKbd from "src/components/MonsterKbd.astro";
 
-At the moment, we only have a single page in our app, but of course we want to add more.
+At the moment, we have only been working on one page in our app, but of course we want to add more.
 
-So far, we've been using the `root.tsx` file to render the only page in our app. But as we add more pages, we'll want to use the `root.tsx` file to render the _layout_ that all of our pages share.
+So far, we've been using the `root.tsx` file to render what appears to be a single page. But looks can be deceiving: this little file is deceptively powerful!
+
+As you'll see, the `root.tsx` file is actually the springboard from which we can render a shared _layout_ that all of our other pages depend on.
 
 ## The `Outlet` component
 
-Let's start by swapping out the title text in our `root.tsx` file with a special component that Remix supplies for us: the `Outlet` component.
+Let's start by swapping out everything between the `<main>` tags in our `root.tsx` file with a special component that Remix supplies for us: the `Outlet` component.
 
-:::danger[Take care]
+The easiest way to do this is to comment out the existing code. We will be using it again later, so <u>***don't delete it***</u>!
 
-#### 🚨 Remember!
+:::note[Commenting code]
 
-Code highlighted in green should be **added** to your files, and code highlighted in red should be **removed**.
+### Commenting code in JSX
+
+In JSX, you can comment out a block of code by wrapping it in `{/* */}`.
+
+The easiest way to do this is to select the block of code you want to comment out, and then use the keyboard shortcut <MonsterKbd>Cmd + /</MonsterKbd> on Mac or <MonsterKbd>Ctrl + /</MonsterKbd> on Windows.
 
 :::
 
@@ -96,9 +103,13 @@ export default function App() {
         <HeaderWithSearch />
 
 				<div className="flex-1">
--					<main className="grid h-full place-items-center">
--						<h1 className="text-mega">Welcome to Epic News!</h1>
--					</main>
+-					{/* <main className="grid h-full place-items-center">
+-						<h1 className="text-mega">Your Journey Begins!</h1>
+-						<p className="text-base text-gray-600 md:text-lg lg:text-xl">
+-							Welcome to Epic News, where the latest developments in tech are
+-							found.
+-						</p>
+-					</main> */}
 +					<Outlet />
 				</div>
 
@@ -113,9 +124,9 @@ export default function App() {
 }
 ```
 
-Save your changes and head back across to your browser. but *make sure you are on the home page at [http://localhost:3000](http://localhost:3000).*
+Save your changes and head back across to your browser, but *make sure you are on the home page at [**http://localhost:3000**](http://localhost:3000).*
 
-You should see the welcome message has changed:
+You should see the screen content has changed:
 
 ![Hello from _index.tsx screenshot](src/assets/png/hello-from-index-tsx.png)
 
@@ -150,11 +161,11 @@ So what exactly is happening here?? Why is the `Outlet` component rendering the 
 
 ::::tip[Deep Dive]
 
-### `Outlet` component deep dive
+## `Outlet` component deep dive
 
 `Outlet` is a special Remix component that tells the browser to render a **child route** that matches the current URL.
 
-This is quite a strange concept to understand at first, so let's take some time to understand what it means.
+This is a strange concept to grasp at first, so let's take some time to understand what is actually happening.
 
 :::info
 
@@ -180,15 +191,17 @@ The "route" in this case would then be served from another file in the code base
 
 ### 2. Introducing "parent" and "child" routes
 
-However, in a Remix application, we can make use of something much more powerful - "parent" and "child" routes.
+In a Remix application, we can make use of something much more powerful: "**parent**" and "**child**" routes.
 
-A "child route" is a route that is nested _within_ another route, which we call a "parent route". As soon as we place the `Outlet` component inside a parent route, it tells Remix to render **both** the parent **and** the matching child route through it.
+A "child" route is nested _within_ another route, which we call a "parent".
+
+As soon as we place the `Outlet` component inside a route file (like we just have in `root.tsx`), it becomes a "parent". The `Outlet` components tells Remix to render **both** the parent **and** the matching child route(s) through it.
 
 #### The main index page of a website
 
 In the case of our app at the moment, the `root.tsx` file is being served as the "parent" route, and the `_index.tsx` file is the "child" route.
 
-The reason we can still see the navbar and footer is because this is code being served from the **parent** `root.tsx` file. However, the content that we see in the middle of the page is now being served from the `_index.tsx` file through the `Outlet` component.
+The reason we can still see the navbar and footer is because this is code being served from the **parent** `root.tsx` file. However, the content that we see in the middle of the page is now being served from the `_index.tsx` file through the `Outlet` component as its child.
 
 Hover your cursor over the two buttons below to see how this works in practice:
 
@@ -196,11 +209,11 @@ Hover your cursor over the two buttons below to see how this works in practice:
 
 ::::
 
+But how does Remix know which route files should be "children" of the parent? The answer lies in Remix's file naming conventions.
+
 ## The route structure
 
 Routes in Remix are represented by files and folders in your project. The structure of your files and folders directly maps to the structure of your routes in the browser URL bar.
-
-Think of the `Outlet` component as a "window" or "placeholder" for the child route. It's a way of telling Remix where to render the child route **inside** the parent route.
 
 We can see this in action by adding a new route to our app. Let's add a dummy 'about us' page.
 
@@ -238,7 +251,9 @@ Head back over to your browser and navigate to [http://localhost:3000/about-us](
 
 ![About us page navigation](src/assets/gif/about-us-page.gif)
 
-Notice how the navbar, footer and theme switcher are still present on the page? This is because `/about-us` is a direct child of the base URL, so the `Outlet` component in the `root.tsx` file now provides a "window" into the `about-us.tsx` code.
+Notice how the navbar, footer and theme switcher are still present on the page? This is because `/about-us` is a direct child of the base URL (`/`, served from the `root.tsx` file), so the `Outlet` component in the `root.tsx` file serves the `about-us.tsx` code inside the parent.
+
+Think of the `Outlet` component as a "window" or "placeholder" for the child route. It's a way of telling Remix where to render the child route **inside** the parent route.
 
 This is a powerful feature of Remix that we will continue to explore in more detail later.
 

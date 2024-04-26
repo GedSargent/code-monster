@@ -87,7 +87,7 @@ function Body({ isHovering }) {
     >
       <div className="!mt-0 w-1/2">
         <h3 className="!mt-0 text-center">
-          <span className="text-4xl font-black">
+          <span className="text-4xl font-black text-white">
             Hello from{" "}
             <pre className="bg-white/10 rounded w-fit mx-auto">
               app/routes/_index.tsx
@@ -113,11 +113,11 @@ function Footer({ isHovering }) {
   return (
     <div className="!mt-0 relative bg-white/10 px-4">
       <div className="!mt-0">
-        <div className="!mt-0 flex justify-between border-b border-white px-8 py-4">
+        <div className="!mt-0 flex justify-between border-b border-white/40 px-8 py-4">
           <div className="!mt-0 bg-white rounded-full w-10 h-10" />
           <div
             style={{ marginTop: 0 }}
-            className="flex items-center gap-4 font-bold"
+            className="flex items-center gap-4 font-bold text-white"
           >
             <span>Home</span>
             <span>About</span>
@@ -174,7 +174,7 @@ export default function EpicNews() {
   };
 
   return (
-    <div className="p-4 bg-white/10 ">
+    <div className="p-4 bg-slate-900/10 dark:bg-white/10 rounded-lg">
       <Buttons handleHover={handleHover} />
       <BrowserChrome url="http://localhost:3000">
         <Header isHovering={currentlyHovering === "parent"} />

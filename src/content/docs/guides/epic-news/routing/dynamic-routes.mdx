@@ -3,15 +3,22 @@ title: Dynamic routes and loader functions in Remix
 description: Learn how to use route params to create dynamic routes in Remix, and access their values using loader functions.
 ---
 
-In our previous lesson on [**nested routes**](/code-monster/guides/epic-news/routing/nested-routes), we created "News" route that enabled users to switch between different news categories.
+## Introduction
+
+In our previous step on [**nested routes**](/code-monster/guides/epic-news/routing/nested-routes), we created a "News" route that enabled users to switch between different news categories.
 
 We did this by creating a new route for each category, like this:
 
 ![News routes](src/assets/png/static-news-routes.png)
 
-Creating static files for each child route is fine, but not very sustainable. What if we want to add a new category? We'd have to create a new file for it, and then update the code inside each child file so they are consistent.
+Creating static files for each child route is fine, but not very sustainable. What if we want to add a new category? We'd have to create a new file for it, and then update the code inside each child file so they are all consistent.
 
-In this lesson, we'll learn how to use route params to create dynamic routes in Remix. This will allow us to create a single route for all news categories, and then use the route params to fetch the correct data.
+There's a much better solution - creating a single dynamic route that will handle requests to all the different news categories.
+
+In this step, we'll learn how to:
+- create a single dynamic route for all news categories.
+- use route params to to fetch the correct data.
+- access the route params using a `loader` function, and log them to the console.
 
 ## Creating a dynamic route
 
@@ -168,256 +175,15 @@ Now check your VS Code terminal. You should see the `category` value logged out 
 
 ![Logging route params](src/assets/png/logging-route-params.png)
 
-## Passing data to the page
-
-Success! We are now reading the `category` value from the URL 🎉. We can use this value to fetch the correct data for our page.
-
-Let's update the `loader` function so it returns this value in title-case as part of the `json` response.
-
-::::caution
-
-After updating the code below, you'll see a red line under `category` because TypeScript doesn't know what data type it is.
-
-Don't worry about this yet - we can fix it later.
-
-For now, let's just return the `categoryTitle` value as part of the `json` response.
-
-:::danger[Extra care]
-
-***Remember - take extra care to delete lines that are highlighted in red, and add the new lines in green exactly where shown.***
-
-:::
-
-::::
-
-```diff lang="tsx" title="app/routes/news.$category.tsx" ins="{ categoryTitle }"
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-+import { useLoaderData } from '@remix-run/react'
-
-+function toTitleCase(str: string) {
-+	return str
-+		.toLowerCase()
-+		.split('-')
-+		.map(function (word) {
-+			return word.charAt(0).toUpperCase() + word.slice(1)
-+		})
-+		.join(' ')
-+}
-+
-export async function loader({ params }: LoaderFunctionArgs) {
-	const { category } = params
-
--	console.log({ category })
-+	const categoryTitle = toTitleCase(category)
-
--	return json({})
-+	return json({ categoryTitle })
-}
-
-export default function NewsCategoryPage() {
-+	const { categoryTitle } = useLoaderData<typeof loader>()
-
-	return (
-		<div className="container py-16">
--			<h2 className="text-h2">Generic news category page</h2>
-+			<h2 className="text-h2">{categoryTitle}</h2>
-		</div>
-	)
-}
-```
-
-:::note
-
-#### Code review
-
-That's a lot of changes! Let's break it down:
-
-- We've added a new function called `toTitleCase` that takes a string and returns it in title-case format (in other words, with every first letter of a word capitalized).
-
-	So, the string `technology` would become `Technology` and so on.
-
-	```tsx
-	function toTitleCase(str: string) {
-		return str
-			.toLowerCase()
-			.split('-')
-			.map(function (word) {
-				return word.charAt(0).toUpperCase() + word.slice(1)
-			})
-			.join(' ')
-	}
-	```
----
-- We the call the `toTitleCase` function inside the `loader` function to convert the `category` value to title-case.
-- We return the `categoryTitle` value as part of the `json` response.
-```tsx {4, 6}
-export async function loader({ params }: LoaderFunctionArgs) {
-	const { category } = params
-
-	const categoryTitle = toTitleCase(category)
-
-	return json({ categoryTitle })
-}
-```
----
-- We call Remix's `useLoaderData` hook to read the `categoryTitle` value inside the `NewsCategoryPage` component on the browser.
-```tsx
-	const { categoryTitle } = useLoaderData<typeof loader>()
-```
----
-- We update the `h2` tag to display the `categoryTitle` value.
-```tsx "{categoryTitle}"
-		<h2 className="text-h2">{categoryTitle}</h2>
-```
-
-:::
-
-## Checking the result
-
-Now, head back to your browser and click the links between the different news categories again.
-
-This time, you should see the title of the category displayed in every page, but we didn't need to hard-code a separate file for every one 🎉:
-
-![Custom title on every dynamic route](src/assets/gif/news-page-with-nav-links.gif)
-
-## Fixing TypeScript errors
-
-Finally, let's fix that TypeScript error we saw earlier.
-
-We will do this using a package called [**Invariant**](https://github.com/zertosh/invariant). This package will help us to tell TypeScript that the `categoryTitle` value will always be a string.
-
-First, `import` the package at the top of your `news.$category.tsx` file:
-
-```diff lang="tsx" title="app/routes/news.$category.tsx"
-+import { invariant } from '@epic-web/invariant'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-```
-
-Next, inside your `loader` function, add the following check:
-
-```diff lang="tsx" title="app/routes/news.$category.tsx"
-export async function loader({ params }: LoaderFunctionArgs) {
-	const { category } = params
-
-+	invariant(typeof category === 'string', 'Category not found')
-	const categoryTitle = toTitleCase(category)
-
-	return json({ categoryTitle })
-}
-```
-
-:::note[Understanding invariant]
-
-As you can see, `invariant` is just a function that takes two arguments. The first argument is a condition that must be `true` for the overall code to continue.
-
-```tsx "typeof category === 'string'"
-invariant(typeof category === 'string', 'Category not found')
-```
-
-However, if the condition is `false`, then the function will throw an error with the message provided in the second argument.
-
-```tsx "'Category not found'"
-invariant(typeof category === 'string', 'Category not found')
-```
-
-:::
-
-The red line has disappeared, and TypeScript now knows that `categoryTitle` will always be a string.
-
-:::tip[Challenge]
-
-## 🚀 Challenge
-
-1. Try adding three-five new categories to your `news` route. You don't need to create a new file for each one - just add a new link to your `app/routes/index.tsx` file.
-2. Update the layout of the `NewsCategoryPage` page by adding some dummy news story summary areas. These can be simple coloured rectangles at the moment to get an idea of layout. We will add real data to them later.
-
-Use this code as a quick wireframe component to drop into your `NewsCategoryPage`:
-
-```tsx
-const WireframeBlock = () => {
-	return (
-		<div className="h-72 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
-	)
-}
-```
-
-You can then call this component multiple times in your `NewsCategoryPage` to create a wireframe layout. For example, if you wanted a five column layout, you could do this:
-
-```tsx
-<div className="grid grid-cols-5 gap-6">
-	<WireframeBlock />
-	<WireframeBlock />
-	<WireframeBlock />
-	<WireframeBlock />
-	<WireframeBlock />
-</div>
-```
-
-This will create a layout with five columns, each containing a wireframe block:
-
-![Five Col Row](src/assets/gif/five-col-row.gif)
-
-### 🚀🚀 Extra Credit 1
-
-1. Can you add a second row of wireframe blocks to your layout?
-
-![Five col two rows](src/assets/png/epic-news/five-col-two-rows.png)
-
-2. Can you use (**Tailwind's responsive class prefixes**)[https://tailwindcss.com/docs/responsive-design] to make your layout responsive? On small screens, you should only show two columns, but on larger screens you should show five.
-
-![Five to two col responsive](src/assets/gif/five-to-two-col-responsive.gif)
-
-### 🚀🚀 Extra Credit 2
-
-Can you make your responsive layouts more complex, where different rows respond in different ways to changing screen sizes?
-
-![Grid complex responsive](src/assets/gif/grid-complex-responsive.gif)
-
-**TIPS**:
-
-1. Think carefully about how to arrange your parent `div` structures to wrap the various child `WireframeBlock` components inside them.
-2. When working with child elements inside a `grid` parent, you can specify how many columns and rows a child element should span using the `col-span-` and `row-span-` classes. For example, look at the code below:
-
-```tsx
-<div className="col-span-1 sm:col-span-2 sm:row-span-2 lg:col-span-3">
-	<WireframeBlock isPrimary />
-</div>
-```
-
-Notice a few things:
-
-1. I have wrapped the `WireframeBlock` component in a `div` element so that I can apply the `col-span-` and `row-span-` classes to it.
-2. The `col-span-1` class specifies that this element should span one column on the very smallest screens.
-3. `sm:col-span-2` specifies that this element should span two ***columns*** on **small** screens (640px width) and above.
-4. `sm:row-span-2` specifies that it should span two ***rows*** on **small** screens (640px width) and above.
-5. `lg:col-span-3` specifies that it should span three columns on *large* (1024px width) screens and above.
-6. I've also updated the `WireframeBlock` component to accept a prop called `isPrimary` that will change the height of the block like so:
-
-```tsx
-interface WireframeBlockProps {
-	isPrimary?: boolean
-}
-
-const WireframeBlock = ({ isPrimary = false }: WireframeBlockProps) => {
-	return (
-		<div
-			className={`${isPrimary ? 'h-36 sm:h-[19.5rem]' : 'h-36'} animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700`}
-		/>
-	)
-}
-```
-
-Have a play with various values and classes, and see what interesting layouts you can come up with!
-:::
-
 ## Summary
 
-In this lesson, we learned how to use route params to create dynamic routes in Remix.
+In this step, we have:
 
-- We created a single route for all news categories, and then used the route params to fetch the correct data.
-- We also learned how to read route params using the `loader` function, and how to pass data to the page using the `json` response.
-- We then read this data using the `useLoaderData` hook, and displayed it on the page.
-- We fixed a TypeScript error by using the `invariant` package to tell TypeScript that the `categoryTitle` value will always be a string.
-- Finally, we completed a challenge to create a wireframe layout for the `NewsCategoryPage` using Tailwind CSS.
+- Deleted our hard-coded static child routes and replaced them with a single dynamic route.
+- Learned about route params and how they can be used to create dynamic routes in Remix.
+- Added a `loader` function to our dynamic route to read the `category` value from the URL.
+- Logged the `category` value to the console to see what it looks like.
 
+## What's next?
+
+In the next step, we will pass the `category` value to our `NewsCategoryPage` component with Remix's `useLoaderData` hook, and display it on the page.

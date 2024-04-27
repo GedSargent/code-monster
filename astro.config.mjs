@@ -163,7 +163,7 @@ export default defineConfig({
               ]
             },
             {
-              label: "🔀 Routes and loaders",
+              label: "🔀 Routes, loaders and useLoaderData",
               collapsed: true,
               items: [
                 {
@@ -177,6 +177,10 @@ export default defineConfig({
                 {
                   label: "🔀 Dynamic routes and loader functions",
                   link: "guides/epic-news/routing/dynamic-routes",
+                },
+                {
+                  label: "🔀 Server/client communication with useLoaderData",
+                  link: "guides/epic-news/routing/use-loader-data",
                 },
               ]
             },

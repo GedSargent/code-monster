@@ -1,16 +1,26 @@
 ---
-title: 🔀 Routing - `Outlet` and `_index.tsx`
+title: Routing - `Outlet` and `_index.tsx`
 description: Learn how to create a nested route with the 'Outlet' component and the '_index.tsx' file.
 ---
 
 import NestedRouting from "src/components/epicNews/NestedRouting.astro";
 import MonsterKbd from "src/components/MonsterKbd.astro";
 
+## Introduction
+
 At the moment, we have only been working on one page in our app, but of course we want to add more.
 
 So far, we've been using the `root.tsx` file to render what appears to be a single page. But looks can be deceiving: this little file is deceptively powerful!
 
 As you'll see, the `root.tsx` file is actually the springboard from which we can render a shared _layout_ that all of our other pages depend on.
+
+In this step, we will:
+
+- Learn how to use the `Outlet` component to render child routes inside a parent route
+- Create a new route file in Remix
+- Understand how the file naming conventions in Remix map to the URL paths in the browser
+- Add new routes to our app and see how they are served from the correct URL paths
+- Complete a challenge to add multiple new routes to our app
 
 ## The `Outlet` component
 

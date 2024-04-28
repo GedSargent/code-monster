@@ -9,11 +9,13 @@ In this guide, we'll use GitHub, which is pre-installed in the Epic Stack, but i
 
 ## What is SSO and OAuth?
 
-Tranditionally, when a user signs up for an account on a website, they create a username and password. This is known as a "local" account.
+Traditionally, when a user signs up for an account on a website, they create a username and password. This is known as a "local" account.
 
 With SSO, a user can sign up for an account using an existing account with a third-party provider, like GitHub.
 
-OAuth is a protocol that allows a user to grant a third-party application access to their account without sharing their password. When you sign up for an account using GitHub, you are using OAuth to authenticate with GitHub.
+[**OAuth**](https://auth0.com/intro-to-iam/what-is-oauth-2) is a protocol that allows a user to grant a third-party application access to their account without sharing their password.
+
+When you sign up for an "Epic News" account using GitHub, you are using OAuth to authenticate with GitHub.
 
 ## Set up a GitHub OAuth application
 
@@ -26,9 +28,11 @@ To use GitHub as an SSO provider, you need to create an OAuth application in you
 
 3. Hit the "**Register a new application**" button.
 
-![Github registerr new app](src/assets/png/epic-news/github-register-new-app.png)
+![Github register new app](src/assets/png/epic-news/github-register-new-app.png)
 
-4. Type in `http://localhost:3000` for "Homepage URL" and `http://localhost:3000/auth/github/callback` for "Authorization callback URL". As for the Application name set to something meaningful (because your users will see the app's name), e.g. `EPIC_NEWS`.
+4. Type in `http://localhost:3000` for "Homepage URL" and `http://localhost:3000/auth/github/callback` for "Authorization callback URL".
+
+    As for the "Application name", set this to something meaningful (because your users will see the app's name), e.g. `EPIC_NEWS`.
 
 ![Register app form details](src/assets/png/epic-news/register-app-form-details.png)
 
@@ -115,10 +119,10 @@ You can access the features listed below via the user actions dropdown in the to
 
 ![User actions dropdown](src/assets/png/epic-news/user-actions-dropdown.png)
 
-For example, you can:
+Find your way around the following features:
 
-- View your profile page.
-- Edit your email address and password.
+- View your **profile** page.
+- Update your email address and password.
 - Manage 'connections' - a feature that allows you to see and edit which SSO providers your account is connected to.
 - Download your data. What data is stored in the application about you?.
 - See which active sessions are currently logged in to your account. **TIP**: Try logging in to your account from another browser or an incognito session to see this feature in action.
@@ -127,10 +131,39 @@ For example, you can:
 
 ![Profile actions](src/assets/png/profile-actions.png)
 
+:::
+
 ## Summary
 
-In this guide, you learned how to set up a GitHub OAuth application and use it to authenticate users in your Epic News application.
+In this step, we:
 
-You also explored the different features available to authenticated users, such as managing connections, viewing active sessions, and creating, editing, reading, and deleting notes.
+- learned how to set up a GitHub OAuth application and use it to authenticate users in your Epic News application.
+- Updated the `.env` file with the `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` values.
+- Created a user account using GitHub as an SSO provider.
+- Explored the different features available to authenticated users, such as managing connections, viewing active sessions, and creating, editing, reading, and deleting notes.
+
+::::note[Assignment]
+
+## 📄 Assignment documentation
+
+We need to update your assignment to document this new feature. 🚀
+
+1. Explain what SSO is, how it works and what its benefits are to end-users.
+2. Describe what OAuth is and how it helps with SSO.
+3. Explain how to set up a GitHub OAuth application.
+4. Show how to create a user account in "Epic News" using GitHub as an SSO provider.
+5. Explain the different features available to authenticated users.
+
+:::tip
+
+### Useful links
+
+- [What is SSO?](https://auth0.com/docs/authenticate/single-sign-on)
+- [What is OAuth?](https://auth0.com/intro-to-iam/what-is-oauth-2)
+- [GitHub OAuth documentation](https://docs.github.com/en/developers/apps/building-oauth-apps)
+
+::::
+
+## What's next?
 
 In the next guide, you will learn how to add 'toast' notifications to your application.

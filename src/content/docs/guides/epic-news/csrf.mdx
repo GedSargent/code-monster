@@ -1,0 +1,130 @@
+---
+title: Cross Site Request Forgery (CSRF)
+description: Learn how to protect your website from CSRF attacks by adding a CSRF token to the application.
+---
+
+import MonsterKbd from 'src/components/MonsterKbd.astro'
+
+## Introduction
+
+Now that we have routing set up, we need a way to secure our application.
+
+We will start by adding cross-site request forgery CSRF protection to our application.
+
+:::note[CSRF Deep Dive]
+
+## What is Cross-Site Request Forgery (CSRF)?
+
+[**Cross-Site Request Forgery**](https://owasp.org/www-community/attacks/csrf), often abbreviated as CSRF, is a type of cyber attack that tricks a user into performing actions they didn't intend to do on a web app where they are currently authenticated.
+
+### How does it work?
+
+Imagine you log into your bank account to check your balance.
+
+![CSRF 01](src/assets/png/epic-news/csrf-01.png)
+
+While you are logged in, you receive an email from who you think is a friend. It has a link to a funny cat video.
+
+You love funny cat videos (who doesn't??), so you click on the link and watch the video. It really is hilarious.
+
+![CSRF 03](src/assets/png/epic-news/csrf-03.png)
+
+***Here's the critical part***.
+
+Because you are already logged into your bank account, the bank's website trusts that any requests made during this session are genuinely from you.
+
+However, hidden in the email link was also a request to transfer money from your account to the attacker.
+
+![CSRF 04](src/assets/png/epic-news/csrf-04.png)
+
+Because the bank's website sees you are logged in, it goes ahead and authorises the transaction.
+
+When you return to look at your balance, you see that your money has been lost.
+
+:::
+
+## How can we protect against CSRF?
+
+One way to protect against CSRF attacks is to use a CSRF token.
+
+This is a unique string that is generated for each user session and is sent with each request to the server.
+
+Before processing any request, the server checks that the token is valid and that it matches the user's session. If it doesn't, the request is rejected.
+
+Let's add this now.
+
+## Wrapping the application with extra security
+
+Luckily, adding CSRF protection to our application is straightforward.
+
+Firstly, add the following import to the top of the file:
+
+```diff lang="tsx" title="app/root.tsx"
+import { type LinksFunction } from '@remix-run/node'
+import Document from '~/components/shared-layout/Document'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
+import { loader } from './__root.server.tsx'
+import { Outlet, useLoaderData } from '@remix-run/react'
+import useTheme from './hooks/useTheme.tsx'
++import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
+```
+
+We simply need to wrap our application with this `AuthenticityTokenProvider` to ensure that a valid CSRF token is checked for every request across the entire application.
+
+This is done by wrapping the components in the `App` component with the `AuthenticityTokenProvider`, then passing a `csrfToken` from the `data` object to the `AuthenticityTokenProvider` component.:
+
+```diff lang="tsx" title="app/root.tsx"
+export default function App() {
+	const data = useLoaderData<typeof loader>()
+	const nonce = useNonce()
+	const theme = useTheme()
+
+	useToast(data.toast)
+
+	return (
++		<AuthenticityTokenProvider token={data.csrfToken}>
+			<Document nonce={nonce} theme={theme}>
+				<div className="flex h-screen flex-col justify-between">
+					<HeaderWithSearch />
+
+					<div className="flex-1">
+						<Outlet />
+					</div>
+
+					<div className="container flex justify-between pb-5">
+						<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+					</div>
+
+				<FooterMenuRight />
+				</div>
+			</Document>
++		</AuthenticityTokenProvider>
+	)
+}
+```
+
+As you can see, we pass in the `csrfToken` from the `data` object that is provided by our `loader` function to the `AuthenticityTokenProvider` component directly.
+
+Before moving on to the next step, make sure you rearrange the imports at the top of the `app/root.tsx` file by using the VS Code keyboard shortcut <MonsterKbd>SHIFT + ALT + O</MonsterKbd> (Windows) or <MonsterKbd>SHIFT + OPT + O</MonsterKbd> (Mac)
+
+## Summary
+
+Although not much has changed visually, we've added a strong security feature to our application that is crucial for you to write about in your assignment.
+
+:::note[Assignment]
+
+### Assignment documentation
+
+1. Explain what Cross-Site Request Forgery (CSRF) is and how it works.
+2. Describe how adding a CSRF token to the application helps protect against CSRF attacks.
+3. Explain how the `AuthenticityTokenProvider` component works and why it is important to wrap the application with it.
+
+:::
+
+## Next steps
+
+In the next step, we will secure our application against spambots by adding a 'honeypot' field to our forms.

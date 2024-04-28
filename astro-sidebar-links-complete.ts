@@ -130,6 +130,10 @@ export const sidebarLinksComplete = [
             label: "🔀 Dynamic routes and loader functions",
             link: "guides/epic-news/routing/dynamic-routes",
           },
+          {
+            label: "🔀 Server/client communication with useLoaderData",
+            link: "guides/epic-news/routing/use-loader-data",
+          },
         ]
       },
       {

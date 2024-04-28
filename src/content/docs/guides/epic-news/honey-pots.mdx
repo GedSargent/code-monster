@@ -1,0 +1,135 @@
+---
+title: Spam bots and honey pots
+description: Learn how to protect your website from spam bots by adding a 'honeypot' field to your forms.
+---
+
+import MonsterKbd from 'src/components/MonsterKbd.astro'
+
+![Honeypot field](src/assets/webp/epic-news/honeypot.webp)
+
+## Introduction
+
+Our application is now protected against Cross-Site Request Forgery (CSRF) attacks. 🎉🎉
+
+In this step, we will add an extra layer of security to protect our application from spam bots.
+
+:::note[Honey pots deep dive]
+
+## What is a spam bot?
+
+![Spam bot](src/assets/webp/epic-news/spambot.webp)
+
+[**Spam bots**](https://www.cloudflare.com/learning/bots/what-is-a-spambot/) are automated programs that crawl the web looking for forms to fill out with spam. They can be used to send spam emails, create fake accounts, or submit malicious content to websites.
+
+### How does it work?
+
+Spam bots work by scanning websites for forms that they can submit data to.
+
+They look for fields like email addresses, names, and other personal information that they can use to send spam.
+
+:::
+
+## How can we protect against spam bots online?
+
+To protect against spam bots, we can hide a secret '[**honeypot**](https://forms.epicweb.dev/06)' field in our forms.
+
+A 'honeypot' is a hidden field in a form that is invisible to users but visible to spam bots. When a spam bot fills out the form, it will fill in the 'honeypot' field as well. We can then check if the 'honeypot' field is filled in and reject the form submission if it is.
+
+![Spam bot honeypot attack](src/assets/webp/epic-news/spambot-honeypot-attack.webp)
+
+Let's add this now.
+
+## Adding a honeypot field
+
+Firstly, add the following import to the top of the file:
+
+```diff lang="tsx" title="app/root.tsx"
+import { type LinksFunction } from '@remix-run/node'
+import Document from '~/components/shared-layout/Document'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
+import { loader } from './__root.server.tsx'
+import { Outlet, useLoaderData } from '@remix-run/react'
+import useTheme from './hooks/useTheme.tsx'
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
++import { HoneypotProvider } from 'remix-utils/honeypot/react'
+
+```
+
+Once in place, we can wrap our `Document` and all its children with the `HoneypotProvider` component:
+
+```diff lang="tsx" title="app/root.tsx"
+export default function App() {
+	const data = useLoaderData<typeof loader>()
+	const theme = useTheme()
+	const nonce = useNonce()
+
+	return (
+		<AuthenticityTokenProvider token={data.csrfToken}>
++			<HoneypotProvider {...data.honeyProps}>
+				<Document nonce={nonce} theme={theme}>
+					<div className="flex h-screen flex-col justify-between">
+						<HeaderWithSearch />
+
+						<div className="flex-1">
+							<Outlet />
+						</div>
+
+						<div className="container flex justify-between pb-5">
+							<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+						</div>
+						<FooterMenuRight />
+					</div>
+				</Document>
++			</HoneypotProvider>
+		</AuthenticityTokenProvider>
+	)
+}
+```
+
+## Checking the honeypot field
+
+We can see the honeypot in action if we visit the [**`http://localhost:3000/signup`**](http://localhost:3000/signup) page and inspect the form in our browser's developer tools.
+
+![Honeypot field](src/assets/webp/epic-news/honeypot-field.webp)
+
+Can you see the hidden fields? 🕵️‍♂️
+
+Well, spam bots can't! If they fill in this field, our application will now reject their submission.
+
+And that's it! Our application is now protected against spam bots. 🚫🤖
+
+## Summary
+
+As with CSRF protection, adding a honeypot to our application is straightforward in Remix.
+
+Let's update your assignment to document this new security feature. 🚀
+
+::::note[Assignment]
+
+### Assignment documentation
+
+1. Explain what a spam bot is and how it works. Why is it important to protect against spam bots?
+2. Describe what a honeypot field is and how it helps protect against spam bots.
+3. Explain how the `HoneypotProvider` component works and why it is important to wrap the application with it.
+4. Show the hidden honeypot field in your broswer application and explain how it works across the forms in your application.
+
+:::tip
+
+### Useful documentation
+
+- [What is a spam bot?](https://www.cloudflare.com/learning/bots/what-is-a-spambot/)
+- [What is a honeypot?](https://forms.epicweb.dev/06)
+- [Remix Utils honeypot documentation](https://github.com/sergiodxa/remix-utils?tab=readme-ov-file#form-honeypot)
+
+:::
+
+::::
+
+## What's next?
+
+In the next step, we will create a new user account on our local site using the signup form we've just secured. 🎉
+

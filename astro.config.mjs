@@ -160,6 +160,10 @@ export default defineConfig({
                   label: "🖥️ Adding links",
                   link: "guides/epic-news/ui/adding-links",
                 },
+                {
+                  label: "🖥️ Custom components",
+                  link: "guides/epic-news/ui/custom-components",
+                },
               ]
             },
             {

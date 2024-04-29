@@ -130,7 +130,7 @@ When you paste the code below into your file, you may see some lines underlined 
 
 This is because:
 
-1. We haven't used the values, variables and functions that we are importing yet, and VS Code is warning us about this. 
+1. We haven't used the values, variables and functions that we are importing yet, and VS Code is warning us about this.
 2. VS Code expects the imports to be organised in a certain order, and we have added new imports that don't follow this order (yet).
 
 You can see both of these warnings if you hover over the underlined code in VS Code.
@@ -278,11 +278,13 @@ Press this shortcut now to automatically organise your imports at the top of you
 
 Remember to save your file after you have done this, and commit your changes to Git.
 
-:::tip[Report writing]
+:::note[Assignment]
 
-## 📄 Report writing
+## 📄 Assignment documentation
 
 You have now completed the implementation of the light and dark mode toggle button in your Remix app.
+
+![Excited](src/assets/gif/excited.gif)
 
 It's time to start the report you will be submitting that documents the process of building the app.
 
@@ -290,15 +292,37 @@ If you haven't already, create a new Word document in your OneDrive folder and g
 
 Remember to include the following parts from this tutorial in your report:
 
-- What is 'light' and 'dark' mode in a web app?
-- Why is [**light and dark mode important in a web app**](https://blogs.perficient.com/2022/03/04/dark-mode-and-digital-accessibility-who-it-helps-and-without-it-who-it-may-hinder/)?
-- What [**accessibility considerations**](https://uxdesign.cc/dark-matters-342ff2c7cc) should be taken into account when implementing light and dark mode?
-- What is meant by the terms 'frontend' and 'backend' in a web app?
-- What are [**`loader`**](https://remix.run/docs/en/main/route/loader) and [**`action`**](https://remix.run/docs/en/main/route/action) functions typically responsible for in a Remix app, and where are the executed (i.e. server or browser)?
-- What is the [**`useLoaderData`**](https://remix.run/docs/en/main/hooks/use-loader-data) hook responsible for in a Remix app?
-- Show how you have used the `useLoaderData` hook in your app to update the `theme` preference in the `ThemeSwitch` component.
-- How did you test the light and dark mode toggle button in the browser?
+### [Setting up](/code-monster/guides/epic-news/light-and-dark-mode/01-setting-up) light and dark mode
+
+1. What is 'light' and 'dark' mode in a web app?
+2. Why is light and dark mode important in a web app?
+3. What accessibility considerations should be taken into account when implementing light and dark mode?
+
+### Adding [**`useLoaderData`**](#adding-useloaderdata-to-the-app-component)
+4. What is the `useLoaderData` hook responsible for in a Remix app?
+5. Show how you have used the `useLoaderData` hook in your app to update the `theme` preference in the `ThemeSwitch` component.
+6. Describe what React props are and how they are used to pass data into a component.
+7. How are React props used in the `Document` component to control the theme of the Epic News website?
+		Include:
+			- The role of TypeScript interfaces in defining the shape of an object, and how this is used in the `DocumentProps` interface in the `Document` component.
+			- How string interpolation is used to insert the value of a variable into a string in JavaScript, and how this is utilized in the `Document` component to control the theme of the Epic News website.
+8. How did you test the light and dark mode toggle button in the browser?
+
+:::tip[Useful links]
+
+### Useful links
+
+- [Why is light and dark mode important in a web app?](https://blogs.perficient.com/2022/03/04/dark-mode-and-digital-accessibility-who-it-helps-and-without-it-who-it-may-hinder/)
+- [What accessibility considerations should be taken into account when implementing light and dark mode?](https://uxdesign.cc/dark-matters-342ff2c7cc)
+- [Remix `useLoaderData` hook](https://remix.run/docs/en/main/hooks/use-loader-data)
+- [React Props](https://react.dev/learn/describing-the-ui#passing-props-to-a-component)
+- [Typescript Interfaces](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#interfaces)
+- [JavaScript Template strings](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals)
+
+:::
 
 Support your explanations with screenshots and code snippets where necessary.
 
-:::
+## What's next?
+
+In the next step, we will add a navbar and footer to the website to introduce navigation and improve user experience.

@@ -167,6 +167,16 @@ export default defineConfig({
               ]
             },
             {
+              label: "🧩 Custom Components",
+              collapsed: true,
+              items: [
+                {
+                  label: "🧩 `HeroCallToAction`",
+                  link: "guides/epic-news/custom-components/hero-call-to-action",
+                }
+              ]
+            },
+            {
               label: "🔀 Routes, loaders and useLoaderData",
               collapsed: true,
               items: [

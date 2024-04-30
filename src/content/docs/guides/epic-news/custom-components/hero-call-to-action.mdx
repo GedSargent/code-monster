@@ -1,0 +1,543 @@
+---
+title: '`HeroCallToAction`'
+description: 'Use and build custom components for your Epic News site'
+---
+
+import MonsterKbd from "src/components/MonsterKbd.astro"
+import MonsterReveal from "src/components/MonsterReveal.astro"
+
+## Introduction
+
+In this guide, we will learn how to use and build custom components for your Epic News site.
+
+The starter project that you have downloaded comes with several custom components that you can use to build your site.
+
+We will start with these as a foundation, and then you can build your own custom components as you need them.
+
+## Pre-built Custom Components
+
+The Epic News starter project comes with several custom components that you can start to build your site with.
+
+Let's take a look at some of these.
+
+## Hero sections
+
+A hero section is a large, prominent section at the top of a page that is used to grab the user's attention.
+
+Typically, there are two main styles of hero image:
+
+1. The first is an image that is placed to one side of the page with a [**call to action**](https://www.wix.com/blog/ctas-101-the-complete-guide-for-call-to-actions-that-actually-convert) section on the other:
+
+		![Hero Image To Side](src/assets/png/epic-news/hero-image-to-side.png)
+
+2. The second is a full-width image that spans the width of the page, sometimes overlaid with custom content:
+
+		![Full Width Hero Image](src/assets/png/epic-news/hero-image-full-width.png)
+
+There are two main hero components in the Epic News starter project.
+
+In this first guide, we will look at the `HeroCallToAction` component.
+
+## 1. The `HeroCallToAction` component
+
+The `HeroCallToAction` component offers a quick way to display a hero section that places an image to one side of the page, and custom content of your own on the other.
+
+Open `app/root.tsx` and add the following to the end of your `import` list:
+
+```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" collapse={1-6}
+import { type LinksFunction } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import Document from '~/components/shared-layout/Document'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { loader } from './__root.server'
+import useTheme from './hooks/useTheme.tsx'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
++import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
+```
+
+Next, slot this component just below the `h1` tag in the JSX being returned by the `App` component:
+
+```diff lang="tsx" title="app/root.tsx" collapse={1-16}
+import { type LinksFunction } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import Document from '~/components/shared-layout/Document'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { loader } from './__root.server'
+import useTheme from './hooks/useTheme.tsx'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
+
+export const links: LinksFunction = () => {
+  return rootLinkElements
+}
+export { headers, meta } from './__root.client.tsx'
+export { action, loader } from './__root.server.tsx'
+
+export default function App() {
+  const data = useLoaderData<typeof loader>()
+  const nonce = useNonce()
+  const theme = useTheme()
+
+  return (
+    <Document nonce={nonce} theme={theme}>
+      <div className="flex h-screen flex-col justify-between">
+        <HeaderWithSearch />
+
+        <div className="flex-1">
+          <main className="grid h-full place-items-center">
+            <h1 className="text-mega">Welcome to Epic News!</h1>
++						<div className="w-full py-16">
++							<HeroCallToAction />
++						</div>
+          </main>
+        </div>
+
+        <div className="container flex justify-between pb-5">
+          <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+        </div>
+      </div>
+    </Document>
+  )
+}
+```
+
+You will notice that the `HeroCallToAction` component is underlined in red. Let's find out why by hovering our mouse over it:
+
+![Hero Call To Action Missing Props](src/assets/webp/epic-news/hero-call-to-action-missing-props.webp)
+
+The error message is telling us that the component is expecting two props to be passed to it: `image` and `children`.
+
+Let's add these now:
+
+```diff lang="tsx" title="app/root.tsx" collapse={}
+export default function App() {
+  const data = useLoaderData<typeof loader>()
+  const nonce = useNonce()
+  const theme = useTheme()
+
+  return (
+    <Document nonce={nonce} theme={theme}>
+      <div className="flex h-screen flex-col justify-between">
+        <HeaderWithSearch />
+
+        <div className="flex-1">
+          <main className="grid h-full place-items-center">
+            <h1 className="text-mega">Welcome to Epic News!</h1>
+							<div className="w-full py-16">
+-								<HeroCallToAction />
++								<HeroCallToAction image="https://www.helpguide.org/wp-content/uploads/2020/01/Social-Media-and-Mental-Health.webp">
++									<div className="flex flex-col gap-8 px-8">
++										<h2 className="text-h2">Welcome to Epic News</h2>
++										<p className="text-lg">
++											Keep up to date with the latest tech news.
++										</p>
++									</div>
++								</HeroCallToAction>
+							</div>
+          </main>
+        </div>
+
+        <div className="container flex justify-between pb-5">
+          <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+        </div>
+      </div>
+    </Document>
+  )
+}
+```
+
+Save the changes to your file and head back to your browser.
+
+You should now see the `HeroCallToAction` component displayed correctly on your site:
+
+![Hero Call To Action](src/assets/webp/epic-news/hero-call-to-action-with-components.webp)
+
+### 1a. Optional `HeroCallToAction` props
+
+Open the component file at `app/components/organisms/Hero/HeroCallToAction.tsx` if you haven't already.
+
+If you look inside the `HeroCallToAction` component code, you will see that it has an [**`interface`**](https://prismic.io/blog/typescript-interfaces) defined at the top of the file.
+
+This interface describes the props that the component expects to receive.
+
+Let's take a look:
+
+```tsx title="app/components/organisms/Hero/HeroCallToAction.tsx"
+interface HeroCallToActionProps {
+	image: string
+	imageRight?: boolean
+	hasBackgroundColour?: boolean
+	children: React.ReactNode
+}
+```
+
+This tells us that the component has two [**optional props**](https://www.sonarsource.com/blog/common-typescript-issues-no-5-optional-property-declarations/) as well as the mandatory ones we've been using already.
+
+Optional props are those that don't have to be passed to the component when it is used, but can be if needed.
+
+We can tell which props are optional by the `?` symbol after the prop name:
+
+```tsx title="app/components/organisms/Hero/HeroCallToAction.tsx" mark={3,4}
+interface HeroCallToActionProps {
+	image: string
+	imageRight?: boolean
+	hasBackgroundColour?: boolean
+	children: React.ReactNode
+}
+```
+
+The `imageRight` prop is a boolean that determines whether the image should be displayed on the right or left side of the component.
+
+The `hasBackgroundColour` prop is another boolean, but this one determines whether the component should have a background colour.
+
+Let's try adding an `imageRight` prop to the component where we call it in `app/root.tsx`:
+
+```diff lang="tsx" title="app/root.tsx"
+
+<HeroCallToAction
+	image="https://www.helpguide.org/wp-content/uploads/2020/01/Social-Media-and-Mental-Health.webp"
++	imageRight={true}
+>
+	<div className="flex flex-col gap-8 px-8">
+		<h2 className="text-h2">Welcome to Epic News</h2>
+		<p className="text-lg">
+			Keep up to date with the latest tech news.
+		</p>
+	</div>
+</HeroCallToAction>
+
+```
+
+With this change saved, check your browser again:
+
+![Hero Call To Action Image Right](src/assets/webp/epic-news/hero-call-to-action-image-right.webp)
+
+Exploring the custom components in the Epic News starter project will help you understand how they work and how you can build your own custom components.
+
+Looking at the `interface` expected by a component will help you understand what props you need to pass to it.
+
+::::tip[Challenge]
+
+## Challenges
+
+1. Provide an image to the `HeroCallToAction` component that is taken from the `app/assets/jpg` folder instead of the external image we currently have.
+2. Customise the `children` of the `HeroCallToAction` component to display your own custom message with styles.
+3. You will notice that the `HeroCallToAction` component has a `hasBackgroundColour` prop, but this is not used anywhere inside the component.
+
+		- Fix the component so that if `hasBackgroundColour` is set to true, it should have the background colour class of `bg-secondary`. If it is false, is should be `bg-transparent`
+		- TIP: Look at how similar logic has been implemented from lines 15-19 with the `imageRight` prop.
+
+4. Currently, the `HeroCallToAction` component has a lot of space around it from the title and horizontal margins.
+
+	![Hero Call To Action With Space](src/assets/webp/epic-news/hero-call-to-action-with-space.webp)
+
+		Can you modify the `root.tsx` file to:
+			- Remove the `<h1>` title at the top of the page, and have it as part of the `HeroCallToAction` component instead?
+			- remove this space and make the component full width?
+
+:::note[Tip]
+
+Use the devtools in your browser to inspect the elements on the page and see how they are styled.
+
+![Inspect with devtools](src/assets/gif/inspect-with-devtools.gif)
+
+This will give you a clue as to which elements are creating the space around the `HeroCallToAction` component.
+
+:::
+
+### Solutions
+
+When you are ready, reveal the solutions to the challenges.
+
+<MonsterReveal title="1. 🖼️ An image from project assets">
+
+#### 1. 🖼️ Provide an image from project assets.
+
+Firstly, let's `import` an image from our `app/assets/jpg` folder.
+
+Add the following to the end of your `import` list at top of `app/root.tsx`:
+
+```diff lang="tsx" title="app/root.tsx" collapse={1-11}
+import { type LinksFunction } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
+import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import Document from '~/components/shared-layout/Document'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { loader } from './__root.server.tsx'
+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
+import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
+import useTheme from './hooks/useTheme.tsx'
++import heroImage from '~/assets/jpg/sample-hero.jpg'
+```
+
+Next, replace the external image URL with the imported image in the `HeroCallToAction` component call:
+
+```diff lang="tsx" title="app/root.tsx"
+<HeroCallToAction
+-  image="https://www.helpguide.org/wp-content/uploads/2020/01/Social-Media-and-Mental-Health.webp"
++	image={heroImage}
+	imageRight={true}
+	hasBackgroundColour={true}
+>
+	<div className="flex flex-col gap-8 px-8">
+		<h2 className="text-h2">Welcome to Epic News</h2>
+		<p className="text-lg">
+			Keep up to date with the latest tech news.
+		</p>
+	</div>
+</HeroCallToAction>
+
+```
+
+When finished, your hero section should now display the image from the `app/assets/jpg` folder:
+
+![Hero call to action with assets image](src/assets/webp/epic-news/hero-call-to-action-with-assets-img.webp)
+
+</MonsterReveal>
+
+<MonsterReveal title="2. 📝 Custom Children">
+
+#### 2. 📝 Custom `children`
+
+Remember that `children` is a special React prop that will render any JSX that passed between the opening and closing tags of a component.
+
+To customise the `children` of the `HeroCallToAction` component, you can add your own JSX elements between the opening and closing tags.
+
+Here is an example of how you can customise the `children`:
+
+```diff lang="tsx" title="app/root.tsx"
+<HeroCallToAction
+	image={heroImage}
+	imageRight={true}
+	hasBackgroundColour={true}
+>
++	<div className="flex h-full flex-1 flex-col justify-between p-16">
++		<div className="flex flex-col gap-8">
++			<h2 className="text-h2">Welcome to Epic News</h2>
++			<p className="text-lg">
++				Keep up to date with the latest tech news.
++			</p>
++		</div>
++		<Button asChild variant="default" size="lg">
++			<Link to="/signup">Sign up</Link>
++		</Button>
++	</div>
+</HeroCallToAction>
+</MonsterReveal>
+```
+
+</MonsterReveal>
+
+<MonsterReveal title="3. 🎨 Custom Background Colour">
+
+#### 3. 🎨 Custom Background Colour
+
+Firstly, open the file at `app/components/organisms/Hero/HeroCallToAction.tsx`.
+
+Next, take a close look at the code in the opening `div` tag of the component:
+
+```tsx title="app/components/organisms/Hero/HeroCallToAction.tsx" mark={8-12} collapse={13-24}
+const HeroCallToAction = ({
+	children,
+	image,
+	imageRight = false,
+	hasBackgroundColour = false,
+}: HeroCallToActionProps) => {
+	return (
+		<div
+			className={`md:mx-auto md:flex md:max-w-6xl ${
+				imageRight && 'md:flex-row-reverse'
+			}`}
+		>
+			<div className="relative flex h-96 items-center justify-center overflow-hidden md:h-[32rem] md:w-1/2">
+				<img
+					src={image}
+					alt="A hero with a call to action."
+					className="absolute min-h-full min-w-full object-cover object-center"
+				/>
+			</div>
+			<div
+				className="relative flex h-96 items-center justify-center md:h-[32rem] md:w-1/2"
+			>
+				{children}
+			</div>
+		</div>
+	)
+}
+```
+
+You'll notice that the `className` of this `div` tag is using a ternary operator to conditionally apply the `'md:flex-row-reverse'` class if `imageRight` is `true`.
+
+We can apply the same logic to the `hasBackgroundColour` prop by adding another ternary operator to the `className` of the `div` tag wrapping the `children` prop:
+
+```diff lang="tsx" title="app/components/organisms/Hero/HeroCallToAction.tsx" collapse={} showLineNumbers
+const HeroCallToAction = ({
+	children,
+	image,
+	imageRight = false,
+	hasBackgroundColour = false,
+}: HeroCallToActionProps) => {
+	return (
+		<div
+			className={`md:mx-auto md:flex md:max-w-6xl ${
+				imageRight && 'md:flex-row-reverse'
+			}`}
+		>
+			<div className="relative flex h-96 items-center justify-center overflow-hidden md:h-[32rem] md:w-1/2">
+				<img
+					src={image}
+					alt="A hero with a call to action."
+					className="absolute min-h-full min-w-full object-cover object-center"
+				/>
+			</div>
+-			<div
+-				className="relative flex h-96 items-center justify-center md:h-[32rem] md:w-1/2"
+-			>
++			<div
++				className={`relative flex h-96 items-center justify-center ${hasBackgroundColour ? `bg-secondary` : `bg-transparent`} md:h-[32rem] md:w-1/2`}
++			>
+				{children}
+			</div>
+		</div>
+	)
+}
+```
+
+With this change in place, a background colour will now be shown if we pass `hasBackgroundColour={true}` to the component in `app/root.tsx`:
+
+![Hero Call To Action Background Colour](src/assets/webp/epic-news/hero-call-to-action-bg-colour.webp)
+
+</MonsterReveal>
+
+<MonsterReveal title="4. 📢 Full Width Hero">
+
+There are a few changes we need to get the hero full width:
+
+1. Remove the `<h1>` title from the `App` component, and the parent `div` wrapping the `HeroCallToAction` component:
+
+```diff lang="tsx" title="app/root.tsx" del="grid " del=" place-items-center" showLineNumbers collapse={2-4, 30-33}
+export default function App() {
+  const data = useLoaderData<typeof loader>()
+  const nonce = useNonce()
+  const theme = useTheme()
+
+  return (
+    <Document nonce={nonce} theme={theme}>
+      <div className="flex h-screen flex-col justify-between">
+        <HeaderWithSearch />
+
+        <div className="flex-1">
+          <main className="grid h-full place-items-center">
+-            <h1 className="text-mega">Welcome to Epic News!</h1>
+
+-						<div className="w-full py-16">
+							<HeroCallToAction
+								image={heroImage}
+								imageRight={true}
+								hasBackgroundColour={true}
+							>
+								<div className="flex flex-col gap-8 px-8">
+									<h2 className="text-h2">Welcome to Epic News</h2>
+									<p className="text-lg">
+										Keep up to date with the latest tech news.
+									</p>
+								</div>
+							</HeroCallToAction>
+-						</div>
+
+						<p className="text-base text-gray-600 md:text-lg lg:text-xl">
+							Welcome to Epic News, where the latest developments in tech
+							are found.
+						</p>
+          </main>
+        </div>
+
+        <div className="container flex justify-between pb-5">
+          <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+        </div>
+      </div>
+    </Document>
+  )
+}
+```
+
+2. Finally, we need to edit the `HeroCallToAction` component code a little.
+
+		Open `app/components/organisms/Hero/HeroCallToAction.tsx` if it isn't already.
+
+		Delete the `md:max-w-6xl` class highlighted in red from the opening `div` tag. This will remove the maximum width constraint on the component:
+
+		```diff lang="tsx" title="app/components/organisms/Hero/HeroCallToAction.tsx" del=" md:max-w-6xl" showLineNumbers collapse={13-24}
+		const HeroCallToAction = ({
+			children,
+			image,
+			imageRight = false,
+			hasBackgroundColour = false,
+		}: HeroCallToActionProps) => {
+			return (
+				<div
+					className={`md:flex md:max-w-6xl ${
+						imageRight && 'md:flex-row-reverse'
+					}`}
+				>
+					<div className="relative flex h-96 items-center justify-center overflow-hidden md:h-[32rem] md:w-1/2">
+						<img
+							src={image}
+							alt="A hero with a call to action."
+							className="absolute min-h-full min-w-full object-cover object-center"
+						/>
+					</div>
+					<div
+						className={`relative flex h-96 items-center justify-center ${hasBackgroundColour ? `bg-secondary` : `bg-transparent`} md:h-[32rem] md:w-1/2`}
+					>
+						{children}
+					</div>
+				</div>
+			)
+		}
+		```
+
+With these changes in place, you should now have a full-width hero section on your site:
+
+![Full Width Hero Call To Action](src/assets/webp/epic-news/hero-call-to-action-full-width.webp)
+</MonsterReveal>
+
+::::
+
+
+## Experimentation
+
+There are lots of custom components in the `app/components` directory that you can explore and use in your site.
+
+Documentation for each can be found in the `README_COMPONENTS.md` at the root of your project.
+
+Try experimenting with these components to see how they work and how you can use them in your site.
+
+::::note[Assignment]
+
+## 📄 Assignment documentation
+
+You will need to document all the changes that you have made to the site so far in this '🧩 Custom Components' section.
+
+You should include:
+
+- What are custom components in React, and why are they useful?
+- The built-in custom components that you have used on your homepage, and any modifications that you have made
+- Any custom components that you have built yourself
+- Any other customisations that you have made to the site's homepage
+
+:::tip[Useful links]
+
+- [React components](https://react.dev/learn/your-first-component#components-ui-building-blocks)
+
+:::
+
+::::

@@ -1,0 +1,424 @@
+---
+title: 'Hero `ParallaxBackground`'
+description: 'Use and build custom components for your Epic News site'
+---
+
+import MonsterKbd from "src/components/MonsterKbd.astro"
+import MonsterReveal from "src/components/MonsterReveal.astro"
+
+## Introduction
+
+The second custom component we are going to look at is the `ParallaxBackground` hero component.
+
+This component generates a full width hero image with an optional call-to-action overlay.
+
+It is further enhanced with a parallax effect when users scroll up or down
+
+## Installing an NPM package
+
+Start by opening the component file in question at `app/components/organisms/Hero/ParallaxBackground.tsx`.
+
+If you look at the `import` statement at the top of the file, you will see a red underline under the `react-scroll-parallax` package.
+
+Hover your mouse over the package name to see the error message:
+
+![React Scroll Parallax error](src/assets/webp/epic-news/react-scroll-parallax-error.webp)
+
+This error message indicates that the `react-scroll-parallax` NPM package is not installed in your project.
+
+:::note[NPM packages]
+
+### What is an NPM package?
+
+An NPM package is a collection of files and folders that are bundled together and distributed via the [NPM registry](https://www.npmjs.com/).
+
+[![NPM registry](src/assets/webp/epic-news/npm-registry.webp)](https://www.npmjs.com/)
+
+These packages can contain JavaScript code, CSS styles, images, and other assets that can be used in your project.
+
+They are useful because they allow you to reuse code that has been written by other developers, saving you lots of time and effort.
+
+
+
+:::
+
+If you ever see an error message like this on an `import`, it means you need to install the package into your project. This is done using the `npm install` command, followed by the package name.
+
+We will do this now by typing the following command in your terminal and hitting enter:
+
+```bash
+npm install react-scroll-parallax
+```
+
+After a few seconds, you should see a message like this:
+
+![React Scroll Parallax installed](src/assets/gif/react-scroll-parallax-installed.gif)
+
+With the package install successfully, we can begin to use the `ParallaxBackground` component in our project.
+
+## Wrapper component
+
+The `react-scroll-parallax` package requires that our application is wrapped in a `ParallaxProvider` component. This allows the package to track the parallax effect across multiple areas of the app.
+
+To do this, we need to wrap the entire application in a `ParallaxProvider` component in the `app/root.tsx` file.
+
+1. First, `import` the `ParralaxProvider` at the top of your `app/root.tsx` file:
+
+```diff lang="tsx" title="app/root.tsx" collapse={1-12}
+import { type LinksFunction } from '@remix-run/node'
+import { Link, useLoaderData } from '@remix-run/react'
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
+import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import Document from '~/components/shared-layout/Document'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { loader } from './__root.server.tsx'
+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
+import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
+import useTheme from './hooks/useTheme.tsx'
+import heroImage from '~/assets/jpg/sample-hero.jpg'
+import { Button } from './components/atoms/Button.tsx'
++import { ParallaxProvider } from 'react-scroll-parallax'
+```
+
+2. Next, wrap the entire application in the `ParallaxProvider` component:
+
+```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={11-55}
+export default function App() {
+	const data = useLoaderData<typeof loader>()
+	const theme = useTheme()
+	const nonce = useNonce()
+
+	return (
++		<ParallaxProvider>
+			<AuthenticityTokenProvider token={data.csrfToken}>
+				<HoneypotProvider {...data.honeyProps}>
+					<Document nonce={nonce} theme={theme}>
+						<div className="flex h-screen flex-col justify-between">
+							<HeaderWithSearch />
+
+							<div className="flex-1">
+								<main className="grid h-full">
+									<HeroCallToAction
+										image={heroImage}
+										imageRight={true}
+										hasBackgroundColour={true}
+									>
+										<div className="flex h-full flex-1 flex-col justify-between p-16">
+											<div className="flex flex-col gap-8">
+												<h2 className="text-h2">Welcome to Epic News</h2>
+												<p className="text-lg">
+													Keep up to date with the latest tech news.
+												</p>
+											</div>
+											<Button asChild variant="default" size="lg">
+												<Link to="/signup">Sign up</Link>
+											</Button>
+										</div>
+									</HeroCallToAction>
+
+									<ParallaxBackground
+										image={heroImage}
+										title="Epic News"
+										logo={logo}
+									/>
+
+									<div className="container">
+										<p className="text-base text-gray-600 md:text-lg lg:text-xl">
+											Welcome to Epic News, where the latest developments in
+											tech are found.
+										</p>
+									</div>
+								</main>
+							</div>
+
+							<div className="container flex justify-between pb-5">
+								<ThemeSwitch
+									userPreference={data.requestInfo.userPrefs.theme}
+								/>
+							</div>
+							<FooterMenuRight />
+						</div>
+					</Document>
+				</HoneypotProvider>
+			</AuthenticityTokenProvider>
++		</ParallaxProvider>
+	)
+}
+```
+
+## Using the `ParallaxBackground` component
+
+The `ParallaxBackground` component is now ready to be used in the app.
+
+We just need to import and configure it.
+
+:::tip[Challenge]
+
+### Challenge: import and configure the component
+
+Using your knowledge of importing and using a custom component from the [**`HeroCallToAction` tutorial**](/code-monster/guides/epic-news/custom-components/hero-call-to-action), can you import and use the `ParallaxBackground` component in your project?
+
+1. Initially, you can place the component just below the `HeroCallToAction` component on the homepage, and then choose which you prefer when they are both displayed.
+2. Although most of its props are optional, add them all at first when you call the component in `app/root.tsx` to see how they affect the output
+3. You can then remove the props one by one to see how the component changes and decide how you like it best.
+
+#### TIPS
+
+- Remember to `import` the component at the top of the file
+- Place the component carefully in the JSX being returned by the `App` component
+- Look at the `interface` in the component file to see what props it accepts
+
+#### 🚀 EXTRA CREDIT
+
+As with `HeroCallToAction`, there is space around the component that we might not otherwise want.
+
+Can you find a way to remove this space so that it stretches right across the page width?
+
+### Solution
+
+After having a go at configuring the component yourself, compare your solution with those below:
+
+<MonsterReveal title="1. ⚙️ Component configuration">
+
+#### 1. ⚙️ Add imports
+
+First, import the `ParallaxBackground` component and the image files you need at the top of the `app/root.tsx` file.
+
+Use the site logo you designed [**previously**](/code-monster/guides/epic-news/ui/logo-design), and, for now, the same test `heroImage` as the `HeroCallToAction` component:
+
+```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-14}
+import { type LinksFunction } from '@remix-run/node'
+import { Link, useLoaderData } from '@remix-run/react'
+import { ParallaxProvider } from 'react-scroll-parallax'
+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
+import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import heroImage from '~/assets/jpg/sample-hero.jpg'
+import logo from '~/assets/png/epic-news-logo.png'
+import Document from '~/components/shared-layout/Document'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { loader } from './__root.server.tsx'
+import { Button } from './components/atoms/Button.tsx'
+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
+import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
+import useTheme from './hooks/useTheme.tsx'
++import ParallaxBackground from './components/organisms/Hero/ParallaxBackground.tsx'
++import heroImage from '~/assets/jpg/sample-hero.jpg'
++import logo from '~/assets/png/epic-news-logo.png'
+```
+
+#### 2. ⚙️ Place component
+
+Carefully place the `ParallaxBackground` component below the `HeroCallToAction` component:
+
+```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={2-4, 11-14, 17-31, 54-63}
+export default function App() {
+	const data = useLoaderData<typeof loader>()
+	const theme = useTheme()
+	const nonce = useNonce()
+
+	return (
+		<ParallaxProvider>
+			<AuthenticityTokenProvider token={data.csrfToken}>
+				<HoneypotProvider {...data.honeyProps}>
+					<Document nonce={nonce} theme={theme}>
+						<div className="flex h-screen flex-col justify-between">
+							<HeaderWithSearch />
+
+							<div className="flex-1">
+								<main className="grid h-full">
+									<HeroCallToAction
+										image={heroImage}
+										imageRight={true}
+										hasBackgroundColour={true}
+									>
+										<div className="flex h-full flex-1 flex-col justify-between p-16">
+											<div className="flex flex-col gap-8">
+												<h2 className="text-h2">Welcome to Epic News</h2>
+												<p className="text-lg">
+													Keep up to date with the latest tech news.
+												</p>
+											</div>
+											<Button asChild variant="default" size="lg">
+												<Link to="/signup">Sign up</Link>
+											</Button>
+										</div>
+									</HeroCallToAction>
+
++									<ParallaxBackground
++										image={heroImage}
++										title="Epic News"
++										logo={logo}
++										altText="Welcome to Epic News, where the latest developments in tech are found."
++									>
++										<div className="mx-auto flex w-fit flex-1 flex-col justify-between gap-16 bg-secondary/40 px-28 py-16 backdrop-blur-sm">
++											<p className="text-center text-4xl font-extrabold text-secondary-foreground">
++												The latest tech news in one place
++											</p>
++											<div className="flex justify-center gap-8">
++												<Button variant="default" size="wide">
++													<Link to="/signup">Sign up</Link>
++												</Button>
++												<Button variant="secondary" size="wide">
++													<Link to="/login">Login</Link>
++												</Button>
++											</div>
++										</div>
++									</ParallaxBackground>
+								</main>
+							</div>
+
+							<div className="container flex justify-between pb-5">
+								<ThemeSwitch
+									userPreference={data.requestInfo.userPrefs.theme}
+								/>
+							</div>
+							<FooterMenuRight />
+						</div>
+					</Document>
+				</HoneypotProvider>
+			</AuthenticityTokenProvider>
+		</ParallaxProvider>
+	)
+}
+```
+
+With this in place, you should see the `ParallaxBackground` component displayed on the homepage, and a parallax effect applied as you scroll up and down:
+
+![ParallaxBackground solution 01](src/assets/gif/parallax-background-solution-01.gif)
+
+####
+
+</MonsterReveal>
+
+<MonsterReveal title="2. 🎨 Customise component">
+
+1. When investigating styles, it's always a good idea to start with your browsers devtools. You can right-click on the component and select 'Inspect' to see the HTML and CSS that is being applied.
+
+		![Parallax Devtools Inspection](src/assets/gif/parallax-devtools-inspection.gif)
+
+		In this case, I can see there is padding and a max-width applied to the component.
+
+2. Let's go through the process of finding these styles in the codebase. The five steps are labelled in the screenshot below:
+
+		1. If I double-click this class list in my browser's devtools, it becomes selected as a string
+		2. With the class list selected, I can copy it to my clipboard
+		3. Back in VS Code, I can then select global search from the icons on the far-left
+		4. I can then paste the class list I copied in step 2 into VS Code's global search
+		5. If I click on the search result, it will take me to the file and line where this class is defined
+
+![Parallax Devtools Inspection](src/assets/webp/epic-news/parallax-using-devtools.webp)
+
+3. In this case, I can see that the padding and max-width are being applied in the `ParallaxBackground` component file.
+
+		I can remove these styles to make the component stretch across the full width of the page:
+
+```diff lang="tsx" title="app/components/organisms/Hero/ParallaxBackground.tsx" del=" sm:pb-16 sm:pt-8" del='className="mx-auto max-w-7xl sm:px-6 lg:px-8"' collapse={15-51}
+const ParallaxBackground = ({
+	description,
+	title,
+	image,
+	logo,
+	altText = 'Welcome to DoBu Martial Arts - where we are stronger together',
+	children,
+}: ParallaxBackgroundProps) => {
+	const parallaxController = useParallaxController()
+	const handleLoad = () => parallaxController?.update()
+
+	return (
+		<div className="relative sm:pb-16 sm:pt-8">
+			<div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+				<div className="relative shadow-xl sm:overflow-hidden sm:rounded-2xl">
+					<div className="absolute inset-0">
+						<Parallax className="hidden lg:block" speed={-20}>
+							<img
+								className="h-full w-full object-cover"
+								src={image}
+								alt={altText}
+								onLoad={handleLoad}
+							/>
+						</Parallax>
+						<img
+							className="h-full w-full object-cover lg:hidden"
+							src={image}
+							alt={altText}
+							onLoad={handleLoad}
+						/>
+						<div className="bg-primary-light absolute inset-0 mix-blend-multiply" />
+					</div>
+					<div className="relative px-4 pb-8 pt-16 sm:px-6 sm:pb-14 sm:pt-24 lg:px-8 lg:pb-20 lg:pt-32">
+						<h1 className="text-center text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-9xl">
+							<span className="via-secondary-dark block bg-gradient-to-r from-secondary to-secondary bg-clip-text uppercase text-transparent drop-shadow-md">
+								{title}
+							</span>
+						</h1>
+						{logo && (
+							<div className="mx-auto my-8 w-32">
+								<img src={logo} className="drop-shadow-md" />
+							</div>
+						)}
+						{description && (
+							<p className="text-secondary-light mx-auto mt-6 max-w-lg text-center text-2xl drop-shadow-md sm:max-w-3xl lg:text-5xl">
+								{description}
+							</p>
+						)}
+						{children && children}
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
+```
+
+</MonsterReveal>
+
+:::
+
+With your two hero sections in place, decide which you like best, and delete the other from `app/root.tsx`.
+
+## Experimentation
+
+There are lots of other custom components in the `app/components` directory that you can explore and use in your site.
+
+Documentation for each can be found in the `README_COMPONENTS.md` at the root of your project.
+
+Try experimenting with these components to see how they work and how you can use them in your site.
+
+Why not have a go at building your own custom component?
+
+::::note[Assignment]
+
+## Summary
+
+In this step, we have:
+
+- Installed an NPM package to use the `ParallaxBackground` component
+- Wrapped the entire application in a `ParallaxProvider` component
+- Imported and used the `ParallaxBackground` component in the `app/root.tsx` file
+- Customised the `ParallaxBackground` component to remove padding and max-width styles
+- Experimented with other custom components in the `app/components` directory
+
+## 📄 Assignment documentation
+
+You will need to document all the changes that you have made to the site so far in this '🧩 Custom Components' section.
+
+You should include:
+
+- What are custom components in React, and why are they useful?
+- The built-in custom components that you have used on your homepage, and any modifications that you have made
+- Any other customisations that you have made to the site's homepage
+- Any custom components that you have built yourself
+
+:::tip[Useful links]
+
+- [React components](https://react.dev/learn/your-first-component#components-ui-building-blocks)
+
+:::
+
+::::

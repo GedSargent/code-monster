@@ -160,10 +160,6 @@ export default defineConfig({
                   label: "🖥️ Adding links",
                   link: "guides/epic-news/ui/adding-links",
                 },
-                {
-                  label: "🖥️ Custom components",
-                  link: "guides/epic-news/ui/custom-components",
-                },
               ]
             },
             {
@@ -173,6 +169,10 @@ export default defineConfig({
                 {
                   label: "🧩 `HeroCallToAction`",
                   link: "guides/epic-news/custom-components/hero-call-to-action",
+                },
+                {
+                  label: "🧩 `ParallaxBackground` Hero",
+                  link: "guides/epic-news/custom-components/hero-parallax-background",
                 }
               ]
             },

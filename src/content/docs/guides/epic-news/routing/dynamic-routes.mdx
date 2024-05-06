@@ -22,7 +22,14 @@ In this step, we'll learn how to:
 
 ## Creating a dynamic route
 
-Delete all your hard-coded static child routes. So in the example above, I would be deleting `news.business.tsx`, `news.entertainment.tsx`, `news.reviews.tsx` and `news.technology.tsx`, and replace them all with a single file called `news.$category.tsx`.
+Delete all your hard-coded static child routes. So in the example from our [**previous tutorial**](/code-monster/guides/epic-news/routing/nested-routes#adding-a-navigation-link), I would be deleting:
+
+- `news.business.tsx`
+- `news.entertainment.tsx`
+- `news.reviews.tsx`
+- `news.technology.tsx`
+
+Replace all of these with a single file called `news.$category.tsx`.
 
 ![Delete static routes](src/assets/png/delete-static-routes.png)
 
@@ -72,9 +79,9 @@ http://localhost:3000/news/reviews
 
 Route params provide an easy way to pass values to a route.
 
-They are essentially variables that can represent different value for each URL that matches a particular base route.
+They are essentially variables that can represent different a value for each URL that matches a particular base route.
 
-In Remix, when we add a `$` to a route filename, anything before the `$` can be thought of as the base route, and anything immediately after it is considered a **route param**.
+In Remix, when we add a `$` to a route filename, anything before the `$` can be thought of as the parent route, and anything immediately after it is a **route parameter**.
 
 :::
 
@@ -110,9 +117,9 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 ### Accessing server data with `loader` functions
 
-Any code placed inside a Remix `loader` function is only ever executed on the **server**.
+Code placed inside a Remix `loader` function is executed only on the **server**.
 
-To make this work two, things need to happen:
+There are two rules to remember when creating a `loader` function:
 
 1. The `loader` function needs to be placed inside a **route** file (i.e. a `tsx` file inside the `routes` folder)
 
@@ -128,7 +135,7 @@ Crucially, Remix will then execute this code on the server _**before**_ the user
 
 :::tip
 
-You'll notice the `loader` function is being passed a `request` object as an argument:
+You'll notice the `loader` function can be passed a `request` object as an argument:
 
 ```tsx "{ request }"
 export async function loader({ request }: LoaderFunctionArgs) {

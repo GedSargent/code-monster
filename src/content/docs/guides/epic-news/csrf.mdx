@@ -57,7 +57,7 @@ Let's add this now.
 
 Luckily, adding CSRF protection to our application is straightforward.
 
-Firstly, add the following import to the top of the file:
+Firstly, add the following import to the top of our `app/root.tsx` file:
 
 ```diff lang="tsx" title="app/root.tsx"
 import { type LinksFunction } from '@remix-run/node'
@@ -75,7 +75,7 @@ import useTheme from './hooks/useTheme.tsx'
 
 We simply need to wrap our application with this `AuthenticityTokenProvider` to ensure that a valid CSRF token is checked for every request across the entire application.
 
-This is done by wrapping the components in the `App` component with the `AuthenticityTokenProvider`, then passing a `csrfToken` from the `data` object to the `AuthenticityTokenProvider` component.:
+This is done by wrapping the JSX returned by the `App` component with the `AuthenticityTokenProvider`, then passing a `csrfToken` from the `data` object to the `AuthenticityTokenProvider` component:
 
 ```diff lang="tsx" title="app/root.tsx"
 export default function App() {

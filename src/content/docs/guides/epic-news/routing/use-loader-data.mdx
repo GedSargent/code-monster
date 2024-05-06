@@ -80,7 +80,7 @@ That's a lot of changes! Let's break it down:
 
 - We've added a new function called `toTitleCase` that takes a string and returns it in title-case format (in other words, with every first letter of a word capitalized).
 
-	So, the string `technology` would become `Technology` and so on.
+	So, the string `technology` would become `Technology`, `reviews` would become `Reviews`, and so on.
 
 	```tsx
 	function toTitleCase(str: string) {
@@ -106,7 +106,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 ```
 ---
-- We call Remix's `useLoaderData` hook to read the `categoryTitle` value inside the `NewsCategoryPage` component on the browser.
+- We call Remix's `useLoaderData` hook (which you will remember from a [**previous lesson**](/code-monster/guides/epic-news/light-and-dark-mode/03-from-server-to-client)) to pass the `categoryTitle` value into the `NewsCategoryPage` component on the browser.
 ```tsx
 	const { categoryTitle } = useLoaderData<typeof loader>()
 ```
@@ -175,7 +175,9 @@ The red line has disappeared, and TypeScript now knows that `categoryTitle` will
 
 ## 🚀 Challenge
 
-1. Try adding three-five new categories to your `news` route. You don't need to create a new file for each one - just add a new link to your `app/routes/index.tsx` file.
+1. Try adding links to three-five new categories to your `news` route.
+
+	**Remember** - you don't need to create a new file for each category now. Just add a new `Link` to each one in your `app/routes/index.tsx` file.
 2. Update the layout of the `NewsCategoryPage` page by adding some dummy news story summary areas. These can be simple coloured rectangles at the moment to get an idea of layout. We will add real data to them later.
 
 Use this code as a quick wireframe component to drop into your `NewsCategoryPage`:
@@ -210,7 +212,7 @@ This will create a layout with five columns, each containing a wireframe block:
 
 ![Five col two rows](src/assets/png/epic-news/five-col-two-rows.png)
 
-2. Can you use (**Tailwind's responsive class prefixes**)[https://tailwindcss.com/docs/responsive-design] to make your layout responsive? On small screens, you should only show two columns, but on larger screens you should show five.
+2. Can you use [**Tailwind's responsive class prefixes**](https://tailwindcss.com/docs/responsive-design) to make your layout responsive? On small screens, you should only show two columns, but on larger screens you should show five.
 
 ![Five to two col responsive](src/assets/gif/five-to-two-col-responsive.gif)
 

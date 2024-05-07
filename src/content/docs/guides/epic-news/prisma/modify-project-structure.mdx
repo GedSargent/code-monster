@@ -12,111 +12,142 @@ Now that we have updated the Prisma schema and pushed these changes to the datab
 
 ## Update permissions
 
-The first thing we need to do is update the permissions in the `app/utils/permissions.ts` file.
+The first thing we need to do is update the permissions in the `app/utils/user.ts` file.
 
-Permissions describe what actions a user can perform on a specific entity. In our case, we have two entities: `user` and `article`.
+Open this file now in your editor.
 
-We will update the `Entity` type to accept `'article'` instead of `'note'`, around line 69:
+Permissions describe what actions a user can perform on a specific entity. In our case, we are concentrating on two entities: `user` and `article`.
 
-```diff lang="tsx" title="app/utils/permissions.ts" showLineNumbers collapse={1-66, 72-85}
-import { json } from '@remix-run/node'
-import { requireUserId } from './auth.server.ts'
-import { prisma } from './db.server.ts'
-import { type useUser } from './user.ts'
+We will update the `Entity` type definition to accept `'article'` as well as `'user'` and `'note'`, around line 28:
 
-export async function requireUserWithPermission(
-	request: Request,
-	permission: PermissionString,
-) {
-	const userId = await requireUserId(request)
-	const permissionData = parsePermissionString(permission)
+```diff lang="tsx" title="app/utils/user.ts" ins=" | 'article'" showLineNumbers collapse={1-25}
+import { type SerializeFrom } from '@remix-run/node'
+import { useRouteLoaderData } from '@remix-run/react'
+import { type loader as rootLoader } from '#app/root.tsx'
 
-	const user = await prisma.user.findFirst({
-		select: { id: true },
-		where: {
-			id: userId,
-			roles: {
-				some: {
-					permissions: {
-						some: {
-							...permissionData,
-							access: permissionData.access
-								? { in: permissionData.access }
-								: undefined,
-						},
-					},
-				},
-			},
-		},
-	})
-
-	if (!user) {
-		throw json(
-			{
-				error: 'Unauthorized',
-				requiredPermission: permissionData,
-				message: `Unauthorized: required permissions: ${permission}`,
-			},
-			{ status: 403 },
-		)
-	}
-
-	return user.id
+function isUser(user: any): user is SerializeFrom<typeof rootLoader>['user'] {
+	return user && typeof user === 'object' && typeof user.id === 'string'
 }
 
-export async function requireUserWithRole(request: Request, name: string) {
-	const userId = await requireUserId(request)
+export function useOptionalUser() {
+	const data = useRouteLoaderData<typeof rootLoader>('root')
+	if (!data || !isUser(data.user)) {
+		return undefined
+	}
+	return data.user
+}
 
-	const user = await prisma.user.findFirst({
-		select: { id: true },
-		where: { id: userId, roles: { some: { name } } },
-	})
-
-	if (!user) {
-		throw json(
-			{
-				error: 'Unauthorized',
-				requiredRole: name,
-				message: `Unauthorized: required role: ${name}`,
-			},
-			{ status: 403 },
+export function useUser() {
+	const maybeUser = useOptionalUser()
+	if (!maybeUser) {
+		throw new Error(
+			'No user found in root loader, but user is required by useUser. If user is optional, try useOptionalUser instead.',
 		)
 	}
-
-	return user.id
+	return maybeUser
 }
 
 type Action = 'create' | 'read' | 'update' | 'delete'
--type Entity = 'user' | 'note'
-+type Entity = 'user' | 'article'
+type Entity = 'user' | 'note' | 'article'
 type Access = 'own' | 'any' | 'own,any' | 'any,own'
-type PermissionString = `${Action}:${Entity}` | `${Action}:${Entity}:${Access}`
-function parsePermissionString(permissionString: PermissionString) {
-	const [action, entity, access] = permissionString.split(':') as [
-		Action,
-		Entity,
-		Access | undefined,
-	]
-
-	return {
-		action,
-		entity,
-		access: access ? (access.split(',') as Array<Access>) : undefined,
-	}
-}
+export type PermissionString =
+	| `${Action}:${Entity}`
+	| `${Action}:${Entity}:${Access}`
 
 // ...Code omitted for brevity...
 ```
 
-## Replace notes with articles
+## Add `getArticleImgSrc` function
 
-Head over to your VS Code file explore and navigate to the folder `app/routes/users+/$username_+`.
+Inside the `utils` folder, there is a file called `misc.tsx`.
 
-You will see a group of files all prefixed with `article`. These files are responsible for rendering the articles for a specific user.
+Open `app/utils/misc.tsx` now.
 
-To updating each of these files to reflect the changes we made to the Prisma schema would take a long time
+This file contains a function called `getNoteImgSrc` (around line 12) that is used to generate the URL for a note image.
 
-To to speed things along, you can download the updated folder here:
+We will copy this code and create a new function beneath it called `getArticleImgSrc` that uses the same logic, but will generate the URL for an article image:
+
+```diff title="app/utils/misc.tsx" lang="tsx"
+import { useFormAction, useNavigation } from '@remix-run/react'
+import { clsx, type ClassValue } from 'clsx'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSpinDelay } from 'spin-delay'
+import { extendTailwindMerge } from 'tailwind-merge'
+import { extendedTheme } from './extended-theme.ts'
+
+export function getUserImgSrc(imageId?: string | null) {
+	return imageId ? `/resources/user-images/${imageId}` : '/img/user.png'
+}
+
+export function getNoteImgSrc(imageId: string) {
+	return `/resources/note-images/${imageId}`
+}
+
++export function getArticleImgSrc(imageId: string) {
++	return `/resources/article-images/${imageId}`
++}
+```
+
+As you can see, this function generates a URL for an article image using the `imageId` parameter.
+
+However, if we look inside the `resources` folder, we will see this route file doesn't exist yet.
+
+Let's create it now.
+
+## Resources routes
+
+The route file we are going to create is a little different from the others we have created so far. We are going to create something called a [**resource route**](https://remix.run/docs/en/main/guides/resource-routes).
+
+### What is a resource route?
+
+In Remix, a [**resource route**](https://remix.run/docs/en/main/guides/resource-routes) is one that doesn't render a UI to the browser, but instead can send any kind of `Response` that we need it to.
+
+We will create a new resource route to serve the images for the articles.
+
+### Create `article-images.$imageId.tsx`
+
+To do this, copy the file `note-images.$imageId.tsx` inside the `app/routes/resources+` folder.
+
+Paste your copy back into the same `resources+` folder and rename it to `article-images.$imageId.tsx`:
+
+![Create article-images file](src/assets/webp/epic-news/create-article-images-file.webp)
+
+### Update `article-images.$imageId.tsx`
+
+Once created, we then need to make one simple change so that it serves images for articles instead of notes:
+
+```diff title="app/routes/resources+/article-images.$imageId.tsx" ins="articleImage" lang="tsx" showLineNumbers
+import { invariantResponse } from '@epic-web/invariant'
+import { type LoaderFunctionArgs } from '@remix-run/node'
+import { prisma } from '~/utils/db.server.ts'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+	invariantResponse(params.imageId, 'Image ID is required', { status: 400 })
+	const image = await prisma.articleImage.findUnique({
+		where: { id: params.imageId },
+		select: { contentType: true, blob: true },
+	})
+
+	invariantResponse(image, 'Not found', { status: 404 })
+
+	return new Response(image.blob, {
+		headers: {
+			'Content-Type': image.contentType,
+			'Content-Length': Buffer.byteLength(image.blob).toString(),
+			'Content-Disposition': `inline; filename="${params.imageId}"`,
+			'Cache-Control': 'public, max-age=31536000, immutable',
+		},
+	})
+}
+```
+
+## Add user-article routes
+
+Using VS Code's file explorer, navigate to the folder `app/routes/users+/$username_+`.
+
+You will see a group of files all prefixed with `__note-` or `notes`. These files are responsible for rendering the notes for a specific user.
+
+To manually update each of these files to reflect the changes we made to the Prisma schema would take a long time, so instead you can download an updated version of this folder here:
 
 <a href="/code-monster/downloads/epic-news/$username_+.zip" class="group inline-flex border-2 gap-4 mt-8 px-8 py-4 text-xl rounded-full no-underline transition bg-blue-200 border-blue-400 hover:border-blue-600 hover:bg-blue-100 dark:bg-blue-600 dark:border-blue-400 dark:hover:border-blue-300 dark:hover:bg-blue-700">
 <Icon name="seti:folder" class="fill-blue-600 transition group-hover:scale-125 group-hover:fill-blue-800 dark:fill-blue-100 dark:group-hover:fill-blue-50" /> <span class="text-blue-600 transition group-hover:text-blue-800 dark:text-blue-100 dark:group-hover:text-blue-50">$username_+.zip</span>
@@ -135,6 +166,29 @@ In this tutorial, we updated the project structure to reflect the changes we mad
 - We updated the permissions in the `app/utils/permissions.ts` file to reflect the new entity name.
 - We replaced the `note` files in the `app/routes/users+/$username_+` folder with the updated `article` files.
 
+::::note[Assignment]
+
+## 📄 Assignment documentation
+
+We need to update your assignment to document this new feature. 🚀
+
+1. Explain the purpose of the `app/utils/permissions.ts` file.
+2. Describe the changes made to the `Entity` type definition in the `app/utils/permissions.ts` file.
+3. Explain the purpose of the `app/routes/users+/$username_+` folder.
+4. Describe the changes made to the `app/routes/users+/$username_+` folder.
+5. Explain how these changes made to the project structure reflect the changes made to the Prisma schema.
+
+:::tip
+
+### Useful links
+
+- [What is Role-Based Access Control (RBAC)?](https://auth0.com/intro-to-iam/what-is-role-based-access-control-rbac)
+- [Understanding role based access](https://auth.epicweb.dev/08)
+
+:::
+
+::::
+
 ## What's next?
 
-In the next tutorial, we will modify the seed data to include some categories and dummy articles that will be used to populate the database.
+In the next tutorial, we will modify the seed data to include some article categories and dummy articles that will be used to populate the database.

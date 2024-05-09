@@ -5,8 +5,6 @@ description: Configuring the app to create articles
 
 With our database schema and seed data in place, let's move on to creating articles.
 
-Let's create some articles for our users to read.
-
 ## The articles route
 
 If you aren't already, log in to the app as a user, or create a dummy user following the steps we covered [**previously**](/code-monster/guides/epic-news/account-creation).
@@ -19,11 +17,11 @@ Once on your user's profile page, let's quickly add a button link to the 'Articl
 
 Open the file at `app/routes/users+/$username.tsx`.
 
-Find the `ProfileRoute` component (around line 31), and add the following code to it, looking carefully at the code below to see where it should be placed.
+Find the `ProfileRoute` component (around line 31), and add the following code to it, looking carefully at the code below to see where it should be placed (just before the 'My Notes' button).
 
 Feel free to expand the collapsed code sections to see the full component:
 
-```diff lang="tsx" title="app/routes/users+/$username.tsx" showLineNumbers collapse={2-42, 61-73}
+```diff lang="tsx" title="app/routes/users+/$username.tsx" collapse={2-42, 61-73}
 export default function ProfileRoute() {
 	const data = useLoaderData<typeof loader>()
 	const user = data.user
@@ -104,9 +102,9 @@ Save your changes, and head back to the browser. You should see the new button l
 
 ![Profile with articles link](src/assets/webp/epic-news/profile-with-articles-link.webp)
 
-Click on this to navigate to the articles page.
-
 ### Creating a new article
+
+Click on this new button to navigate to the articles page.
 
 Once here, click the `+ New Article` button and fill in the form to create a new article:
 
@@ -212,7 +210,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 With this in place, we can now display the `category` name in the browser.
 
-Navigate down to the `ArticleRoute` component in the same file (around line 100), and add the JSX highlighted in green just below the `h2` element:
+Navigate down to the `ArticleRoute` component in the same file (around line 108), and add the JSX highlighted in green just below the `h2` element:
 
 ```diff lang="tsx" title="app/routes/users+/$username_+/articles.$articleId.tsx"
 export default function ArticleRoute() {
@@ -233,6 +231,8 @@ export default function ArticleRoute() {
 +					{data.article.category?.name ?? 'General News'}
 +				</p>
 +			</div>
+			<div className={`${displayBar ? 'pb-24' : 'pb-12'} overflow-y-auto`}>
+			// ... Code omitted for brevity ...
 ```
 
 With this in place, save your changes and you should now see the `category` name displayed on the article page:
@@ -246,6 +246,25 @@ Now that we can see the `category` name on the article page, let's add a `catego
 If a user clicks on an existing article they are the owner of (or have permissions to edit), they should be presented with an 'Edit' button. Clicking this button will take them to the article editor form, where they can update the article:
 
 ![Display editor form](src/assets/gif/display-editor-form.gif)
+
+:::note[Quick tip]
+
+If you want to give the form more room in your browser, you can adjust its minimum height inside the parent route file at `app/routes/users+/$username_+/articles.tsx` like so:
+
+```diff lang="tsx" title="app/routes/users+/$username_+/articles.tsx" ins="750px"
+export default function ArticlesRoute() {
+	const data = useLoaderData<typeof loader>()
+	const user = useOptionalUser()
+	const isOwner = user?.id === data.owner.id
+	const ownerDisplayName = data.owner.name ?? data.owner.username
+	const navLinkDefaultClassName =
+		'line-clamp-2 block rounded-l-full py-2 pl-8 pr-6 text-base lg:text-xl'
+	return (
+		<main className="container flex h-full min-h-[750px] px-0 pb-12 md:px-8">
+			// ... Code omitted for brevity ...
+```
+
+:::
 
 ## Modifying the article editor
 
@@ -533,7 +552,17 @@ export const ArticleEditorSchema = z.object({
 
 #### What is the `ArticleEditorSchema`?
 
-The `ArticleEditorSchema` is a Zod schema object that defines the constraints for the form fields in the article editor form.
+The `ArticleEditorSchema` is a [**Zod**](https://zod.dev/) schema object that defines the constraints for the form fields in the article editor form.
+
+#### What is Zod?
+
+<a href="https://zod.dev.">
+	<img src="https://zod.dev/logo.svg" alt="Zod schema validation library" width="192px" />
+</a>
+
+[**Zod**](https://zod.dev/) is a TypeScript-first schema declaration and validation library. It allows you to define the shape of your data and validate it against that shape.
+
+:::
 
 We are adding a new field to the schema called `categoryId`, which will hold the `id` of the selected category. This field is optional, as the user may not select a category.
 
@@ -547,20 +576,18 @@ categoryId: z
 
 The `min` and `max` methods are used to define the minimum and maximum lengths of the `categoryId` field. In this case, the `categoryId` field must be between 1 and 30 characters long.
 
-:::
-
 ### Update `ArticleEditor`
 
 Next, we need to update the props coming into the `ArticleEditor` component (still inside `app/routes/users+/$username_+/__article-editor.tsx`).
 
 We need to include to include a new `category` field to the `article`, and a new `categories` prop definition.
 
-These need adding around line 62:
+These lines of code need adding, starting from around line 68:
 
-```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx" ins=" | 'categoryId'"
+```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx" ins=" | 'categoryId'" showLineNumbers startLineNumber=66
 export function ArticleEditor({
 	article,
-	categories,
++	categories,
 }: {
 	article?: SerializeFrom<
 		Pick<Article, 'id' | 'title' | 'content'> & {
@@ -583,7 +610,7 @@ export function ArticleEditor({
 		},
 		defaultValue: {
 			...article,
-+			category: article?.category?.name ?? '',
++			categoryId: article?.category?.id ?? '',
 			images: article?.images ?? [{}],
 		},
 		shouldRevalidate: 'onBlur',
@@ -598,11 +625,11 @@ Nothing has changed on the frontend yet, so let's fix that now.
 
 ### Display 'Categories'
 
-Scroll down the `ArticleEditor` component further, and you will find the `TextAreaField` for the `content` field, around line 121.
+Scroll down the `ArticleEditor` component further, and you will find the `TextAreaField` for the `content` field, around line 125.
 
 Let's place our choices for the `category` field just below this:
 
-```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx" showLineNumbers collapse={2-12, 14-31, 42-59, 76-116, 118-130}
+```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx" showLineNumbers startLineNumber={66} collapse={2-12, 14-31, 42-59, 76-116, 118-130}
 export function ArticleEditor({
 	article,
 	categories,
@@ -779,7 +806,17 @@ As you can see, each input element has a `name` and a `value` attribute.
 <input type="text" name="title" value="My amazing article" />
 ```
 
-The `name` generates the keys of `FormData` object, and the `value` attribute generates the value of the respective key.
+The `name` attribute generates the keys of `FormData` object, and the `value` attribute generates the value of the respective key.
+
+```tsx mark='name="title"' mark='value="My amazing article"' mark="title:" mark="'My amazing article'"
+<input type="text" name="title" value="My amazing article" />
+
+/// Becomes...
+
+const formData = new FormData({
+	title: 'My amazing article',
+})
+```
 
 Our problem is that the `RadioGroup.Item` component from Radix UI does not automatically bind the selected value to the form submission in a way that traditional form elements do. This happens because `RadioGroup.Item` in Radix UI doesn't function as a native HTML form element like `<input type="radio">`. It doesn't automatically integrate with form submissions unless you handle it explicitly.
 
@@ -789,11 +826,11 @@ Let's do this now.
 
 :::
 
-Open the component file at `app/components/molecules/SelectorGroup.tsx` now, and take a look at the code.
+Open the component file at `app/components/molecules/SelectorGroup.tsx` and take a look at the code.
 
 Add the code shown below:
 
-```diff lang="tsx" title="app/components/molecules/SelectorGroup.tsx" showLineNumbers collapse={}
+```diff lang="tsx" title="app/components/molecules/SelectorGroup.tsx" showLineNumbers ins="initialValue ?? ''"
 import * as RadioGroup from '@radix-ui/react-radio-group'
 import { useState } from 'react'
 
@@ -880,11 +917,11 @@ Go back to the code in `app/routes/users+/$username_+/__article-editor.tsx`, and
 </div>
 ```
 
-Save your changes, and we can move on to the next step.
+Save your changes, and we can move on to the next step of handling the data once it is sent.
 
 ### Update `ArticleEditor.server.tsx`
 
-When data is sent from a Remix `Form` component, it is sent to the nearest server-side `action` function which handles the form submission.
+When data is submitted from a Remix `Form` component, it is sent to the nearest server-side `action` function which handles the form submission.
 
 The logic for our form submission is handled in the `app/routes/users+/$username_+/__article-editor.server.tsx` file.
 
@@ -892,9 +929,11 @@ Open this now and take a look inside.
 
 There is a lot going on!
 
-Luckily, we only need to make three minor changes to ensure we capture the new `categoryId` field from the form data:
+Luckily, we only need to make three minor changes towards the end of the file.
 
-```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.server.tsx" showLineNumbers collapse={}
+These will ensure we capture the new `categoryId` field from the form data:
+
+```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.server.tsx" showLineNumbers collapse={1-29, 34-96}
 import { parseWithZod } from '@conform-to/zod'
 import { createId as cuid } from '@paralleldrive/cuid2'
 import {
@@ -1074,6 +1113,10 @@ update: {
 },
 ```
 
+:::
+
+:::tip[Task]
+
 ## Generate new articles
 
 With these changes in place, you should now be able to create new articles with a `category` field.
@@ -1090,6 +1133,8 @@ Just make sure each article has:
 - Some lorum-ipsum placeholder content
 - A category (and some without)
 - At least one image (and some without)
+
+:::
 
 ## Summary
 

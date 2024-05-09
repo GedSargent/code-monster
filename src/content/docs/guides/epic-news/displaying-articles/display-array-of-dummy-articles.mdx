@@ -13,7 +13,6 @@ In this guide, we will:
 
 1. Create a reusable `ArticleCard` component from the code we have already written.
 2. Loop through the mock articles using JavaScript's `map` function and display them on the page.
-3. Load real articles from the database and display them on the page.
 
 ## Create a reusable `ArticleCard` component
 
@@ -31,15 +30,15 @@ In this case, the `image`, `title`, and `category` of the article will become pr
 
 ```tsx title="app/routes/news.$category.tsx" collapse={2-6} mark={13-38} showLineNumbers
 export default function NewsCategoryPage() {
-	const { category, mockArticles } = useLoaderData<typeof loader>()
+	const { categoryTitle, articles } = useLoaderData<typeof loader>()
 
-	console.log({ category, mockArticles })
+	console.log({ categoryTitle, articles })
 
-	const { image, title, category: articleCategory } = mockArticles[0]
+	const { image, title, category } = articles[0]
 
 	return (
 		<div className="container py-8 lg:py-16">
-			<h2 className="mb-16 text-h2">{category}</h2>
+			<h2 className="mb-16 text-h2">{categoryTitle}</h2>
 
 			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
 				<div>
@@ -53,17 +52,17 @@ export default function NewsCategoryPage() {
 						</div>
 					</div>
 					<div
-						className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
+						className={`flex h-40 flex-col justify-between bg-muted p-6 lg:h-44`}
 					>
 						<h3
-							className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
+							className={`line-clamp-2 text-2xl font-bold text-foreground`}
 						>
 							{title}
 						</h3>
 						<div className="flex items-center gap-3">
 							<img src={techIcon} alt={category} className="h-6 w-6" />
-							<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
-								{category}
+							<span className="text-sm text-muted-foreground">
+								{categoryTitle}
 							</span>
 						</div>
 					</div>
@@ -102,10 +101,10 @@ First, let's create the `ArticleCard` component together with an accompanying Ty
 interface ArticleCardProps {
 	image: string
 	title: string
-	category: string
+	categoryTitle: string
 }
 
-function ArticleCard({ image, title, category }: ArticleCardProps) {
+function ArticleCard({ image, title, categoryTitle }: ArticleCardProps) {
 	return (
 		<div>
 			<div className={`relative h-44 lg:h-52`}>
@@ -114,17 +113,17 @@ function ArticleCard({ image, title, category }: ArticleCardProps) {
 				</div>
 			</div>
 			<div
-				className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
+				className={`flex h-40 flex-col justify-between bg-muted p-6 lg:h-44`}
 			>
 				<h3
-					className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
+					className={`line-clamp-2 text-2xl font-bold text-foreground`}
 				>
 					{title}
 				</h3>
 				<div className="flex items-center gap-3">
-					<img src={techIcon} alt={category} className="h-6 w-6" />
-					<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
-						{category}
+					<img src={image} alt={categoryTitle} className="h-6 w-6" />
+					<span className="text-sm text-muted-foreground">
+						{categoryTitle}
 					</span>
 				</div>
 			</div>
@@ -133,21 +132,23 @@ function ArticleCard({ image, title, category }: ArticleCardProps) {
 }
 ```
 
-As you can see, all the code inside the `return` statement of the `ArticleCard` component is the same as the code we highlighted above in the `NewsCategoryPage` component. All that was needed was to cut and paste the code straight across.
+As you can see, all the code inside the `return` statement of the `ArticleCard` component is the same as the code we highlighted above in the `NewsCategoryPage` component.
+
+All that was needed was to cut and paste the code straight across, then swap out hardcoded values for the props that we are passing to the component.
 
 Next, we can replace the old code in the `NewsCategoryPage` component with the new `ArticleCard` component, and pass it the props that it requires:
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx" collapse={2-6}
 export default function NewsCategoryPage() {
-	const { category, mockArticles } = useLoaderData<typeof loader>()
+	const { categoryTitle, articles } = useLoaderData<typeof loader>()
 
-	console.log({ category, mockArticles })
+	console.log({ categoryTitle, articles })
 
-	const { image, title, category: articleCategory } = mockArticles[0]
+	const { image, title, category } = articles[0]
 
 	return (
 		<div className="container py-8 lg:py-16">
-			<h2 className="mb-16 text-h2">{category}</h2>
+			<h2 className="mb-16 text-h2">{categoryTitle}</h2>
 
 			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
 -				<div>
@@ -161,22 +162,22 @@ export default function NewsCategoryPage() {
 -						</div>
 -					</div>
 -					<div
--						className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
+-						className={`flex h-40 flex-col justify-between bg-muted p-6 lg:h-44`}
 -					>
 -						<h3
--							className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
+-							className={`line-clamp-2 text-2xl font-bold text-foreground`}
 -						>
 -							{title}
 -						</h3>
 -						<div className="flex items-center gap-3">
 -							<img src={techIcon} alt={category} className="h-6 w-6" />
--							<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
--								{category}
+-							<span className="text-sm text-muted-foreground">
+-								{categoryTitle}
 -							</span>
 -						</div>
 -					</div>
 -				</div>
-+				<ArticleCard title={title} category={articleCategory} image={image} />
++				<ArticleCard title={title} categoryTitle={categoryTitle} image={image} />
 			</div>
 		</div>
 	)
@@ -192,7 +193,7 @@ Not only is this code more readable (because having a component named `ArticleCa
 
 Now that we've got a reusable `ArticleCard` component, we can loop through all of the mock articles and display them on the page.
 
-To do this, we will use JavaScript's `map` function to loop through the `mockArticles` array and render an `ArticleCard` component for each article.
+To do this, we will use JavaScript's `map` function to loop through the `articles` array and render an `ArticleCard` component for each article.
 
 :::tip[Challenge]
 
@@ -200,13 +201,15 @@ To do this, we will use JavaScript's `map` function to loop through the `mockArt
 
 We looked at how to use the `map` function in a [**previous tutorial**](/code-monster/guides/prisma/using-map), so if you need a refresher, feel free to check it out.
 
-1. Inside the `NewsCategoryPage` component, replace the `ArticleCard` component with a `map` function that loops through the `mockArticles` array and renders an `ArticleCard` component for each article.
+1. Inside the `NewsCategoryPage` component, replace the `ArticleCard` component with a `map` function that loops through the `articles` array and renders an `ArticleCard` component for each article.
 2. Pass the `image`, `title`, and `category` of each article as props to the `ArticleCard` component.
 3. Use the `id` of each article as the `key` prop for the `ArticleCard` component inside the `map` function.
 
 Your final result on screen should look something like this:
 
 ![Display all mock articles](src/assets/png/epic-news/display-all-mock-articles.png)
+
+Don't worry that all the pictures are the same; remember that this is just a mock article with a placeholder image.
 
 Once you've got a solution, compare it with the one below:
 
@@ -247,25 +250,25 @@ function ArticleCard({ image, title, category }: ArticleCardProps) {
 }
 
 export default function NewsCategoryPage() {
-	const { category, mockArticles } = useLoaderData<typeof loader>()
+	const { categoryTitle, articles } = useLoaderData<typeof loader>()
 
--	console.log({ category, mockArticles })
+-	console.log({ categoryTitle, articles })
 -
--	const { image, title, category: articleCategory } = mockArticles[0]
+-	const { image, title, category } = articles[0]
 -
 	return (
 		<div className="container py-8 lg:py-16">
-			<h2 className="mb-16 text-h2">{category}</h2>
+			<h2 className="mb-16 text-h2">{categoryTitle}</h2>
 
 			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
--				<ArticleCard title={title} category={articleCategory} image={image} />
-+				{mockArticles.map(({ id, title, category: articleCategory, image }) => {
+-				<ArticleCard title={title} categoryTitle={categoryTitle} image={image} />
++				{articles.map(article => {
 +					return (
 +						<ArticleCard
-+							key={id}
-+							title={title}
-+							category={articleCategory}
-+							image={image}
++							key={article.id}
++							title={article.title}
++							categoryTitle={toTitleCase(article.category) || 'General News'}
++							image={article.image}
 +						/>
 +					)
 +				})}

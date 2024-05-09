@@ -20,7 +20,7 @@ Let's get started!
 
 ## Display information on screen
 
-Take a closer look at the **structure** of the mock articles we have created by expanding the first element of our `mockArticles` array in your browser console.
+Take a closer look at the **structure** of the mock articles we have created by expanding the first element of our `articles` array in your browser console.
 
 You should see something like this:
 
@@ -28,12 +28,12 @@ You should see something like this:
 
 ![Mock article structure](src/assets/png/epic-news/mock-article-structure.png)
 
-The first mock article, found at index `0` of the `mockArticles` array, has several properties that we can display on screen.
+The first mock article, found at index `0` of the `articles` array, has several properties that we can display on screen.
 
 For example, it has:
 
 - a `category` of `"technology"`
-- a `title` of `Article 1`
+- a `title` of `"Article 1"`
 - an `image` value of `"https://picsum.photos/800/600"`
 
 Let's capture this first mock article in a variable so that we can experiment with accessing the properties it contains.
@@ -42,7 +42,7 @@ Add the code below to the `NewsCategoryPage` component:
 
 :::caution
 
-Note that we have jumped into the `NewsCategoryPage` component in the code snippet below.
+Although we are still inside `app/routes/news.$category.tsx`, note that we have jumped into the `NewsCategoryPage` component in the code snippet below.
 
 As always, take extra care to ensure you are adding the code to the correct place in your file.
 
@@ -50,11 +50,11 @@ As always, take extra care to ensure you are adding the code to the correct plac
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx"
 export default function NewsCategoryPage() {
-	const { category, mockArticles } = useLoaderData<typeof loader>()
+	const { categoryTitle, articles } = useLoaderData<typeof loader>()
 
-	console.log({ category, mockArticles })
+	console.log({ categoryTitle, articles })
 
-+	const firstArticle = mockArticles[0]
++	const firstArticle = articles[0]
 
   // [... Code omitted for brevity ...]
 }
@@ -63,13 +63,13 @@ export default function NewsCategoryPage() {
 
 ### Capturing an item from an array
 
-Notice how we captured the first item from the `mockArticles` array with square brackets `[]` and the index `0`?
+Notice how we captured the first item from the `articles` array with square brackets `[]` and the index `0`?
 
 ```tsx
-const firstArticle = mockArticles[0]
+const firstArticle = articles[0]
 ```
 
-If we wanted to access the second item in the array, we would use `mockArticles[1]`, the third item would be `mockArticles[2]` and so on.
+If we wanted to access the second item in the array, we would use `articles[1]`, the third item would be `articles[2]` and so on.
 
 This is how you access an individual array item in JavaScript.
 
@@ -77,19 +77,21 @@ This is how you access an individual array item in JavaScript.
 
 ## Display the first article
 
-Finally, let's display the first article's `title`, `image` and `category` on the page:
+Finally, let's display the first article's `title`, `image` and `category` on the page.
+
+For now, place the code highlighted in green below just after the `<h2>` tag in the `NewsCategoryPage` component. We will style it later:
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx"
 export default function NewsCategoryPage() {
-	const { category, mockArticles } = useLoaderData<typeof loader>()
+	const { categoryTitle, articles } = useLoaderData<typeof loader>()
 
-	console.log({ category, mockArticles })
+	console.log({ categoryTitle, articles })
 
-	const firstArticle = mockArticles[0]
+	const firstArticle = articles[0]
 
   	return (
 		<div className="container py-8 lg:py-16">
-			<h2 className="mb-16 text-h2">{category}</h2>
+			<h2 className="mb-16 text-h2">{categoryTitle}</h2>
 
 +			<div>
 +				<img src={firstArticle.image} alt={firstArticle.title} />
@@ -102,21 +104,29 @@ export default function NewsCategoryPage() {
 
 ```
 
+Well, it doesn't look great, but at least we can see the first article's image, title and category displayed on the page:
+
+:::caution[Different images]
+
+Your own article image is likely different from that shown below.
+
+This is because we are using a dummy placeholder image that is generated at random from a site called [**Lorem Picsum**](https://picsum.photos/).
+
+If you refresh your page, you should see a different image each time!
+
+We will soon be swapping these placeholder images for real images from the database.
+
+:::
+
+![Displaying the first article](src/assets/webp/epic-news/first-article-unstyled.webp)
+
 Having to write out the `firstArticle` variable and then access its properties is a bit verbose. We can simplify this by using [**object destructuring**](https://vinodht.medium.com/javascript-object-destructing-cheat-sheet-66dedfdc412).
 
 :::tip[Challenge]
 
-### Simplify the code with object destructuring
+### Simplifying code: object destructuring
 
 1. Can you simplify the code by using [**object destructuring**](https://vinodht.medium.com/javascript-object-destructing-cheat-sheet-66dedfdc412) to extract the `title`, `image` and `category` properties from the `firstArticle` object?
-
-    :::note
-
-    **TIP**: When destructuring the `category` property, you will need to rename it to `articleCategory` to avoid a naming conflict with the `category` variable.
-
-    Check how to do this in the [**object destructuring**](https://vinodht.medium.com/javascript-object-destructing-cheat-sheet-66dedfdc412) cheat sheet (look for the heading "**Rename after destructing**").
-
-    :::
 
 2. After destructuring each property, replace all the `firstArticle` references with direct property names.
 
@@ -136,23 +146,23 @@ Try it out yourself, then check your solution against the one below.
 
 <MonsterReveal>
 
-```diff lang="tsx" title="app/routes/news.$category.tsx" ins="{image}" ins="{title}" ins="{articleCategory}"
+```diff lang="tsx" title="app/routes/news.$category.tsx" ins="{image}" ins="{title}" ins="{category}"
 export default function NewsCategoryPage() {
-	const { category, mockArticles } = useLoaderData<typeof loader>()
+	const { categoryTitle, articles } = useLoaderData<typeof loader>()
 
-	console.log({ category, mockArticles })
+	console.log({ categoryTitle, articles })
 
--	const firstArticle = mockArticles[0]
-+	const { image, title, category: articleCategory } = mockArticles[0]
+-	const firstArticle = articles[0]
++	const { image, title, category } = articles[0]
 
 	return (
 		<div className="container py-8 lg:py-16">
-			<h2 className="mb-16 text-h2">{category}</h2>
+			<h2 className="mb-16 text-h2">{categoryTitle}</h2>
 
 			<div>
 				<img src={image} alt={title} />
 				<h3>{title}</h3>
-				<span>{articleCategory}</span>
+				<span>{category}</span>
 			</div>
 		</div>
 	)
@@ -167,42 +177,40 @@ export default function NewsCategoryPage() {
 
 If you've followed the steps correctly, you should see the first article's image, title and category displayed on the page:
 
-:::caution[Different images]
-
-Your own article image is likely different from that shown below.
-
-This is because we are using a dummy placeholder image that is generated at random from a site called [**Lorem Picsum**](https://picsum.photos/).
-
-If you refresh your page, you should see a different image each time!
-
-We will soon be swapping these placeholder images for real images from the database.
-
-:::
-
 ![Displaying the first article](src/assets/png/epic-news/displaying-first-article.png)
 
 Although this does the job, it doesn't look all that great!
 
 Let's wrap the article in a parent `div` that applies the `grid` class to organise its children. This will allow us to style the article more effectively.
 
+:::caution[Using your existing code]
+
+If you completed the [**previous challenge**](/code-monster/guides/epic-news/routing/use-loader-data#-challenge) a few sections back, you may already have a `grid` layout in place.
+
+If so, you can place the article card JSX code into the existing `grid` layout and adjust the steps accordingly.
+
+Otherwise, if you'd prefer to just follow the steps below, that's fine too!
+
+:::
+
 ```diff lang="tsx" title="app/routes/news.$category.tsx"
 export default function NewsCategoryPage() {
-	const { category, mockArticles } = useLoaderData<typeof loader>()
+	const { categoryTitle, articles } = useLoaderData<typeof loader>()
 
-	console.log({ category, mockArticles })
+	console.log({ categoryTitle, articles })
 
-	const { image, title, category: articleCategory } = mockArticles[0]
+	const { image, title, category } = articles[0]
 
 	return (
 		<div className="container py-8 lg:py-16">
-			<h2 className="mb-16 text-h2">{category}</h2>
+			<h2 className="mb-16 text-h2">{categoryTitle}</h2>
 
 +			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
 				<div>
 					<img src={image} alt={title} />
 					<h3>{title}</h3>
 
-					<span>{articleCategory}</span>
+					<span>{category}</span>
 				</div>
 +			</div>
 		</div>
@@ -229,6 +237,11 @@ Using Tailwind's utility classes, see if you can recreate the card layout shown 
 		- The background colour, which is `bg-card dark:bg-dark-card`.
 		- The text colour of the heading, which is `text-foreground dark:text-dark-foreground`.
 		- The text colour of the category label, which is `text-muted-foreground dark:text-dark-muted-foreground`.
+		- You'll notice there is an icon next to the category label. This is a custom icon that you can find in OneNote under the **🧑🏽‍💻 - Components and props** lesson resources. It is part of a collection of icons you can download in a zip file.
+
+			Alternatively, the React-icons library is pre-installed in the project.
+
+			You can explore how to use React-icons here: [**React-icons**](https://react-icons.github.io/react-icons/).
 
 ![Styled article card](src/assets/png/epic-news/styled-article-card.png)
 
@@ -238,15 +251,15 @@ Please note that your own solution will likely look different from the one shown
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={2-6}
 export default function NewsCategoryPage() {
-	const { category, mockArticles } = useLoaderData<typeof loader>()
+	const { categoryTitle, articles } = useLoaderData<typeof loader>()
 
-	console.log({ category, mockArticles })
+	console.log({ categoryTitle, articles })
 
-	const { image, title, category: articleCategory } = mockArticles[0]
+	const { image, title, category } = articles[0]
 
 	return (
 		<div className="container py-8 lg:py-16">
-			<h2 className="mb-16 text-h2">{category}</h2>
+			<h2 className="mb-16 text-h2">{categoryTitle}</h2>
 
 			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
 +				<div>
@@ -260,16 +273,16 @@ export default function NewsCategoryPage() {
 +						</div>
 +					</div>
 +					<div
-+						className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
++						className={`flex h-40 flex-col justify-between bg-muted p-6 lg:h-44`}
 +					>
 +						<h3
-+							className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
++							className={`line-clamp-2 text-2xl font-bold text-foreground`}
 +						>
 +							{title}
 +						</h3>
 +						<div className="flex items-center gap-3">
 +							<img src={techIcon} alt={category} className="h-6 w-6" />
-+							<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
++							<span className="text-sm text-muted-foreground">
 +								{category}
 +							</span>
 +						</div>
@@ -294,4 +307,4 @@ In this lesson, we learned how to:
 - Use object destructuring to simplify our code.
 - Style a dummy article card ready for display on the page.
 
-In the next lesson, we will learn how to create a reusable custom component from our styled article card, loop through an array of articles to display them all, and finally load real articles from the database and display them on the page.
+In the next lesson, we will learn how to create a reusable custom component from our styled article card, and loop through an array of articles to display them all.

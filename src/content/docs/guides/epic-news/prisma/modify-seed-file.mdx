@@ -9,9 +9,10 @@ import MonsterReveal from "src/components/MonsterReveal.astro";
 
 Now that we have [**updated the Prisma schema**](/code-monster/guides/epic-news/prisma/schema-updates) to include `Category` and `Article` models, we need to update the seed data to include some categories that will be used to populate the database.
 
-This just involve two steps:
+This just involve three steps:
 
 1. Updating the `seed.ts` file to include some categories.
+2. Ensuring 'articles' are included in the entities that users can create, read, update and delete.
 2. Running the seed script to populate the database with the new data.
 
 🚀 **Let's get started!** 🚀
@@ -52,6 +53,36 @@ Add the code below just after the `console.timeEnd('👑 Created roles...')` sta
 ```
 
 In this code snippet, we are creating three categories: `Tech`, `Games`, and `Artificial Intelligence`.
+
+### Add articles to permitted entities
+
+Towards the top of the `seed` function is an array called `entities`, around line 23.
+
+This array contains the entities that users can create, read, update, and delete. Currently, it only contains the `User` and `Note` entities:
+
+```ts title="prisma/seed.ts" mark={10}
+async function seed() {
+	console.log('🌱 Seeding...')
+	console.time(`🌱 Database has been seeded`)
+
+	console.time('🧹 Cleaned up the database...')
+	await cleanupDb(prisma)
+	console.timeEnd('🧹 Cleaned up the database...')
+
+	console.time('🔑 Created permissions...')
+	const entities = ['user', 'note']
+	const actions = ['create', 'read', 'update', 'delete']
+	const accesses = ['own', 'any'] as const
+
+  // ... Code omitted for brevity ...
+}
+```
+
+Update this array to include the `Article` entity:
+
+```diff title="prisma/seed.ts" lang="ts" showlineNumbers startLineNumber=23 ins=", 'article'"
+  const entities = ['user', 'note', 'article']
+```
 
 ## Run the seed script
 

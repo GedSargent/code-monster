@@ -238,6 +238,36 @@ export default defineConfig({
                 },
               ]
             },
+            {
+              label: "🖥️ Displaying Articles",
+              collapsed: true,
+              items: [
+                {
+                  label: '🖥️ Creating articles',
+                  link: 'guides/epic-news/displaying-articles/creating-articles'
+                },
+                {
+                  label: '🖥️ Loading Dummy Articles',
+                  link: 'guides/epic-news/displaying-articles/loading-dummy-articles'
+                },
+                {
+                  label: '🖥️ Style Dummy Articles',
+                  link: 'guides/epic-news/displaying-articles/style-article-card'
+                },
+                {
+                  label: '🖥️ Display an array of dummy articles',
+                  link: 'guides/epic-news/displaying-articles/display-array-of-dummy-articles'
+                },
+                {
+                  label: '🖥️ Load and display all real articles',
+                  link: 'guides/epic-news/displaying-articles/load-and-display-all-real-articles'
+                },
+                {
+                  label: '🖥️ Filter articles by category',
+                  link: 'guides/epic-news/displaying-articles/filter-articles-by-category'
+                },
+              ]
+            }
           ],
         },
         {

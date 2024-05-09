@@ -1080,14 +1080,16 @@ With these changes in place, you should now be able to create new articles with 
 
 Navigate to the 'Articles' page, and click the `+ New Article` button to start creating some new articles.
 
-Don't worry about the content of each article for now, just paste in some lorum ipsum placeholder text from a website like [Lorum Ipsum](https://www.lipsum.com/).
+Aim for 10-15 new articles, each with different categories, and some with no category at all.
+
+Don't worry about the content of each article for now, just paste in some *lorum ipsum* placeholder text from a website like [Lorum Ipsum](https://www.lipsum.com/).
 
 Just make sure each article has:
 
 - A title
 - Some lorum-ipsum placeholder content
-- A category
-- At least one image
+- A category (and some without)
+- At least one image (and some without)
 
 ## Summary
 
@@ -1102,7 +1104,27 @@ In this tutorial, we have:
 - Updated the `ArticleEditor.server.tsx` file to capture the new `categoryId` field
 - Generated new articles with a `category` field
 
-With these changes in place, you should now be able to create new articles with a `category` field.
+::::note[Assignment]
+
+## 📄 Assignment documentation
+
+We need to update your assignment to document this new feature. 🚀
+
+1. How did you update the `loader` functions for view, edit and new article pages?
+2. How did you load `categories` in the edit and new article `loader` functions?
+3. How did you update the `SelectorGroup` component so that the correct `categoryId` was submitted with the form data? What new props did you add?
+4. What is an `action` function in Remix?
+5. What did you add to the `action` function to capture the new `categoryId` field from the form data?
+
+:::tip
+
+### Useful links
+
+- [Remix `action` functions](https://remix.run/docs/en/main/route/action)
+- [Radix UI `RadioGroup.Item` component](https://radix-ui.com/docs/primitives/components/radio-group)
+- [FormData](https://javascript.info/formdata)
+
+::::
 
 ## What's next?
 

@@ -267,6 +267,24 @@ export default defineConfig({
                   link: 'guides/epic-news/displaying-articles/filter-articles-by-category'
                 },
               ]
+            },
+            {
+              label: "📝 Single article page",
+              collapsed: true,
+              items: [
+                {
+                  label: '📝 Create a single article page',
+                  link: 'guides/epic-news/single-article-page/create-single-article-page'
+                },
+                // {
+                //   label: '📝 Fetch and display article data',
+                //   link: 'guides/epic-news/single-article-page/fetch-article-data'
+                // },
+                // {
+                //   label: '📝 Style the article page',
+                //   link: 'guides/epic-news/single-article-page/style-article-page'
+                // },
+              ]
             }
           ],
         },

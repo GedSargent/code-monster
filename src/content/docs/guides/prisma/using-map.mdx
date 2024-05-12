@@ -54,7 +54,7 @@ The first thing to understand is that React will automatically render any conten
 
 We can see this if we replace the main page title with an array of strings:
 
-```diff lang="tsx" title="src/routes/articles.tsx"
+```diff lang="tsx" title="app/routes/articles.tsx"
 export default function ArticlesRoute() {
 	const { articles } = useLoaderData<typeof loader>()
 
@@ -85,7 +85,7 @@ If you check the browser, you will see that the page title is now "MyBrilliantAr
 
 If we take this a step further, what do you think will happen if we replace the plain strings inside this array with full React components?
 
-```diff lang="tsx" title="src/routes/articles.tsx"
+```diff lang="tsx" title="app/routes/articles.tsx"
 export default function ArticlesRoute() {
 	const { articles } = useLoaderData<typeof loader>()
 
@@ -158,7 +158,7 @@ This means that we can use the `map` function to loop through an array of object
 
 Let's see how we can use this to display a list of articles.
 
-```diff lang="tsx" title="src/routes/articles.tsx"
+```diff lang="tsx" title="app/routes/articles.tsx"
 export default function ArticlesRoute() {
 	const { articles } = useLoaderData<typeof loader>()
 

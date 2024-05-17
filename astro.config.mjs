@@ -276,14 +276,18 @@ export default defineConfig({
                   label: '📝 Create a single article page',
                   link: 'guides/epic-news/single-article-page/create-single-article-page'
                 },
-                // {
-                //   label: '📝 Fetch and display article data',
-                //   link: 'guides/epic-news/single-article-page/fetch-article-data'
-                // },
-                // {
-                //   label: '📝 Style the article page',
-                //   link: 'guides/epic-news/single-article-page/style-article-page'
-                // },
+                {
+                  label: '📝 Link from news index to single article page',
+                  link: 'guides/epic-news/single-article-page/link-to-single-article-page'
+                },
+                {
+                  label: '📝 Fetch and display article data',
+                  link: 'guides/epic-news/single-article-page/fetch-article-data'
+                },
+                {
+                  label: '📝 Style the article page',
+                  link: 'guides/epic-news/single-article-page/style-article-page'
+                },
               ]
             }
           ],

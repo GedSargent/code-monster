@@ -1,0 +1,173 @@
+---
+title: Fetch article data
+description: Fetch article data in the single article page
+---
+
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+In this guide, you will fetch and display article data in the single article page.
+
+::::tip[Challenge]
+
+## Fetch article data
+
+Using your knowledge from our previous lesson on how to [**load and display articles**](/code-monster/guides/epic-news/displaying-articles/load-and-display-all-real-articles) for the news index page, can you fetch and display the article data for the single article page?
+
+Your Prisma query should fetch a single article based on the `articleId` parameter from the URL.
+
+It should `select` the following fields:
+
+- `id`
+- `title`
+- `content`
+- `category` (`name` only)
+- `owner` (`name` only`)
+- `images` (`id` only)
+
+For the time being, just display the article title on the screen. We will look at displaying the article content in the next tutorial.
+
+![Single article title only](src/assets/webp/epic-news/single-article-title-only.webp)
+
+#### Tips
+
+- In the news index page, we used Prisma's `findMany()` function. However, in this case you will need to research and find out how to use the [**`findUnique()`**](https://www.prisma.io/docs/orm/reference/prisma-client-reference#findunique) function to fetch a single article.
+
+- You will need to use the `articleId` parameter from the URL to fetch the article data.
+
+- What will you show on the screen if the article is not found? How will you handle this in the code?
+
+### Solution
+
+<MonsterReveal title="1. Create Prisma Query">
+
+#### 1. Create Prisma query
+
+First, let's create the query to fetch the single article data.
+
+I could, of course, write this straight into the `loader` function. However, because I started a [**dedicated file for server-side queries previously**](/code-monster/guides/epic-news/displaying-articles/filter-articles-by-category#extra-credit-1---all-articles-page), I will add the function there to keep my code organised.
+
+Open the file at `models/article.server.ts` (or create this file if you haven't already) and add the following code:
+
+```diff lang="tsx" title="app/server/getArticle.ts"
+import { prisma } from '~/utils/db.server.js'
+
++export async function getSingleArticle(articleId: string) {
++	return await prisma.article.findUnique({
++		where: { id: articleId },
++		select: {
++			id: true,
++			title: true,
++			content: true,
++			category: { select: { name: true } },
++			owner: { select: { name: true } },
++			images: { select: { id: true } },
++		},
++	})
++}
+```
+
+</MonsterReveal>
+
+<MonsterReveal title="2. Update `article.$articleId.tsx`">
+
+#### 2. Update `article.$articleId.tsx`
+
+```diff lang="tsx" title="app/routes/article.$articleId.tsx"
++import { invariant } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
++import { useLoaderData } from '@remix-run/react'
++import { getSingleArticle } from '~/models/article.server.js'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { articleId } = params
++	invariant(typeof articleId === 'string', 'No article ID provided')
++
++	const article = await getSingleArticle(articleId)
++
++	return json({ article })
+}
+
++const ArticleNotFound = () => {
++	return (
++		<div className="container flex h-full flex-1 flex-col items-center justify-center">
++			<h2 className="pb-8 text-center text-h2">No article found 🤔</h2>
++			<p className="text-center text-xl">
++				Please check the article ID in your browser and try again.
++			</p>
++		</div>
++	)
++}
+
+export default function ArticlePage() {
++	const { article } = useLoaderData<typeof loader>()
+
++	return article ? (
++		<div className="container py-16">
++			<h2 className="pb-8 text-h2">{article.title}</h2>
++		</div>
++	) : (
++		<ArticleNotFound />
++	)
+}
+```
+
+:::note[Ternary operator]
+
+The only new(-ish) feature of this code is the [**ternary operator**](https://www.programiz.com/javascript/ternary-operator) in the final `return` statement.
+
+We've used ternary operators [**before**](/code-monster/guides/epic-news/custom-components/hero-call-to-action#3--custom-background-colour), but not in this way.
+
+Here, we're checking if the entire `article` is truthy (i.e. is it an actual object or is it `null`?).
+
+If it is, we render the article title. If it's not, we render the `ArticleNotFound` component.
+
+```tsx mark={4-10}
+export default function ArticlePage() {
+	const { article } = useLoaderData<typeof loader>()
+
+	return article ? (
+		<div className="container py-16">
+			<h2 className="pb-8 text-h2">{article.title}</h2>
+		</div>
+	) : (
+		<ArticleNotFound />
+	)
+}
+```
+
+:::
+
+</MonsterReveal>
+
+::::
+
+## Summary
+
+In this tutorial, we have:
+
+- Created a Prisma query to fetch a single article.
+- Updated the single article page to fetch and display the article data.
+- Added a simple error message if the article is not found.
+
+::::note[Assignment]
+
+## 📄 Assignment documentation
+
+We need to update your assignment to document this new feature. 🚀
+
+1. How did you fetch the article data in the single article page?
+2. What did you show on the screen if the article was not found? How did you handle this in the code?
+
+:::tip
+
+### Useful links
+
+- [Remix `loader` functions](https://remix.run/docs/en/main/discussion/data-flow#route-loader)
+- [Remix `useLoaderData` hook](https://remix.run/docs/en/main/hooks/use-loader-data)
+- [JavaScript ternary operator](https://www.programiz.com/javascript/ternary-operator)
+
+::::
+
+## What's next?
+
+In the next guide, we'll [**display and style the article content**](/code-monster/guides/epic-news/single-article-page/style-article-page) on the single article page.

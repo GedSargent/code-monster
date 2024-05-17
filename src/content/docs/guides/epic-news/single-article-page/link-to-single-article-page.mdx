@@ -1,0 +1,86 @@
+---
+title: Link to single article page
+description: Learn how to link to a single article page in your project.
+---
+
+import MonsterReveal from 'src/components/MonsterReveal.astro'
+
+Now that we have our single article page built, we need a way to link to it from the individual news cards that we display on the news index page.
+
+:::tip[Challenge]
+
+## Link to the single article page
+
+For every card on the news index page, we want to link to the single article page when the user clicks on the card.
+
+- You should use the `Link` component from `'@remix-run/react'` to create a link to the single article page.
+- The link should incorporate the article ID into its URL (use a [**template literal string**](https://stackoverflow.com/questions/30372538/how-can-i-interpolate-jsx-with-an-expression-in-a-string) for this).
+- Can you set the link to [**`prefetch` the page data**](https://remix.run/docs/en/main/components/link#prefetch) when the user hovers over it?
+
+When you are ready, check out one possible solution below and compare it with your own.
+
+## Solution
+
+<MonsterReveal title="Link to single article page">
+
+### Link to single article page
+
+To link to the single article page, we need to wrap the `ArticleCard` (or your own code's equivalent) in a `Link` component from `'@remix-run/react'`.
+
+We can then use a template literal string to incorporate the article ID into the URL:
+
+```diff lang="tsx" title="app/components/organisms/NewsIndexGrid.tsx"
++import { Link } from '@remix-run/react'
+
+// ...Code omitted for brevity...
+
+export default function NewsIndexGrid({
+	articles,
+	categoryTitle,
+}: NewsIndexGridProps) {
+	return (
+		<>
+			<div className="py-8 lg:py-16">
+				<h2 className="mb-16 text-h2">{categoryTitle}</h2>
+
+				<div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 lg:grid-rows-4">
+					{articles.map((article, index) => {
+						const level =
+							index === 0 ? 'primary' : index < 5 ? 'secondary' : 'tertiary'
+
+						const formattedTitle = toTitleCase(article.category?.name || '')
+						const imageSrc = article.images.length
+							? getArticleImgSrc(article.images[0].id)
+							: siteLogo
+
+						return (
++							<Link
++								to={`/article/${article.id}`}
++								key={article.id}
++								className={`group col-span-1 ${level === 'secondary' ? 'sm:row-span-2' : ''} ${level === 'primary' ? 'sm:col-span-2 sm:row-span-4' : ''}`}
++								prefetch="intent"
++							>
+								<ArticleCard
+									title={article.title}
+									categoryTitle={
+										article.category && isCategoryTitle(formattedTitle)
+											? formattedTitle
+											: 'General News'
+									}
+									image={imageSrc}
+									level={level}
+								/>
++							</Link>
+						)
+					})}
+				</div>
+			</div>
+		</>
+	)
+}
+
+By adding the `prefetch="intent"` attribute to the `Link` component, we can prefetch the single article page data when the user hovers over the link. This then speeds up the page load when the user clicks on the link.
+
+```
+
+</MonsterReveal>

@@ -1,10 +1,11 @@
 ---
-import type { SandpackFiles, SandpackSetup } from '@codesandbox/sandpack-react/types';
+import type { SandpackFiles, SandpackProviderProps, SandpackSetup } from '@codesandbox/sandpack-react/types';
 import CodePlayground from './react/CodePlayground';
 
 interface Props {
   localStorageId: string;
   customSetup?: SandpackSetup;
+  customOptions?: Pick<SandpackProviderProps, 'options'>
   template?:
     | "react-ts"
     | "react"
@@ -21,16 +22,19 @@ interface Props {
   activeFile?: string;
   showTabs?: boolean;
   showConsole?: boolean;
+  showPreview?: boolean;
 }
 
 const {
   customSetup,
+  customOptions,
   localStorageId,
   title = "Code Playground",
   template = "react-ts",
   files,
   showConsole = false,
   showTabs = true,
+  showPreview = true,
 } = Astro.props
 ---
 
@@ -39,8 +43,10 @@ const {
   localStorageId={localStorageId}
   files={files}
   customSetup={customSetup}
+  customOptions={customOptions}
   template={template}
   title={title}
   showConsole={showConsole}
   showTabs={showTabs}
+  showPreview={showPreview}
 />

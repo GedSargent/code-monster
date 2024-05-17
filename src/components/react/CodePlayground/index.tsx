@@ -5,6 +5,7 @@ import {
   SandpackProvider,
   SandpackThemeProvider,
   type SandpackFiles,
+  type SandpackProviderProps,
   type SandpackSetup
 } from "@codesandbox/sandpack-react";
 import { useRef, useState } from "react";
@@ -17,6 +18,7 @@ import customThemeDark from "./customThemeDark";
 interface CodeSandboxProps {
   localStorageId: string;
   customSetup?: SandpackSetup;
+  customOptions?: Pick<SandpackProviderProps, 'options'>
   template?:
     | "react-ts"
     | "react"
@@ -33,19 +35,26 @@ interface CodeSandboxProps {
   activeFile?: string;
   showTabs?: boolean;
   showConsole?: boolean;
+  showPreview?: boolean;
 }
 
 const CodePlayground = ({
   customSetup,
+  customOptions,
   localStorageId,
   title = "Code Playground",
   template = "react-ts",
   files,
   showConsole = false,
   showTabs = true,
+  showPreview = true,
 }: CodeSandboxProps) => {
   const codeMirrorInstance = useRef<any>(undefined);
   const wrapperRef = useRef<any>(null);
+  const combinedOptions = {
+    externalResources: ["https://cdn.tailwindcss.com"],
+    ...customOptions
+  }
 
   const [isFullScreen, setIsFullScreen] = useState(false);
 
@@ -59,9 +68,7 @@ const CodePlayground = ({
           ref={wrapperRef}
         >
           <SandpackProvider
-            options={{
-              externalResources: ["https://cdn.tailwindcss.com"],
-            }}
+            options={combinedOptions}
             template={template}
             files={files}
             customSetup={customSetup}
@@ -84,13 +91,15 @@ const CodePlayground = ({
                       height={panelHeight}
                     />
                   </Panel>
-                <PanelResizeHandle className="w-2 border-x border-neutral-700 transition duration-500 hover:bg-neutral-700 hover:border-neutral-600" />
-                <Panel className={`w-full`}>
-                  <SandpackPreview
-                    showOpenInCodeSandbox={false}
-                    style={{height: panelHeight}}
-                  />
-                </Panel>
+                  {showPreview && (<>
+                    <PanelResizeHandle className="w-2 border-x border-neutral-700 transition duration-500 hover:bg-neutral-700 hover:border-neutral-600" />
+                    <Panel className={`w-full`}>
+                      <SandpackPreview
+                        showOpenInCodeSandbox={false}
+                        style={{height: panelHeight}}
+                      />
+                    </Panel>
+                  </>)}
                 </PanelGroup>
                 {showConsole && (
                   <div className="w-full">

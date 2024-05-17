@@ -1,11 +1,11 @@
 import React from "react";
 
-interface MonsterRevealProps {
+interface RevealProps {
   children: React.ReactNode;
   title: string;
 }
 
-export default function MonsterReveal({ children, title }: MonsterRevealProps) {
+export default function Reveal({ children, title }: RevealProps) {
   const [isBlurred, setIsBlurred] = React.useState(true);
 
   const handleClickInside = () => {
@@ -19,7 +19,7 @@ export default function MonsterReveal({ children, title }: MonsterRevealProps) {
 			</div>
 
 			<div className={`absolute inset-0 !mt-0 ${isBlurred ? 'block' : 'hidden'}`}>
-				<div className={`!mt-0 sticky top-20 text-shadow text-shadow-black/20 leading-[1.2] text-shadow-y-3 ${isBlurred ? 'text-shadow-blur-2 select-none' : 'text-shadow-transparent select-auto'} px-8 py-16 text-center text-5xl font-black text-gray-400 transition duration-500 md:text-6xl md:leading-[1.3] dark:text-gray-50 dark:text-shadow-black/70`}>
+				<div className={`!mt-0 sticky top-20 text-shadow text-shadow-black/20 leading-[1.2] text-shadow-y-3 ${isBlurred ? 'text-shadow-blur-2 select-none' : 'text-shadow-transparent select-auto'} px-8 py-16 text-5xl font-black text-gray-400 transition duration-500 md:text-6xl md:leading-[1.3] dark:text-gray-50 dark:text-shadow-black/70`}>
 					{title}
 				</div>
 			</div>

@@ -1,0 +1,462 @@
+---
+title: Create an admin page
+description: Cretae an admin review page that allows admins to approve or reject articles.
+---
+
+import MonsterReveal from 'src/components/MonsterReveal.astro'
+
+Our app is almost complete. We can write articles, view, edit, and delete them.
+
+However, we need to add an admin page that allows admins to publish articles when they are ready, and make them live on the site.
+
+:::tip[Challenge]
+
+## Set up the admin page
+
+Using the skills you've learned so far, create an admin page that allows users to review and publish articles that are ready to go live on the site.
+
+For the time being, we will make this page available to everyone. We can grant access to `admin` users only in the next guide.
+
+### Requirements
+
+- Create a new route `/admin-review` that displays a list of articles that are still in `draft` status.
+- What will you display to the user if there are no articles to review? How will you handle this?
+- When a user clicks on an article, they should be able to view the article in full.
+- Add a 'Publish' button to each article that changes the status to `published`.
+- Update the code in the `/news` routes to only display articles that are `published`.
+- Update the code in the `/article/$articleId` to display a new 'Published on' date if the article is published.
+- Show a message to the user if they try to access an article that is not published.
+
+#### EXTRA CREDIT 🚀 (optional)
+
+Rather than simply display a message, if a user tries to access the `/article/$articleId` route for an article that is not published, redirect them to the `/news` page and display a toast notification informing them that the article is being reviewed.
+
+### Hints
+
+- Look at the layout of the `/users/$username/articles` page for ideas on how to lay this page out
+- Think carefully how you will make the 'Publish' button work. Rememeber there are two fields to update: `isPublished` (boolean) and `publishedAt` (date).
+- Once this functionality is in place, you should update the `/news` parent and child routes to only display articles that are published.
+- You will need to update the `/article/$articleId` route to display the `publishedAt` field in a human-friendly format. You can find an example of date formatting in the `/users/$username/articles` page.
+
+## Solution
+
+<MonsterReveal title="1. Create `/admin-review` route">
+
+### 1. Create the `/admin-review` route
+
+The first thing I will need is a new parent route that will display a list of all articles.
+
+This is straightforward. In `/admin-review`, I'll just set up a `loader` function that returns the `id`, `title` and `isPublished` values for each article:
+
+```tsx title="app/routes/admin-review.tsx"
+import { json } from '@remix-run/node'
+import { prisma } from '~/utils/db.server.ts'
+
+export async function loader() {
+	const allArticles = await prisma.article.findMany({
+		select: { id: true, title: true, isPublished: true },
+	})
+
+	return json({ allArticles })
+}
+```
+
+I'll then use the same layout as the `/users/$username/articles` page to display the list of articles.
+
+The only thing I've added (highlighted in white below) is an indication of whether the article is published or not.
+
+```diff lang="tsx" title="app/routes/admin-review.tsx" showLineNumbers
+import { json } from '@remix-run/node'
++import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
+import { prisma } from '~/utils/db.server.ts'
+import { cn } from '~/utils/misc.tsx'
+
+export async function loader() {
+	const allArticles = await prisma.article.findMany({
+		select: { id: true, title: true, isPublished: true },
+	})
+
+	return json({ allArticles })
+}
+
++interface StatusPillProps {
++	isPublished: boolean
++}
++export function StatusPill({ isPublished }: StatusPillProps) {
++	return (
++		<div
++			className={`rounded-full px-2 py-1 text-xs font-semibold ${isPublished ? 'bg-green-700 text-white' : 'bg-red-700 text-white'}`}
++		>
++			{isPublished ? 'P' : 'D'}
++		</div>
++	)
++}
++
++export default function ArticlesRoute() {
++	const { allArticles } = useLoaderData<typeof loader>()
++
++	const navLinkDefaultClassName =
++		'line-clamp-2 block rounded-l-full py-2 pl-8 pr-6 text-base lg:text-xl'
++	return (
++		<main className="container flex h-full min-h-[750px] px-0 py-12 md:px-8">
++			<div className="grid w-full grid-cols-4 bg-muted pl-2 md:container md:rounded-3xl md:pr-0">
++				<div className="relative col-span-1">
++					<div className="absolute inset-0 flex flex-col">
++						<ul className="overflow-y-auto overflow-x-hidden py-12">
++							{allArticles.map(article => (
++								<li
++									key={article.id}
++									className="flex items-center gap-2 p-1 pr-0"
++								>
++									<StatusPill isPublished={article.isPublished} />
++									<NavLink
++										to={article.id}
++										preventScrollReset
++										prefetch="intent"
++										className={({ isActive }) =>
++											cn(
++												navLinkDefaultClassName,
++												isActive && 'w-full bg-accent',
++											)
++										}
++									>
++										{article.title}
++									</NavLink>
++								</li>
++							))}
++						</ul>
++					</div>
++				</div>
++				<div className="relative col-span-3 bg-accent md:rounded-r-3xl">
++					<Outlet />
++				</div>
++			</div>
++		</main>
++	)
++}
+```
+
+At first, of course, all the articles will show a red 'D' to signify 'Draft'.
+
+I can always customise this later if I want.
+
+I'll also create a child index route that displays a message asking the user to select an article to review:
+
+```tsx title="app/routes/admin-review/index.tsx"
+	export default function ArticlesIndexRoute() {
+		return (
+			<div className="container pt-12">
+				<p className="text-body-md">Select an article</p>
+			</div>
+		)
+	}
+```
+
+When finished, my `/admin-review` route looks like this:
+
+![Article review styled](src/assets/webp/epic-news/admin-review-styled.webp)
+
+</MonsterReveal>
+
+This looks good, but of course if I click on any of the articles titles, I'll get a 404 error because I haven't created the child route yet.
+
+Let fix that now.
+
+<MonsterReveal title="2. Server-side code">
+
+### 2. Server-side code
+
+The first thing we will do is get the backend logic set up.
+
+(I could place all of the code into a single route file, but I prefer to break it up into smaller files for easier maintenance.)
+
+Remembering that adding a `.server` suffix to the file name will make it a server route, I'll create a new child route called `/__admin-review.$articleId.server.tsx`:
+
+```tsx title="app/routes/__admin-review.$articleId.server.tsx"
+import { prisma } from '#app/utils/db.server.js'
+import { redirectWithToast } from '#app/utils/toast.server.js'
+import { parseWithZod } from '@conform-to/zod'
+import { invariantResponse } from '@epic-web/invariant'
+import { LoaderFunctionArgs, ActionFunctionArgs } from '@remix-run/node'
+import { json } from '@remix-run/react'
+import { formatDistanceToNow } from 'date-fns'
+import { z } from 'zod'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+	invariantResponse(params.articleId, 'No article ID provided', { status: 404 })
+
+	const article = await prisma.article.findUnique({
+		where: { id: params.articleId },
+		select: {
+			id: true,
+			title: true,
+			content: true,
+			ownerId: true,
+			updatedAt: true,
+			publishedAt: true,
+			isPublished: true,
+			category: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
+			images: {
+				select: {
+					id: true,
+					altText: true,
+				},
+			},
+		},
+	})
+
+	invariantResponse(article, 'Not found', { status: 404 })
+
+	const updatedAtDate = new Date(article.updatedAt)
+	const publishedAtDate = article.publishedAt
+		? new Date(article.publishedAt)
+		: null
+	const timeAgoUpdated = formatDistanceToNow(updatedAtDate)
+	const timeAgoPublished = publishedAtDate
+		? formatDistanceToNow(publishedAtDate)
+		: null
+
+	return json({
+		article,
+		timeAgoUpdated,
+		timeAgoPublished,
+	})
+}
+
+export const PublishArticleSchema = z.object({
+	publish: z.optional(z.string()),
+	unpublish: z.optional(z.string()),
+})
+
+export async function action({ request }: ActionFunctionArgs) {
+	const formData = await request.formData()
+
+	const submission = await parseWithZod(formData, {
+		schema: PublishArticleSchema.superRefine(async (data, ctx) => {
+			if (!data.publish && !data.unpublish) return
+
+			const article = await prisma.article.findUnique({
+				select: { id: true },
+				where: { id: data.publish ?? data.unpublish },
+			})
+
+			if (!article) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: 'Article not found',
+				})
+			}
+		}).transform(async data => {
+			return {
+				...data,
+				publishedAt: new Date(),
+				isPublished: data.publish ? true : false,
+			}
+		}),
+		async: true,
+	})
+
+	if (submission.status !== 'success') {
+		return json(
+			{ result: submission.reply() },
+			{ status: submission.status === 'error' ? 400 : 200 },
+		)
+	}
+
+	const { publish, unpublish } = submission.value
+
+	const updatedArticle = await prisma.article.update({
+		where: { id: publish ?? unpublish },
+		data: {
+			isPublished: publish ? true : false,
+			publishedAt: publish ? new Date() : null,
+		},
+	})
+
+	return redirectWithToast(`/admin-review/${updatedArticle.id}`, {
+		type: 'success',
+		title: 'Success',
+		description: `The article has been ${publish ? 'published' : 'unpublished'}`,
+	})
+}
+```
+
+</MonsterReveal>
+
+<MonsterReveal title="3. Create `/admin-review.$articleId.tsx`">
+
+### 3. Create the `/admin-review/$articleId` route
+
+I'll now create a new child route that will display the full article, together with a button that will toggle between saying 'Publish' or 'Unpublish', depending on the article's status.
+
+This is a long snippet, but don't worry - we will go through it in class together.
+
+Here is the full code for the `/admin-review/$articleId` route:
+
+```tsx title="app/routes/admin-review/$articleId.tsx"
+import { getFormProps, useForm } from '@conform-to/react'
+import { Form, useActionData, useLoaderData } from '@remix-run/react'
+import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
+import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
+import { ErrorList } from '~/components/forms.tsx'
+import { Icon } from '~/components/ui/icon.tsx'
+import { StatusButton } from '~/components/ui/status-button.tsx'
+import { getArticleImgSrc, useIsPending } from '~/utils/misc.tsx'
+
+import type { action, loader } from './__admin-review.$articleId.server'
+export { action, loader } from './__admin-review.$articleId.server'
+
+export default function AdminReviewRoute() {
+	const data = useLoaderData<typeof loader>()
+
+	return (
+		<div className="absolute inset-0 flex flex-col px-10">
+			<h2 className="mb-2 pt-12 text-h2 lg:mb-6">{data.article.title}</h2>
+			<div className="mb-4 flex gap-4">
+				<p className="w-fit rounded-lg bg-card px-4 py-2 text-sm text-card-foreground">
+					{data.article.category?.name ?? 'General News'}
+				</p>
+				<p
+					className={`w-fit rounded-lg ${data.article.isPublished ? 'bg-green-800' : 'bg-destructive'} px-4 py-2 text-sm text-card-foreground`}
+				>
+					{data.article.isPublished ? 'Published' : 'Awaiting review'}
+				</p>
+			</div>
+			<div className="overflow-y-auto pb-24">
+				<ul className="flex flex-wrap gap-5 py-5">
+					{data.article.images.map(image => (
+						<li key={image.id}>
+							<a href={getArticleImgSrc(image.id)}>
+								<img
+									src={getArticleImgSrc(image.id)}
+									alt={image.altText ?? ''}
+									className="h-32 w-32 rounded-lg object-cover"
+								/>
+							</a>
+						</li>
+					))}
+				</ul>
+				<p className="whitespace-break-spaces text-sm md:text-lg">
+					{data.article.content}
+				</p>
+			</div>
+
+			<div className={floatingToolbarClassName}>
+				<span className="text-sm text-foreground/90 max-[524px]:hidden">
+					<Icon name="clock" className="scale-125">
+						{data.timeAgoUpdated} ago
+					</Icon>
+				</span>
+				<span
+					className={`text-sm ${data.timeAgoPublished ? 'text-foreground/90' : 'text-red/90'} max-[524px]:hidden`}
+				>
+					<Icon
+						name={data.timeAgoPublished ? 'check' : 'update'}
+						className="scale-125"
+					>
+						{data.timeAgoPublished
+							? `Published ${data.timeAgoPublished} ago`
+							: 'Not published yet'}
+					</Icon>
+				</span>
+				<div className="grid flex-1 grid-cols-2 justify-end gap-2 min-[525px]:flex md:gap-4">
+					<ArticleStatusForm
+						id={data.article.id}
+						isPublished={data.article.isPublished}
+					/>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+interface PublishArticleProps {
+	id: string
+	isPublished: boolean
+}
+export function ArticleStatusForm({ id, isPublished }: PublishArticleProps) {
+	const actionData = useActionData<typeof action>()
+	const isPending = useIsPending()
+	const [form] = useForm({
+		id: 'set-article-status',
+		lastResult: actionData?.result,
+	})
+
+	return (
+		<Form method="POST" {...getFormProps(form)}>
+			<input
+				type="hidden"
+				name={isPublished ? 'unpublish' : 'publish'}
+				value={id}
+			/>
+			<StatusButton
+				type="submit"
+				name="intent"
+				value="set-article-status"
+				status={isPending ? 'pending' : form.status ?? 'idle'}
+				disabled={isPending}
+				className="w-full max-md:aspect-square max-md:px-0"
+			>
+				<Icon
+					name={isPublished ? 'cross-1' : 'check'}
+					className="scale-125 max-md:scale-150"
+				>
+					<span className="max-md:hidden">
+						{isPublished ? 'Unpublish' : 'Publish'}
+					</span>
+				</Icon>
+			</StatusButton>
+			<ErrorList errors={form.errors} id={form.errorId} />
+		</Form>
+	)
+}
+
+export function ErrorBoundary() {
+	return (
+		<GeneralErrorBoundary
+			statusHandlers={{
+				403: () => <p>You are not allowed to do that</p>,
+				404: ({ params }) => <p>No article with the id exists</p>,
+			}}
+		/>
+	)
+}
+```
+
+</MonsterReveal>
+
+:::
+
+## Final functionality
+
+If all is working well, you should now have a fully functioning admin review page that allows you to publish or unpublish articles:
+
+![Publish unpublish article](src/assets/gif/publish-unpublish-article.gif)
+
+## Summary
+
+In this step, you have:
+
+- Created a new `/admin-review` route that displays a list of articles that are still in `draft` status.
+- Writte the server-side code to load articles and handle the publish/unpublish actions.
+- Created a new child route `/admin-review/$articleId` that displays the full article and allows you to publish or unpublish it.
+
+::::note[Assignment]
+
+## 📄 Assignment documentation
+
+Update your assignment to include explanations of the following:
+
+You should include:
+
+- A brief description of the new `/admin-review` route
+- A brief description of the new `/admin-review/$articleId` route
+- An explanation of the new server-side code
+- Examples of code from each file, explaining what it is doing
+
+::::

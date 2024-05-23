@@ -274,15 +274,15 @@ Rather than duplicate the code and have it in two places (which is a bad practic
 
 ![Create models folder](src/assets/webp/epic-news/create-models-folder.webp)
 
-Inside this folder, I'll create a new file called `article.server.ts`:
+Inside this folder, I'll create a new file called `article.server.tsx`:
 
-![Create article.server.ts file](src/assets/webp/epic-news/create-article-server-file.webp)
+![Create article.server.tsx file](src/assets/webp/epic-news/create-article-server-file.webp)
 
 #### Remix server-side files
 
-You'll notice that the new file has a `.server.ts` extension.
+You'll notice that the new file has a `.server.tsx` extension.
 
-Remix knows that any file with a `.server.ts` extension is a server-side file and will only be run on the server.
+Remix knows that any file with a `.server.tsx` extension is a server-side file and will only be run on the server.
 
 This is a much neater solution that keeps all server-side code in one place.
 
@@ -294,7 +294,7 @@ This will be pretty much the same code I had originally in the `app/routes/news.
 
 The only difference will be that the function will have the `select` option removed:
 
-```tsx title="app/models/article.server.ts"
+```tsx title="app/models/article.server.tsx"
 import { prisma } from '~/utils/db.server.js'
 
 export async function getAllArticles() {
@@ -317,7 +317,7 @@ export async function getAllArticles() {
 Let's create a new `loader` function in the `news._index.tsx` file that will call the `getAllArticles` function:
 
 ```diff lang="tsx" title="app/routes/news._index.tsx" ins="json, "
-+import { getAllArticles } from '~/models/article.server.js'
++import { getAllArticles } from '~/models/article.server.tsx'
 import { json, useLoaderData } from '@remix-run/react'
 
 +export async function loader() {
@@ -334,7 +334,7 @@ import { json, useLoaderData } from '@remix-run/react'
 Now that I have the articles, I can `.map` through them on the page:
 
 ```diff lang="tsx" title="app/routes/news._index.tsx" showLineNumbers collapse={1-60}
-import { getAllArticles, getFilteredArticles } from '~/models/article.server.js'
+import { getAllArticles, getFilteredArticles } from '~/models/article.server.tsx'
 import { json, useLoaderData } from '@remix-run/react'
 
 import aiIcon from '~/assets/png/ai-logo@2x.png'
@@ -455,7 +455,7 @@ There are, of course, multiple ways you could implement this layout, but here is
 
 ```tsx title="~/routes/news._index.tsx"
 import { json, useLoaderData } from '@remix-run/react'
-import { getFilteredArticles } from '~/models/article.server.js'
+import { getFilteredArticles } from '~/models/article.server.tsx'
 import NewsIndexGrid from '~/components/organisms/NewsIndexGrid.js'
 
 export async function loader() {

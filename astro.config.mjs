@@ -298,14 +298,10 @@ export default defineConfig({
                   label: '🛡️ Create an admin review page',
                   link: 'guides/epic-news/admin-page/create-admin-page'
                 },
-                // {
-                //   label: '🛡️ Check a user has a role',
-                //   link: 'guides/epic-news/admin-page/check-a-user-has-a-role'
-                // },
-                // {
-                //   label: '🛡️ Protecting routes',
-                //   link: 'guides/epic-news/admin-page/protecting-routes'
-                // }
+                {
+                  label: '🛡️ Protecting routes',
+                  link: 'guides/epic-news/admin-page/protecting-routes'
+                }
               ]
             }
           ],

@@ -1,0 +1,218 @@
+---
+title: Protecting routes
+description: Learn how to protect routes in Remix by using the `loader` function to check if a user has the 'admin' role.
+---
+
+import MonsterReveal from 'src/components/MonsterReveal.astro'
+
+## Objectives
+
+Now that we have a fully functioning admin review page (see our [**previous guide**](/code-monster/guides/epic-news/admin-page/create-admin-page)), we need to make sure that unauthorised users can't access it.
+
+Because this page allows users to publish or unpublish articles, we need to ensure that only users with the 'admin' role can access it.
+
+In this guide, we will learn how to protect routes in Remix by using the `loader` function to check if a user has the 'admin' role before they can access it.
+
+We will do this across two stages:
+
+1. Forbid users from accessing the admin review page who are not logged in or do not have the 'admin' role.
+2. Provide a link in the navbar to the admin review page only for users with the 'admin' role.
+
+## 1. Protect the admin review page
+
+This first step is surprisingly easy - we only need to add a single line of code!
+
+Open `app/routes/admin-review.tsx` and add the code shown below:
+
+```diff lang="tsx" title="app/routes/admin-review.tsx" ins="LoaderFunctionArgs, " ins="{ request }: LoaderFunctionArgs"
+import { LoaderFunctionArgs, json } from '@remix-run/node'
+import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
+import { prisma } from '~/utils/db.server.ts'
+import { cn } from '~/utils/misc.tsx'
++import { requireUserWithRole } from '~/utils/permissions.server.js'
+
+export async function loader({ request }: LoaderFunctionArgs) {
++	await requireUserWithRole(request, 'admin')
+
+	const allArticles = await prisma.article.findMany({
+		select: { id: true, title: true, isPublished: true },
+	})
+
+	return json({ allArticles })
+}
+```
+
+The `requireUserWithRole` function is already included in the Epic Stack. It firstly checks if a user is logged in and has the specified role. In this case, if the user does not have the 'admin' role, it will throw an unauthorised (403) error.
+
+### Test protection with unauthorized user
+
+The way to test this is to log in with the user role you set up for yourself in a [**previous tutorial**](/code-monster/guides/epic-news/account-creation).
+
+Once you are logged in, try to access the `'http://localhost:3000/admin-review'` page. You should see a 403 error:
+
+![Unhandled 403 error](src/assets/webp/epic-news/unhandled-403-error.webp)
+
+This is fine, but not the best user experience. At this point, the application has completely crashed, and the only way a user can recover is to use the browser's back button.
+
+Let's improve this by adding an `ErrorBoundary` component to catch the error and display a more user-friendly message.
+
+### Add an `ErrorBoundary` component
+
+An `ErrorBoundary` is a React component that catches JavaScript errors (such as the 403 'Unauthorized' error shown here) anywhere in its child component tree and logs those errors, displaying a fallback UI instead of crashing the whole app.
+
+Let's add an `ErrorBoundary` component to `app/routes/admin-review.tsx`.
+
+First, import the `GeneralErrorBoundary` and `Button`
+
+```diff lang="tsx" title="app/routes/admin-review.tsx"
+import { LoaderFunctionArgs, json } from '@remix-run/node'
+import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
++import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
++import { Button } from '~/components/atoms/Button.js'
+import { prisma } from '~/utils/db.server.ts'
+import { cn } from '~/utils/misc.tsx'
+import { requireUserWithRole } from '~/utils/permissions.server.js'
+```
+
+Next, scroll all the way to the bottom of the component file, and add the code below:
+
+```diff lang="tsx" title="app/routes/admin-review.tsx" showLineNumbers collapse={10-16, 19-30, 33-72}
+import { LoaderFunctionArgs, json } from '@remix-run/node'
+import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
+import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
+import { Button } from '~/components/atoms/Button.js'
+import { prisma } from '~/utils/db.server.ts'
+import { cn } from '~/utils/misc.tsx'
+import { requireUserWithRole } from '~/utils/permissions.server.js'
+
+export async function loader({ request }: LoaderFunctionArgs) {
+	await requireUserWithRole(request, 'admin')
+
+	const allArticles = await prisma.article.findMany({
+		select: { id: true, title: true, isPublished: true },
+	})
+
+	return json({ allArticles })
+}
+
+interface StatusPillProps {
+	isPublished: boolean
+}
+export function StatusPill({ isPublished }: StatusPillProps) {
+	return (
+		<div
+			className={`rounded-full px-2 py-1 text-xs font-semibold ${isPublished ? 'bg-green-700 text-white' : 'bg-red-700 text-white'}`}
+		>
+			{isPublished ? 'P' : 'D'}
+		</div>
+	)
+}
+
+export default function ArticlesRoute() {
+	const { allArticles } = useLoaderData<typeof loader>()
+
+	const navLinkDefaultClassName =
+		'line-clamp-2 block rounded-l-full py-2 pl-8 pr-6 text-base lg:text-xl'
+	return (
+		<main className="container flex h-full min-h-[750px] px-0 py-12 md:px-8">
+			<div className="grid w-full grid-cols-4 bg-muted pl-2 md:container md:rounded-3xl md:pr-0">
+				<div className="relative col-span-1">
+					<div className="absolute inset-0 flex flex-col">
+						<ul className="overflow-y-auto overflow-x-hidden py-12">
+							{allArticles.map(article => (
+								<li
+									key={article.id}
+									className="flex items-center gap-2 p-1 pr-0"
+								>
+									<StatusPill isPublished={article.isPublished} />
+									<NavLink
+										to={article.id}
+										preventScrollReset
+										prefetch="intent"
+										className={({ isActive }) =>
+											cn(
+												navLinkDefaultClassName,
+												isActive && 'w-full bg-accent',
+											)
+										}
+									>
+										{article.title}
+									</NavLink>
+								</li>
+							))}
+						</ul>
+					</div>
+				</div>
+				<div className="relative col-span-3 bg-accent md:rounded-r-3xl">
+					<Outlet />
+				</div>
+			</div>
+		</main>
+	)
+}
+
++export function ErrorBoundary() {
++	return (
++		<GeneralErrorBoundary
++			statusHandlers={{
++				403: () => (
++					<div>
++						<p>You are not allowed to access this page.</p>
++						<p>
++							Please login with an administrator account, or contact support.
++						</p>
++						<Button>
++							<NavLink to="/login">Login</NavLink>
++						</Button>
++					</div>
++				),
++			}}
++		/>
++	)
++}
+```
+
+Save your changes and head back to the browser. Try to access the `'http://localhost:3000/admin-review'` page again while logged in with the same user.
+
+You should now see a more helpful message:
+
+![Handled 403 error](src/assets/webp/epic-news/handled-403-error.webp)
+
+:::tip[Challenge]
+
+### 403 page styling
+
+The error message is displayed, but it doesn't look very good. Can you style it to make it more visually appealing and match the overall branding of your site?
+
+There is no solution provided for this challenge - it's up to you to get creative!
+
+:::
+
+## Summary
+
+In this step, we have:
+
+- Protected the admin review page by adding checking if the user has the 'admin' role.
+- Added an `ErrorBoundary` component to catch the 403 error and display a more user-friendly message.
+
+::::note[Assignment]
+
+## 📄 Assignment documentation
+
+Update your assignment to include explanations of the following:
+
+- Why is it important to protect certain routes like the admin review page in an application?
+- How are you protecting the admin review page in your application?
+- How does the `ErrorBoundary` component improve the user experience when an unauthorised user tries to access the admin review page?
+
+:::tip
+
+### Useful links
+
+- [What is Role-Based Access Control (RBAC)?](https://auth0.com/intro-to-iam/what-is-role-based-access-control-rbac)
+- [Understanding role based access](https://auth.epicweb.dev/08)
+- [Error boundaries in Remix](https://remix.run/docs/en/main/route/error-boundary)
+
+:::
+
+::::

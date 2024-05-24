@@ -301,8 +301,20 @@ export default defineConfig({
                 {
                   label: '🛡️ Protecting routes',
                   link: 'guides/epic-news/admin-page/protecting-routes'
+                },
+                {
+                  label: '🛡️ Admin-only links',
+                  link: 'guides/epic-news/admin-page/admin-only-links'
+                },
+                {
+                  label: '🛡️ Filter published articles',
+                  link: 'guides/epic-news/admin-page/filter-published-articles'
                 }
               ]
+            },
+            {
+              label: '🚀 Wrapping up - extra credits',
+              link: 'guides/epic-news/wrapping-up'
             }
           ],
         },

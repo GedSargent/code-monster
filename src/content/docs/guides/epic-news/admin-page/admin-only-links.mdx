@@ -1,0 +1,229 @@
+---
+title: Admin-only links
+description: Learn how to add links to the navbar that are only visible to users with the 'admin' role.
+---
+
+import MonsterKbd from 'src/components/MonsterKbd.astro'
+
+## Objectives
+
+In the [**previous guide**](/code-monster/guides/epic-news/admin-page/protecting-routes), we learned how to protect routes in Remix by using the `loader` function to check if a user has the 'admin' role.
+
+Now that we have protected the admin review page, we need to provide a link in the navbar to the admin review page only for users with the 'admin' role.
+
+The problem is that our current function that checks the user's role throws an error if they are not an admin.
+
+This wouldn't work in the case of a navbar link, as we still want users who are not admins to see the navbar but not the link.
+
+This is actually a straightfoward fix, and we will do this in three stages:
+
+## Create an optional admin user check
+
+Open `app/utils/rootProviders/generateRootJson.ts` and add the following code to the `generateRootJson` function that starts around line 43:
+
+```diff lang="tsx" title="app/utils/rootProviders/generateRootJson.ts" showLineNumbers startLineNumber=43
+export default function generateRootJson({
+	user,
+	request,
+	honeyProps,
+	toast,
+	csrfToken,
+	timings,
+	toastHeaders,
+	csrfCookieHeader,
+}: GenerateRootJsonArgs) {
+	const pageData = {
+		user,
+		requestInfo: {
+			hints: getHints(request),
+			origin: getDomainUrl(request),
+			path: new URL(request.url).pathname,
+			userPrefs: {
+				theme: getTheme(request),
+			},
+		},
+		ENV: getEnv(),
+		toast,
+		honeyProps,
+		csrfToken,
++		isAdminUser: user ? user.roles.some(role => role.name === 'admin') : false,
+	}
+	const headerData = {
+		headers: combineHeaders(
+			{ 'Server-Timing': timings.toString() },
+			toastHeaders,
+			csrfCookieHeader ? { 'set-cookie': csrfCookieHeader } : null,
+		),
+	}
+
+	return { pageData, headerData }
+}
+```
+
+## Pass `isAdminUser` to the navbar
+
+Next, open `app/root.tsx` and add the following code to the `HeaderWithSearch` component (or whichever navbar component you are using):
+
+:::caution
+
+Adding the code below will create a red line under `isAdminUser` in your editor.
+
+This is because `HeaderWithSearch` isn't expecting the `isAdminUser` prop yet.
+
+Don't worry - we will fix this in the next step.
+
+:::
+
+```diff lang="tsx" title="app/root.tsx" showLineNumbers startLineNumber=22 collapse={2-4, 14-23} ins=" isAdminUser={data.isAdminUser}"
+export default function App() {
+	const data = useLoaderData<typeof loader>()
+	const theme = useTheme()
+	const nonce = useNonce()
+
+	return (
+		<ParallaxProvider>
+			<AuthenticityTokenProvider token={data.csrfToken}>
+				<HoneypotProvider {...data.honeyProps}>
+					<Document nonce={nonce} theme={theme}>
+						<div className="flex h-screen flex-col justify-between">
+							<HeaderWithSearch isAdminUser={data.isAdminUser} />
+
+							<div className="flex-1">
+								<Outlet />
+							</div>
+
+							<div className="fixed m-4 rounded-full bg-black/20 p-2 backdrop-blur-sm transition hover:bg-black/30 dark:bg-white/20 dark:hover:bg-white/30">
+								<ThemeSwitch
+									userPreference={data.requestInfo.userPrefs.theme}
+								/>
+							</div>
+							<FooterMenuRight companyName="Epic News" />
+						</div>
+					</Document>
+				</HoneypotProvider>
+			</AuthenticityTokenProvider>
+		</ParallaxProvider>
+	)
+}
+```
+
+## Conditionally render the admin link
+
+Finally, open `app/components/organisms/HeaderWithSearch.tsx`.
+
+Add the following code to the `HeaderWithSearch` component:
+
+```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers ins="{ isAdminUser }: HeaderWithSearchProps" ins="flex flex-1 items-center justify-center gap-8" collapse={32-50}
+import { Link, useMatches } from '@remix-run/react'
+import logo from '~/assets/png/epic-news-logo.png'
+import { SearchBar } from '../molecules/SearchBar'
+import LoginOrUserDropdown from './LoginOrUserDropdown'
+
++interface HeaderWithSearchProps {
++	isAdminUser: boolean
++}
+export default function HeaderWithSearch({ isAdminUser }: HeaderWithSearchProps) {
+	const matches = useMatches()
+	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+
+	return (
+		<header className="bg-emerald-50 py-6 dark:bg-emerald-950">
+			<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+				<Link to="/" className="group">
+					<div className="flex items-center gap-4 transition group-hover:opacity-80">
+						<img src={logo} alt="Epic News Logo" className="w-16" />
+						<span className="text-sm font-bold text-foreground">Epic News</span>
+					</div>
+				</Link>
+				<div className="flex flex-1 items-center justify-center gap-8">
++					{isAdminUser && (
++						<Link
++							to="/admin-review"
++							className="rounded-lg bg-green-900 px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-green-800"
++						>
++							Admin Review
++						</Link>
++					)}
+					<Link
+						to="/news"
+						className="text-sm font-semibold text-foreground transition hover:text-foreground/80"
+					>
+						News
+					</Link>
+					<Link
+						to="/about-us"
+						prefetch="intent"
+						className="text-sm font-semibold text-foreground transition hover:text-foreground/80"
+					>
+						About us
+					</Link>
+					<Link
+						to="/contact-us"
+						className="text-sm font-semibold text-foreground transition hover:text-foreground/80"
+					>
+						Contact us
+					</Link>
+				</div>
+				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
+					{searchBar}
+				</div>
+				<div className="flex items-center gap-10">
+					<LoginOrUserDropdown />
+				</div>
+				<div className="block w-full sm:hidden">{searchBar}</div>
+			</nav>
+		</header>
+	)
+}
+```
+
+### Testing
+
+Whilst logged in as a normal user, or when not logged in at all, you should not be able to see the new admin link in the navbar:
+
+![Navbar without admin link](src/assets/webp/epic-news/navbar-without-admin-link.webp)
+
+Now, log out of the application completely.
+
+Once successfully logged out, log back in with the following details:
+
+**Username**: <MonsterKbd>kody</MonsterKbd>
+**Password**: <MonsterKbd>kodylovesyou</MonsterKbd>
+
+:::note
+
+<MonsterKbd>Kody</MonsterKbd> is a default admin user that is set up in the `prisma/seed.ts` file.
+
+Feel free to open this file and see if you can work out where the user is created.
+
+:::
+
+Once you are logged in as 'Kody', you should now see the "Admin Review" link has now appeared in the navbar:
+
+![Navbar with admin link](src/assets/webp/epic-news/navbar-with-admin-link.webp)
+
+Click on this link, and you should be taken straight to the admin review page.
+
+## Summary
+
+In this tutorial, we have:
+
+- Created an optional admin user check in the `generateRootJson` function.
+- Added an admin link to the navbar that is only visible to users with the 'admin' role.
+
+::::note[Assignment]
+
+## 📄 Assignment documentation
+
+Update your assignment to include explanations of the following:
+
+- Why could we not use any existing functions to check if a user is an admin?
+- How did we check that a user was logged in, and that the user was an admin?
+- What is conditional rendering? How does the `isAdminUser` prop help us to conditionally render the admin link in the navbar?
+
+:::tip[Useful links]
+[Conditional rendering in React](https://react.dev/learn/conditional-rendering)
+:::
+
+::::

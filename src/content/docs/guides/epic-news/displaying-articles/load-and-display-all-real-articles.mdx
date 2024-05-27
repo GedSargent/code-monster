@@ -9,7 +9,7 @@ import MonsterReveal from "src/components/MonsterReveal.astro";
 
 Now that we have successfully displayed all the mock articles on the page, we can replace the mock articles with real articles from the database.
 
-To do this, we will use the `prisma` client to fetch all articles from the database and display them on the page.
+To do this, we will use the `prisma` client to fetch all articles from the database first.
 
 ### Remove mock articles
 
@@ -53,7 +53,7 @@ import techIcon from '~/assets/png/news-categories/tech-logo@2x.png'
 
 Next, let's fetch all articles from the database using the `prisma` client inside the `loader` function, and then export them as JSON:
 
-```diff lang="tsx" title="app/routes/news.$category.tsx" ins=", allArticles" collapse={1-5}
+```diff lang="tsx" title="app/routes/news.$category.tsx" ins=", allArticles" ins="async " collapse={1-5}
 import { invariant } from '@epic-web/invariant'
 import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
@@ -95,7 +95,7 @@ The `select` option is used to specify which fields from each record to include 
   })
 ```
 
-In this case, we are fetching the `id`, `title`, `category`, and `images` fields from the `article` table. We don't need the `content` of each article as this is an index page, so we are only fetching the fields that we need.
+In this case, we are fetching the `id`, `title`, `category`, and `images` fields from the `article` table. We don't need the `content` of each article as this is just an index page, so we are only fetching the fields that we need.
 
 If we filter out only the fields we need from each record, we can reduce the amount of data that needs to be transferred from the database to the server, thereby improving performance.
 
@@ -136,11 +136,11 @@ import { prisma } from '~/utils/db.server.ts'
 +import { getArticleImgSrc } from '~/utils/misc.tsx'
 ```
 
-Finally, let's replace the mock `articles` array with all the real articles from our database.
+Finally, inside the `ArticleCard` function, let's replace the mock `articles` array currently being displayed with all the real articles from our database.
 
 ::::tip[Challenge]
 
-Can you swap out the old mock `articles` array with the new `allArticles` array yourself?
+Inside the `ArticleCard` function, you swap out the old mock `articles` array with the new `allArticles` array yourself?
 
 :::caution
 
@@ -249,7 +249,7 @@ export default function NewsCategoryPage() {
 +						<ArticleCard
 +							key={id}
 +							title={title}
-+							category={articleCategory?.name ?? 'Uncategorized'}
++							category={articleCategory?.name ?? 'General News'}
 +							image={imageSrc}
 +						/>
 +					)

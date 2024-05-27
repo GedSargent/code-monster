@@ -210,7 +210,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 With this in place, we can now display the `category` name in the browser.
 
-Navigate down to the `ArticleRoute` component in the same file (around line 108), and add the JSX highlighted in green just below the `h2` element:
+Navigate down to the `ArticleRoute` component in the same file (around line 111), and add the JSX highlighted in green just below the `h2` element:
 
 ```diff lang="tsx" title="app/routes/users+/$username_+/articles.$articleId.tsx"
 export default function ArticleRoute() {
@@ -483,7 +483,7 @@ import { StatusButton } from '~/components/ui/status-button.tsx'
 import { Textarea } from '~/components/ui/textarea.tsx'
 import { cn, getArticleImgSrc, useIsPending } from '~/utils/misc.tsx'
 import { type action } from './__article-editor.server'
-+import SelectorGroup from '#app/components/molecules/SelectorGroup.js'
++import SelectorGroup from '~/components/molecules/SelectorGroup.js'
 ```
 
 ### Update the `ArticleEditorSchema`
@@ -564,7 +564,7 @@ The `ArticleEditorSchema` is a [**Zod**](https://zod.dev/) schema object that de
 
 :::
 
-We are adding a new field to the schema called `categoryId`, which will hold the `id` of the selected category. This field is optional, as the user may not select a category.
+We are adding a new field to the schema called `categoryId`, which will hold the `id` of the selected category. This field is optional, as the user might decide not to place an article in any particular category.
 
 ```tsx
 categoryId: z
@@ -580,11 +580,11 @@ The `min` and `max` methods are used to define the minimum and maximum lengths o
 
 Next, we need to update the props coming into the `ArticleEditor` component (still inside `app/routes/users+/$username_+/__article-editor.tsx`).
 
-We need to include to include a new `category` field to the `article`, and a new `categories` prop definition.
+We need to include a new `category` field to the `article`, and a new `categories` prop definition.
 
-These lines of code need adding, starting from around line 68:
+These lines of code need adding, starting from around line 64:
 
-```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx" ins=" | 'categoryId'" showLineNumbers startLineNumber=66
+```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx" ins=" | 'categoryId'" showLineNumbers startLineNumber=62
 export function ArticleEditor({
 	article,
 +	categories,
@@ -768,6 +768,15 @@ export function ArticleEditor({
 
 Save your changes, and you should now see the categories available to choose from:
 
+:::caution
+
+To see the new fields, make sure you:
+
+- have saved all your changes so far
+- are visiting the `http://localhost:3000/users/example/articles/$articleId/edit` route in your browser
+
+:::
+
 ![Article editor with categories](src/assets/webp/epic-news/article-editor-with-categories.webp)
 
 ### Modify `SelectorGroup`
@@ -897,6 +906,12 @@ export default function SelectorGroup({
 	/// ... Code omitted for brevity ...
 }
 ```
+:::
+
+:::caution
+
+Remember to save your changes before moving on.
+
 :::
 
 With these new changes to `SelectorGroup`, we now need to pass in the new props we've defined.

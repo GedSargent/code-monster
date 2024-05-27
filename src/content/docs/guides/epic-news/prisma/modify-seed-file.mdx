@@ -84,6 +84,12 @@ Update this array to include the `Article` entity:
   const entities = ['user', 'note', 'article']
 ```
 
+:::caution
+
+Make sure that you have saved all these changes before continuing.
+
+:::
+
 ## Run the seed script
 
 Now that we have updated the seed script, we can run it to populate the database with new dummy data.
@@ -94,10 +100,12 @@ To do this, run the following command in your terminal:
 npm run setup
 ```
 
-After a few moments, you should see the following output:
+After a few moments, you should see something similar to the following output (the time taken may vary):
 
 ```txt frame="none"
-🌱  The seed command has been executed.
+🌱 Database has been seeded: 2.102s
+
+The seed command has been executed.
 ```
 
 Once you do, check the new database in Prisma Studio to see the new data.

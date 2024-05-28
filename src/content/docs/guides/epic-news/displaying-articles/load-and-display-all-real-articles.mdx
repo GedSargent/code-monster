@@ -154,7 +154,7 @@ Give it your best shot, and if you can't work it out, refer to the solution belo
 
 1. Remember that `useLoaderData` will now return `allArticles` instead of `articles`. Use `console.log` on the new `allArticles` array to see what it looks like in the browser console.
 2. Use the `map` function to loop through the `allArticles` array and render an `ArticleCard` component for each article.
-3. `ArticleCard` has a prop called `image`. This prop needs an image `src` passing into it.
+3. `ArticleCard` has a prop called `image`. This prop needs an optional image `src` passing into it.
 
     You can generate this by calling the `getArticleImgSrc` function with the `id` of **the first image** in the `images` array (i.e. `getArticleImgSrc(images[0].id)`).
 
@@ -174,18 +174,18 @@ I've included all the changes in this file for reference.
 
 <MonsterReveal>
 
-```diff lang="tsx" title="app/routes/news.$category.tsx" ins=", allArticles" showLineNumbers collapse={1-3, 24-56}
+```diff lang="tsx" title="app/routes/news.$category.tsx" ins=", allArticles" showLineNumbers collapse={1-5, 25-61}
 import { invariant } from '@epic-web/invariant'
 import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
-import techIcon from '~/assets/png/news-categories/tech-logo@2x.png'
 import { prisma } from '~/utils/db.server.ts'
-+import { getArticleImgSrc } from '~/utils/misc.tsx'
+import { toTitleCase } from '~/utils/stringUtils.js'
 
 export async function loader({ params }: LoaderFunctionArgs) {
 	const { category } = params
 
 	invariant(typeof category === 'string', 'Category not found')
+	const categoryTitle = toTitleCase(category)
 
 +	const allArticles = await prisma.article.findMany({
 +		select: {
@@ -196,36 +196,41 @@ export async function loader({ params }: LoaderFunctionArgs) {
 +		},
 +	})
 
-	return json({ category, allArticles })
+	return json({ categoryTitle, allArticles })
 }
 
 interface ArticleCardProps {
-	image: string
 	title: string
-	category: string
+	category?: string
+	imageId?: string
 }
+export default function ArticleCard({
+	title,
+	category = 'General News',
+	imageId,
+}: ArticleCardProps) {
+	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
 
-function ArticleCard({ image, title, category }: ArticleCardProps) {
 	return (
 		<div>
 			<div className={`relative h-44 lg:h-52`}>
-				<div className="absolute inset-0">
-					<img className="h-full w-full object-cover" src={image} alt={title} />
+				<div className="absolute inset-0 ">
+					<img
+						className="h-full w-full rounded-t-md object-cover"
+						src={imageSrc}
+						alt={title}
+					/>
 				</div>
 			</div>
 			<div
-				className={`flex h-40 flex-col justify-between bg-card p-6 lg:h-44 dark:bg-dark-card`}
+				className={`flex h-40 flex-col justify-between rounded-b-md bg-muted p-6 lg:h-44`}
 			>
-				<h3
-					className={`line-clamp-2 text-2xl font-bold text-foreground dark:text-dark-foreground`}
-				>
+				<h3 className={`line-clamp-2 text-2xl font-bold text-foreground`}>
 					{title}
 				</h3>
 				<div className="flex items-center gap-3">
-					<img src={techIcon} alt={category} className="h-6 w-6" />
-					<span className="text-sm text-muted-foreground dark:text-dark-muted-foreground">
-						{category}
-					</span>
+					<img src={techIcon} alt={categoryTitle} className="h-6 w-6" />
+					<span className="text-sm text-muted-foreground">{categoryTitle}</span>
 				</div>
 			</div>
 		</div>
@@ -233,24 +238,20 @@ function ArticleCard({ image, title, category }: ArticleCardProps) {
 }
 
 export default function NewsCategoryPage() {
-	const { category, allArticles } = useLoaderData<typeof loader>()
+	const { categoryTitle, allArticles } = useLoaderData<typeof loader>()
 
 	return (
 		<div className="container py-8 lg:py-16">
 			<h2 className="mb-16 text-h2">{category}</h2>
 
 			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
-+				{allArticles.map(({ id, title, category: articleCategory, images }) => {
-+					const imageSrc = images[0]?.id
-+						? getArticleImgSrc(images[0].id)
-+						: 'https://picsum.photos/800/600'
-+
-+					return (
++				{allArticles.map((article) => {
++				  return (
 +						<ArticleCard
-+							key={id}
-+							title={title}
-+							category={articleCategory?.name ?? 'General News'}
-+							image={imageSrc}
++							key={article.id}
++							title={article.title}
++							categoryTitle={categoryTitle}
++							imageId={article.images[0]?.id}
 +						/>
 +					)
 +				})}

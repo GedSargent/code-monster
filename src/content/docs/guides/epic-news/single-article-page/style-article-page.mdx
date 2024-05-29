@@ -30,7 +30,7 @@ You should display the following information:
 
 #### Tips
 
-- Look at how other news sites display their single article pages for inspiration.
+- Look at how other news sites display their single article pages for design inspiration, e.g. [**BBC News**](https://www.bbc.co.uk/news/articles/cneew1weereo); [**The Guardian**](https://www.theguardian.com/film/article/2024/may/28/movie-franchises-popular-readers); [**IGN**](https://www.ign.com/articles/killer-klowns-from-outer-space-the-game-review)
 - Use Tailwind CSS classes to style the page elements.
 - Think carefully how we [**displayed the article images**](/epic-news/displaying-articles/load-and-display-all-real-articles#finding-article-images) on the news index page
 
@@ -44,9 +44,13 @@ When you are ready, check out one possible solution below and compare it with yo
 
 Because the application is getting more complex, I'm beginning to split my code into different components to ensure they are reusable, simple and declarative.
 
-For example, I would like to reuse the same code for displaying the article category as I did on the news index page. I will create a new component called `CategoryWithIcon` and use it on both the single article page and the news index page:
+For example, I would like to reuse the same code for displaying the article category as I did on the news index page. 
 
-```tsx title="app/components/molecules/CategoryWithIcon.tsx"
+Rather than simply duplicate this code and have it in multiple places, I will create a new component called `CategoryLabel` and use it in both the single article page and the `ArticleCard` component.
+
+In the snippet below, I've created a new file called `CategoryLabel.tsx` in the `app/components/molecules` directory. This file also contains a function called `getCategoryIconSrc` that returns the correct icon for a given category title.
+
+```tsx title="app/components/molecules/CategoryLabel.tsx"
 import fallbackIcon from '~/assets/png/ai-logo@2x.png'
 import businessIcon from '~/assets/png/business-logo@2x.png'
 import entertainmentIcon from '~/assets/png/games-logo@2x.png'
@@ -67,15 +71,17 @@ export function getCategoryIconSrc(categoryTitle: string | null): string {
 	return finalIcon
 }
 
-interface CategoryWithIconProps {
+interface CategoryLabelProps {
 	categoryTitle: string | null
 }
-export default function CategoryWithIcon({
-	categoryTitle,
-}: CategoryWithIconProps) {
+export default function CategoryLabel({ categoryTitle }: CategoryLabelProps) {
 	return (
 		<div className="flex items-center gap-3">
-			<img src={getCategoryIconSrc(categoryTitle)} className="h-6 w-6" />
+			<img
+				src={getCategoryIconSrc(categoryTitle)}
+				alt={categoryTitle || 'General News'}
+				className="h-6 w-6"
+			/>
 			<span className="text-sm text-muted-foreground">
 				{categoryTitle ?? 'General News'}
 			</span>
@@ -86,62 +92,24 @@ export default function CategoryWithIcon({
 
 </MonsterReveal>
 
-<MonsterReveal title="2. Build single article page">
+<MonsterReveal title="2. SingleArticle component">
 
-### 2. Build single article page
-
-With this in place, I can build out the rest of my single article page:
-
-```tsx title="app/routes/article.$articleId.tsx"
-import SingleArticle from '~/components/organisms/SingleArticle.js'
-import { invariant } from '@epic-web/invariant'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import { getSingleArticle } from '~/models/article.server.js'
-
-export async function loader({ params }: LoaderFunctionArgs) {
-  const { articleId } = params
-  invariant(typeof articleId === 'string', 'No article ID provided')
-
-  const article = await getSingleArticle(articleId)
-
-  return json({ article })
-}
-
-const ArticleNotFound = () => {
-  return (
-    <div className="container flex h-full flex-1 flex-col items-center justify-center">
-      <h2 className="pb-8 text-center text-h2">No article found 🤔</h2>
-      <p className="text-center text-xl">
-        Please check the article ID in your browser and try again.
-      </p>
-    </div>
-  )
-}
-
-export default function ArticlePage() {
-  const { article } = useLoaderData<typeof loader>()
-
-  return article ? <SingleArticle article={article} /> : <ArticleNotFound />
-}
-```
-
-</MonsterReveal>
-
-<MonsterReveal title="3. SingleArticle component">
-
-### 3. SingleArticle component
+### 2. SingleArticle component
 
 Note that I've extracted the actual article display into a new component called `SingleArticle`.
+
+This will be saved in a new file at `app/components/organisms/SingleArticle.tsx`
+
+Eventually (in the next solution step), I will use this component in the single article page.
 
 This component will be responsible for displaying the article `title`, `content`, author `name`, `category` and `images`.
 
 ```tsx title="app/components/organisms/SingleArticle.tsx"
-import CategoryWithIcon from '#app/components/molecules/CategoryWithIcon.js'
-import { toTitleCase } from '#app/utils/stringHelpers.js'
 import { Link } from '@remix-run/react'
 import { FiArrowLeft } from 'react-icons/fi'
+import { toTitleCase } from '#app/utils/stringUtils.js'
 import siteLogo from '~/assets/png/epic-news-logo@2x.png'
+import CategoryLabel from '~/components/molecules/CategoryLabel.js'
 import { getArticleImgSrc } from '~/utils/misc.js'
 
 interface SingleArticleProps {
@@ -191,7 +159,7 @@ export default function SingleArticle({ article }: SingleArticleProps) {
           </div>
         </div>
         <div className="flex justify-between gap-4 pt-4">
-          <CategoryWithIcon categoryTitle={categoryTitle} />
+          <CategoryLabel categoryTitle={categoryTitle} />
           <span className="text-sm text-muted-foreground">
             By: {article.owner.name}
           </span>
@@ -202,6 +170,48 @@ export default function SingleArticle({ article }: SingleArticleProps) {
       </div>
     </div>
   )
+}
+```
+
+</MonsterReveal>
+
+<MonsterReveal title="3. Build single article page">
+
+### 3. Build single article page
+
+With this in place, I can build out the rest of my single article page:
+
+```tsx title="app/routes/article.$articleId.tsx"
+import { invariant } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import SingleArticle from '~/components/organisms/SingleArticle.tsx'
+import { getSingleArticle } from '~/models/article.server.ts'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { articleId } = params
+	invariant(typeof articleId === 'string', 'No article ID provided')
+
+	const article = await getSingleArticle(articleId)
+
+	return json({ article })
+}
+
+const ArticleNotFound = () => {
+	return (
+		<div className="container flex h-full flex-1 flex-col items-center justify-center">
+			<h2 className="pb-8 text-center text-h2">No article found 🤔</h2>
+			<p className="text-center text-xl">
+				Please check the article ID in your browser and try again.
+			</p>
+		</div>
+	)
+}
+
+export default function ArticlePage() {
+	const { article } = useLoaderData<typeof loader>()
+
+	return article ? <SingleArticle article={article} /> : <ArticleNotFound />
 }
 ```
 

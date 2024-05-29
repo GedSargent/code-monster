@@ -4,6 +4,7 @@ description: Learn how to filter articles by category on the Epic News index pag
 ---
 
 import MonsterReveal from "src/components/MonsterReveal.astro";
+import MonsterKbd from "src/components/MonsterKbd.astro";
 import { Steps } from '@astrojs/starlight/components';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
@@ -21,11 +22,12 @@ In this guide, we'll update the `loader` function in our `app/routes/news.$categ
 
 At the moment, our `loader` function is fetching all articles from the database:
 
-```tsx title="app/routes/news.$category.tsx" mark={6-13}
+```tsx title="app/routes/news.$category.tsx" mark={7-14}
 export async function loader({ params }: LoaderFunctionArgs) {
 	const { category } = params
 
 	invariant(typeof category === 'string', 'Category not found')
+	const categoryTitle = toTitleCase(category)
 
 	const allArticles = await prisma.article.findMany({
 		select: {
@@ -36,7 +38,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 		},
 	})
 
-	return json({ category, allArticles })
+	return json({ categoryTitle, allArticles })
 }
 ```
 
@@ -67,7 +69,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 Next, we need to actually implement the filtering logic.
 
-We'll use Prisma's `where` option to filter articles by `category` and if they are published or not.
+We'll use Prisma's `where` option to filter articles by `category`.
 
 :::note[More complex queries]
 
@@ -106,6 +108,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 	const { category } = params
 
 	invariant(typeof category === 'string', 'Category not found')
+	const categoryTitle = toTitleCase(category)	
 
 	const filteredArticles = await prisma.article.findMany({
 +		where: {
@@ -121,7 +124,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 		},
 	})
 
-	return json({ category, filteredArticles })
+	return json({ categoryTitle, filteredArticles })
 }
 ```
 
@@ -138,22 +141,16 @@ export default function NewsCategoryPage() {
 			<h2 className="mb-16 text-h2">{category}</h2>
 
 			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
-				{filteredArticles.map(
-					({ id, title, category: articleCategory, images }, index) => {
-						const imageSrc = images[0]?.id
-							? getArticleImgSrc(images[0].id)
-							: `https://picsum.photos/800/600`
-
-						return (
-							<ArticleCard
-								key={id}
-								title={title}
-								category={articleCategory?.name ?? 'Uncategorized'}
-								image={imageSrc}
-							/>
-						)
-					},
-				)}
+				{filteredArticles.map(article => {
+					return (
+						<ArticleCard
+							key={article.id}
+							title={article.title}
+							categoryTitle={categoryTitle}
+							imageId={article.images[0]?.id}
+						/>
+					)
+				})}
 			</div>
 		</div>
 	)
@@ -166,11 +163,11 @@ Now, if you navigate to the news index page and click on a category, you should 
 
 ![Category filter working](src/assets/gif/category-filter-working.gif)
 
-:::tip[Challenge]
+::::tip[Challenge]
 
 ## Code challenges
 
-### Dynamic category icons
+## Dynamic category icons
 
 - You will notice that all of the article cards display the same icon regardless of the category:
 
@@ -178,19 +175,63 @@ Now, if you navigate to the news index page and click on a category, you should 
 
 		Can you update the `ArticleCard` component to display a different icon based on the category of the article?
 
-		It is up to you which icons you choose for which categories, but there are some supplied in **OneNote > 🧑🏽‍💻 - Components and props**.
+		It is up to you which icons you choose for which categories, but remember there are some supplied in **OneNote > 🧑🏽‍💻 - Components and props**.
 
-<MonsterReveal title="Dynamic Category Icon Solution">
+## Solution
 
-Firstly, of course, we need to import the different icons we plan to use in the `ArticleCard` component:
+<MonsterReveal title="1. Extract `ArticleCard` to separate file">
 
-```diff lang="tsx" title="app/components/ArticleCard.tsx"
-+import defaultIcon from '~/assets/png/ai-logo@2x.png'
-+import businessIcon from '~/assets/png/business-logo@2x.png'
-import siteLogo from '~/assets/png/epic-news-logo@2x.png'
-+import entertainmentIcon from '~/assets/png/games-logo@2x.png'
-+import techIcon from '~/assets/png/tech-logo@2x.png'
+### 1. Extract `ArticleCard` to separate file
+
+Firstly, I've extracted the `ArticleCard` to its own file. This is a good practice as it keeps the component code clean and easy to read.
+
+I placed my new `ArticleCard` component in the `app/components/organisms` directory:
+
+![Create ArticleCard component](src/assets/webp/epic-news/create-article-card-component.webp)
+
+Just remember to `import` the `ArticleCard` component back into the top of the `app\routes\news.$category.tsx` file, and remove the `import`s you no longer need:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx"
+import { invariant } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+-import defaultIcon from '~/assets/png/ai-logo@2x.png'
+-import businessIcon from '~/assets/png/business-logo@2x.png'
+-import siteLogo from '~/assets/png/epic-news-logo@2x.png'
+-import entertainmentIcon from '~/assets/png/games-logo@2x.png'
+-import techIcon from '~/assets/png/tech-logo@2x.png'
+import { prisma } from '~/utils/db.server.ts'
+-import { getArticleImgSrc } from '~/utils/misc.tsx'
+import { toTitleCase } from '~/utils/stringUtils'
++import ArticleCard from '~/components/organisms/ArticleCard.js'
 ```
+
+(Remember you can quickly remove unused imports in VS Code by pressing <MonsterKbd>SHIFT + ALT + O</MonsterKbd> on Windows, or <MonsterKbd>SHIFT + OPT + O</MonsterKbd> on Mac.)
+
+</MonsterReveal>
+
+<MonsterReveal title="2. Adding imports">
+
+### 2. Adding imports
+
+With my `ArticleCard` component in its own file, I can now add the necessary imports for the icons I want to use for each category, together with the `getArticleImgSrc` function.
+
+Back inside `app/components/organisms/ArticleCard.tsx`, add the following imports (assuming you are using the files shared in **OneNote > 🧑🏽‍💻 - Components and props**):
+
+```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx"
+import defaultIcon from '~/assets/png/ai-logo@2x.png'
+import businessIcon from '~/assets/png/business-logo@2x.png'
+import siteLogo from '~/assets/png/epic-news-logo@2x.png'
+import entertainmentIcon from '~/assets/png/games-logo@2x.png'
+import techIcon from '~/assets/png/tech-logo@2x.png'
+import { getArticleImgSrc } from '~/utils/misc.js'
+```
+
+</MonsterReveal>
+
+<MonsterReveal title="3. Category logic">
+
+### 3. Category logic
 
 Next, we need to think about the logic for selecting the correct icon based on the category.
 
@@ -209,52 +250,80 @@ if (category === 'business') {
 	categoryIcon = defaultIcon
 }
 ```
+
 This would work fine, but as the categories grow the conditional statement gets longer and less efficient.
 
-A more elegant solution would be to use an [**object**](https://www.programiz.com/javascript/object) to map each category to its corresponding icon:
+A more elegant solution would be to use an [**object**](https://www.programiz.com/javascript/object) to map each category to its corresponding icon.
 
-```diff lang="tsx" title="app/components/ArticleCard.tsx" collapse={1-5}
+```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx" ins="categoryTitle?" ins="{categoryIcon}" ins="{categoryTitle || 'General News'}"
 import defaultIcon from '~/assets/png/ai-logo@2x.png'
 import businessIcon from '~/assets/png/business-logo@2x.png'
 import siteLogo from '~/assets/png/epic-news-logo@2x.png'
 import entertainmentIcon from '~/assets/png/games-logo@2x.png'
 import techIcon from '~/assets/png/tech-logo@2x.png'
+import { getArticleImgSrc } from '~/utils/misc.js'
 
 interface ArticleCardProps {
-	image: string
 	title: string
-+	categoryTitle: 'Technology' | 'Business' | 'Entertainment' | 'General News'
-	level?: 'primary' | 'secondary' | 'tertiary'
+	categoryTitle?: string
+	imageId?: string
 }
-
-function ArticleCard({
-	image,
+export default function ArticleCard({
 	title,
 	categoryTitle,
-	level = 'tertiary',
+	imageId,
 }: ArticleCardProps) {
-+	const categoryIcons = {
+	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
++	const categoryIcons: Record<string, string> = {
 +		Technology: techIcon,
 +		Business: businessIcon,
 +		Entertainment: entertainmentIcon,
 +	}
-
-+	const categoryIcon = categoryTitle ? categoryIcon[categoryTitle] : defaultIcon
++
++	const categoryIcon = categoryTitle
++		? categoryIcons[categoryTitle]
++		: defaultIcon
 
 	return (
-		{/* ... */}
-+			<img src={categoryIcon} alt={categoryTitle} />
-		{/* ... */}
-
+		<div>
+			<div className={`relative h-44 lg:h-52`}>
+				<div className="absolute inset-0 ">
+					<img
+						className="h-full w-full rounded-t-md object-cover"
+						src={imageSrc}
+						alt={title}
+					/>
+				</div>
+			</div>
+			<div
+				className={`flex h-40 flex-col justify-between rounded-b-md bg-muted p-6 lg:h-44`}
+			>
+				<h3 className={`line-clamp-2 text-2xl font-bold text-foreground`}>
+					{title}
+				</h3>
+				<div className="flex items-center gap-3">
+					<img src={categoryIcon} alt={categoryTitle} className="h-6 w-6" />
+					<span className="text-sm text-muted-foreground">
+						{categoryTitle || 'General News'}
+					</span>
+				</div>
+			</div>
+		</div>
 	)
 }
+
 ```
+Take extra care to ensure that you have changed the `categoryTitle` prop to be optional in the `ArticleCardProps` interface.
+
+This is important for a later step below, when we create a general news page.
 
 With this in place, different categories are assigned their own icon dynamically based on the category title.
 
 </MonsterReveal>
 
-### Extra credit 1 - all articles page 🚀
+## Extra credit 1 - all articles page 🚀
+
+- Head over to [**`http://localhost:3000/news`**](http://localhost:3000/news) in your browser window.
 
 - Currently the `/news` page only displays a message asking the user to select a category:
 
@@ -264,7 +333,11 @@ With this in place, different categories are assigned their own icon dynamically
 
 		You should also add an extra link to the navigation bar that takes the user back to the `/news` page. You decide what the link should be called.
 
-<MonsterReveal title="All articles page solution">
+## Solution - Extra credit 1 🚀
+
+<MonsterReveal title="1. Extract Prisma Query">
+
+### 1. Extract Prisma query
 
 Firstly, I'm going to be making use of the same Prisma query that I've set up on the `/news/$category` page.
 
@@ -286,7 +359,11 @@ Remix knows that any file with a `.server.tsx` extension is a server-side file a
 
 This is a much neater solution that keeps all server-side code in one place.
 
-#### Create a new function
+</MonsterReveal>
+
+<MonsterReveal title="2. Create new Prisma Query">
+
+### 2. Create new Prisma Query
 
 Inside this new file, I'll create a new function called `getAllArticles`.
 
@@ -312,13 +389,25 @@ export async function getAllArticles() {
 }
 ```
 
-#### Update `routes/news._index.tsx`
+</MonsterReveal>
+
+<MonsterReveal title="3. Update `news._index.tsx`">
+
+### 3. Update `news._index.tsx`
 
 Let's create a new `loader` function in the `news._index.tsx` file that will call the `getAllArticles` function:
 
+:::caution
+
+If you haven't got a `news._index.tsx` file, you can create one in the `app/routes` directory.
+
+:::
+
 ```diff lang="tsx" title="app/routes/news._index.tsx" ins="json, "
-+import { getAllArticles } from '~/models/article.server.tsx'
 import { json, useLoaderData } from '@remix-run/react'
++import { getAllArticles } from '~/models/article.server.tsx'
++import { toTitleCase } from '~/utils/stringUtils.js'
++import ArticleCard from '~/components/organisms/ArticleCard.js'
 
 +export async function loader() {
 +	const allArticles = await getAllArticles()
@@ -331,19 +420,12 @@ import { json, useLoaderData } from '@remix-run/react'
 
 #### Display articles
 
-Now that I have the articles, I can `.map` through them on the page:
+Now that I have the articles loaded, I can `.map` through them on the page:
 
-```diff lang="tsx" title="app/routes/news._index.tsx" showLineNumbers collapse={1-60}
-import { getAllArticles, getFilteredArticles } from '~/models/article.server.tsx'
+```diff lang="tsx" title="app/routes/news._index.tsx" showLineNumbers collapse={}
 import { json, useLoaderData } from '@remix-run/react'
-
-import aiIcon from '~/assets/png/ai-logo@2x.png'
-import businessIcon from '~/assets/png/business-logo@2x.png'
-import siteLogo from '~/assets/png/epic-news-logo@2x.png'
-import entertainmentIcon from '~/assets/png/games-logo@2x.png'
-import techIcon from '~/assets/png/tech-logo@2x.png'
-
-import { getArticleImgSrc } from '~/utils/misc.js'
+import { getAllArticles } from '~/models/article.server.tsx'
+import ArticleCard from '~/components/organisms/ArticleCard.js'
 
 export async function loader() {
 	const allArticles = await getAllArticles()
@@ -351,83 +433,25 @@ export async function loader() {
 	return json({ allArticles })
 }
 
-interface ArticleCardProps {
-	image: string
-	title: string
-	categoryName: 'Technology' | 'Business' | 'Entertainment' | 'General News'
-}
-
-function ArticleCard({ image, title, categoryName }: ArticleCardProps) {
-	const categoryIcon = {
-		Technology: techIcon,
-		Business: businessIcon,
-		Entertainment: entertainmentIcon,
-		'General News': aiIcon,
-	}
-
-	return (
-		<div>
-			<div className={`relative h-44 lg:h-52`}>
-				<div className="absolute inset-0">
-					<img className="h-full w-full object-cover" src={image} alt={title} />
-				</div>
-			</div>
-			<div
-				className={`flex h-40 flex-col justify-between bg-muted p-6 lg:h-44`}
-			>
-				<h3
-					className={`dark:text-dark-foreground line-clamp-2 text-2xl font-bold text-foreground`}
-				>
-					{title}
-				</h3>
-				<div className="flex items-center gap-3">
-					<img
-						src={categoryIcon[categoryName]}
-						alt={categoryName}
-						className="h-6 w-6"
-					/>
-					<span className="dark:text-dark-muted-foreground text-xs font-bold text-muted-foreground">
-						{categoryName}
-					</span>
-				</div>
-			</div>
-		</div>
-	)
-}
-
 export default function NewsPageIndex() {
 +	const { allArticles } = useLoaderData<typeof loader>()
 
-+	function isValidCategory(
-+		categoryName: string,
-+	): categoryName is 'Technology' | 'Business' | 'Entertainment' {
-+		console.log({ categoryName })
-+
-+		return ['Technology', 'Business', 'Entertainment'].includes(categoryName)
-+	}
-
 	return (
 		<main className="container py-16">
-			<h2 className="pb-16 text-h2">Technology</h2>
+			<h2 className="pb-16 text-h2">All news</h2>
 
-+			<div className="grid grid-cols-3 gap-8">
-+				{allArticles.map(article => (
-+					<ArticleCard
-+						key={article.id}
-+						image={
-+							article.images.length
-+								? getArticleImgSrc(article.images[0].id)
-+								: siteLogo
-+						}
-+						title={article.title}
-+						categoryName={
-+							article.category && isValidCategory(article.category.name)
-+								? article.category.name
-+								: 'GENERAL NEWS'
-+						}
-+					/>
-+				))}
-+			</div>
+			<div className="grid grid-cols-3 gap-8">
++				{allArticles.map(article => {
++					return (
++						<ArticleCard
++							key={article.id}
++							title={article.title}
++							categoryTitle={article.category?.name}
++							imageId={article.images[0]?.id}
++						/>
++					)
++				})}
+			</div>
 		</main>
 	)
 }
@@ -450,6 +474,185 @@ export default function NewsPageIndex() {
 There are, of course, multiple ways you could implement this layout, but here is one possible solution:
 
 <Tabs>
+
+<TabItem label="ArticleCard.tsx">
+
+```diff lang="tsx" title="~/components/organisms/ArticleCard.tsx" showLineNumbers ins="${imageWrapperClasses[level]}" ins="${textWrapperClasses[level]}"
+import defaultIcon from '~/assets/png/ai-logo@2x.png'
+import businessIcon from '~/assets/png/business-logo@2x.png'
+import siteLogo from '~/assets/png/epic-news-logo@2x.png'
+import entertainmentIcon from '~/assets/png/games-logo@2x.png'
+import techIcon from '~/assets/png/tech-logo@2x.png'
+import { getArticleImgSrc } from '~/utils/misc.js'
+
+interface ArticleCardProps {
+	title: string
+	categoryTitle?: string
+	imageId?: string
++	level?: 'primary' | 'secondary' | 'tertiary'
+}
+export default function ArticleCard({
+	title,
+	categoryTitle,
+	imageId,
++	level = 'tertiary',
+}: ArticleCardProps) {
+	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
+	const categoryIcons: Record<string, string> = {
+		Technology: techIcon,
+		Business: businessIcon,
+		Entertainment: entertainmentIcon,
+	}
+
+	const categoryIcon = categoryTitle
+		? categoryIcons[categoryTitle]
+		: defaultIcon
+
++	const imageWrapperClasses = {
++		primary:
++			'hidden relative w-full object-cover sm:block sm:h-[12rem] md:h-[23rem]',
++		secondary:
++			'hidden relative w-full rounded-t-lg object-cover sm:block sm:h-[11rem]',
++		tertiary: 'hidden',
++	}
++
++	const textWrapperClasses = {
++		primary:
++			'h-[10rem] flex flex-col justify-between rounded-lg bg-muted p-6 sm:rounded-t-none md:h-[22.5rem]',
++		secondary:
++			'h-[10rem] flex flex-col justify-between bg-muted p-6 sm:rounded-b-lg sm:h-[11rem]',
++		tertiary:
++			'h-[10.25rem] flex flex-col rounded-lg justify-between bg-muted p-6',
++	}
+
+	return (
+		<div>
+			<div className={`${imageWrapperClasses[level]}`}>
+				<div className="absolute inset-0 ">
+					<img
+						className="h-full w-full rounded-t-md object-cover"
+						src={imageSrc}
+						alt={title}
+					/>
+				</div>
+			</div>
+			<div className={`${textWrapperClasses[level]}`}>
+				<h3 className={`line-clamp-2 text-2xl font-bold text-foreground`}>
+					{title}
+				</h3>
+				<div className="flex items-center gap-3">
+					<img src={categoryIcon} alt={categoryTitle} className="h-6 w-6" />
+					<span className="text-sm text-muted-foreground">
+						{categoryTitle || 'General News'}
+					</span>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+```
+
+</TabItem>
+
+<TabItem label="NewsIndexGrid.tsx">
+
+```tsx title="~/components/organisms/NewsIndexGrid.tsx"
+import ArticleCard from '~/components/organisms/ArticleCard'
+
+interface IndexArticle {
+	title: string
+	images: {
+		id: string
+	}[]
+	id: string
+	category: {
+		name: string
+	} | null
+}
+interface NewsIndexGridProps {
+	articles: IndexArticle[]
+	categoryTitle?: string
+}
+
+export default function NewsIndexGrid({
+	articles,
+	categoryTitle,
+}: NewsIndexGridProps) {
+	return (
+		<>
+			<div className="py-8 lg:py-16">
+				<h2 className="mb-16 text-h2">{categoryTitle}</h2>
+
+				<div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 lg:grid-rows-4">
+					{articles.map((article, index) => {
+						const level =
+							index === 0 ? 'primary' : index < 5 ? 'secondary' : 'tertiary'
+
+						return (
+							<div
+								key={article.id}
+								className={`col-span-1 ${level === 'secondary' ? 'sm:row-span-2' : ''} ${level === 'primary' ? 'sm:col-span-2 sm:row-span-4' : ''}`}
+							>
+								<ArticleCard
+									title={article.title}
+									categoryTitle={categoryTitle}
+									imageId={article.images[0]?.id}
+									level={level}
+								/>
+							</div>
+						)
+					})}
+				</div>
+			</div>
+		</>
+	)
+}
+```
+
+</TabItem>
+
+<TabItem label="article.server.tsx">
+
+```diff lang="tsx" title="~/models/article.server.tsx"
+import { prisma } from '~/utils/db.server.js'
+
+export async function getAllArticles() {
+	return await prisma.article.findMany({
+		select: {
+			id: true,
+			title: true,
+			category: { select: { name: true } },
+			images: { select: { id: true } },
+		},
+		orderBy: {
+			createdAt: 'desc',
+		},
+	})
+}
+
++export async function getFilteredArticles(category: string) {
++	return await prisma.article.findMany({
++		where: {
++			category: {
++				slug: category,
++			},
++		},
++		select: {
++			id: true,
++			title: true,
++			category: { select: { name: true } },
++			images: { select: { id: true } },
++		},
++		orderBy: {
++			createdAt: 'desc',
++		},
++		take: 9, // Limits the number of articles returned
++	})
++}
+```
+
+</TabItem>
 
 <TabItem label="news._index.tsx">
 
@@ -485,185 +688,11 @@ export default function NewsPageIndex() {
 
 </TabItem>
 
-<TabItem label="article.server.tsx">
-
-```tsx title="~/models/article.server.tsx"
-import { prisma } from '~/utils/db.server.js'
-
-export async function getFilteredArticles(category: string) {
-	return await prisma.article.findMany({
-		where: {
-			category: {
-				slug: category,
-			},
-		},
-		select: {
-			id: true,
-			title: true,
-			category: { select: { name: true } },
-			images: { select: { id: true } },
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-		take: 9, // Limits the number of articles returned
-	})
-}
-```
-
-</TabItem>
-
-<TabItem label="NewsIndexGrid.tsx">
-
-```tsx title="~/components/organisms/NewsIndexGrid.tsx"
-import aiIcon from '~/assets/png/ai-logo@2x.png'
-import businessIcon from '~/assets/png/business-logo@2x.png'
-import siteLogo from '~/assets/png/epic-news-logo@2x.png'
-import entertainmentIcon from '~/assets/png/games-logo@2x.png'
-import techIcon from '~/assets/png/tech-logo@2x.png'
-
-import { getArticleImgSrc } from '~/utils/misc.js'
-import { toTitleCase } from '~/utils/stringHelpers.js'
-
-interface ArticleCardProps {
-	image: string
-	title: string
-	categoryTitle: 'Technology' | 'Business' | 'Entertainment' | 'General News'
-	level?: 'primary' | 'secondary' | 'tertiary'
-}
-
-export function ArticleCard({
-	image,
-	title,
-	categoryTitle,
-	level = 'tertiary',
-}: ArticleCardProps) {
-	const categoryIcon = {
-		Technology: techIcon,
-		Business: businessIcon,
-		Entertainment: entertainmentIcon,
-		'General News': aiIcon,
-	}
-
-	const imageWrapperClasses = {
-		primary:
-			'hidden relative w-full object-cover sm:block sm:h-[12rem] md:h-[23rem]',
-		secondary:
-			'hidden relative w-full rounded-t-lg object-cover sm:block sm:h-[11rem]',
-		tertiary: 'hidden',
-	}
-
-	const textWrapperClasses = {
-		primary:
-			'h-[10rem] flex flex-col justify-between rounded-lg bg-muted p-6 sm:rounded-t-none md:h-[22.5rem]',
-		secondary:
-			'h-[10rem] flex flex-col justify-between bg-muted p-6 sm:rounded-b-lg sm:h-[11rem]',
-		tertiary:
-			'h-[10.25rem] flex flex-col rounded-lg justify-between bg-muted p-6',
-	}
-
-	return (
-		<>
-			<div className={`${imageWrapperClasses[level]}`}>
-				<div className="absolute inset-0">
-					<img
-						className="h-full w-full rounded-t-lg object-cover"
-						src={image}
-						alt={title}
-					/>
-				</div>
-			</div>
-			<div className={`${textWrapperClasses[level]}`}>
-				<h3 className={`line-clamp-2 text-2xl font-bold text-foreground`}>
-					{title}
-				</h3>
-				<div className="flex items-center gap-3">
-					<img
-						src={categoryTitle ? categoryIcon[categoryTitle] : aiIcon}
-						className="h-6 w-6"
-					/>
-					<span className="text-sm text-muted-foreground">{categoryTitle}</span>
-				</div>
-			</div>
-		</>
-	)
-}
-
-interface IndexArticle {
-	title: string
-	images: {
-		id: string
-	}[]
-	id: string
-	category: {
-		name: string
-	} | null
-}
-
-interface NewsIndexGridProps {
-	articles: IndexArticle[]
-	categoryTitle: string
-}
-
-export default function NewsIndexGrid({
-	articles,
-	categoryTitle,
-}: NewsIndexGridProps) {
-	function isCategoryTitle(
-		title: string,
-	): title is 'Technology' | 'Business' | 'Entertainment' | 'General News' {
-		return ['Technology', 'Business', 'Entertainment', 'General News'].includes(
-			title,
-		)
-	}
-
-	return (
-		<>
-			<div className="py-8 lg:py-16">
-				<h2 className="mb-16 text-h2">{categoryTitle}</h2>
-
-				<div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 lg:grid-rows-4">
-					{articles.map((article, index) => {
-						const level =
-							index === 0 ? 'primary' : index < 5 ? 'secondary' : 'tertiary'
-
-						const formattedTitle = toTitleCase(article.category?.name || '')
-						const imageSrc = article.images.length
-							? getArticleImgSrc(article.images[0].id)
-							: siteLogo
-
-						return (
-							<div
-								key={article.id}
-								className={`col-span-1 ${level === 'secondary' ? 'sm:row-span-2' : ''} ${level === 'primary' ? 'sm:col-span-2 sm:row-span-4' : ''}`}
-							>
-								<ArticleCard
-									title={article.title}
-									categoryTitle={
-										article.category && isCategoryTitle(formattedTitle)
-											? formattedTitle
-											: 'General News'
-									}
-									image={imageSrc}
-									level={level}
-								/>
-							</div>
-						)
-					})}
-				</div>
-			</div>
-		</>
-	)
-}
-```
-
-</TabItem>
-
 </Tabs>
 
 </MonsterReveal>
 
-:::
+::::
 
 ## Summary
 

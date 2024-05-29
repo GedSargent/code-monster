@@ -186,7 +186,7 @@ import { invariant } from '@epic-web/invariant'
 import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import SingleArticle from '~/components/organisms/SingleArticle.tsx'
-import { getSingleArticle } from '~/models/article.server.ts'
+import { getSingleArticle } from '~/models/article.server.tsx'
 
 export async function loader({ params }: LoaderFunctionArgs) {
 	const { articleId } = params

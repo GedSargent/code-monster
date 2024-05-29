@@ -28,13 +28,13 @@ What matters when creating a reusable component is that you can pass the element
 
 In this case, the `image`, `title`, and `category` of the article will become props, and the code highlighted below will become the basis of our new custom component:
 
-```tsx title="app/routes/news.$category.tsx" collapse={2-6} mark={13-38} showLineNumbers
+```tsx title="app/routes/news.$category.tsx" collapse={2-6} mark={13-36} showLineNumbers
 export default function NewsCategoryPage() {
 	const { categoryTitle, articles } = useLoaderData<typeof loader>()
 
 	console.log({ categoryTitle, articles })
 
-	const { image, title, category } = articles[0]
+	const { image, title } = articles[0]
 
 	return (
 		<div className="container py-8 lg:py-16">
@@ -58,8 +58,10 @@ export default function NewsCategoryPage() {
 							{title}
 						</h3>
 						<div className="flex items-center gap-3">
-							<img src={techIcon} alt={category} className="h-6 w-6" />
-							<span className="text-sm text-muted-foreground">{categoryTitle}</span>
+							<img src={techIcon} alt={categoryTitle} className="h-6 w-6" />
+							<span className="text-sm text-muted-foreground">
+								{categoryTitle}
+							</span>
 						</div>
 					</div>
 				</div>
@@ -71,7 +73,7 @@ export default function NewsCategoryPage() {
 
 Let's get started.
 
-:::tip[Challenge]
+::::tip[Challenge]
 
 ## Challenge: build a reusable component
 
@@ -89,13 +91,21 @@ Let's get started.
 
 Once you've finished, compare your solution with the one below:
 
-### Solution
+## Solution
 
 <MonsterReveal title="1. Separate code">
 
-### Separate code
+### 1. Separate code
 
-First, it doesn't really make sense to have the `toTitleCase` function in the `app\routes\news.$category.tsx`. I'm therefore going to create a new file called `stringUtils.ts` inside the `app\utils` folder, and move the `toTitleCase` function into it:
+First, it doesn't really make sense to have the `toTitleCase` function in the `app\routes\news.$category.tsx`.
+
+I'm therefore going to create a new file called `stringUtils.ts` inside the `app\utils` folder, and move the `toTitleCase` function into it:
+
+:::caution
+
+Remember to `export` the `toTitleCase` function so that it can be `import`ed into other files across your project.
+
+:::
 
 ```tsx title="app/utils/stringUtils.ts"
 export function toTitleCase(str: string) {
@@ -130,22 +140,20 @@ With this in place, we can now create the `ArticleCard` component together with 
 ```tsx title="app/routes/news.$category.tsx"
 import siteLogo from '~/assets/png/epic-news-logo@2x.png'
 import techIcon from '~/assets/png/tech-logo@2x.png'
-import { toTitleCase } from '~/utils/stringUtils.js'
-import { getArticleImgSrc } from '~/utils/misc.js'
 
 // ...Code omitted for brevity...
 
 interface ArticleCardProps {
 	title: string
 	categoryTitle: string
-	imageId?: string
+	image?: string
 }
-export default function ArticleCard({
+function ArticleCard({
 	title,
 	categoryTitle,
-	imageId,
+	image,
 }: ArticleCardProps) {
-	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
+	const imageSrc = image ?? siteLogo
 
 	return (
 		<div>
@@ -188,7 +196,7 @@ export default function NewsCategoryPage() {
 
 	console.log({ categoryTitle, articles })
 
-	const { image, title, category } = articles[0]
+	const { image, title } = articles[0]
 
 	return (
 		<div className="container py-8 lg:py-16">
@@ -222,7 +230,6 @@ export default function NewsCategoryPage() {
 -					</div>
 -				</div>
 +				<ArticleCard
-+					key={article.id}
 +					title={article.title}
 +					categoryTitle={categoryTitle}
 +					imageId={article.images[0]?.id}
@@ -236,7 +243,7 @@ Not only is this code more readable (because having a component named `ArticleCa
 
 </MonsterReveal>
 
-:::
+::::
 
 ## Displaying all mock articles
 
@@ -246,12 +253,12 @@ To do this, we will use JavaScript's `map` function to loop through the `article
 
 :::tip[Challenge]
 
-### Challenge: display all mock articles
+## Challenge: display all mock articles
 
 We looked at how to use the `map` function in a [**previous tutorial**](/code-monster/guides/prisma/using-map), so if you need a refresher, feel free to check it out.
 
 1. Inside the `NewsCategoryPage` component, replace the `ArticleCard` component with a `map` function that loops through the `articles` array and renders an `ArticleCard` component for each article.
-2. Pass the `image`, `title`, and `category` of each article as props to the `ArticleCard` component.
+2. Pass the `image`, `title`, and `categoryTitle` of each article as props to the `ArticleCard` component.
 3. Use the `id` of each article as the `key` prop for the `ArticleCard` component inside the `map` function.
 
 Your final result on screen should look something like this:
@@ -271,22 +278,16 @@ Once you've got a solution, compare it with the one below:
 ```diff lang="tsx" title="app/routes/news.$category.tsx" collapse={1-44} showLineNumbers
 import siteLogo from '~/assets/png/epic-news-logo@2x.png'
 import techIcon from '~/assets/png/tech-logo@2x.png'
-import { toTitleCase } from '~/utils/stringUtils.js'
-import { getArticleImgSrc } from '~/utils/misc.js'
 
 // ...Code omitted for brevity...
 
 interface ArticleCardProps {
 	title: string
 	categoryTitle: string
-	imageId?: string
+	image?: string
 }
-export default function ArticleCard({
-	title,
-	categoryTitle,
-	imageId,
-}: ArticleCardProps) {
-	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
+function ArticleCard({ title, categoryTitle, image }: ArticleCardProps) {
+	const imageSrc = image ?? siteLogo
 
 	return (
 		<div>
@@ -333,7 +334,7 @@ export default function NewsCategoryPage() {
 +							key={article.id}
 +							title={article.title}
 +							categoryTitle={categoryTitle}
-+							image={article.images[0]?.id}
++							image={article.image}
 +						/>
 +					)
 +				})}

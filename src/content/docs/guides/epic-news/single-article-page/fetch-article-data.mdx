@@ -28,7 +28,7 @@ For the time being, just display the article title on the screen. We will look a
 
 ![Single article title only](src/assets/webp/epic-news/single-article-title-only.webp)
 
-#### Tips
+### Tips
 
 - In the news index page, we used Prisma's `findMany()` function. However, in this case you will need to research and find out how to use the [**`findUnique()`**](https://www.prisma.io/docs/orm/reference/prisma-client-reference#findunique) function to fetch a single article.
 
@@ -36,11 +36,11 @@ For the time being, just display the article title on the screen. We will look a
 
 - What will you show on the screen if the article is not found? How will you handle this in the code?
 
-### Solution
+## Solution
 
 <MonsterReveal title="1. Create Prisma Query">
 
-#### 1. Create Prisma query
+### 1. Create Prisma query
 
 First, let's create the query to fetch the single article data.
 
@@ -48,8 +48,42 @@ I could, of course, write this straight into the `loader` function. However, bec
 
 Open the file at `models/article.server.ts` (or create this file if you haven't already) and add the following code:
 
-```diff lang="tsx" title="app/server/getArticle.ts"
+```diff lang="tsx" title="app/server/getArticle.ts" showLineNumbers collapse={3-35}
 import { prisma } from '~/utils/db.server.js'
+
+export async function getAllArticles() {
+	return await prisma.article.findMany({
+		select: {
+			id: true,
+			title: true,
+			category: { select: { name: true } },
+			images: { select: { id: true } },
+		},
+		orderBy: {
+			createdAt: 'desc',
+		},
+	})
+}
+
+export async function getFilteredArticles(category: string) {
+	return await prisma.article.findMany({
+		where: {
+			category: {
+				slug: category,
+			},
+		},
+		select: {
+			id: true,
+			title: true,
+			category: { select: { name: true } },
+			images: { select: { id: true } },
+		},
+		orderBy: {
+			createdAt: 'desc',
+		},
+		take: 9, // Limits the number of articles returned
+	})
+}
 
 +export async function getSingleArticle(articleId: string) {
 +	return await prisma.article.findUnique({
@@ -70,7 +104,7 @@ import { prisma } from '~/utils/db.server.js'
 
 <MonsterReveal title="2. Update `article.$articleId.tsx`">
 
-#### 2. Update `article.$articleId.tsx`
+### 2. Update `article.$articleId.tsx`
 
 ```diff lang="tsx" title="app/routes/article.$articleId.tsx"
 +import { invariant } from '@epic-web/invariant'
@@ -117,7 +151,7 @@ The only new(-ish) feature of this code is the [**ternary operator**](https://ww
 
 We've used ternary operators [**before**](/code-monster/guides/epic-news/custom-components/hero-call-to-action#3--custom-background-colour), but not in this way.
 
-Here, we're checking if the entire `article` is truthy (i.e. is it an actual object or is it `null`?).
+Here, we're checking if the entire `article` is truthy (i.e. is it an actual object - in which case we found a matching article - or is it `null` - in which case we didn't?).
 
 If it is, we render the article title. If it's not, we render the `ArticleNotFound` component.
 

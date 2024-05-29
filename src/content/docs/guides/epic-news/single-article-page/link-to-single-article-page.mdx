@@ -11,7 +11,7 @@ Now that we have our single article page built, we need a way to link to it from
 
 ## Link to the single article page
 
-For every card on the news index page, we want to link to the single article page when the user clicks on the card.
+For every card on the news index page (e.g. `/news` or `/news/$category`), we want to link to the single article page when the user clicks on the card.
 
 - You should use the `Link` component from `'@remix-run/react'` to create a link to the single article page.
 - The link should incorporate the article ID into its URL (use a [**template literal string**](https://stackoverflow.com/questions/30372538/how-can-i-interpolate-jsx-with-an-expression-in-a-string) for this).
@@ -21,18 +21,126 @@ When you are ready, check out one possible solution below and compare it with yo
 
 ## Solution
 
-<MonsterReveal title="Link to single article page">
+<MonsterReveal title="1. Update `ArticleCard` component">
 
-### Link to single article page
+### 1. Update `ArticleCard` component
 
 To link to the single article page, we need to wrap the `ArticleCard` (or your own code's equivalent) in a `Link` component from `'@remix-run/react'`.
 
+This means that we will also need to pass a new prop to the `ArticleCard` component: `articleId`.
+
 We can then use a template literal string to incorporate the article ID into the URL:
 
-```diff lang="tsx" title="app/components/organisms/NewsIndexGrid.tsx"
+```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx" showLineNumbers collapse={23-49}
 +import { Link } from '@remix-run/react'
+import defaultIcon from '~/assets/png/ai-logo@2x.png'
+import businessIcon from '~/assets/png/business-logo@2x.png'
+import siteLogo from '~/assets/png/epic-news-logo@2x.png'
+import entertainmentIcon from '~/assets/png/games-logo@2x.png'
+import techIcon from '~/assets/png/tech-logo@2x.png'
+import { getArticleImgSrc } from '~/utils/misc.js'
 
-// ...Code omitted for brevity...
+interface ArticleCardProps {
++	articleId: string
+	title: string
+	categoryTitle?: string
+	imageId?: string
+	level?: 'primary' | 'secondary' | 'tertiary'
+}
+export default function ArticleCard({
++	articleId,
+	title,
+	categoryTitle,
+	imageId,
+	level = 'tertiary',
+}: ArticleCardProps) {
+	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
+	const categoryIcons: Record<string, string> = {
+		Technology: techIcon,
+		Business: businessIcon,
+		Entertainment: entertainmentIcon,
+	}
+
+	const categoryIcon = categoryTitle
+		? categoryIcons[categoryTitle]
+		: defaultIcon
+
+	const imageWrapperClasses = {
+		primary:
+			'hidden relative w-full object-cover sm:block sm:h-[12rem] md:h-[23rem]',
+		secondary:
+			'hidden relative w-full rounded-t-lg object-cover sm:block sm:h-[11rem]',
+		tertiary: 'hidden',
+	}
+
+	const textWrapperClasses = {
+		primary:
+			'h-[10rem] flex flex-col justify-between rounded-lg bg-muted p-6 sm:rounded-t-none md:h-[22.5rem]',
+		secondary:
+			'h-[10rem] flex flex-col justify-between bg-muted p-6 sm:rounded-b-lg sm:h-[11rem]',
+		tertiary:
+			'h-[10.25rem] flex flex-col rounded-lg justify-between bg-muted p-6',
+	}
+
+	return (
++		<Link to={`/article/${articleId}`} prefetch='intent'>
+			<div className={`${imageWrapperClasses[level]}`}>
+				<div className="absolute inset-0 ">
+					<img
+						className="h-full w-full rounded-t-md object-cover"
+						src={imageSrc}
+						alt={title}
+					/>
+				</div>
+			</div>
+			<div className={`${textWrapperClasses[level]}`}>
+				<h3 className={`line-clamp-2 text-2xl font-bold text-foreground`}>
+					{title}
+				</h3>
+				<div className="flex items-center gap-3">
+					<img src={categoryIcon} alt={categoryTitle} className="h-6 w-6" />
+					<span className="text-sm text-muted-foreground">
+						{categoryTitle || 'General News'}
+					</span>
+				</div>
+			</div>
++		</Link>
+	)
+}
+```
+
+By adding the `prefetch="intent"` attribute to the `Link` component, we can prefetch the single article page data when the user hovers over the link. This then speeds up the page load when the user clicks on the link.
+
+</MonsterReveal>
+
+<MonsterReveal title="2. Pass article ID from '/news' routes">
+
+### 2. Pass article ID from '/news' routes
+
+You will now need to pass the article ID to the `ArticleCard` component from the `/news` and `/news/$category` routes.
+
+In my example below, I had already extracted the main grid layout of these two pages to a custom `NewsIndexGrid` component.
+
+This is where I need pass the article ID to the `ArticleCard` component, but of course modify this solution to fit your own implementation.
+
+```diff lang="tsx" title="app/components/organisms/NewsIndexGrid.tsx" showLineNumbers collapse={1-16}
+
+import ArticleCard from '~/components/organisms/ArticleCard'
+
+interface IndexArticle {
+	title: string
+	images: {
+		id: string
+	}[]
+	id: string
+	category: {
+		name: string
+	} | null
+}
+interface NewsIndexGridProps {
+	articles: IndexArticle[]
+	categoryTitle?: string
+}
 
 export default function NewsIndexGrid({
 	articles,
@@ -48,29 +156,19 @@ export default function NewsIndexGrid({
 						const level =
 							index === 0 ? 'primary' : index < 5 ? 'secondary' : 'tertiary'
 
-						const formattedTitle = toTitleCase(article.category?.name || '')
-						const imageSrc = article.images.length
-							? getArticleImgSrc(article.images[0].id)
-							: siteLogo
-
 						return (
-+							<Link
-+								to={`/article/${article.id}`}
-+								key={article.id}
-+								className={`group col-span-1 ${level === 'secondary' ? 'sm:row-span-2' : ''} ${level === 'primary' ? 'sm:col-span-2 sm:row-span-4' : ''}`}
-+								prefetch="intent"
-+							>
+							<div
+								key={article.id}
+								className={`col-span-1 ${level === 'secondary' ? 'sm:row-span-2' : ''} ${level === 'primary' ? 'sm:col-span-2 sm:row-span-4' : ''}`}
+							>
 								<ArticleCard
++									articleId={article.id}
 									title={article.title}
-									categoryTitle={
-										article.category && isCategoryTitle(formattedTitle)
-											? formattedTitle
-											: 'General News'
-									}
-									image={imageSrc}
+									categoryTitle={categoryTitle}
+									imageId={article.images[0]?.id}
 									level={level}
 								/>
-+							</Link>
+							</div>
 						)
 					})}
 				</div>
@@ -78,8 +176,6 @@ export default function NewsIndexGrid({
 		</>
 	)
 }
-
-By adding the `prefetch="intent"` attribute to the `Link` component, we can prefetch the single article page data when the user hovers over the link. This then speeds up the page load when the user clicks on the link.
 
 ```
 

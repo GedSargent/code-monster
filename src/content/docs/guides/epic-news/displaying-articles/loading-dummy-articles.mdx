@@ -219,13 +219,13 @@ const WireframeBlock = ({ isPrimary = false }: WireframeBlockProps) => {
 }
 
 export default function NewsCategoryPage() {
-+  const { category, articles } = useLoaderData<typeof loader>();
++  const { categoryTitle, articles } = useLoaderData<typeof loader>();
 +
-+  console.log({ category, articles });
++  console.log({ categoryTitle, articles });
 
   return (
     <div>
-      <h1>{category}</h1>
+      <h1>{categoryTitle}</h1>
     </div>
   );
 }

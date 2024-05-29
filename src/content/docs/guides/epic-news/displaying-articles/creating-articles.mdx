@@ -210,7 +210,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 With this in place, we can now display the `category` name in the browser.
 
-Navigate down to the `ArticleRoute` component in the same file (around line 111), and add the JSX highlighted in green just below the `h2` element:
+Navigate down to the `ArticleRoute` component in the same file (around line 120), and add the JSX highlighted in green just below the `h2` element:
 
 ```diff lang="tsx" title="app/routes/users+/$username_+/articles.$articleId.tsx"
 export default function ArticleRoute() {
@@ -270,7 +270,7 @@ export default function ArticlesRoute() {
 
 ### Load `categories`
 
-Although this looks like the same article, it's not. We've now opened the article editor form, which is a separate route in the app.
+Although this is the same article data, it's actually slightly different. This is because we've now opened the article editor form, which is a separate route in the app.
 
 As such, Remix has loaded the article data again, but this time it's for the article editor form.
 

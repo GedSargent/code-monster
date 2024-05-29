@@ -103,11 +103,13 @@ export default function NewsCategoryPage() {
 }
 
 ```
-With this code saved, your `news/$category` should look something like this:
+With this code saved, visit your `/news` page in the browser, and click on a category (it doesn't matted which at this stage).
+
+Your `news/$category` should look something like this:
 
 :::caution[Different images]
 
-Your own article image is likely different from that shown below.
+Your own dummy article image is likely different from that shown below.
 
 This is because we are using a dummy placeholder image that is generated at random from a site called [**Lorem Picsum**](https://picsum.photos/).
 
@@ -118,10 +120,6 @@ We will soon be swapping these placeholder images for real images from the datab
 :::
 
 ![Displaying the first article](src/assets/webp/epic-news/first-article-unstyled.webp)
-
-Well, it doesn't look great! 
-
-At least we can see the first article's image, title and category displayed on the page. We will improve the styling later.
 
 ## JavaScript object destructuring
 
@@ -170,7 +168,7 @@ export default function NewsCategoryPage() {
 	console.log({ categoryTitle, articles })
 
 -	const firstArticle = articles[0]
-+	const { image, title, category } = articles[0]
++	const { image, title } = articles[0]
 
 	return (
 		<div className="container py-8 lg:py-16">
@@ -179,7 +177,7 @@ export default function NewsCategoryPage() {
 			<div>
 				<img src={image} alt={title} />
 				<h3>{title}</h3>
-				<span>{category}</span>
+				<span>{categoryTitle}</span>
 			</div>
 		</div>
 	)
@@ -216,7 +214,7 @@ export default function NewsCategoryPage() {
 
 	console.log({ categoryTitle, articles })
 
-	const { image, title, category } = articles[0]
+	const { image, title } = articles[0]
 
 	return (
 		<div className="container py-8 lg:py-16">
@@ -227,7 +225,7 @@ export default function NewsCategoryPage() {
 					<img src={image} alt={title} />
 					<h3>{title}</h3>
 
-					<span>{category}</span>
+					<span>{categoryTitle}</span>
 				</div>
 +			</div>
 		</div>
@@ -306,12 +304,14 @@ export default function NewsCategoryPage() {
 +							{title}
 +						</h3>
 +						<div className="flex items-center gap-3">
-+							<img src={techIcon} alt={category} className="h-6 w-6" />
-+							<span className="text-sm text-muted-foreground">{category}</span>
++							<img src={techIcon} alt={categoryTitle} className="h-6 w-6" />
++							<span className="text-sm text-muted-foreground">
++								{categoryTitle}
++							</span>
 +						</div>
 +					</div>
 +				</div>
-+			</div>
+			</div>
 		</div>
 	)
 }

@@ -17,27 +17,39 @@ Now that we have a news index page, we need a page for users to read the full ar
 
 ## Code challenge
 
-Remind yourself how we created a [**dynamic page**](/code-monster/guides/epic-news/routing/dynamic-routes#creating-a-dynamic-route) for the different news categories.
+Remind yourself how we created a [**dynamic page**](/code-monster/guides/epic-news/routing/dynamic-routes#creating-a-dynamic-route) for the different news categories. If you remember, we made the route dynamic by using the `$categoryId` route param.
 
-With this knowledge, create a new dynamic page for the single article page.
+In a similar way, we need to create another dynamic route, but this time for single articles. The article will be found by its `id` field.
 
-It should be accessible at the route `/article/$articleId`.
+With this knowledge, can you create a new dynamic route for the single article page?
 
-For the time being, just display a fake page title and the `articleId` in the page content.
+### Instructions
 
-You should `console.log` the fake `articleId` route param to verify that the dynamic route is working.
+- The new page should be accessible at the route `/article/$articleId` in the broswer.
+
+- The `articleId` doesn't need to be a real `id` from the database at the moment - remember that route params are dynamic and can be anything.
+
+- For the time being, just display a fake page title and the `articleId` in the page content.
+
+- You should `console.log` the fake `articleId` route param to verify that the dynamic route is working.
 
 After you've had a go at this yourself, check out the solution below.
 
-### Solution
+## Solution
 
-<MonsterReveal>
+<MonsterReveal title="1. Create a new route file">
 
-#### Create the single article page
+### 1. Create a new route file
 
 1. Create a new file in the `src/routes` directory called `article.$articleId.tsx`:
 
 ![Single article file](src/assets/webp/epic-news/single-article-file.webp)
+
+</MonsterReveal>
+
+<MonsterReveal title="2. Adding code">
+
+### 2. Adding code
 
 2. To display a fake article and the `articleId` in the page content, add the following code to the `article.$articleId.tsx` file:
 

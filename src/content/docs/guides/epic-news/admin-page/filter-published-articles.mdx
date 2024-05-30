@@ -48,14 +48,29 @@ If you have followed the previous tutorials, then you will have a file called `a
 
 At the very bottom of this file, add a new function called `getPublishedArticlesByCategory` that fetches only the articles that are published:
 
-```tsx title="app/models/article.server.tsx" {7}
-export async function getPublishedArticlesByCategory(category: string) {
+```diff lang="tsx" title="app/models/article.server.tsx" showLineNumbers collapse={3-49}
+import { prisma } from '~/utils/db.server.js'
+
+export async function getAllArticles() {
+	return await prisma.article.findMany({
+		select: {
+			id: true,
+			title: true,
+			category: { select: { name: true } },
+			images: { select: { id: true } },
+		},
+		orderBy: {
+			createdAt: 'desc',
+		},
+	})
+}
+
+export async function getFilteredArticles(category: string) {
 	return await prisma.article.findMany({
 		where: {
 			category: {
 				slug: category,
 			},
-			isPublished: true,
 		},
 		select: {
 			id: true,
@@ -69,6 +84,42 @@ export async function getPublishedArticlesByCategory(category: string) {
 		take: 9, // Limits the number of articles returned
 	})
 }
+
+export async function getSingleArticle(articleId: string) {
+	return await prisma.article.findUnique({
+		where: { id: articleId },
+		select: {
+			id: true,
+			title: true,
+			content: true,
+			category: { select: { name: true } },
+			owner: { select: { name: true } },
+			images: { select: { id: true } },
+		},
+	})
+}
+
++export async function getPublishedArticlesByCategory(category: string) {
++	return await prisma.article.findMany({
++		where: {
++			category: {
++				slug: category,
++			},
++			isPublished: true,
++		},
++		select: {
++			id: true,
++			title: true,
++			category: { select: { name: true } },
++			images: { select: { id: true } },
++		},
++		orderBy: {
++			createdAt: 'desc',
++		},
++		take: 9, // Limits the number of articles returned
++	})
++}
+
 ```
 
 As you can see, this is virtually identical to the `getFilteredArticles` function we wrote earlier, but with an additional `where` clause that filters out articles that are not published.
@@ -123,21 +174,21 @@ Can you modify these routes to display only published articles?
 
 1. Open the file at `app/routes/news.$category.tsx` and modify the `loader` function to fetch only published articles:
 
-```tsx title="app/routes/news.$category.tsx" showLineNumbers
-import { getPublishedArticlesByCategory } from '#app/models/article.server.js'
+```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers
 import { invariant } from '@epic-web/invariant'
 import { json, type LoaderFunctionArgs } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
+import { toTitleCase } from '~/utils/stringUtils'
 import NewsIndexGrid from '~/components/organisms/NewsIndexGrid.js'
-import { toTitleCase } from '~/utils/stringHelpers.js'
++import { getPublishedArticlesByCategory } from '~/models/article.server.js'
 
 export async function loader({ params }: LoaderFunctionArgs) {
 	const { category } = params
 
-	invariant(typeof category === 'string', 'Category not found')
+	invariant(typeof category === 'string', 'No category provided')
 	const categoryTitle = toTitleCase(category)
 
-	const filteredArticles = await getPublishedArticlesByCategory(category)
++	const filteredArticles = await getPublishedArticlesByCategory(category)
 
 	return json({ categoryTitle, filteredArticles })
 }
@@ -146,15 +197,11 @@ export default function NewsCategoryPage() {
 	const { categoryTitle, filteredArticles } = useLoaderData<typeof loader>()
 
 	return (
-		<div className="container">
-			{filteredArticles.length ? (
-				<NewsIndexGrid
-					articles={filteredArticles}
-					categoryTitle={categoryTitle}
-				/>
-			) : (
-				<h2 className="mb-16 text-h2">No articles found - {categoryTitle}</h2>
-			)}
+		<div className="container py-16">
+			<NewsIndexGrid
+				articles={filteredArticles}
+				categoryTitle={categoryTitle}
+			/>
 		</div>
 	)
 }
@@ -162,19 +209,16 @@ export default function NewsCategoryPage() {
 
 </MonsterReveal>
 
-<MonsterReveal title="2. Modify `app/routes/article/$articleId` route">
+<MonsterReveal title="2. Hide draft single articles">
 
-### 2. Modify `app/routes/article/$articleId` route
+### 2. Hide draft single articles
 
-For this solution, we just need to update the `getSingleArticle` function in `app/models/article.server.tsx` to fetch only published articles:
+For this solution, we need to update the `getSingleArticle` function in `app/models/article.server.tsx` to fetch only published articles:
 
-```diff lang="tsx" title="app/models/article.server.tsx"
+```tsx title="app/models/article.server.tsx" ins=", isPublished: true"
 export async function getSingleArticle(articleId: string) {
 	return await prisma.article.findUnique({
-		where: {
-			id: articleId,
-+			isPublished: true
-		},
+		where: { id: articleId, isPublished: true	},
 		select: {
 			id: true,
 			title: true,
@@ -188,6 +232,34 @@ export async function getSingleArticle(articleId: string) {
 ```
 
 Our code in the `app/routes/article.$articleId.tsx` file will remain the same, as we are already using the `getSingleArticle` function to fetch the article data, and showing a fallback UI if the article is not found.
+
+You can test this by:
+
+1. Opening a split terminal in your project directory by clicking the button below:
+
+![Split terminal button](src/assets/webp/epic-news/split-terminal-button.webp)
+
+2. In your new terminal panel, fire up the Prisma Studio server:
+
+```bash
+npx prisma studio
+```
+
+3. Once Prisma Studio has opened in your browser, open the `Article` table and find an article where `isPublished` is set to `false`.
+
+		Double-click into the `id` field of the unpublished article and copy its value.
+
+![Select draft article id](src/assets/webp/epic-news/select-draft-article-id.webp)
+
+Then navigate to the `/article/$articleId` route in your browser, replacing `$articleId` with the actual id of the article. For example, if my unplublished article had an ID of `123456`, I would visit:
+
+```bash mark="/123456"
+http://localhost:3000/article/123456
+```
+
+If the article is unpublished, you should see the fallback UI displayed:
+
+![Unpublished article fallback UI](src/assets/webp/epic-news/unpublished-article-fallback-ui.webp)
 
 </MonsterReveal>
 :::

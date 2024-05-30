@@ -22,21 +22,12 @@ For the time being, we will make this page available to everyone. We can grant a
 - Create a new route `/admin-review` that displays a list of articles that are still in `draft` status.
 - What will you display to the user if there are no articles to review? How will you handle this?
 - When a user clicks on an article, they should be able to view the article in full.
-- Add a 'Publish' button to each article that changes the status to `published`.
-- Update the code in the `/news` routes to only display articles that are `published`.
-- Update the code in the `/article/$articleId` to display a new 'Published on' date if the article is published.
-- Show a message to the user if they try to access an article that is not published.
-
-#### EXTRA CREDIT 🚀 (optional)
-
-Rather than simply display a message, if a user tries to access the `/article/$articleId` route for an article that is not published, redirect them to the `/news` page and display a toast notification informing them that the article is being reviewed.
+- Add a button that toggles an article's status between published and unpublished.
 
 ### Hints
 
 - Look at the layout of the `/users/$username/articles` page for ideas on how to lay this page out
-- Think carefully how you will make the 'Publish' button work. Rememeber there are two fields to update: `isPublished` (boolean) and `publishedAt` (date).
-- Once this functionality is in place, you should update the `/news` parent and child routes to only display articles that are published.
-- You will need to update the `/article/$articleId` route to display the `publishedAt` field in a human-friendly format. You can find an example of date formatting in the `/users/$username/articles` page.
+- Think carefully how you will make the 'Publish' button work. Remember there are two fields to update: `isPublished` (boolean) and `publishedAt` (date).
 
 ## Solution
 

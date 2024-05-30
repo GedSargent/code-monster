@@ -44,9 +44,19 @@ Rather than simply display a message, if a user tries to access the `/article/$a
 
 ### 1. Create the `/admin-review` route
 
-The first thing I will need is a new parent route that will display a list of all articles.
+The first thing I will need is a new parent route to display a list of all articles.
 
-This is straightforward. In `/admin-review`, I'll just set up a `loader` function that returns the `id`, `title` and `isPublished` values for each article:
+This is straightforward. Firstly, I need to create a new file inside `app/routes` called `admin-review.tsx`:
+
+![Create admin review](src/assets/webp/epic-news/create-admin-review.webp)
+
+</MonsterReveal>
+
+<MonsterReveal title="2. Add a `loader` function">
+
+### 2. Add a `loader` function
+
+In `app/routes/admin-review.tsx`, I'll set up a `loader` function that returns the `id`, `title` and `isPublished` values for each article:
 
 ```tsx title="app/routes/admin-review.tsx"
 import { json } from '@remix-run/node'
@@ -60,6 +70,12 @@ export async function loader() {
 	return json({ allArticles })
 }
 ```
+
+</MonsterReveal>
+
+<MonsterReveal title="3. Copy UI layout">
+
+### 3. Copy the UI layout
 
 I'll then use the same layout as the `/users/$username/articles` page to display the list of articles.
 
@@ -136,13 +152,25 @@ export async function loader() {
 +}
 ```
 
-At first, of course, all the articles will show a red 'D' to signify 'Draft'.
+At first, of course, all the articles will show a red 'D' to signify 'Draft':
 
-I can always customise this later if I want.
+![Initial admin review](src/assets/webp/epic-news/initial-admin-review.webp)
 
-I'll also create a child index route that displays a message asking the user to select an article to review:
+This is to be expected, and I can always customise it later if I want.
 
-```tsx title="app/routes/admin-review/index.tsx"
+</MonsterReveal>
+
+<MonsterReveal title="4. Child admin-review index route">
+
+### 4. Create a child admin-review index route
+
+I'll also create a new child index route file at `app/routes/admin-review._index.tsx`:
+
+![Create admin review index](src/assets/webp/epic-news/create-admin-review-index.webp)
+
+This will display a message asking the user to select an article to review:
+
+```tsx title="app/routes/admin-review._index.tsx"
 	export default function ArticlesIndexRoute() {
 		return (
 			<div className="container pt-12">
@@ -162,15 +190,19 @@ This looks good, but of course if I click on any of the articles titles, I'll ge
 
 Let fix that now.
 
-<MonsterReveal title="2. Server-side code">
+<MonsterReveal title="5. Server-side code">
 
-### 2. Server-side code
+### 5. Server-side code
 
 The first thing we will do is get the backend logic set up.
 
 (I could place all of the code into a single route file, but I prefer to break it up into smaller files for easier maintenance.)
 
-Remembering that adding a `.server` suffix to the file name will make it a server route, I'll create a new child route called `/__admin-review.$articleId.server.tsx`:
+Remembering that adding a `.server` suffix to the file name will make it a server route, I'll create a new child route at `app/routes/__admin-review.$articleId.server.tsx`:
+
+![Create admin review server file](src/assets/webp/epic-news/create-admin-review-server-file.webp)
+
+Once set up, I'll add the code below to it:
 
 ```tsx title="app/routes/__admin-review.$articleId.server.tsx"
 import { prisma } from '#app/utils/db.server.js'
@@ -288,15 +320,21 @@ export async function action({ request }: ActionFunctionArgs) {
 
 </MonsterReveal>
 
-<MonsterReveal title="3. Create `/admin-review.$articleId.tsx`">
+<MonsterReveal title="6. Create `/admin-review.$articleId.tsx`">
 
-### 3. Create the `/admin-review/$articleId` route
+### 6. Create the `/admin-review/$articleId` route
 
 I'll now create a new child route that will display the full article, together with a button that will toggle between saying 'Publish' or 'Unpublish', depending on the article's status.
 
+Again, I'll start by creating a new file at `app/routes/admin-review.$articleId.tsx`:
+
+![Create admin-review-article-id](src/assets/webp/epic-news/create-admin-review-article-id.webp)
+
+Next, I'll add the code.
+
 This is a long snippet, but don't worry - we will go through it in class together.
 
-Here is the full code for the `/admin-review/$articleId` route:
+Here is the full code for the `app/routes/admin-review.$articleId.tsx` route file:
 
 ```tsx title="app/routes/admin-review/$articleId.tsx"
 import { getFormProps, useForm } from '@conform-to/react'
@@ -317,12 +355,12 @@ export default function AdminReviewRoute() {
 	return (
 		<div className="absolute inset-0 flex flex-col px-10">
 			<h2 className="mb-2 pt-12 text-h2 lg:mb-6">{data.article.title}</h2>
-			<div className="mb-4 flex gap-4">
+			<div className="mb-4 flex  justify-between gap-4">
 				<p className="w-fit rounded-lg bg-card px-4 py-2 text-sm text-card-foreground">
 					{data.article.category?.name ?? 'General News'}
 				</p>
 				<p
-					className={`w-fit rounded-lg ${data.article.isPublished ? 'bg-green-800' : 'bg-destructive'} px-4 py-2 text-sm text-card-foreground`}
+					className={`w-fit rounded-lg ${data.article.isPublished ? 'bg-green-800' : 'bg-destructive'} px-4 py-2 text-xs font-bold text-card-foreground`}
 				>
 					{data.article.isPublished ? 'Published' : 'Awaiting review'}
 				</p>

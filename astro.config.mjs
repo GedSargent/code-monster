@@ -50,7 +50,55 @@ export default defineConfig({
       },
       sidebar: [
         {
+          label: "Programming Principles",
+          collapsed: true,
+          items: [
+            {
+              label: "Harmony Music Academy",
+              items: [
+                {
+                  label: "Design Brief",
+                  link: "guides/programming/harmony-music"
+                },
+                {
+                  label: "Planning algorithms",
+                  link: "guides/programming/planning-algorithms"
+                },
+                {
+                  label: "Figma developer mode",
+                  link: "guides/programming/figma-developer-mode"
+                },
+                {
+                  label: "Form inputs",
+                  link: "guides/programming/form-inputs"
+                },
+                {
+                  label: "Linking JavaScript",
+                  link: "guides/programming/linking-javascript"
+                },
+                {
+                  label: "From algorithm to comment planning",
+                  link: "guides/programming/comment-planning"
+                },
+                {
+                  label: "Capturing form data",
+                  link: "the-form-object",
+                },
+                {
+                  label: "Displaying user information",
+                  link: "displaying-user-information",
+                },
+                {
+                  label: "Formatting text",
+                  link: "formatting-text",
+                }
+              ]
+            }
+          ]
+        },
+        {
           label: "React 101",
+          collapsed: true,
           items: [
             {
               label: "⚛️ Getting started",

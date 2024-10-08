@@ -51,14 +51,14 @@ export default defineConfig({
       sidebar: [
         {
           label: "Programming Principles",
-          collapsed: true,
+          collapsed: false,
           items: [
             {
               label: "Harmony Music Academy",
               items: [
                 {
                   label: "Design Brief",
-                  link: "guides/programming/harmony-music"
+                  link: "guides/programming/harmony-music/design-brief"
                 },
                 {
                   label: "Planning algorithms",

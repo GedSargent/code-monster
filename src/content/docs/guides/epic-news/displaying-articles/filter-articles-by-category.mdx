@@ -108,7 +108,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 	const { category } = params
 
 	invariant(typeof category === 'string', 'Category not found')
-	const categoryTitle = toTitleCase(category)	
+	const categoryTitle = toTitleCase(category)
 
 	const filteredArticles = await prisma.article.findMany({
 +		where: {
@@ -203,7 +203,7 @@ import { useLoaderData } from '@remix-run/react'
 import { prisma } from '~/utils/db.server.ts'
 -import { getArticleImgSrc } from '~/utils/misc.tsx'
 import { toTitleCase } from '~/utils/stringUtils'
-+import ArticleCard from '~/components/organisms/ArticleCard.js'
++import ArticleCard from '~/components/organisms/ArticleCard.tsx'
 ```
 
 (Remember you can quickly remove unused imports in VS Code by pressing <MonsterKbd>SHIFT + ALT + O</MonsterKbd> on Windows, or <MonsterKbd>SHIFT + OPT + O</MonsterKbd> on Mac.)
@@ -407,7 +407,7 @@ If you haven't got a `news._index.tsx` file, you can create one in the `app/rout
 import { json, useLoaderData } from '@remix-run/react'
 +import { getAllArticles } from '~/models/article.server.tsx'
 +import { toTitleCase } from '~/utils/stringUtils.js'
-+import ArticleCard from '~/components/organisms/ArticleCard.js'
++import ArticleCard from '~/components/organisms/ArticleCard.tsx'
 
 +export async function loader() {
 +	const allArticles = await getAllArticles()
@@ -425,7 +425,7 @@ Now that I have the articles loaded, I can `.map` through them on the page:
 ```diff lang="tsx" title="app/routes/news._index.tsx" showLineNumbers collapse={}
 import { json, useLoaderData } from '@remix-run/react'
 import { getAllArticles } from '~/models/article.server.tsx'
-import ArticleCard from '~/components/organisms/ArticleCard.js'
+import ArticleCard from '~/components/organisms/ArticleCard.tsx'
 
 export async function loader() {
 	const allArticles = await getAllArticles()
@@ -558,7 +558,7 @@ export default function ArticleCard({
 <TabItem label="NewsIndexGrid.tsx">
 
 ```tsx title="~/components/organisms/NewsIndexGrid.tsx"
-import ArticleCard from '~/components/organisms/ArticleCard'
+import ArticleCard from '~/components/organisms/ArticleCard.tsx'
 
 interface IndexArticle {
 	title: string

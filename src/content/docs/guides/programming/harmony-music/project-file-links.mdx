@@ -1,0 +1,325 @@
+---
+title: Project file links
+description: Link HTML, CSS, and JavaScript files together
+---
+
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Introduction
+
+In this guide, you will learn how to link HTML, CSS, and JavaScript files together in a project.
+
+We will cover:
+
+- The roles and responsibilities of HTML, CSS, and JavaScript
+- Why separating files is important
+- How to link an external CSS file to an HTML document
+- How to link an external JavaScript file to an HTML document
+
+## HTML, CSS and JavaScript: roles and responsibilities
+
+In a web project, HTML, CSS, and JavaScript each have different roles and responsibilities.
+
+Look carefully at what these are below.
+
+:::note
+
+![The separation of concerns](src/assets/png/programming/html-css-javascript-infographic.png)
+
+- **HTML**: Contains the **structure and content** of your web page.
+
+  It is like the bluprint of a car that explains what different parts are needed and where they should go.
+  
+  If we know that we want to add a new element on our page, we know to look in the HTML file.
+
+- **CSS**: Describes the **styles** of your web page.
+
+  CSS tells the browser how your HTML elements should look, like the paint on a car.
+  
+  If we want to change the color of a button, we know to look in the CSS file.
+
+- **JavaScript**: Contains the **interactivity and functionality** of your web page.
+
+  JavaScript makes your web page dynamic and interactive, like the engine of a car.
+  
+  If we want to capture user input or perform calculations, we know to look in the JavaScript file.
+  :::
+
+We could, in theory, throw everything into one huge HTML file. The problem with this approach is that it becomes difficult for coders to manage and maintain the code as it grows.
+
+Instead, it is much better practice to separate your HTML, CSS, and JavaScript into different files, and then link them together using special HTML tags.
+
+:::caution[Important]
+
+## Why separate files?
+
+Separating your HTML, CSS, and JavaScript into separate files is good coding practice for several reasons:
+
+### 1. Readability 
+
+It's much easier to read and understand your code when it's separated into different files.
+
+### 2. Reusability
+
+You can reuse CSS and JavaScript files across multiple HTML files.
+
+### 3. Maintenance
+
+It's easier to maintain and update your code when it's separated into different files.
+
+### 4. Collaboration
+
+It's easier to collaborate with others when your code is separated into different files.
+
+:::
+
+## Linking an external CSS file
+
+First, open your project folder in VS Code. Look for the `index.html` file and click to open this.
+
+You should see the code below. Feel free to expand the snippet below to see the full code.
+
+```html title="index.html" collapse={7-46} showLineNumbers
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Harmony | Sign Up</title>
+  </head>
+  <body>
+    <form class="form-wrapper">
+      <div class="form-section">
+        <div class="form-field">
+          <label for="email" class="form-label">Email*</label>
+          <input
+            name="email"
+            type="text"
+            class="form-input"
+            placeholder="Your email"
+          />
+        </div>
+        <div class="form-field">
+          <label for="level" class="form-label">Level*</label>
+          <select name="level" class="form-input">
+            <option value="basic">Basic</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="hoursPerWeek" class="form-label">Hours per week*</label>
+          <input
+            name="hours-per-week"
+            type="number"
+            class="form-input"
+            placeholder="How many?"
+          />
+        </div>
+
+        <button type="submit" class="submit-btn">Sign up</button>
+      </div>
+
+      <div class="form-section">
+        <img
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+      </div>
+    </form>
+  </body>
+</html>
+```
+
+To link an external CSS file to an HTML document, you need to use the `<link>` tag in the `<head>` section of your HTML document.
+
+Just below the `<title>` tag, on line 5, add the following code:
+
+```html
+<link rel="stylesheet" href="./index.css" />
+```
+
+:::note
+
+### Understanding the `<link>` tag
+
+- The `rel` attribute specifies the **rel**ationship between the current document and the linked document. In this case, it's a stylesheet.
+- The `href` attribute specifies the **h**ypertext **ref**erence of the linked document. In this case, it's the path to the CSS file inside the project folder.
+
+```html mark="rel="stylesheet"" mark="href="./index.css""
+<link rel="stylesheet" href="./index.css" />
+```
+
+:::
+
+Your new code should look like this:
+
+```diff lang="html" title="index.html" collapse={8-47} showLineNumbers
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Harmony | Sign Up</title>
++    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <form class="form-wrapper">
+      <div class="form-section">
+        <div class="form-field">
+          <label for="email" class="form-label">Email*</label>
+          <input
+            name="email"
+            type="text"
+            class="form-input"
+            placeholder="Your email"
+          />
+        </div>
+        <div class="form-field">
+          <label for="level" class="form-label">Level*</label>
+          <select name="level" class="form-input">
+            <option value="basic">Basic</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="hoursPerWeek" class="form-label">Hours per week*</label>
+          <input
+            name="hours-per-week"
+            type="number"
+            class="form-input"
+            placeholder="How many?"
+          />
+        </div>
+
+        <button type="submit" class="submit-btn">Sign up</button>
+      </div>
+
+      <div class="form-section">
+        <img
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+      </div>
+    </form>
+  </body>
+</html>
+```
+
+Save your changes, and look back at your browser. With the CSS file linked, you should see the styles applied to your HTML document:
+
+![Harmony Music Academy sign-up form with CSS styles applied](src/assets/webp/programming/harmony-music/form-with-css.webp)
+
+## Linking an external JavaScript file
+
+To link an external JavaScript file to an HTML document, you need to use the `<script>` tag at the end of your HTML document, just before the closing `</body>` tag.
+
+:::note
+
+The script tag we are about to insert will look like this:
+
+```html
+<script type="module" src="./index.js"></script>
+```
+
+### Understanding the `<script>` tag
+
+Let's break down the `<script>` tag:
+
+- The `type` attribute specifies the **type** of script. In this case, it's a module script. This means that we will be able to `import` other modules (JavaScript files) into this main file of code.
+- The `src` attribute specifies the **s**ou**rc**e of the script. In this case, it's the path to the JavaScript file inside the project folder.
+
+```html mark="type="module"" mark='src="./index.js"'
+<script type="module" src="./index.js"></script>
+```
+
+:::
+
+Add the following code just before the closing `</body>` tag:
+
+```diff lang="html" title="index.html" collapse={8-45} showLineNumbers
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Harmony | Sign Up</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <form class="form-wrapper">
+      <div class="form-section">
+        <div class="form-field">
+          <label for="email" class="form-label">Email*</label>
+          <input
+            name="email"
+            type="text"
+            class="form-input"
+            placeholder="Your email"
+          />
+        </div>
+        <div class="form-field">
+          <label for="level" class="form-label">Level*</label>
+          <select name="level" class="form-input">
+            <option value="basic">Basic</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="hoursPerWeek" class="form-label">Hours per week*</label>
+          <input
+            name="hours-per-week"
+            type="number"
+            class="form-input"
+            placeholder="How many?"
+          />
+        </div>
+
+        <button type="submit" class="submit-btn">Sign up</button>
+      </div>
+
+      <div class="form-section">
+        <img
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+      </div>
+    </form>
+
++    <script type="module" src="./index.js"></script>
+  </body>
+</html>
+```
+
+Save your changes, and look back at your browser. With the JavaScript file linked, you should see an alert has appeared on your page:
+
+![Harmony Music Academy sign-up form with JavaScript alert](src/assets/webp/programming/harmony-music/form-with-js.webp)
+
+:::tip[Challenge]
+
+With this in place, have a go at the challenges below:
+
+1. Can you work out where this JavaScript alert is coming from? There's a clue in the message it gives you!
+2. Change the alert message to something else. What happens when you refresh the page?
+3. Replace the alert with a `console.log` message instead. What happens when you refresh the page now?
+4. Can you find the `console.log` message in your browser's developer tools? Use the internet to search for how to do this if you're not sure!
+
+🚀 EXTRA CREDIT - Advanced CSS!
+
+Try narrowing the browser window to see how the form responds. What happens when you make the window very small?
+
+1. Can you use CSS to make the side of the form with the logo in disappear when the window is below 640px wide?
+
+![Harmony Music Academy sign-up form with logo hidden](src/assets/gif/programming/harmony-music/logo-hidden.gif)
+
+TIP: You will need to research:
+
+- media queries in CSS to target different screen widths.
+- how to use the `display` property to hide the form section.
+
+#### Useful resources
+
+- [Scrimba: Media Query Basics](https://v2.scrimba.com/learn-responsive-web-design-c029/~01b)
+- [MDN: Media queries](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Media_queries)
+- [MDN: CSS display property](https://developer.mozilla.org/en-US/docs/Web/CSS/display)
+
+<hr />
+
+2. Can you make the Harmony Music Logo appear at the top of the form on mobile screens (i.e. when the window is below 640px wide), but hide it on desktop screens?
+
+![Harmony Music Academy sign-up form with logo at the top](src/assets/gif/programming/harmony-music/logo-top.gif)
+
+:::

@@ -1,0 +1,78 @@
+---
+title: Client brief
+description: Understanding the design brief
+---
+
+import { Card } from '@astrojs/starlight/components';
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Introduction
+
+Harmony Music is an online teaching service. They specialise in music tution at both beginner and advanced levels.
+
+![MyBrilliantArticles](src/assets/svg/harmony-music/harmony-music-academy-logo.svg)
+
+## The requirements
+
+The product manager of Harmony Music Academy has approached you with a job. Read through their brief carefully. 
+
+<Card title="Harmony Music Academy - Client Brief" icon="seti:todo">
+
+![Harmony product manager](src/assets/jpg/programming/product-manager.jpg)
+
+*We need a sign-up page for our website. It should let new subscribers register by providing their email address and the number of hours they wish to study per week.*
+
+*Don't worry about getting users to create a password here. This will be handled on a different page of the website entirely.*
+
+*We categorise students into two levels: beginner and advanced. New subscribers will need to pick which of the two levels they want to join at. Make sure they can do this from the sign-up form.*
+
+*We only allow beginners to request up to 5 hours of tuition per week, but advanced students can request up to 10 hours per week.*
+
+*We only want people who are serious about music to join, so subscribers shouldn't be able to sign up unless they specify at least one hour of tuition per week.*
+
+*Our tuition fees are set at £12.25 per hour for beginners and £15.50 per hour for advanced levels. After successfully submitting the form, we'd like subscribers to be presented with a summary of their request along with the total weekly cost they will be charged. Please show the total cost in GBP, and on the same page as they signed up on.*
+
+</Card>
+
+:::tip[Challenge]
+
+## Breaking down requirements
+
+One of the first challenges of this project is to break down the requirements into smaller, more manageable tasks.
+
+Your first task is to simply write a list of the key features and requirements of the sign-up page.
+
+This will help you to understand the scope of the project and plan your approach.
+
+Here are some questions to consider:
+
+- What are the key features of the sign-up page?
+- What are the different user journeys that need to be supported?
+- What are the validation rules that need to be enforced?
+- How should the total cost be calculated and displayed?
+
+Spend 10 minutes on this, and then check your answers against the solution below.
+
+<MonsterReveal>
+1. The sign-up form should capture the user's email address, their level (beginner or advanced), and the number of hours they wish to study per week
+2. Beginners can request a maximum of 5 hours tuition per week
+3. Advanced students can request up to 10 hours per week
+4. All subscribers must specify at least one hour of tuition per week
+5. Before proceeding, we will need to validate that the user has selected a level, that they have provided an email address, that they have specified at least one hour of study, and that the number of hours requested is within the allowed range
+6. Beginner levels are charged at £12.25 per hour, advanced levels are charged at £15.50 per hour
+7. The total cost will be calculated by multiplying the number of hours requested by the hourly rate
+8. Total cost should be displayed in GBP, and on the same page as the sign-up form
+9. Upon successful submission of the form, the subscriber should be shown a summary of their request and the total cost
+</MonsterReveal>
+
+:::
+
+## Recap
+
+In this article, we've introduced the design brief for Harmony Music Academy's sign-up page.
+
+We've shown how important it is to break down project briefs into small, structured tasks to help you plan your approach to the project.
+
+## Next steps
+
+In the next article, we'll look at how to plan the logic of the sign-up page and how to structure the code to meet the requirements of the design brief.

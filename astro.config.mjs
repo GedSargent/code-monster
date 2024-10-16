@@ -57,40 +57,44 @@ export default defineConfig({
               label: "Harmony Music Academy",
               items: [
                 {
-                  label: "Design Brief",
-                  link: "guides/programming/harmony-music/design-brief"
+                  label: "Client Brief",
+                  link: "guides/programming/harmony-music/client-brief"
                 },
                 {
-                  label: "Planning algorithms",
-                  link: "guides/programming/planning-algorithms"
+                  label: "Algorithm planning",
+                  link: "guides/programming/harmony-music/algorithm-planning"
                 },
                 {
-                  label: "Figma developer mode",
-                  link: "guides/programming/figma-developer-mode"
+                  label: "Project file links",
+                  link: "guides/programming/harmony-music/project-file-links"
                 },
                 {
-                  label: "Form inputs",
-                  link: "guides/programming/form-inputs"
-                },
-                {
-                  label: "Linking JavaScript",
-                  link: "guides/programming/linking-javascript"
-                },
-                {
-                  label: "From algorithm to comment planning",
-                  link: "guides/programming/comment-planning"
+                  label: "From algorithm to comment plans",
+                  link: "guides/programming/harmony-music/comment-planning"
                 },
                 {
                   label: "Capturing form data",
-                  link: "the-form-object",
+                  link: "guides/programming/harmony-music/capturing-form-data",
                 },
                 {
-                  label: "Displaying user information",
-                  link: "displaying-user-information",
+                  label: "Debugging",
+                  link: "guides/programming/harmony-music/debugging",
                 },
                 {
-                  label: "Formatting text",
-                  link: "formatting-text",
+                  label: "Form validation",
+                  link: "guides/programming/harmony-music/form-validation",
+                },
+                {
+                  label: "Error display",
+                  link: "guides/programming/harmony-music/error-display",
+                },
+                {
+                  label: "Displaying data",
+                  link: "guides/programming/harmony-music/displaying-data",
+                },
+                {
+                  label: "Styling output with CSS",
+                  link: "guides/programming/harmony-music/styling-output-with-css",
                 }
               ]
             }

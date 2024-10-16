@@ -1,0 +1,72 @@
+---
+title: Algorithm planning
+description: Using flowcharts to plan algorithms
+---
+
+import { Card } from '@astrojs/starlight/components';
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## The problem
+
+Remind yourself of the problem you are trying to solve.
+
+Harmony Music is an online teaching service. They specialise in music tuition at both beginner and advanced levels.
+
+They have approached you to build a sign-up page for their website. It should meet the following requirements:
+
+<Card title="Harmony Music Sign-up Page">
+
+1. The sign-up form should capture the user's email address, their level (beginner or advanced), and the number of hours they wish to study per week
+2. Beginners can request a maximum of 5 hours tuition per week
+3. Advanced students can request up to 10 hours per week
+4. All subscribers must specify at least one hour of tuition per week
+5. Before proceeding, we will need to validate that the user has selected a level, that they have provided an email address, that they have specified at least one hour of study, and that the number of hours requested is within the allowed range
+6. Beginner levels are charged at £12.25 per hour, advanced levels are charged at £15.50 per hour
+7. The total cost will be calculated by multiplying the number of hours requested by the hourly rate
+8. Total cost should be displayed in GBP, and on the same page as the sign-up form
+9. Upon successful submission of the form, the subscriber should be shown a summary of their request and the total cost
+
+</Card>
+
+## Flowchart planning
+
+With your list of requirements in hand, you can plan the flow of the sign-up page logic.
+
+Head over to [Figma](https://www.figma.com) and create a flowchart from scratch that plots out the logic of the sign-up page.
+
+:::note
+
+Remember the different blocks used in a flowchart:
+
+- Start/End
+- Process
+- Decision
+- Input/Output
+
+![Common flowchart blocks](src/assets/png/programming/flow-chart-blocks.png);
+
+FigJam's shape library has a range of flowchart shapes you can use, and you can use connectors to link them together.
+:::
+
+### Solution
+
+Once you have completed your flowchart, check your work against the solution below.
+
+What have you done differently? What have you done the same?
+
+<MonsterReveal title="Sign-up logic">
+
+![Sign-up logic flowchart](src/assets/png/programming/harmony-music-sign-up-logic.png)
+
+</MonsterReveal>
+
+## Recap
+
+In this step, you have:
+
+- Reminded yourself of the requirements for the Harmony Music sign-up page
+- Planned the logic of the sign-up page using a flowchart
+
+## Next steps
+
+In the next step, you will link together the HTML, CSS and JavaScript files required for the sign-up page.

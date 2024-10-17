@@ -68,34 +68,34 @@ export default defineConfig({
                   label: "Project file links",
                   link: "guides/programming/harmony-music/project-file-links"
                 },
-                {
-                  label: "From algorithm to comment plans",
-                  link: "guides/programming/harmony-music/comment-planning"
-                },
-                {
-                  label: "Capturing form data",
-                  link: "guides/programming/harmony-music/capturing-form-data",
-                },
-                {
-                  label: "Debugging",
-                  link: "guides/programming/harmony-music/debugging",
-                },
-                {
-                  label: "Form validation",
-                  link: "guides/programming/harmony-music/form-validation",
-                },
-                {
-                  label: "Error display",
-                  link: "guides/programming/harmony-music/error-display",
-                },
-                {
-                  label: "Displaying data",
-                  link: "guides/programming/harmony-music/displaying-data",
-                },
-                {
-                  label: "Styling output with CSS",
-                  link: "guides/programming/harmony-music/styling-output-with-css",
-                }
+                // {
+                //   label: "From algorithm to comment plans",
+                //   link: "guides/programming/harmony-music/comment-planning"
+                // },
+                // {
+                //   label: "Capturing form data",
+                //   link: "guides/programming/harmony-music/capturing-form-data",
+                // },
+                // {
+                //   label: "Debugging",
+                //   link: "guides/programming/harmony-music/debugging",
+                // },
+                // {
+                //   label: "Form validation",
+                //   link: "guides/programming/harmony-music/form-validation",
+                // },
+                // {
+                //   label: "Error display",
+                //   link: "guides/programming/harmony-music/error-display",
+                // },
+                // {
+                //   label: "Displaying data",
+                //   link: "guides/programming/harmony-music/displaying-data",
+                // },
+                // {
+                //   label: "Styling output with CSS",
+                //   link: "guides/programming/harmony-music/styling-output-with-css",
+                // }
               ]
             }
           ]

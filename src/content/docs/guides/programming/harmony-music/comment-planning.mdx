@@ -8,3 +8,139 @@ import MonsterReveal from "src/components/MonsterReveal.astro";
 
 ## Introduction
 
+Now that you have your algorithm, it's time to transfer it into comment steps to help you code.
+
+This is a crucial step in the coding process, as it helps you to translate your algorithm plan into small, manageable coding steps.
+
+It can also help you to identify any potential issues or bugs in your algorithm before you start coding.
+
+## Comment planning
+
+### What are comments? What is a comment plan?
+
+Comments are lines of text in your code that are not executed by the computer.
+
+They are used to explain to humans what the code is doing, and why it is doing it.
+
+For example:
+
+```javascript
+function toTitleCase(sentence) {
+  // Split the sentence into an array of separate words
+  let words = sentence.split(" ");
+  
+  // Loop through each word
+  for (let i = 0; i < words.length; i++) {
+    // Capitalize the first letter of each word
+    words[i] = words[i][0].toUpperCase() + words[i].slice(1);
+  }
+  
+  // Join the words back together
+  let titleCasedSentence = words.join(" ");
+
+  return titleCasedSentence;
+}
+```
+
+In the example above, the comments explain what each part of the code is doing. This makes it easier for other developers (or yourself, in the future) to understand the code.
+
+A comment plan is a list of comments that describe the steps you need to take to code your algorithm.
+
+## How to create a comment plan
+
+Let's take the algorithm we created in the previous guide as an example:
+
+![Sign-up logic flowchart](src/assets/png/programming/harmony-music-sign-up-logic.png)
+
+Immediately, we can see that we need to:
+
+1. Display a form to the user
+2. Include input fields for the user's email address, level, and hours of study
+3. Capture user's input on form submission
+4. Validate the user's input
+5. Calculate the total cost
+6. Display the total cost to the user
+
+Already, these steps provide a good starting point for our comment plan. Let's add them to the `index.js` file:
+
+```javascript title="index.js"
+// Display a form to the user
+// Include input fields for the user's email address, level, and hours of study
+// Capture user's input on form submission
+// Validate the user's input
+// Calculate the total cost
+// Display the total cost to the user
+```
+
+Some of these steps need breaking down even further. 
+
+For example, "Capture user's input on form submission" could be broken down into:
+
+```javascript title="index.js"
+// Display a form to the user
+// Include input fields for the user's email address, level, and hours of study
+// Capture user's input on form submission
+  // Get the user's email address
+  // Get the user's level
+  // Get the user's hours of study
+```
+
+For example, "Validate the user's input" could be broken down into:
+
+```javascript title="index.js"
+// Display a form to the user
+// Include input fields for the user's email address, level, and hours of study
+// Capture user's input on form submission
+// Validate the user's input
+  // Check if the user has selected a level
+  // Check if the user has provided an email address
+  // Check if the user has specified at least one hour of study
+  // Check if the number of hours requested is within the allowed range
+  // Calculate the total cost
+// Display the total cost to the user
+
+```
+
+:::tip[Challenge]
+
+### Challenge: input types
+
+For each of the input fields, consider what type of input they should accept. For example, the email address field could be stored in the variable name `userEmail`, and should be a data type of 'string'.
+
+Using the same technique as above, add comments to your `index.js` file that describe the variable name you will store each input field as, and the type of input each field should accept.
+
+#### Solution
+
+<MonsterReveal>
+
+```diff lang="javascript" title="index.js" showLineNumbers
+// Display a form to the user
+// Include input fields for the user's email address, level, and hours of study
+// Capture user's input on form submission
++  // Store the user's email address as userEmail (string/text)
++  // Store the user's level as userLevel (string/text)
++  // Store the user's hours of study as userHours (number)
+// Capture user's input on form submission
+// Validate the user's input
+  // Check if the user has selected a level
+  // Check if the user has provided an email address
+  // Check if the user has specified at least one hour of study
+  // Check if the number of hours requested is within the allowed range
+  // Calculate the total cost
+// Display the total cost to the user
+```
+
+</MonsterReveal>
+
+Are there any other steps you need to add to your comment plan? Add them now before moving on to the next guide. 
+
+## Summary
+
+In this guide, we've introduced the concept of comment planning and how it can help you to translate your algorithm into coding steps.
+
+We've shown how to create a comment plan for your project, and how to break down each step into smaller, more manageable tasks.
+
+## Next steps
+
+In the next guide, we'll look at how to actually capture the user's input on form submission, and how to store this data in variables for use in our code.
+:::

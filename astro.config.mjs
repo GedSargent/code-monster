@@ -69,12 +69,20 @@ export default defineConfig({
                   link: "guides/programming/harmony-music/project-file-links"
                 },
                 {
-                  label: "Comment plans",
+                  label: "Comment planning",
                   link: "guides/programming/harmony-music/comment-planning"
+                },
+                {
+                  label: "HTML Inputs",
+                  link: "guides/programming/harmony-music/html-inputs",
                 },
                 {
                   label: "Capturing form data",
                   link: "guides/programming/harmony-music/capturing-form-data",
+                },
+                {
+                  label: "Committing to GitHub",
+                  link: "guides/programming/harmony-music/committing-to-github",
                 },
                 // {
                 //   label: "Debugging",

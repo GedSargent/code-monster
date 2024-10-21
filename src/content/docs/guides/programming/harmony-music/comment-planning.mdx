@@ -3,7 +3,6 @@ title: Comment planning
 description: Transfer your algorithm into comment steps to help coding
 ---
 
-import { Card } from '@astrojs/starlight/components';
 import MonsterReveal from "src/components/MonsterReveal.astro";
 
 ## Introduction
@@ -61,7 +60,9 @@ Immediately, we can see that we need to:
 5. Calculate the total cost
 6. Display the total cost to the user
 
-Already, these steps provide a good starting point for our comment plan. Let's add them to the `index.js` file:
+Already, these steps provide a good starting point for our comment plan. Let's add them to the `index.js` file.
+
+Delete all the existing code inside your `index.js` file, and replace it with the following comments:
 
 ```javascript title="index.js"
 // Display a form to the user
@@ -120,7 +121,6 @@ Using the same technique as above, add comments to your `index.js` file that des
 +  // Store the user's email address as userEmail (string/text)
 +  // Store the user's level as userLevel (string/text)
 +  // Store the user's hours of study as userHours (number)
-// Capture user's input on form submission
 // Validate the user's input
   // Check if the user has selected a level
   // Check if the user has provided an email address

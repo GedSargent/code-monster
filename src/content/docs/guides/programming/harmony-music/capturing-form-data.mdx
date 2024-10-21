@@ -3,8 +3,279 @@ title: Capturing form data
 description: Capture input data from users and store in variables
 ---
 
-import { Card } from '@astrojs/starlight/components';
 import MonsterReveal from "src/components/MonsterReveal.astro";
 
 ## Introduction
 
+In this guide, we will learn how to capture input data from users and store it in variables.
+
+This is a crucial step in building interactive web applications, as it allows you to collect information from users and use it to personalize their experience.
+
+## Listening for a form submission event
+
+Open the `index.js` file, and look carefully at the [comment plan](/code-monter/guides/programming/harmony-music/comment-planning) you created in the [previous guide](/code-monter/guides/programming/harmony-music/comment-planning).
+
+We've already completed the first two steps - displaying the form to the user and including input fields for the user's email address, level, and hours of study.
+
+We can go ahead and delete these two steps from our comment plan, as they are already covered in the HTML document that we've been working in:
+
+```diff lang="javascript" title="index.js"
+-// Display a form to the user
+-// Include input fields for the user's email address, level, and hours of study
+// Capture user's input on form submission
+  // Store the user's email address as userEmail (string/text)
+  // Store the user's level as userLevel (string/text)
+  // Store the user's hours of study as userHours (number)
+// Validate the user's input
+  // Check if the user has selected a level
+  // Check if the user has provided an email address
+  // Check if the user has specified at least one hour of study
+  // Check if the number of hours requested is within the allowed range
+  // Calculate the total cost
+// Display the total cost to the user
+```
+
+### The `document.querySelector()` and `addEventListener()` methods
+
+When a user clicks the 'submit' button placed inside a HTML form, the `<form>` element itself fires a `submit` [event](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events) to the browser.
+
+We can use JavaScript to 'listen' for this event.
+
+To do this, we need to:
+
+1. Target the HTML form element as a variable in our code
+2. Add an [event listener](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events#using_addeventlistener) to this variable.
+
+Add the code below to your `index.js` file:
+
+```diff lang="javascript" title="index.js" showLineNumbers collapse={8-16}
+// Capture user's input on form submission
++let form = document.querySelector("form");
++
++form.addEventListener("submit", function () {
++  console.log("Form submitted");
++});
+// Store the user's email address as userEmail (string/text)
+// Store the user's level as userLevel (string/text)
+// Store the user's hours of study as userHours (number)
+// Validate the user's input
+// Check if the user has selected a level
+// Check if the user has provided an email address
+// Check if the user has specified at least one hour of study
+// Check if the number of hours requested is within the allowed range
+// Calculate the total cost
+// Display the total cost to the user
+```
+
+Take extra care to place this code directly below the comment note that describes it.
+
+This will ensure that we cover each step of our plan as we implement its logic.
+
+:::note[Code explanation]
+
+### `document.querySelector()`
+
+The `document.querySelector()` method is used to target an HTML element on the page, and store it as a variable in JavaScript
+
+In this case, we are targeting the `"form"` element in the HTML document, and storing it as a variable called `form`.
+
+```javascript mark='"form"'
+let form = document.querySelector("form");
+```
+
+### `addEventListener()`
+
+The `addEventListener()` method is used to "listen" for a specific event on an HTML element, and run a function when that event occurs:
+
+```javascript {3-5}
+let form = document.querySelector("form");
+
+form.addEventListener("submit", function () {
+  console.log("Form submitted");
+});
+```
+
+### Callback functions
+
+This function is just the same as any other in JavaScript, but within this particular context (i.e. inside an event listener), it is given a special name.
+
+It is referred to as a ***callback*** function.
+
+This is because it's code is "called back" into the logical flow of the application when the targeted event is triggered.
+:::
+
+## Checking execution flow with `console.log()`
+
+You'll notice that within the body of this function we are only executing one line of code:
+
+```javascript mark={2}
+form.addEventListener("submit", function () {
+  console.log("Form submitted");
+});
+```
+
+The `console.log()` function is a quick way to print messsages to the browser console, or display the current values of variables as they change throughout your code.
+
+We can just add anything we want to display in the browser console as an argument to it (i.e. between the two brackets).
+
+In this case, we are simply printing a message to check that the callback function has indeed been triggered by form submission.
+
+### Viewing the browser console
+
+To view the console in your browser, right-click on the page and select `Inspect` from the context menu:
+
+![Inspecting the page](src/assets/webp/programming/harmony-music/inspect-page.webp)
+
+With the inspection panel open (this is also referred to as the "developer tools" panel), click on the `Console` tab:
+
+![Console panel](src/assets/webp/programming/harmony-music/console-tab.webp)
+
+Now, try submitting the form.
+
+If all is working correctly, you should see the message `"Form submitted"` flash into the console, and then disappear.
+
+![Form submit event default](src/assets/gif/programming/harmony-music/form-submit-event-default.gif)
+
+## Using `event.preventDefault()` in event handlers
+
+By default, when a form is submitted, the browser will automatically reload the page. This is because the form submission event is designed to send the form data to a server.
+
+However, in our case, we want to capture the form data and use it to calculate the total cost of the user's lessons.
+
+To prevent the page from reloading, we can use the `event.preventDefault()` method.
+
+Looking ***carefully*** at the additions below, update your `index.js` code as follows:
+
+```diff lang="javascript" title="index.js" showLineNumbers ins="(event)" collapse={9-17}
+// Capture user's input on form submission
+let form = document.querySelector("form");
+
+form.addEventListener("submit", function (event) {
++  event.preventDefault();
++
+  console.log("Form submitted");
+});
+// Store the user's email address as userEmail (string/text)
+// Store the user's level as userLevel (string/text)
+// Store the user's hours of study as userHours (number)
+// Validate the user's input
+// Check if the user has selected a level
+// Check if the user has provided an email address
+// Check if the user has specified at least one hour of study
+// Check if the number of hours requested is within the allowed range
+// Calculate the total cost
+// Display the total cost to the user
+```
+
+With this change in place, the page will no longer reload when the form is submitted, and your console message should remain visible:
+
+![Form submit event with preventDefault()](src/assets/gif/programming/harmony-music/event-prevent-default.gif)
+
+## Targeting input values in JavaScript
+
+Let's go ahead and capture the user's email address.
+
+Delete the `console.log();` message confirming the form is submitted, and add the lines highlighted in green to your `index.js` file:
+
+```diff lang="javascript" name="index.js" showLineNumbers collapse={12-20}
+// Capture user's input on form submission
+let form = document.querySelector("form");
+
+form.addEventListener("submit", function (event) {
+  event.preventDefault();
+
+-  console.log("Form submitted");
++  let userEmail = document.querySelector("#email").value;
++  console.log({ userEmail });
+});
+// Store the user's email address as userEmail (string/text)
+// Store the user's level as userLevel (string/text)
+// Store the user's hours of study as userHours (number)
+// Validate the user's input
+// Check if the user has selected a level
+// Check if the user has provided an email address
+// Check if the user has specified at least one hour of study
+// Check if the number of hours requested is within the allowed range
+// Calculate the total cost
+// Display the total cost to the user
+```
+
+### Checking the value of a variable - `console.log()`
+
+As you will have noticed, we have a new `console.log()` statement that should print the value of the `userEmail` variable to the console.
+
+Try submitting the form in your browser without anything written in the email field and check the developer tools console:
+
+![Empty userEmail](src/assets/gif/programming/harmony-music/user-email-log-empty.gif)
+
+:::caution
+
+As you can see, even if the user does not write anything into a form field, the input element still sends the value of an ***empty*** string.
+
+Remember this behaviour, as it will be important when we come to validate the user's input in a later step.
+
+:::
+
+Now try adding an email address and submitting the form again.
+
+This time, you should see the email address you entered printed to the console:
+
+![Filled userEmail](src/assets/webp/programming/harmony-music/user-email-log-filled.webp)
+
+With this in place - it's your turn!
+
+:::tip[Coding challenge]
+
+## Challenge: User level and hours of study
+
+1. Target the user's *level* and *hours of study* in the same way as we did for the email address. Give your variables suitable names that are consistent with our first variable name.
+2. Print the values of these variables to the console.
+3. Test your code by submitting the form with different values in the input fields.
+
+{/* ### Solution
+
+<MonsterReveal>
+
+```diff lang="javascript" title="index.js" showLineNumbers ins={", userLevel, userHours"} collapse={13-21}
+// Capture user's input on form submission
+let form = document.querySelector("form");
+
+form.addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  let userEmail = document.querySelector("#email").value;
++  let userLevel = document.querySelector("#level").value;
++  let userHours = document.querySelector("#hoursPerWeek").value;
+  console.log({ userEmail, userLevel, userHours });
+});
+// Store the user's email address as userEmail (string/text)
+// Store the user's level as userLevel (string/text)
+// Store the user's hours of study as userHours (number)
+// Validate the user's input
+// Check if the user has selected a level
+// Check if the user has provided an email address
+// Check if the user has specified at least one hour of study
+// Check if the number of hours requested is within the allowed range
+// Calculate the total cost
+// Display the total cost to the user
+```
+
+![Log all form values](src/assets/webp/programming/harmony-music/log-all-form-values.webp)
+
+</MonsterReveal> */}
+:::
+
+## Summary
+
+In this guide, we:
+
+- learned how to capture input data from users and store it in variables.
+- used the `document.querySelector()` method to target the form element, and the `addEventListener()` method to listen for the form submission event.
+- used the `event.preventDefault()` method to prevent the page from reloading when the form is submitted.
+- targeted the input values for the user's email address, level, and hours of study, and stored them in variables.
+
+## Next steps
+
+In the next step, we will learn how to commit your current code changes to GitHub using GitHub Desktop.
+
+This will allow you to save your work and keep track of the changes you've made.

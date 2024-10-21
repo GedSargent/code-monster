@@ -1,0 +1,304 @@
+---
+title: HTML inputs
+description: Configure HTML input elements ready for JavaScript 
+---
+
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Introduction
+
+In this guide, we will learn how to configure a HTML form so that its data can be targetted by JavaScript.
+
+Although it won't change anything from the end-user's point of view, it is an essential step in configuring our application code ready for processing.
+
+## HTML inputs: the `id` attribute
+
+To capture form data in HTML, you need to create a form element with input fields for the data you want to collect.
+
+Luckily, the form has already been created and styled for us:
+
+![Sign-up form](src/assets/webp/programming/harmony-music/form-with-css.webp)
+
+We just need to add an `id` attribute to the HTML code that uniquely identifies each of our form input elements ready for the JavaScript to target them.
+
+:::note[The `id` and `class` attributes]
+
+### 1. The HTML `id` attribute
+
+The `id` attribute is a unique identifier that coders can give to an HTML element.
+
+It is used to target a HTML element in JavaScript code.
+
+For example, if you have an input field for the user's email address, you could give it the `id` attribute `email`:
+
+```html
+<input type="email" id="email" name="email" placeholder="Email address">
+```
+
+Note that the `id` and `name` attributes are different things. These can both be the same without causing any problems.
+
+Using an `id` attribute like this allows you to capture the input field as a variable in your JavaScript code using the `document.querySelector()` method:
+
+```javascript
+const emailInput = document.querySelector("#email");
+```
+
+#### An `id` should be unique
+
+Because of this, no HTML page should have more than one element with the same `id` attribute value.
+
+Once we name the input with an `id` of `email`, we cannot use the same `id` value for another element on the same page.
+
+### 2. The HTML `class` attribute
+
+The `class` attribute is primarily used to apply CSS classes to individual HTML elements, or to groups of elements.
+
+Unlike the `id` attribute, the `class` attribute can be used multiple times on the same page:
+
+```html
+<form class="form-wrapper">
+  <input type="email" class="form-input" />
+  <input type="text" class="form-input" />
+  <input type="number" class="form-input" />
+</form>
+```
+
+In the example above, all three input fields have the same `class` attribute value of `form-input`, but we only have one `class` attribute value of `form-wrapper` for the form element.
+
+In our CSS file, we might define the styles for these two classes like this:
+
+```css
+.form-wrapper {
+  /* CSS styles for the form */
+}
+
+.form-input {
+  /* CSS styles for the input fields */
+}
+```
+
+Because of this, we can apply the same CSS styles to all input fields by using the `form-input` class, whilst applying different styles to the form itself using the `form-wrapper` class.
+
+:::
+
+## Updating the HTML form code
+
+Look carefully at HTML code for the form, and find where the `<form>` tag starts and ends (around lines 8 and 50).
+
+This is the area where we will be capturing the form data. Try expanding the code snippet below to see the full form:
+
+```html name="index.html" showLineNumbers {8, 50} collapse={10-48}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Harmony | Sign Up</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <form class="form-wrapper">
+      <div class="form-section">
+        <img
+          class="mobile-display"
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+        <div class="form-field">
+          <label for="email" class="form-label">Email*</label>
+          <input
+            name="email"
+            type="text"
+            class="form-input"
+            placeholder="Your email"
+          />
+        </div>
+        <div class="form-field">
+          <label for="level" class="form-label">Level*</label>
+          <select name="level" class="form-input">
+            <option value="basic">Basic</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="hoursPerWeek" class="form-label">Hours per week*</label>
+          <input
+            name="hours-per-week"
+            type="number"
+            class="form-input"
+            placeholder="How many?"
+          />
+        </div>
+
+        <button type="submit" class="submit-btn">Sign up</button>
+      </div>
+
+      <div class="form-section mobile-hidden">
+        <img
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+      </div>
+    </form>
+
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>
+```
+
+Within this section, look for the very first `div` with the `class` name of `form-field` (around line 15), and look carefully at the `<label>` and `<input>` tags within it:
+
+```html name="index.html" showLineNumbers {15-23} collapse={9-14, 24-49}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Harmony | Sign Up</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <form class="form-wrapper">
+      <div class="form-section">
+        <img
+          class="mobile-display"
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+        <div class="form-field">
+          <label for="email" class="form-label">Email*</label>
+          <input
+            name="email"
+            type="text"
+            class="form-input"
+            placeholder="Your email"
+          />
+        </div>
+        <div class="form-field">
+          <label for="level" class="form-label">Level*</label>
+          <select name="level" class="form-input">
+            <option value="basic">Basic</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="hoursPerWeek" class="form-label">Hours per week*</label>
+          <input
+            name="hours-per-week"
+            type="number"
+            class="form-input"
+            placeholder="How many?"
+          />
+        </div>
+
+        <button type="submit" class="submit-btn">Sign up</button>
+      </div>
+
+      <div class="form-section mobile-hidden">
+        <img
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+      </div>
+    </form>
+
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>
+```
+
+### Adding an `id` attribute to an input field
+
+To capture the user's email address, we need to add an `id` attribute to the `<input>` tag for the email field:
+
+```diff lang="html" name="index.html" showLineNumbers startLineNumber={15}
+<div class="form-field">
+  <label for="email" class="form-label">Email*</label>
+  <input
++    id="email"
+    name="email"
+    type="text"
+    class="form-input"
+    placeholder="Your email"
+  />
+</div>
+```
+
+:::tip[Challenge]
+
+### Challenge: add `id` attributes to the form fields
+
+Look for the other form input fields in the HTML code, and add `id` attributes to each of them.
+
+Make sure that each `id` attribute is unique, and that it matches the `for` attribute of the corresponding `<label>` tag.
+
+{/* ### Solution
+
+<MonsterReveal>
+
+```diff lang="html" name="index.html" add='id="level"' showLineNumbers collapse={9-14, 43-51}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Harmony | Sign Up</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <form class="form-wrapper">
+      <div class="form-section">
+        <img
+          class="mobile-display"
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+        <div class="form-field">
+          <label for="email" class="form-label">Email*</label>
+          <input
++            id="email"
+            name="email"
+            type="text"
+            class="form-input"
+            placeholder="Your email"
+          />
+        </div>
+        <div class="form-field">
+          <label for="level" class="form-label">Level*</label>
+          <select id="level" name="level" class="form-input">
+            <option value="basic">Basic</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="hoursPerWeek" class="form-label">Hours per week*</label>
+          <input
++            id="hoursPerWeek"
+            name="hours-per-week"
+            type="number"
+            class="form-input"
+            placeholder="How many?"
+          />
+        </div>
+
+        <button type="submit" class="submit-btn">Sign up</button>
+      </div>
+
+      <div class="form-section mobile-hidden">
+        <img
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+      </div>
+    </form>
+
+    <script type="module" src="./index.js"></script>
+  </body>
+</html>
+```
+</MonsterReveal> */}
+:::
+
+## Summary
+
+In this guide, we have configured our HTML form inputs with unique `id` attributes.
+
+These will ensure that the values of each input field can be targetted by JavaScript.
+
+## Next steps
+
+In the next step, we will capture the values from our HTML forms and store them in variables ready for processing.

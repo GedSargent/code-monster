@@ -57,32 +57,36 @@ export default defineConfig({
               label: "Harmony Music Academy",
               items: [
                 {
-                  label: "Client brief",
+                  label: "📄 Client brief",
                   link: "guides/programming/harmony-music/client-brief"
                 },
                 {
-                  label: "Algorithm design",
+                  label: "⚙️ Algorithm design",
                   link: "guides/programming/harmony-music/algorithm-design"
                 },
                 {
-                  label: "Project file links",
+                  label: "💻 Project file links",
                   link: "guides/programming/harmony-music/project-file-links"
                 },
                 {
-                  label: "Comment planning",
+                  label: "💻 Comment planning",
                   link: "guides/programming/harmony-music/comment-planning"
                 },
                 {
-                  label: "HTML Inputs",
+                  label: "🔄️ Committing to GitHub",
+                  link: "guides/programming/harmony-music/committing-to-github",
+                },
+                {
+                  label: "✏️ Assignment update",
+                  link: "guides/programming/harmony-music/assignment-update",
+                },
+                {
+                  label: "💻 HTML Inputs",
                   link: "guides/programming/harmony-music/html-inputs",
                 },
                 {
-                  label: "Capturing form data",
+                  label: "💻 Capturing form data",
                   link: "guides/programming/harmony-music/capturing-form-data",
-                },
-                {
-                  label: "Committing to GitHub",
-                  link: "guides/programming/harmony-music/committing-to-github",
                 },
                 // {
                 //   label: "Debugging",

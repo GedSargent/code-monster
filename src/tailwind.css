@@ -5,6 +5,8 @@
 :root {
   --custom-base-font-size: 1.3rem;
   --custom-p-margin-top: 1.5rem;
+  --custom-ul-vertical-margin: 1rem;
+  --custom-secondary-li-font-size: 1.2rem;
   --custom-margin-top-headings: 3rem;
   --custom-code-border-radius: 0.25rem;
   --custom-aside-title-margin-top: 0.25rem;
@@ -31,6 +33,18 @@ h1, h2, h3, h4, h5, h6 {
 
 li {
   font-size: var(--custom-base-font-size);
+}
+
+.sl-markdown-content ul {
+  margin-bottom: var(--custom-ul-vertical-margin);
+}
+
+.sl-markdown-content ul li ul {
+  margin-top: 0.5rem;
+}
+.sl-markdown-content ul li ul li {
+  margin-top: 0;
+  font-size: var(--custom-secondary-li-font-size);
 }
 
 p {

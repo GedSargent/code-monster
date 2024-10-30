@@ -88,12 +88,12 @@ export default defineConfig({
                   label: "💻 Capturing form data",
                   link: "guides/programming/harmony-music/capturing-form-data",
                 },
+                {
+                  label: "🛠️ Debugging",
+                  link: "guides/programming/harmony-music/debugging",
+                },
                 // {
-                //   label: "Debugging",
-                //   link: "guides/programming/harmony-music/debugging",
-                // },
-                // {
-                //   label: "Form validation",
+                //   label: "💻 Form validation",
                 //   link: "guides/programming/harmony-music/form-validation",
                 // },
                 // {

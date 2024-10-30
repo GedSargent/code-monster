@@ -3,6 +3,8 @@ title: Project file links
 description: Link HTML, CSS, and JavaScript files together
 ---
 
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
 ## Introduction
 
 In this guide, you will learn how to link HTML, CSS, and JavaScript files together in a project.
@@ -297,7 +299,7 @@ With this in place, have a go at the challenges below:
 3. Replace the alert with a `console.log` message instead. What happens when you refresh the page now?
 4. Can you find the `console.log` message in your browser's developer tools? Use the internet to search for how to do this if you're not sure!
 
-🚀 **EXTRA CREDIT - Advanced CSS!**
+## 🚀 **EXTRA CREDIT - Advanced CSS!**
 
 Try narrowing the browser window to see how the form responds. What happens when you make the window very small?
 
@@ -316,11 +318,268 @@ TIP: You will need to research:
 - [MDN: Media queries](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Media_queries)
 - [MDN: CSS display property](https://developer.mozilla.org/en-US/docs/Web/CSS/display)
 
+{/* ### Solution - Hide the logo on small screens
+
+<MonsterReveal>
+
+1. First, we need to add a media query to target screens below 640px wide. Add the following CSS to the end of your `index.css` file:
+
+```css title="index.css"
+@media screen and (max-width: 640px) {
+  .mobile-hidden {
+    display: none;
+  }
+}
+```
+
+    This rule hides any element with the class `mobile-hidden` when the screen width is below 640px.
+
+2. Next, we will need to add the `mobile-hidden` class to the form section containing the logo. Around line 39, update your `index.html` code to look like this:
+
+```diff lang="html" title="index.html" collapse={8-37} showLineNumbers ins=" mobile-hidden"
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Harmony | Sign Up</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <form class="form-wrapper">
+      <div class="form-section">
+        <div class="form-field">
+          <label for="email" class="form-label">Email*</label>
+          <input
+            name="email"
+            type="text"
+            class="form-input"
+            placeholder="Your email"
+          />
+        </div>
+        <div class="form-field">
+          <label for="level" class="form-label">Level*</label>
+          <select name="level" class="form-input">
+            <option value="basic">Basic</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="hoursPerWeek" class="form-label">Hours per week*</label>
+          <input
+            name="hours-per-week"
+            type="number"
+            class="form-input"
+            placeholder="How many?"
+          />
+        </div>
+
+        <button type="submit" class="submit-btn">Sign up</button>
+      </div>
+
+      <div class="form-section mobile-hidden">
+        <img
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+      </div>
+    </form>
+  </body>
+
+  <script type="module" src="./index.js"></script>
+</html>
+```
+
+With this code in place, the logo will disappear when the window is below 640px wide.
+
+</MonsterReveal> */}
+
 <hr />
 
 2. Can you make the Harmony Music Logo appear at the top of the form on mobile screens (i.e. when the window is below 640px wide), but hide it on desktop screens?
 
 ![Harmony Music Academy sign-up form with logo at the top](src/assets/gif/programming/harmony-music/logo-top.gif)
+
+{/* ### Solution - Move the logo on mobile screens
+
+<MonsterReveal>
+
+The effect of 'moving' the logo is actually an illusion. As we hide the logo on the right, we simultaneously show a second logo on the left that is hidden on larger screens.
+
+1. First, add a second logo to the left side of the form that is hidden on desktops, but revealed on mobile.
+
+    Around line 10, update your `index.html` code to look like this:
+
+```diff lang="html" title="index.html" collapse={24-50} showLineNumbers
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Harmony | Sign Up</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <form class="form-wrapper">
+      <div class="form-section">
++        <img
++          class="mobile-display"
++          src="./assets/harmony-music-academy-logo.svg"
++          alt="Harmony Music Academy logo"
++        />
+        <div class="form-field">
+          <label for="email" class="form-label">Email*</label>
+          <input
+            name="email"
+            type="text"
+            class="form-input"
+            placeholder="Your email"
+          />
+        </div>
+        <div class="form-field">
+          <label for="level" class="form-label">Level*</label>
+          <select name="level" class="form-input">
+            <option value="basic">Basic</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="hoursPerWeek" class="form-label">Hours per week*</label>
+          <input
+            name="hours-per-week"
+            type="number"
+            class="form-input"
+            placeholder="How many?"
+          />
+        </div>
+
+        <button type="submit" class="submit-btn">Sign up</button>
+      </div>
+
+      <div class="form-section mobile-hidden">
+        <img
+          src="./assets/harmony-music-academy-logo.svg"
+          alt="Harmony Music Academy logo"
+        />
+      </div>
+    </form>
+  </body>
+
+  <script type="module" src="./index.js"></script>
+</html>
+```
+
+2. Next, add a CSS rule to show the new logo on mobile screens and hide it on desktop screens.
+
+    Update your `index.css` code to look like this:
+
+```diff lang="css" title="index.css" collapse={1-62, 71-92} showLineNumbers
+:root {
+  --black: rgb(22, 22, 22);
+  --white: rgb(255, 255, 255);
+  --grey-50: rgb(250, 250, 250);
+  --grey-300: rgb(192, 198, 201);
+  --grey-500: rgb(88, 104, 112);
+  --brand-light: rgb(255, 90, 58);
+  --brand-dark: rgb(172, 62, 41);
+  --sky-500: rgb(14 165 233);
+  --box-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+* {
+  color: var(--grey-500);
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+}
+button {
+  cursor: pointer;
+}
+.form-wrapper {
+  display: flex;
+  background-color: var(--grey-50);
+  min-height: 100vh;
+}
+.form-section {
+  width: calc(50% - 1px);
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2rem;
+  padding: 2rem 4rem;
+}
+.form-section:first-of-type {
+  border-right: 1px solid var(--grey-300);
+}
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+  width: 100%;
+}
+.form-label {
+  font-size: 1.25rem;
+}
+.form-input {
+  background-color: var(--white);
+  border-radius: 999px;
+  border: 1px solid var(--grey-300);
+  font-size: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 300;
+  color: var(--black);
+  width: 100%;
+}
+.form-input::placeholder {
+  color: var(--grey-300);
+}
+.form-input:focus {
+  outline: none;
+  outline: 2px solid var(--sky-500);
+  box-shadow: var(--box-shadow-lg);
+}
++.mobile-display {
++  display: none;
++}
+.submit-btn {
+  border-radius: 1.75rem;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--white);
+  border: 0;
+  padding: 0.75rem 2rem;
+  font-size: 1.5rem;
+  background: linear-gradient(
+    180deg,
+    var(--brand-light) 0%,
+    var(--brand-dark) 100%
+  );
+  transition: all 0.3s ease;
+  outline: none;
+  box-shadow: none;
+}
+.submit-btn:hover {
+  outline: 1px solid var(--brand-dark);
+  box-shadow: var(--box-shadow-lg);
+  transition: all 0.3s ease;
+}
+
+@media screen and (max-width: 640px) {
+  .mobile-hidden {
+    display: none;
+  }
++  .mobile-display {
++    display: block;
++  }
+}
+```
+
+If you notice, we have added a new class called `mobile-display` to the new logo, but this class has two separate rules defined for it.
+
+This class is explicitly `hidden` on desktop screens, but it is shown on mobile screens.
+
+With this code in place, the logo will seem to move from the right side of the form to the top when the window is below 640px wide.
+
+</MonsterReveal> */}
 
 :::
 

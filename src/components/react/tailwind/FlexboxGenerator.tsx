@@ -1,9 +1,10 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 function FlexChild({ label }: { label: number }) {
-  return (<div className="!m-0 p-2">
-      <div className={`!m-0 flex text-gray-600 items-center justify-center w-16 h-16 bg-gray-100 rounded-md`}>{label}</div>
-    </div>)
+  return (<motion.div className="!m-0 p-2" layout>
+      <motion.div className={`!m-0 flex text-gray-600 items-center justify-center w-16 h-16 bg-gray-100 rounded-md shadow-md dark:shadow-gray-300/50`} layout="position">{label}</motion.div>
+    </motion.div>)
 }
 
 function Button({ children, onClick, disabled = false }: { children: React.ReactNode, onClick: () => void, disabled?: boolean }) {

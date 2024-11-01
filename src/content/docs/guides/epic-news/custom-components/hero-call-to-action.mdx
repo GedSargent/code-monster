@@ -42,7 +42,9 @@ In this first guide, we will look at the `HeroCallToAction` component.
 
 The `HeroCallToAction` component offers a quick way to display a hero section that places an image to one side of the page, and custom content of your own on the other.
 
-Open `app/root.tsx` and add the following to the end of your `import` list:
+1. Open `app/root.tsx`
+
+2. Add the following to the end of your `import` list:
 
 ```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" collapse={1-6}
 import { type LinksFunction } from '@remix-run/node'
@@ -57,7 +59,9 @@ import HeaderWithSearch from './components/organisms/HeaderWithSearch'
 +import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
 ```
 
-Next, slot this component just below the `h1` tag in the JSX being returned by the `App` component:
+3. Next, slot this component just below the `h1` tag in the JSX being returned by the `App` component.
+
+		Don't worry about the red underline that appears under the `HeaderWithSearch` component for now - we will fix this in a moment:
 
 ```diff lang="tsx" title="app/root.tsx" collapse={1-16}
 import { type LinksFunction } from '@remix-run/node'
@@ -105,13 +109,15 @@ export default function App() {
 }
 ```
 
-You will notice that the `HeroCallToAction` component is underlined in red. Let's find out why by hovering our mouse over it:
+4. You will notice that the `HeroCallToAction` component is underlined in red. Let's find out why by hovering our mouse over it:
 
 ![Hero Call To Action Missing Props](src/assets/webp/epic-news/hero-call-to-action-missing-props.webp)
 
-The error message is telling us that the component is expecting two props to be passed to it: `image` and `children`.
+The error message is telling us that the component is expecting two [props](https://react.dev/learn/passing-props-to-a-component) to be passed to it: `image` and `children`.
 
-Let's add these now:
+Let's add these now.
+
+5. Delete the line shown in red, and add the section of JSX code shown in green below:
 
 ```diff lang="tsx" title="app/root.tsx" collapse={}
 export default function App() {
@@ -158,43 +164,43 @@ You should now see the `HeroCallToAction` component displayed correctly on your 
 
 ### 1a. Optional `HeroCallToAction` props
 
-Open the component file at `app/components/organisms/Hero/HeroCallToAction.tsx` if you haven't already.
+1. Open the component file at `app/components/organisms/Hero/HeroCallToAction.tsx` (if you haven't already).
 
-If you look inside the `HeroCallToAction` component code, you will see that it has an [**`interface`**](https://prismic.io/blog/typescript-interfaces) defined at the top of the file.
+2. If you look inside the `HeroCallToAction` component code, you will see that it has an [**`interface`**](https://prismic.io/blog/typescript-interfaces) defined at the top of the file.
 
-This interface describes the props that the component expects to receive.
+		This interface describes the props that the component expects to receive.
 
-Let's take a look:
+		Let's take a look:
 
-```tsx title="app/components/organisms/Hero/HeroCallToAction.tsx"
-interface HeroCallToActionProps {
-	image: string
-	imageRight?: boolean
-	hasBackgroundColour?: boolean
-	children: React.ReactNode
-}
-```
+		```tsx title="app/components/organisms/Hero/HeroCallToAction.tsx"
+		interface HeroCallToActionProps {
+			image: string
+			imageRight?: boolean
+			hasBackgroundColour?: boolean
+			children: React.ReactNode
+		}
+		```
 
-This tells us that the component has two [**optional props**](https://www.sonarsource.com/blog/common-typescript-issues-no-5-optional-property-declarations/) as well as the mandatory ones we've been using already.
+		This tells us that the component has two [**optional props**](https://www.sonarsource.com/blog/common-typescript-issues-no-5-optional-property-declarations/) as well as the mandatory ones we've been using already.
 
-Optional props are those that don't have to be passed to the component when it is used, but can be if needed.
+		Optional props are those that don't have to be passed to the component when it is used, but can be if needed.
 
-We can tell which props are optional by the `?` symbol after the prop name:
+		We can tell which props are optional by the `?` symbol after the prop name:
 
-```tsx title="app/components/organisms/Hero/HeroCallToAction.tsx" mark={3,4}
-interface HeroCallToActionProps {
-	image: string
-	imageRight?: boolean
-	hasBackgroundColour?: boolean
-	children: React.ReactNode
-}
-```
+		```tsx title="app/components/organisms/Hero/HeroCallToAction.tsx" mark={3,4}
+		interface HeroCallToActionProps {
+			image: string
+			imageRight?: boolean
+			hasBackgroundColour?: boolean
+			children: React.ReactNode
+		}
+		```
 
-The `imageRight` prop is a boolean that determines whether the image should be displayed on the right or left side of the component.
+		The `imageRight` prop is a boolean that determines whether the image should be displayed on the right or left side of the component.
 
-The `hasBackgroundColour` prop is another boolean, but this one determines whether the component should have a background colour.
+		The `hasBackgroundColour` prop is another boolean, but this one determines whether the component should have a background colour.
 
-Let's try adding an `imageRight` prop to the component where we call it in `app/root.tsx`:
+3. Let's try adding an `imageRight` prop to the component where we call it in `app/root.tsx`:
 
 ```diff lang="tsx" title="app/root.tsx"
 
@@ -216,7 +222,7 @@ With this change saved, check your browser again:
 
 ![Hero Call To Action Image Right](src/assets/webp/epic-news/hero-call-to-action-image-right.webp)
 
-Exploring the custom components in the Epic News starter project will help you understand how they work and how you can build your own custom components.
+Exploring the custom components in the Epic News starter project will help you understand how they work and how you can build your own.
 
 Looking at the `interface` expected by a component will help you understand what props you need to pass to it.
 
@@ -331,7 +337,24 @@ Here is an example of how you can customise the `children`:
 +		</Button>
 +	</div>
 </HeroCallToAction>
-</MonsterReveal>
+```
+
+Note that, to get the `Button` and `Link` components to render correctly, you will need to import the at the top of the file:
+
+```diff lang="tsx" title="app/root.tsx" ins="Link, " collapse={4-7, 11-13} showLineNumbers
+import { type LinksFunction } from '@remix-run/node'
+import { Link, useLoaderData } from '@remix-run/react'
+import heroImage from '~/assets/jpg/sample-hero.jpg'
+import Document from '~/components/shared-layout/Document'
+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+import { useNonce } from '~/utils/nonce-provider.ts'
+import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { type loader } from './__root.server'
++import { Button } from './components/atoms/Button.tsx'
+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
+import useTheme from './hooks/useTheme.tsx'
 ```
 
 </MonsterReveal>

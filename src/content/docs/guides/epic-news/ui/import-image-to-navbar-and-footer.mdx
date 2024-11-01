@@ -4,6 +4,7 @@ description: 'Importing images in React'
 ---
 
 import MonsterReveal from "src/components/MonsterReveal.astro";
+import FlexboxGenerator from "src/components/FlexboxGenerator.astro";
 
 In this guide, we'll learn how to import images in React. We'll cover:
 
@@ -28,20 +29,30 @@ The easiest way to do this is to simply drag and drop the image file into the `a
 
 Now that the image is in the correct folder, you can import it into your component:
 
-```diff lang="tsx" title="HeaderWithSearch.tsx"
+```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx"
 import { useMatches } from '@remix-run/react'
 import { SearchBar } from '../molecules/SearchBar'
 import LoginOrUserDropdown from './LoginOrUserDropdown'
 +import logo from '~/assets/png/epic-news-logo.png';
 ```
 
+:::caution
+
+The above snippet assumes you have saved your logo with the name `epic-news-logo.png`, and placed this into the `assets/png/` folder.
+
+If you have saved your logo with a different filename, or placed it into a different location, you will need to modify the `import` statement accordingly.
+
+:::
+
 ### Using the image
 
-To actually use the image in your component, you can use the `img` tag and set the `src` attribute to the imported image. You can also set an `alt` attribute to describe the image.
+To actually use the image in your component, you can use the `img` tag and set the `src` attribute to the imported image.
+
+You should also set an `alt` attribute to describe the image for users accessing the site with a screen reader.
 
 Add the line of code below inside the `div` that you created in the previous tutorial:
 
-```diff lang="tsx" title="HeaderWithSearch.tsx" showLineNumbers collapse={1-4, 18-24}
+```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers collapse={1-4, 18-24}
 import { useMatches } from '@remix-run/react'
 import { SearchBar } from '../molecules/SearchBar'
 import LoginOrUserDropdown from './LoginOrUserDropdown'
@@ -87,6 +98,14 @@ Now that you have the logo and site title in the navigation bar, use flexbox to 
 - The site title should be centred vertically with the logo.
 
 Once you've had a go, check the your code against the solution below:
+
+**TIPS**
+
+You will need to use Tailwind's flexbox utilities to achieve this.
+
+Use the flexbox generator below to generate the code required for this layout:
+
+<FlexboxGenerator />
 
 <MonsterReveal title="Flexbox solution">
 ```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" ins=" className="flex items-center gap-4"" showLineNumbers collapse={1-4, 18-24}

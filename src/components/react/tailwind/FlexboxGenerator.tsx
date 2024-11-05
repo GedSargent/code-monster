@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 function FlexChild({ label }: { label: number }) {
   return (<motion.div className="!m-0 p-2" layout>
-      <motion.div className={`!m-0 flex text-gray-600 items-center justify-center w-16 h-16 bg-gray-100 rounded-md shadow-md dark:shadow-gray-300/50`} layout="position">{label}</motion.div>
+      <motion.div className={`!m-0 flex text-gray-600 items-center justify-center w-16 h-16 bg-gray-100 rounded-md shadow-md border border-gray-500 border-t-gray-400 dark:bg-gray-900 dark:text-gray-100`} layout="position">{label}</motion.div>
     </motion.div>)
 }
 
@@ -51,7 +51,7 @@ function Select({ label, options, onChange, disabled = false }: SelectProps) {
 
 function FlexboxGenerator() {
   const [numberOfChildren, setNumberOfChildren] = React.useState(3);
-  const [applyFlex, setApplyFlex] = React.useState(true);
+  const [applyFlex, setApplyFlex] = React.useState(false);
   const [flexWrap, setFlexWrap] = React.useState(false);
   const [flexDirection, setFlexDirection] = React.useState('flex-row');
   const [justifyContent, setJustifyContent] = React.useState('justify-start');
@@ -153,7 +153,7 @@ function FlexboxGenerator() {
           <p className="!mt-0 mb-4 text-sm">Copy and paste the code below into your parent flex container to recreate the layout above 😎.</p>
           <pre className="!m-0 p-4 bg-gray-900 rounded-md text-sm text-gray-300">
             <span className="text-cyan-500">className</span>=
-            <span className="text-orange-300">"{`${applyFlex ? 'flex' : 'block'}${flexDirection !== "flex-row" && applyFlex ? `$ {flexDirection}` : ''}${alignItems !== 'items-start' && applyFlex ? ` ${alignItems}` : ''}${justifyContent !== 'justify-start' && applyFlex ? ` ${justifyContent}` : ''}${flexWrap && applyFlex ? ' flex-wrap' : ''}`}"</span>
+            <span className="text-orange-300">"{`${applyFlex ? 'flex' : 'block'}${flexDirection !== "flex-row" && applyFlex ? ` ${flexDirection}` : ''}${alignItems !== 'items-start' && applyFlex ? ` ${alignItems}` : ''}${justifyContent !== 'justify-start' && applyFlex ? ` ${justifyContent}` : ''}${flexWrap && applyFlex ? ' flex-wrap' : ''}`}"</span>
           </pre>
         </div>
       </div>

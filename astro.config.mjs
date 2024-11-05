@@ -132,6 +132,7 @@ export default defineConfig({
         },
         {
           label: "Prisma",
+          collapsed: true,
           items: [
             {
               label: "🗄️ Database config",

@@ -5,6 +5,7 @@ description: 'Use and build custom components for your Epic News site'
 
 import MonsterKbd from "src/components/MonsterKbd.astro"
 import MonsterReveal from "src/components/MonsterReveal.astro"
+import MonsterVideo from "src/components/MonsterVideo.astro"
 
 ## Introduction
 
@@ -38,13 +39,15 @@ These packages can contain JavaScript code, CSS styles, images, and other assets
 
 They are useful because they allow you to reuse code that has been written by other developers, saving you lots of time and effort.
 
-
-
 :::
 
 If you ever see an error message like this on an `import`, it means you need to install the package into your project. This is done using the `npm install` command, followed by the package name.
 
-We will do this now by typing the following command in your terminal and hitting enter:
+### Installing `react-scroll-parallax`
+
+1. Stop your server (if it is running) by clicking into the terminal panel and typing <MonsterKbd>CTRL + C</MonsterKbd> (or <MonsterKbd>CMD + C</MonsterKbd> on Mac)
+
+2. Next type the following command in your terminal and hit enter:
 
 ```bash
 npm install react-scroll-parallax
@@ -54,7 +57,7 @@ After a few seconds, you should see a message like this:
 
 ![React Scroll Parallax installed](src/assets/gif/react-scroll-parallax-installed.gif)
 
-With the package install successfully, we can begin to use the `ParallaxBackground` component in our project.
+With the package installed successfully, we can begin to use the `ParallaxBackground` component in our project.
 
 ## Wrapper component
 
@@ -62,7 +65,9 @@ The `react-scroll-parallax` package requires that our application is wrapped in 
 
 To do this, we need to wrap the entire application in a `ParallaxProvider` component in the `app/root.tsx` file.
 
-1. First, `import` the `ParallaxProvider` at the top of your `app/root.tsx` file:
+1. Firstly, open `app/root.tsx`.
+
+2. Next, `import` the `ParallaxProvider` at the top of your `app/root.tsx` file:
 
 ```diff lang="tsx" title="app/root.tsx" collapse={1-12}
 import { type LinksFunction } from '@remix-run/node'
@@ -83,9 +88,9 @@ import { Button } from './components/atoms/Button.tsx'
 +import { ParallaxProvider } from 'react-scroll-parallax'
 ```
 
-2. Next, wrap the entire application in the `ParallaxProvider` component:
+2. Next, wrap all the JSX that is being returned from the `App` component inside the `ParallaxProvider` component like so:
 
-```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={11-55}
+```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={12-45}
 export default function App() {
 	const data = useLoaderData<typeof loader>()
 	const theme = useTheme()
@@ -93,57 +98,53 @@ export default function App() {
 
 	return (
 +		<ParallaxProvider>
-			<AuthenticityTokenProvider token={data.csrfToken}>
-				<HoneypotProvider {...data.honeyProps}>
-					<Document nonce={nonce} theme={theme}>
-						<div className="flex h-screen flex-col justify-between">
-							<HeaderWithSearch />
+			<Document nonce={nonce} theme={theme}>
+				<div className="flex h-screen flex-col justify-between">
+					<HeaderWithSearch />
 
-							<div className="flex-1">
-								<main className="grid h-full">
-									<HeroCallToAction
-										image={heroImage}
-										imageRight={true}
-										hasBackgroundColour={true}
-									>
-										<div className="flex h-full flex-1 flex-col justify-between p-16">
-											<div className="flex flex-col gap-8">
-												<h2 className="text-h2">Welcome to Epic News</h2>
-												<p className="text-lg">
-													Keep up to date with the latest tech news.
-												</p>
-											</div>
-											<Button asChild variant="default" size="lg">
-												<Link to="/signup">Sign up</Link>
-											</Button>
-										</div>
-									</HeroCallToAction>
-
-									<ParallaxBackground
-										image={heroImage}
-										title="Epic News"
-										logo={logo}
-									/>
-
-									<div className="container">
-										<p className="text-base text-gray-600 md:text-lg lg:text-xl">
-											Welcome to Epic News, where the latest developments in
-											tech are found.
+					<div className="flex-1">
+						<main className="grid h-full">
+							<HeroCallToAction
+								image={heroImage}
+								imageRight={true}
+								hasBackgroundColour={true}
+							>
+								<div className="flex h-full flex-1 flex-col justify-between p-16">
+									<div className="flex flex-col gap-8">
+										<h2 className="text-h2">Welcome to Epic News</h2>
+										<p className="text-lg">
+											Keep up to date with the latest tech news.
 										</p>
 									</div>
-								</main>
-							</div>
+									<Button asChild variant="default" size="lg">
+										<Link to="/signup">Sign up</Link>
+									</Button>
+								</div>
+							</HeroCallToAction>
 
-							<div className="container flex justify-between pb-5">
-								<ThemeSwitch
-									userPreference={data.requestInfo.userPrefs.theme}
-								/>
+							<ParallaxBackground
+								image={heroImage}
+								title="Epic News"
+								logo={logo}
+							/>
+
+							<div className="container">
+								<p className="text-base text-gray-600 md:text-lg lg:text-xl">
+									Welcome to Epic News, where the latest developments in
+									tech are found.
+								</p>
 							</div>
-							<FooterMenuRight />
-						</div>
-					</Document>
-				</HoneypotProvider>
-			</AuthenticityTokenProvider>
+						</main>
+					</div>
+
+					<div className="container flex justify-between pb-5">
+						<ThemeSwitch
+							userPreference={data.requestInfo.userPrefs.theme}
+						/>
+					</div>
+					<FooterMenuRight />
+				</div>
+			</Document>
 +		</ParallaxProvider>
 	)
 }
@@ -171,17 +172,11 @@ Using your knowledge of importing and using a custom component from the [**`Hero
 - Place the component carefully in the JSX being returned by the `App` component
 - Look at the `interface` in the component file to see what props it accepts
 
-#### 🚀 EXTRA CREDIT
-
-As with `HeroCallToAction`, there is space around the component that we might not otherwise want.
-
-Can you find a way to remove this space so that it stretches right across the page width?
-
 ### Solution
 
 After having a go at configuring the component yourself, compare your solution with those below:
 
-<MonsterReveal title="1. ⚙️ Component configuration">
+<MonsterReveal title="⚙️ Component configuration">
 
 #### 1. ⚙️ Add imports
 
@@ -214,7 +209,7 @@ import useTheme from './hooks/useTheme.tsx'
 
 #### 2. ⚙️ Place component
 
-Carefully place the `ParallaxBackground` component below the `HeroCallToAction` component:
+Carefully place the `ParallaxBackground` component below the `HeroCallToAction` component, looking to see where it should go in relation to the other lines of code:
 
 ```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={2-4, 11-14, 17-31, 54-63}
 export default function App() {
@@ -292,95 +287,15 @@ With this in place, you should see the `ParallaxBackground` component displayed 
 
 ![ParallaxBackground solution 01](src/assets/gif/parallax-background-solution-01.gif)
 
-####
-
-</MonsterReveal>
-
-<MonsterReveal title="2. 🎨 Customise component">
-
-1. When investigating styles, it's always a good idea to start with your browsers devtools. You can right-click on the component and select 'Inspect' to see the HTML and CSS that is being applied.
-
-		![Parallax Devtools Inspection](src/assets/gif/parallax-devtools-inspection.gif)
-
-		In this case, I can see there is padding and a max-width applied to the component.
-
-2. Let's go through the process of finding these styles in the codebase. The five steps are labelled in the screenshot below:
-
-		1. If I double-click this class list in my browser's devtools, it becomes selected as a string
-		2. With the class list selected, I can copy it to my clipboard
-		3. Back in VS Code, I can then select global search from the icons on the far-left
-		4. I can then paste the class list I copied in step 2 into VS Code's global search
-		5. If I click on the search result, it will take me to the file and line where this class is defined
-
-![Parallax Devtools Inspection](src/assets/webp/epic-news/parallax-using-devtools.webp)
-
-3. In this case, I can see that the padding and max-width are being applied in the `ParallaxBackground` component file.
-
-		I can remove these styles to make the component stretch across the full width of the page:
-
-```diff lang="tsx" title="app/components/organisms/Hero/ParallaxBackground.tsx" del=" sm:pb-16 sm:pt-8" del='className="mx-auto max-w-7xl sm:px-6 lg:px-8"' collapse={15-51}
-const ParallaxBackground = ({
-	description,
-	title,
-	image,
-	logo,
-	altText = 'Welcome to DoBu Martial Arts - where we are stronger together',
-	children,
-}: ParallaxBackgroundProps) => {
-	const parallaxController = useParallaxController()
-	const handleLoad = () => parallaxController?.update()
-
-	return (
-		<div className="relative sm:pb-16 sm:pt-8">
-			<div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-				<div className="relative shadow-xl sm:overflow-hidden sm:rounded-2xl">
-					<div className="absolute inset-0">
-						<Parallax className="hidden lg:block" speed={-20}>
-							<img
-								className="h-full w-full object-cover"
-								src={image}
-								alt={altText}
-								onLoad={handleLoad}
-							/>
-						</Parallax>
-						<img
-							className="h-full w-full object-cover lg:hidden"
-							src={image}
-							alt={altText}
-							onLoad={handleLoad}
-						/>
-						<div className="bg-primary-light absolute inset-0 mix-blend-multiply" />
-					</div>
-					<div className="relative px-4 pb-8 pt-16 sm:px-6 sm:pb-14 sm:pt-24 lg:px-8 lg:pb-20 lg:pt-32">
-						<h1 className="text-center text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-9xl">
-							<span className="via-secondary-dark block bg-gradient-to-r from-secondary to-secondary bg-clip-text uppercase text-transparent drop-shadow-md">
-								{title}
-							</span>
-						</h1>
-						{logo && (
-							<div className="mx-auto my-8 w-32">
-								<img src={logo} className="drop-shadow-md" />
-							</div>
-						)}
-						{description && (
-							<p className="text-secondary-light mx-auto mt-6 max-w-lg text-center text-2xl drop-shadow-md sm:max-w-3xl lg:text-5xl">
-								{description}
-							</p>
-						)}
-						{children && children}
-					</div>
-				</div>
-			</div>
-		</div>
-	)
-}
-```
-
 </MonsterReveal>
 
 :::
 
-With your two hero sections in place, decide which you like best, and delete the other from `app/root.tsx`.
+With your two hero sections in place, decide which you like best.
+
+Do you prefer the 'Hero call to action' or the 'Parallax Background'?
+
+Decide on your favourite, and delete the other from `app/root.tsx`. Remember you can always customise your choice further if you wish.
 
 ## Experimentation
 
@@ -401,7 +316,7 @@ In this step, we have:
 - Installed an NPM package to use the `ParallaxBackground` component
 - Wrapped the entire application in a `ParallaxProvider` component
 - Imported and used the `ParallaxBackground` component in the `app/root.tsx` file
-- Customised the `ParallaxBackground` component to remove padding and max-width styles
+- Customised the `ParallaxBackground` component with our own image and text
 - Experimented with other custom components in the `app/components` directory
 
 ## 📄 Assignment documentation

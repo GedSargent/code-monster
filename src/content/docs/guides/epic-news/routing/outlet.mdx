@@ -3,6 +3,7 @@ title: Routing - `Outlet` and `_index.tsx`
 description: Learn how to create a nested route with the 'Outlet' component and the '_index.tsx' file.
 ---
 
+import { FileTree } from '@astrojs/starlight/components';
 import NestedRouting from "src/components/epicNews/NestedRouting.astro";
 import MonsterKbd from "src/components/MonsterKbd.astro";
 
@@ -44,71 +45,30 @@ The easiest way to do this is to select the block of code you want to comment ou
 
 ::::
 
+1. Add the `Outlet` components as an extra import at the top of the `root.tsx` file:
 
+2. Comment out the all your code that is currently between the `<main>` tags in the `root.tsx` file (highlighted in white below - your actual code might be different here)
 
-```diff lang="tsx" title="app/root.tsx" ins="Outlet, " showLineNumbers collapse={10-19, 21-62}
-import { parse } from '@conform-to/zod'
-import {
-	json,
-	type ActionFunctionArgs,
-	type LinksFunction,
-	type LoaderFunctionArgs,
-} from '@remix-run/node'
+3. Add the `Outlet` component beneath the commented out code
+
+```diff lang="tsx" title="app/root.tsx" ins="Outlet, " showLineNumbers collapse={5-17, 56-62} {31-52}
+import { type LinksFunction } from '@remix-run/node'
 import { Outlet, useLoaderData } from '@remix-run/react'
-import { z } from 'zod'
-import Document from '~/components/shared-layout/Document.tsx'
+import { ParallaxProvider } from 'react-scroll-parallax'
+import Document from '~/components/shared-layout/Document'
 import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-import { getHints } from '~/utils/client-hints'
-import { getDomainUrl } from '~/utils/misc'
 import { useNonce } from '~/utils/nonce-provider.ts'
 import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { getTheme, setTheme } from '~/utils/theme.server'
+import { type loader } from './__root.server'
 import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 import HeaderWithSearch from './components/organisms/HeaderWithSearch'
-import useTheme from './hooks/useTheme'
+import useTheme from './hooks/useTheme.tsx'
 
 export const links: LinksFunction = () => {
 	return rootLinkElements
 }
-
-export async function loader({ request }: LoaderFunctionArgs) {
-	const requestInfo = {
-		hints: getHints(request),
-		origin: getDomainUrl(request),
-		path: new URL(request.url).pathname,
-		userPrefs: {
-			theme: getTheme(request),
-		},
-	}
-
-	return json({ requestInfo })
-}
-
-const ThemeFormSchema = z.object({
-	theme: z.enum(['system', 'light', 'dark']),
-})
-
-export async function action({ request }: ActionFunctionArgs) {
-	const formData = await request.formData()
-	const submission = parse(formData, {
-		schema: ThemeFormSchema,
-	})
-
-	if (submission.intent !== 'submit') {
-		return json({ status: 'idle', submission } as const)
-	}
-
-	if (!submission.value) {
-		return json({ status: 'error', submission } as const, { status: 400 })
-	}
-	const { theme } = submission.value
-
-	const responseInit = {
-		headers: { 'set-cookie': setTheme(theme) },
-	}
-
-	return json({ success: true, submission }, responseInit)
-}
+export { headers, meta } from './__root.client.tsx'
+export { action, loader } from './__root.server.tsx'
 
 export default function App() {
 	const data = useLoaderData<typeof loader>()
@@ -116,28 +76,45 @@ export default function App() {
 	const theme = useTheme()
 
 	return (
-		<Document nonce={nonce} theme={theme}>
-			<div className="flex h-screen flex-col justify-between">
-        <HeaderWithSearch />
+		<ParallaxProvider>
+			<Document nonce={nonce} theme={theme}>
+				<div className="flex h-screen flex-col justify-between">
+					<HeaderWithSearch />
 
-				<div className="flex-1">
--					{/* <main className="grid h-full place-items-center">
--						<h1 className="text-mega">Your Journey Begins!</h1>
--						<p className="text-base text-gray-600 md:text-lg lg:text-xl">
--							Welcome to Epic News, where the latest developments in tech are
--							found.
--						</p>
--					</main> */}
-+					<Outlet />
+					<div className="flex-1">
+						{/* <main className="h-full">
+							<ParallaxBackground
+								image={heroImage}
+								title="Epic News"
+								logo={logo}
+								altText="Welcome to Epic News, where the latest developments in tech are found."
+							>
+								<div className="mx-auto flex w-fit flex-1 flex-col justify-between gap-16 bg-secondary/40 px-28 py-16 backdrop-blur-sm">
+									<p className="text-center text-4xl font-extrabold text-secondary-foreground">
+										The latest tech news in one place
+									</p>
+									<div className="flex justify-center gap-8">
+										<Button variant="default" size="wide">
+											<Link to="/signup">Sign up</Link>
+										</Button>
+										<Button variant="secondary" size="wide">
+											<Link to="/login">Login</Link>
+										</Button>
+									</div>
+								</div>
+							</ParallaxBackground>
+						</main> */}
++						<Outlet />
+					</div>
+
+					<div className="container flex justify-between pb-5">
+						<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+					</div>
+
+					<FooterMenuRight />
 				</div>
-
-				<div className="container flex justify-between pb-5">
-					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-				</div>
-
-      <FooterMenuRight />
-			</div>
-		</Document>
+			</Document>
+		</ParallaxProvider>
 	)
 }
 ```
@@ -205,13 +182,24 @@ However, if we wanted to navigate to a different page - say the 'About Us' page 
 http://localhost:3000/about-us
 ```
 
-The "route" in this case would then be served from another file in the code base. In a Remix app, this file would typically be found inside the `routes` folder, and called `about-us.tsx`.
+The "route" in this case would then be served from another file in the code base.
+
+In a Remix app, this file would typically be found inside the `routes` folder, and called `about-us.tsx`.
+
+<FileTree>
+
+- app
+	- root.tsx
+	- routes
+		- **about-us.tsx**
+
+</FileTree>
 
 ### Introducing "parent" and "child" routes
 
 In traditional apps, each new route request triggers a complete page reload.
 
-If you stop and think about this, it doesn't actually make much sense. If you have a navbar and footer that are the same on every page, why should they be reloaded every time?
+If you stop and think about this, it doesn't actually make much sense. If you have a navbar and footer that are the same on every page, why should they be reloaded *every time*?
 
 This can slow down the app and make it longer to load.
 
@@ -219,7 +207,7 @@ However, in a Remix application, we can make use of something much more powerful
 
 A "child" route is nested _within_ another route, which we call a "parent".
 
-As soon as we place the `Outlet` component inside a route file (like we just have in `root.tsx`), it becomes a "parent".
+As soon as we place the `Outlet` component inside a route file (like we just have in `root.tsx`), it becomes a "parent" route.
 
 The `Outlet` components tells Remix to render **both** the parent **and** the matching child route(s) through it. Because the parent is already loaded into memory, the child route can be rendered much more quickly because Remix doesn't need to reload the entire page.
 
@@ -289,7 +277,9 @@ This is a powerful feature of Remix that we will continue to explore in more det
 
 ## Update navbar links
 
-Finally, let's update the navbar links to include the new 'About us' page:
+Finally, let's update the navbar links to include the new 'About us' page.
+
+Open `app/components/organisms/HeaderWithSearch.tsx` and add the following code to the navbar section:
 
 ```diff title="app/components/organisms/HeaderWithSearch.tsx" lang="tsx" ins=' className="flex flex-1 justify-center gap-8"'
 export default function HeaderWithSearch() {
@@ -306,7 +296,7 @@ export default function HeaderWithSearch() {
 						<span className="text-sm text-foreground">Epic News</span>
 					</div>
 				</Link>
-
++
 				<div className="flex flex-1 justify-center gap-8">
 					<Link
 						to="/news"
@@ -368,18 +358,18 @@ Notice how the browser begins to load the 'about-us' page in the background as s
 
 ### Challenge
 
-Add a new routes to your app that serve pages from the URL paths below. For the time being, you can just add a simple title to each page in the same way we did for `/about-us`.
+Add a new route to your app that serve pages from the URL paths below. For the time being, you can just add a simple title to each page in the same way we did for `/about-us`.
 
-1. `/contact-us`
-2. `/my-account`
+The new route URL should be `/contact-us`.
+
+You should also add a link to the new page in your navbar, and add the `prefetch` attribute to the link to speed up page loading times.
 
 Visit each page in your browser to check that they are being served correctly:
 
 1. Visiting `http://localhost:3000/contact-us` should show a page with the title "Contact us"
-2. `http://localhost:3000/my-account` should show a page with the title "My account".
-3. Make sure the navbar and footer still show as expected on each page.
-4. Update your navbar and footer to include links to these new pages.
-5. Add a `prefetch` attribute to these new links to make them load faster in the browser.
+2. Make sure the navbar and footer still show as expected on each page.
+3. Update your navbar and footer to include links to these new pages.
+4. Add a `prefetch` attribute to these new links to make them load faster in the browser.
 
 :::
 

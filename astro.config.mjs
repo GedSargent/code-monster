@@ -51,7 +51,6 @@ export default defineConfig({
       sidebar: [
         {
           label: "Programming Principles",
-          collapsed: false,
           items: [
             {
               label: "Harmony Music Academy",
@@ -193,7 +192,6 @@ export default defineConfig({
             },
             {
               label: "🌞 Light and Dark Mode",
-              collapsed: true,
               items: [
                 {
                   label: "🌞 Setting up",
@@ -207,7 +205,6 @@ export default defineConfig({
             },
             {
               label: "🖥️ User Interface - Basics",
-              collapsed: true,
               items: [
                 {
                   label: "🖥️ Add Navbar and Footer",
@@ -229,7 +226,6 @@ export default defineConfig({
             },
             {
               label: "🧩 Custom Components",
-              collapsed: true,
               items: [
                 {
                   label: "🧩 `HeroCallToAction`",
@@ -243,7 +239,6 @@ export default defineConfig({
             },
             {
               label: "🔀 Routes, loaders and useLoaderData",
-              collapsed: true,
               items: [
                 {
                   label: "🔀 The `Outlet` component",
@@ -261,126 +256,130 @@ export default defineConfig({
                   label: "🔀 Server/client communication with useLoaderData",
                   link: "guides/epic-news/routing/use-loader-data",
                 },
-              ]
-            },
-            {
-              label: "🔒 Security",
-              collapsed: true,
-              items: [
                 {
-                  label: "🔒 Cross site request forgery",
-                  link: "guides/epic-news/csrf",
-                },
-                {
-                  label: "🔒 Spambots and honeypots",
-                  link: "guides/epic-news/honey-pots",
-                },
-                {
-                  label: "🔒 Account creation",
-                  link: "guides/epic-news/account-creation",
-                },
-                {
-                  label: "🔒 Single Sign-On",
-                  link: "guides/epic-news/single-sign-on",
+                  label: "🔀 News wireframe layout",
+                  link: "guides/epic-news/routing/news-layout",
                 },
               ]
             },
-            {
-              label: '🗄️ Prisma database',
-              collapsed: true,
-              items: [
-                {
-                  label: '🗄️ Schema updates',
-                  link: 'guides/epic-news/prisma/schema-updates'
-                },
-                {
-                  label: '🗂️ Modify project structure',
-                  link: 'guides/epic-news/prisma/modify-project-structure'
-                },
-                {
-                  label: '🌱 Modify seed file',
-                  link: 'guides/epic-news/prisma/modify-seed-file'
-                },
-              ]
-            },
-            {
-              label: "🖥️ Displaying Articles",
-              collapsed: true,
-              items: [
-                {
-                  label: '🖥️ Creating articles',
-                  link: 'guides/epic-news/displaying-articles/creating-articles'
-                },
-                {
-                  label: '🖥️ Loading Dummy Articles',
-                  link: 'guides/epic-news/displaying-articles/loading-dummy-articles'
-                },
-                {
-                  label: '🖥️ Style Dummy Articles',
-                  link: 'guides/epic-news/displaying-articles/style-article-card'
-                },
-                {
-                  label: '🖥️ Display an array of dummy articles',
-                  link: 'guides/epic-news/displaying-articles/display-array-of-dummy-articles'
-                },
-                {
-                  label: '🖥️ Load and display all real articles',
-                  link: 'guides/epic-news/displaying-articles/load-and-display-all-real-articles'
-                },
-                {
-                  label: '🖥️ Filter articles by category',
-                  link: 'guides/epic-news/displaying-articles/filter-articles-by-category'
-                },
-              ]
-            },
-            {
-              label: "📝 Single article page",
-              collapsed: true,
-              items: [
-                {
-                  label: '📝 Create a single article page',
-                  link: 'guides/epic-news/single-article-page/create-single-article-page'
-                },
-                {
-                  label: '📝 Link from news index to single article page',
-                  link: 'guides/epic-news/single-article-page/link-to-single-article-page'
-                },
-                {
-                  label: '📝 Fetch and display article data',
-                  link: 'guides/epic-news/single-article-page/fetch-article-data'
-                },
-                {
-                  label: '📝 Style the article page',
-                  link: 'guides/epic-news/single-article-page/style-article-page'
-                },
-              ]
-            },
-            {
-              label: "🛡️ Admin page",
-              collapsed: true,
-              items: [
-                {
-                  label: '🛡️ Create an admin review page',
-                  link: 'guides/epic-news/admin-page/create-admin-page'
-                },
-                {
-                  label: '🛡️ Protecting routes',
-                  link: 'guides/epic-news/admin-page/protecting-routes'
-                },
-                {
-                  label: '🛡️ Admin-only links',
-                  link: 'guides/epic-news/admin-page/admin-only-links'
-                },
-                {
-                  label: '🛡️ Filter published articles',
-                  link: 'guides/epic-news/admin-page/filter-published-articles'
-                }
-              ]
-            },
-            {
-              label: '🚀 Wrapping up - extra credits',
-              link: 'guides/epic-news/wrapping-up'
-            }
+            // {
+            //   label: "🔒 Security",
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: "🔒 Cross site request forgery",
+            //       link: "guides/epic-news/csrf",
+            //     },
+            //     {
+            //       label: "🔒 Spambots and honeypots",
+            //       link: "guides/epic-news/honey-pots",
+            //     },
+            //     {
+            //       label: "🔒 Account creation",
+            //       link: "guides/epic-news/account-creation",
+            //     },
+            //     {
+            //       label: "🔒 Single Sign-On",
+            //       link: "guides/epic-news/single-sign-on",
+            //     },
+            //   ]
+            // },
+            // {
+            //   label: '🗄️ Prisma database',
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: '🗄️ Schema updates',
+            //       link: 'guides/epic-news/prisma/schema-updates'
+            //     },
+            //     {
+            //       label: '🗂️ Modify project structure',
+            //       link: 'guides/epic-news/prisma/modify-project-structure'
+            //     },
+            //     {
+            //       label: '🌱 Modify seed file',
+            //       link: 'guides/epic-news/prisma/modify-seed-file'
+            //     },
+            //   ]
+            // },
+            // {
+            //   label: "🖥️ Displaying Articles",
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: '🖥️ Creating articles',
+            //       link: 'guides/epic-news/displaying-articles/creating-articles'
+            //     },
+            //     {
+            //       label: '🖥️ Loading Dummy Articles',
+            //       link: 'guides/epic-news/displaying-articles/loading-dummy-articles'
+            //     },
+            //     {
+            //       label: '🖥️ Style Dummy Articles',
+            //       link: 'guides/epic-news/displaying-articles/style-article-card'
+            //     },
+            //     {
+            //       label: '🖥️ Display an array of dummy articles',
+            //       link: 'guides/epic-news/displaying-articles/display-array-of-dummy-articles'
+            //     },
+            //     {
+            //       label: '🖥️ Load and display all real articles',
+            //       link: 'guides/epic-news/displaying-articles/load-and-display-all-real-articles'
+            //     },
+            //     {
+            //       label: '🖥️ Filter articles by category',
+            //       link: 'guides/epic-news/displaying-articles/filter-articles-by-category'
+            //     },
+            //   ]
+            // },
+            // {
+            //   label: "📝 Single article page",
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: '📝 Create a single article page',
+            //       link: 'guides/epic-news/single-article-page/create-single-article-page'
+            //     },
+            //     {
+            //       label: '📝 Link from news index to single article page',
+            //       link: 'guides/epic-news/single-article-page/link-to-single-article-page'
+            //     },
+            //     {
+            //       label: '📝 Fetch and display article data',
+            //       link: 'guides/epic-news/single-article-page/fetch-article-data'
+            //     },
+            //     {
+            //       label: '📝 Style the article page',
+            //       link: 'guides/epic-news/single-article-page/style-article-page'
+            //     },
+            //   ]
+            // },
+            // {
+            //   label: "🛡️ Admin page",
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: '🛡️ Create an admin review page',
+            //       link: 'guides/epic-news/admin-page/create-admin-page'
+            //     },
+            //     {
+            //       label: '🛡️ Protecting routes',
+            //       link: 'guides/epic-news/admin-page/protecting-routes'
+            //     },
+            //     {
+            //       label: '🛡️ Admin-only links',
+            //       link: 'guides/epic-news/admin-page/admin-only-links'
+            //     },
+            //     {
+            //       label: '🛡️ Filter published articles',
+            //       link: 'guides/epic-news/admin-page/filter-published-articles'
+            //     }
+            //   ]
+            // },
+            // {
+            //   label: '🚀 Wrapping up - extra credits',
+            //   link: 'guides/epic-news/wrapping-up'
+            // }
           ],
         },
         {

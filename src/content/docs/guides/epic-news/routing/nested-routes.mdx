@@ -3,6 +3,7 @@ title: Routes and Remix's file structure
 description: Remix's file structure and how it relates to routes in the application
 ---
 
+import { FileTree } from '@astrojs/starlight/components';
 import NestedRouting from "src/components/epicNews/NestedRouting.astro";
 import MonsterReveal from "src/components/MonsterReveal.astro";
 import MonsterKbd from "src/components/MonsterKbd.astro";
@@ -23,9 +24,9 @@ If the app was deployed to a live website, the base URL would be the domain name
 
 If you remember from our previous lesson, the `Outlet` component is used to render the **child** routes of the current parent at a specific place in the UI.
 
-So in effect, this means that the `root.tsx` file is actually the **parent** for ***every*** other route in the app. Any code we add here will be globally applied to all the other routes.
+So in effect, this means that the `root.tsx` file is actually the **parent** for ***every*** other route in the app. Any code we add here will be globally applied to all the other routes across the site.
 
-But what if we could add more parent and child routes to a Remix app? How could we show Remix know which files are ***parents*** and which are their ***children***?
+But what if we could add more fine-grained parent and child routes to a Remix app? How could we show Remix know which files are ***parents***, which are ***siblings*** and which are their ***children***?
 
 The answer lies in the naming conventions of the files themselves.
 
@@ -36,6 +37,17 @@ Files that sit at the same level as others in the `routes` folder are called **s
 Any files that we add next to the `_index.tsx` file will become **siblings** of `_index.tsx`, and direct **children** of `root.tsx`:
 
 ![Parent and sibling routes](src/assets/png/epic-news/parent-and-sibling-routes@2x.png)
+
+<FileTree>
+
+- app
+	- root.tsx // parent route
+	- routes
+		- _index.tsx // child/sibling route
+		- about-us.tsx // child/sibling route
+		- contact.tsx // child/sibling route
+
+</FileTree>
 
 For example, head back over to your browser, and type in the URL `http://localhost:3000/news`. Hit return and you should see a page not found message:
 
@@ -55,6 +67,12 @@ export default function NewsPage() {
 }
 
 ```
+
+:::caution[🤔 Stuck?]
+
+If you can't remember how to add a new route file in Remix, revisit the [**`Outlet` component lesson**](/code-monster/guides/epic-news/routing/outlet#adding-a-new-route) for a refresher.
+
+:::
 
 Save the file and head back to your browser. Refresh the page and you should see the new "News" page:
 
@@ -119,7 +137,7 @@ export default function TechnologyNewsPage() {
 
 :::note[Getting started with nested routes]
 
-### File names and URL conventions
+### Understanding file names and URL conventions
 
 The files `news.tsx` and `news.technology.tsx` both have names that share the same ***base path***: `/news`.
 
@@ -311,7 +329,7 @@ Just remember to save your file afterwards to keep the changes!
 
 If you visit `http://localhost:3000/` in your browser, you should see your original code from the [**`root.tsx`**](/code-monster/guides/epic-news/root-tsx) lesson displayed on the page:
 
-![Index page with original code](src/assets/png/epic-news/index-page-original-code.png)
+![Index page with original code](src/assets/webp/epic-news/index-page-original-code.webp)
 
 This is because any child root file that named `_index.tsx` will be rendered directly with the parent URL, in this case `http://localhost:3000/`.
 
@@ -327,11 +345,11 @@ Using what you have learned about the `_index.tsx` special filename and Remix's 
 
 ![News page with welcome text](src/assets/png/epic-news/news-page-welcome-text.png)
 
-When the user clicks on a category, the welcome message above should be replaced with the category page.
+When the user clicks on a category, the welcome message shown in the screenshot above should be replaced with the category page.
 
 You can use the code below for the news welcome page content.
 
-```tsx title="app/routes/news._index.tsx"
+```tsx title="Placeholder code for news welcome page"
 export default function NewsPageIndex() {
 	return (
 		<main className="container py-24">

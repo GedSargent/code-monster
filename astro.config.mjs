@@ -91,13 +91,13 @@ export default defineConfig({
                   label: "🛠️ Debugging",
                   link: "guides/programming/harmony-music/debugging",
                 },
+                {
+                  label: "💻 Form validation",
+                  link: "guides/programming/harmony-music/form-validation",
+                },
                 // {
-                //   label: "💻 Form validation",
-                //   link: "guides/programming/harmony-music/form-validation",
-                // },
-                // {
-                //   label: "Error display",
-                //   link: "guides/programming/harmony-music/error-display",
+                //   label: "Error handling",
+                //   link: "guides/programming/harmony-music/error-handling",
                 // },
                 // {
                 //   label: "Displaying data",

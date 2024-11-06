@@ -74,16 +74,16 @@ code {
   margin-bottom: 0;
 }
 
-.sl-markdown-content ul li :is(.directory) {
-
-}
-
 .starlight-aside {
   border-radius: var(--custom-code-border-radius);
 }
 
 .starlight-aside__title {
   margin-top: var(--custom-aside-title-margin-top) !important;
+}
+
+.starlight-aside__content ul {
+  margin-top: 1rem !important;
 }
 
 #code-playground-wrapper * {

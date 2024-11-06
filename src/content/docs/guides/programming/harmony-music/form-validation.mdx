@@ -1,9 +1,440 @@
 ---
 title: Form validation
 description: Form validation is an essential part of web development. Learn how to validate user input in a sign-up form for Harmony Music Academy.
+# TODO: Remove this once the guide is complete
+next: false
 ---
 
-import { Card } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
 import MonsterReveal from "src/components/MonsterReveal.astro";
 
 ## Introduction
+
+The first rule of web development is simple: never trust any user input.
+
+This is because users can enter anything they want into a form field, and it's up to you to make sure that the data is valid and safe to use.
+
+This tutorial will walk you through how to validate user input in a sign-up form for Harmony Music Academy.
+
+## 1. Presence checking
+
+The simplest form of validation is to check if a field is empty or not. This is known as ***presence checking***.
+
+In our sign-up form, we want to make sure that the user has entered their email address, level, and hours per week.
+
+### Checking for empty fields
+
+Let's start by seeing what happens when we submit the form without entering any data.
+
+
+<Steps>
+
+1. If you have been following the steps in the previous tutorial on [Capturing Form Data](/code-monster/guides/programming/harmony-music/capturing-form-data), you should already have the following code inside your `index.js` file:
+
+    ```js title="index.js" showLineNumbers {7-10} collapse={13-21}
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      let userEmail = document.querySelector("#email").value;
+      let userLevel = document.querySelector("#level").value;
+      let userHours = document.querySelector("#hoursPerWeek").value;
+      console.log({ userEmail, userLevel, userHours });
+    });
+    // Store the user's email address as userEmail (string/text)
+    // Store the user's level as userLevel (string/text)
+    // Store the user's hours of study as userHours (number)
+    // Validate the user's input
+    // Check if the user has selected a level
+    // Check if the user has provided an email address
+    // Check if the user has specified at least one hour of study
+    // Check if the number of hours requested is within the allowed range
+    // Calculate the total cost
+    // Display the total cost to the user
+    ```
+
+2. With this code in place, start your application server in the [usual way](https://github.com/L4-Programming/harmony-music?tab=readme-ov-file#4-view-html-in-browser).
+
+3. In your browser, open up the dev tools, and navigate to the 'Console' tab.
+
+4. Submit the form without entering any data. You should see the following output in the console:
+
+    ![logging-empty-form-values](src/assets/gif/programming/harmony-music/logging-empty-form-values.gif)
+
+    As you can see, the `userEmail` and `userHours` values are empty strings, while `userLevel` is string that reads `'basic'`.
+
+    ```js
+    { userEmail: "", userLevel: "basic", userHours: "" }
+    ```
+
+</Steps>
+
+Let's spend a moment to understand where these values are coming from.
+
+::::note
+
+### Types of HTML input fields
+
+#### 1. Text inputs
+
+<Steps>
+
+1. Open your `index.html` file and locate the form field for the user's email address.
+
+    It should be somewhere around line 17, and look like this:
+
+    ```html title='index.html' {4}
+    <input
+      id="email"
+      name="email"
+      type="text"
+      class="form-input"
+      placeholder="Your email"
+    />
+    ```
+
+    The highlighted line above shows field is of type `text`, which means that it accepts any kind of text input from the user.
+
+2. When we submit the form, the `value` of the text box is captured in the `userEmail` variable:
+
+    ```js
+    let userEmail = document.querySelector("#email").value;
+    ```
+
+3. If the user does not enter anything in the text box, the `value` of the text box will simply be an empty string `""`.
+
+    :::caution[Tip]
+    Keep this value in mind, as we can use it to check whether a user has actually submitted an email address later.
+    :::
+
+</Steps>
+
+#### 2. Select boxes
+
+<Steps>
+
+1. Head back to your `index.html` file and locate the select box for the user's level.
+
+    It should be around line 27, and look like this:
+
+    ```html title='index.html' {2-4}
+    <select id="level" name="level" class="form-input">
+      <option value="basic">Basic</option>
+      <option value="intermediate">Intermediate</option>
+      <option value="advanced">Advanced</option>
+    </select>
+    ```
+
+2. The highlighted lines above show the three options that a user can choose from.
+
+    If you look closely, you'll see that every `option` tag has a `value` attribute that corresponds to the level name.
+
+    It is this `value` that is captured in the `userLevel` variable (inside `index.js`) when the form is submitted:
+
+    ```js title='index.js'
+    let userLevel = document.querySelector("#level").value;
+    ```
+
+3. If the user does not select any option, the `value` of the select box will be the `value` of the first option, which is `'basic'`.
+
+</Steps>
+
+::::
+
+### Checking for empty fields
+
+Now that we know where our form values are coming from, let's think how we can add a validation check that ensures that the user has entered an email address.
+
+<Steps>
+
+1. Inside `index.js`, just above the `console.log()` statement, add a conditional check like so:
+
+    ```diff lang="js" title='index.js'
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      let userLevel = document.querySelector("#level").value;
+      let userEmail = document.querySelector("#email").value;
+      let userHours = document.querySelector("#hoursPerWeek").value;
+    +
+    +  if (userEmail === "") {
+    +    alert("Please enter your email address.");
+    +
+    +    return;
+    +  }
+    +
+      console.log({ userEmail, userLevel, userHours });
+    });
+    ```
+
+2. Save your changes, and head back over to your browser.
+
+    Make sure your devtools console is still open, and try submitting an empty form again.
+
+    This time, you should see an alert message that says "Please enter your email address."
+
+    ![alert-empty-email](src/assets/gif/programming/harmony-music/alert-empty-email.gif)
+
+3. Did you notice something else as well? The `console.log()` statement is no longer executed when the email field is empty.
+
+    Can you work out why?
+
+    {/* <MonsterReveal>
+
+    This is because the `return` statement inside the `if` block stops the function from executing any further.
+
+    ```js {4}
+    if (userEmail === "") {
+      alert("Please enter your email address.");
+
+      return;
+    }
+    ```
+
+    Any time you see a `return` statement inside a function, it means that the function will stop executing the code inside it at that point and `return` whatever value we have told it to.
+    
+    (In this case, the function returns `undefined`, because we haven't specified a value to return.)
+
+    Because of this, the `console.log()` statement is never reached when the email field is empty.
+
+    This behaviour is useful because it allows us to stop the computer processing data unnecessarily if any of the fields are empty.
+
+    </MonsterReveal> */}
+
+4. Now that we have a check in place for the email field, let's add similar ones to validate the other form fields.
+
+    :::tip[Challenge]
+
+    Can you add checks to ensure that the `userHours` field is not submitted as an empty string? 🤔
+
+    #### Expected behaviour
+
+    - If the user has submitted an empty string for `userHours`, display an alert message to prompt them to enter the required information.
+    - The function should not continue to log the form data to the console if either `userEmail` or `userHours` are empty.
+    - If there are values for each of the fields, the form data should be logged to the console as before.
+
+    {/* ### Solution
+
+    <MonsterReveal>
+  
+    To add a check for the `userHours` field, you can follow the same pattern as the check for the `userEmail` field.
+
+    ```diff lang="js" title="index.js" showLineNumbers collapse={24-33}
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      let userEmail = document.querySelector("#email").value;
+      let userLevel = document.querySelector("#level").value;
+      let userHours = document.querySelector("#hoursPerWeek").value;
+
+      if (userEmail === "") {
+        alert("Please enter your email address.");
+
+        return;
+      }
+    +  if (userHours === "") {
+    +    alert("Please how many hours of tuition you would like.");
+    +
+    +    return;
+    +  }
+
+      console.log({ userEmail, userLevel, userHours });
+    });
+    // Store the user's email address as userEmail (string/text)
+    // Store the user's level as userLevel (string/text)
+    // Store the user's hours of study as userHours (number)
+    // Validate the user's input
+    // Check if the user has selected a level
+    // Check if the user has provided an email address
+    // Check if the user has specified at least one hour of study
+    // Check if the number of hours requested is within the allowed range
+    // Calculate the total cost
+    // Display the total cost to the user
+    ```
+    </MonsterReveal> */}
+
+    :::
+
+  </Steps>
+
+## 2. Content validation
+
+Presence checking is one thing, but we also need to make sure that the data entered by the user is valid.
+
+Let's start by checking if the user has entered a valid email address.
+
+### Checking for valid email addresses
+
+This is actually surprising easy!
+
+<Steps>
+
+1. Open `index.html`
+
+2. Locate the input field for the user's email address.
+
+    It should be around line 17, and look like this:
+
+    ```html title='index.html' {4}
+    <input
+      id="email"
+      name="email"
+      type="text"
+      class="form-input"
+      placeholder="Your email"
+    />
+    ```
+
+3. The `type` attribute of the input field is set to `text`, which means that it accepts any kind of text input.
+
+    All we need to do is change this to `email`:
+
+    ```html title='index.html' ins='type="email"'
+    <input
+      id="email"
+      name="email"
+      type="email"
+      class="form-input"
+      placeholder="Your email"
+    />
+    ```
+
+4. With this in place, if you submit a value in the email field that is not a valid email address, the browser will automatically display an error message.
+
+    ![Email content validation](src/assets/webp/programming/harmony-music/email-content-validation.webp)
+
+</Steps>
+
+### Checking for valid hours
+
+One simple check that we need to do is ensure that users must enter a positive integer for the number of hours.
+
+<Steps>
+
+1. Open `index.js`
+
+2. Before we can check if the number is positive or not, we need to convert the value of `userHours` to a number.
+
+    This is because the `value` of an input field is always a string, even if the HTML input field is of type `number`.
+
+    To convert the value to a number, we can use the built-in JavaScript `parseInt()` function.
+
+    Remove the line highlighted in red below, and replace it with the code highlighted in green:
+
+    ```diff lang="js" title='index.js' showLineNumbers collapse={10-21}
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      let userEmail = document.querySelector("#email").value;
+      let userLevel = document.querySelector("#level").value;
+      let userHours = document.querySelector("#hoursPerWeek").value;
+    -  let userHours = document.querySelector("#hoursPerWeek").value;
+    +  let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+      
+      if (userEmail === "") {
+        alert("Please enter your email address.");
+
+        return;
+      }
+      if (userHours === "") {
+        alert("Please how many hours of tuition you would like.");
+
+        return;
+      }
+
+      console.log({ userEmail, userLevel, userHours });
+    });
+    ```
+
+2. Now we can do a check on the actual number value.
+
+    Just below the check for an empty `userHours` field, add a second `if` condition to ensure that the value is at least 1 or above:
+
+    ```diff lang="js" title='index.js' showLineNumbers collapse={5-15, 29-38}
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      let userEmail = document.querySelector("#email").value;
+      let userLevel = document.querySelector("#level").value;
+      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+
+      if (userEmail === "") {
+        alert("Please enter your email address.");
+
+        return;
+      }
+      if (userHours === "") {
+        alert("Please how many hours of tuition you would like.");
+
+        return;
+      }
+    +  if (userHours < 1) {
+    +    alert("Please enter at least one hour of tuition.");
+    +
+    +    return;
+    +  }
+
+      console.log({ userEmail, userLevel, userHours });
+    });
+    // Store the user's email address as userEmail (string/text)
+    // Store the user's level as userLevel (string/text)
+    // Store the user's hours of study as userHours (number)
+    // Validate the user's input
+    // Check if the user has selected a level
+    // Check if the user has provided an email address
+    // Check if the user has specified at least one hour of study
+    // Check if the number of hours requested is within the allowed range
+    // Calculate the total cost
+    // Display the total cost to the user
+    ```
+
+</Steps>
+
+## Validation checklist
+
+With the work completed so far, you have a good foundation for validating user input in your form.
+
+Here's two more validation checks you should consider adding:
+
+- Has the user selected a valid level (`"basic"`, `"intermediate"`, `"advanced"`)?
+- Is the number of hours requested within the allowed range for the level they have chosen (e.g., between 1 and 10 hours)?
+
+:::tip[Challenge]
+
+Can you add these two checks to your form validation code?
+
+Are there any other validation checks that you identified while planning your logic algorithm?
+
+#### Expected behaviour
+
+- If any validation check fails, display an alert message to prompt the user to enter the required information.
+- The function should not continue to log the form data to the console if any of the validation checks fail.
+- If all validation checks pass, the form data should be logged to the console as before.
+
+:::
+
+## Summary
+
+In this tutorial, you learned how to validate user input in a sign-up form for Harmony Music Academy.
+
+We have covered:
+
+- Presence checking to ensure that the user has entered data in all required fields.
+- Content validation to ensure that the data entered is of the correct type and format.
+- Using a `return` statement to stop the function from executing if any validation check fails.
+
+## Next steps
+
+In the next step, we will learn how to optimise the error messages shown to users when they fail to complete the required information.
+

@@ -93,49 +93,13 @@ Once you've finished, compare your solution with the one below:
 
 ## Solution
 
-<MonsterReveal title="1. Separate code">
+<MonsterReveal title="1. Create the component">
 
-### 1. Separate code
+### 1. Create the component
 
-First, it doesn't really make sense to have the `toTitleCase` function in the `app\routes\news.$category.tsx`.
+Create the `ArticleCard` component together with an accompanying TypeScript interface.
 
-I'm therefore going to create a new file called `stringUtils.ts` inside the `app\utils` folder, and move the `toTitleCase` function into it:
-
-:::caution
-
-Remember to `export` the `toTitleCase` function so that it can be `import`ed into other files across your project.
-
-:::
-
-```tsx title="app/utils/stringUtils.ts"
-export function toTitleCase(str: string) {
-	return str
-		.toLowerCase()
-		.split('-')
-		.map(function (word) {
-			return word.charAt(0).toUpperCase() + word.slice(1)
-		})
-		.join(' ')
-}
-```
-
-Next, let's `import` the `toTitleCase` function back into `app\routes\news.$category.tsx`:
-
-```diff lang="tsx" title="app/routes/news.$category.tsx" collapse showLineNumbers
-import { invariant } from '@epic-web/invariant'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import { prisma } from '~/utils/db.server.ts'
-+import { toTitleCase } from '~/utils/stringUtils.js'
-```
-
-</MonsterReveal>
-
-<MonsterReveal title="2. Create the component">
-
-### 2. Create the component
-
-With this in place, we can now create the `ArticleCard` component together with an accompanying TypeScript interface:
+Carefully place this just above the main `NewsCategoryPage` component in the `app/routes/news.$category.tsx` file:
 
 ```tsx title="app/routes/news.$category.tsx"
 import siteLogo from '~/assets/png/epic-news-logo@2x.png'
@@ -184,9 +148,9 @@ function ArticleCard({
 
 </MonsterReveal>
 
-<MonsterReveal title="3. Call the new component">
+<MonsterReveal title="2. Call the new component">
 
-### 3. Call the new component
+### 2. Call the new component
 
 Next, we can replace the old code in the `NewsCategoryPage` component with the new `ArticleCard` component, and pass it the props that it requires:
 

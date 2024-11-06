@@ -3,6 +3,8 @@ title: Dynamic routes and loader functions in Remix
 description: Learn how to use route params to create dynamic routes in Remix, and access their values using loader functions.
 ---
 
+import MonsterVideo from "src/components/MonsterVideo.astro"
+
 ## Introduction
 
 In our previous step on [**nested routes**](/code-monster/guides/epic-news/routing/nested-routes), we created a "News" route that enabled users to switch between different news categories.
@@ -11,9 +13,13 @@ We did this by creating a new route for each category, like this:
 
 ![News routes](src/assets/png/static-news-routes.png)
 
-Creating static files for each child route is fine, but not very sustainable. What if we want to add a new category? We'd have to create a new file for it, and then update the code inside each child file so they are all consistent.
+Creating static files for each child route is fine, but not very sustainable. 
 
-There's a much better solution - creating a single dynamic route that will handle requests to all the different news categories.
+Think about this for a second.
+
+What if we want to add new categories? We'd have to create a new child file for each one, and then update the code inside each so they are all consistent.
+
+There's a much better solution - creating a single ***dynamic route*** that will handle requests for all the different news categories.
 
 In this step, we'll learn how to:
 - create a single dynamic route for all news categories.
@@ -29,7 +35,9 @@ Delete all your hard-coded static child routes. So in the example from our [**pr
 - `news.reviews.tsx`
 - `news.technology.tsx`
 
-Replace all of these with a single file called `news.$category.tsx`.
+Replace all of these with a single file called `news.$category.tsx`:
+
+![Delete child routes](src/assets/gif/delete-individual-child-routes.gif)
 
 ![Delete static routes](src/assets/png/delete-static-routes.png)
 
@@ -45,6 +53,8 @@ export default function NewsCategoryPage() {
 }
 ```
 
+Save these changes.
+
 Now, head back to your browser and refresh your page. Try clicking the links to your different pages again. You will notice something strange has happened:
 
 ![Single dynamic route](src/assets/gif/single-dynamic-route.gif)
@@ -55,7 +65,9 @@ Why?
 
 ## Route params
 
-The `$` sign in the file name `news/$category.tsx` is actually a special character that tells Remix that this route is **dynamic**. It means that the route can match any base URL that starts with `/news/`, but then has a unique value for `category`.
+The `$` sign in the file name `news/$category.tsx` is actually a special character that tells Remix that this route is ***dynamic***.
+
+It means that the route can match any base URL that starts with `/news/`, but then will have a unique value for `category`.
 
 So, for example, if we visited the URL:
 
@@ -63,7 +75,7 @@ So, for example, if we visited the URL:
 http://localhost:3000/news/business
 ```
 
-...the `category` value would be the string "`business`".
+...the `$category` value would be the string "`business`".
 
 However, if we visited
 
@@ -71,7 +83,7 @@ However, if we visited
 http://localhost:3000/news/reviews
 ```
 
-...the `category` value would then be the string "`reviews`", and so on.
+...the `$category` value would then be the string "`reviews`", and so on.
 
 :::note[Deep Dive]
 
@@ -103,9 +115,11 @@ But what is a `loader` function?
 
 ### Client vs. server code
 
-Traditionally, React code is only ever executed by the **client**, or inside the user's browser.
+Traditionally, React code is only ever executed inside the user's browser.
 
-This is great for creating engaging user interactions, but the problem is that many crucial website actions, such as loading database information or accessing route parameters, can only be done on the **server**.
+The user's browser is known as the **client** in web development terms.
+
+This is great for building exciting user interfaces, but the problem is that many crucial website actions, such as loading database information or accessing route parameters, can only be done on the **server**.
 
 The makers of Remix got around this problem by introducing the concept of `loader` functions:
 
@@ -148,11 +162,15 @@ This `request` object carries crucial information about the incoming request to 
 Think of it as a toolbox that the `loader` function uses to understand exactly what the user is asking for.
 :::
 
-You can learn more about `loader` functions via the [**Remix docs**](https://remix.run/docs/en/main/route/loader).
+You can learn more about `loader` functions below:
+
+<MonsterVideo src="https://www.youtube.com/embed/NXqEP_PsPNc?si=_mUaoXuvBJs6Enoe" />
+
+More info is available in the [**Remix docs**](https://remix.run/docs/en/main/route/loader).
 
 ::::
 
-At first, let's just log this value out to the console and see what it looks like.
+At first, let's just log the `category` value out to the console and see what it looks like.
 
 Carefully add the following code to your `news/$category.tsx` file:
 
@@ -181,6 +199,12 @@ Head back to your browser and click the links between the different news categor
 Now check your VS Code terminal. You should see the `category` value logged out each time you click a link:
 
 ![Logging route params](src/assets/png/logging-route-params.png)
+
+This is great!
+
+We are loading the dynamic `category` value directly from the URL and logging it to the console.
+
+In the next step, we will do something more useful with this value. We will pass it to our `NewsCategoryPage` component and display it on the page.
 
 ## Summary
 

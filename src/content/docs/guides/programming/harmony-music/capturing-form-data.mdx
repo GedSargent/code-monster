@@ -177,7 +177,7 @@ Let's go ahead and capture the user's email address.
 
 Delete the `console.log();` message confirming the form is submitted, and add the lines highlighted in green to your `index.js` file:
 
-```diff lang="javascript" name="index.js" showLineNumbers collapse={12-20}
+```diff lang="javascript" name="index.js" showLineNumbers collapse={14-20}
 // Capture user's input on form submission
 let form = document.querySelector("form");
 
@@ -185,10 +185,11 @@ form.addEventListener("submit", function (event) {
   event.preventDefault();
 
 -  console.log("Form submitted");
++  // Store the user's email address as userEmail (string/text)
 +  let userEmail = document.querySelector("#email").value;
 +  console.log({ userEmail });
 });
-// Store the user's email address as userEmail (string/text)
+-// Store the user's email address as userEmail (string/text)
 // Store the user's level as userLevel (string/text)
 // Store the user's hours of study as userHours (number)
 // Validate the user's input
@@ -203,6 +204,8 @@ form.addEventListener("submit", function (event) {
 ### Checking the value of a variable - `console.log()`
 
 As you will have noticed, we have a new `console.log()` statement that should print the value of the `userEmail` variable to the console.
+
+We've also moved the relevent line from our comment plan above the variable to show where the `userEmail` is being captured.
 
 Try submitting the form in your browser without anything written in the email field and check the developer tools console:
 
@@ -231,26 +234,29 @@ With this in place - it's your turn!
 1. Capture the user's *level* and *hours of study* in variables, the same way as we did for the email address. Give your variables suitable names that are consistent with our first variable name.
 2. Print the values of these variables to the console.
 3. Test your code by submitting the form with different values in the input fields.
+4. Once your form is behaving correctly, move the relevant line from your comment plan above the respective variables.
 
 ### Solution
 
 <MonsterReveal>
 
-```diff lang="javascript" title="index.js" showLineNumbers ins={", userLevel, userHours"} collapse={13-21}
+```diff lang="javascript" title="index.js" showLineNumbers ins={", userLevel, userHours"} collapse={18-21}
 // Capture user's input on form submission
 let form = document.querySelector("form");
 
 form.addEventListener("submit", function (event) {
   event.preventDefault();
 
+  // Store the user's email address as userEmail (string/text)
   let userEmail = document.querySelector("#email").value;
++  // Store the user's level as userLevel (string/text)
 +  let userLevel = document.querySelector("#level").value;
++  // Store the user's hours of study as userHours (number)
 +  let userHours = document.querySelector("#hoursPerWeek").value;
   console.log({ userEmail, userLevel, userHours });
 });
-// Store the user's email address as userEmail (string/text)
-// Store the user's level as userLevel (string/text)
-// Store the user's hours of study as userHours (number)
+-// Store the user's level as userLevel (string/text)
+-// Store the user's hours of study as userHours (number)
 // Validate the user's input
 // Check if the user has selected a level
 // Check if the user has provided an email address

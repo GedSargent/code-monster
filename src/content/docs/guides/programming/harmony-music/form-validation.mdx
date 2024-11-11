@@ -31,21 +31,21 @@ Let's start by seeing what happens when we submit the form without entering any 
 
 1. If you have been following the steps in the previous tutorial on [Capturing Form Data](/code-monster/guides/programming/harmony-music/capturing-form-data), you should already have the following code inside your `index.js` file:
 
-    ```js title="index.js" showLineNumbers {7-10} collapse={13-21}
+    ```js title="index.js" showLineNumbers {7-12} collapse={15-21}
     // Capture user's input on form submission
     let form = document.querySelector("form");
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
 
+      // Store the user's email address as userEmail (string/text)
       let userEmail = document.querySelector("#email").value;
+      // Store the user's level as userLevel (string/text)
       let userLevel = document.querySelector("#level").value;
-      let userHours = document.querySelector("#hoursPerWeek").value;
+      // Store the user's hours of study as userHours (number)
+      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
       console.log({ userEmail, userLevel, userHours });
     });
-    // Store the user's email address as userEmail (string/text)
-    // Store the user's level as userLevel (string/text)
-    // Store the user's hours of study as userHours (number)
     // Validate the user's input
     // Check if the user has selected a level
     // Check if the user has provided an email address
@@ -158,10 +158,15 @@ Now that we know where our form values are coming from, let's think how we can a
     form.addEventListener("submit", function (event) {
       event.preventDefault();
 
-      let userLevel = document.querySelector("#level").value;
+      // Store the user's email address as userEmail (string/text)
       let userEmail = document.querySelector("#email").value;
-      let userHours = document.querySelector("#hoursPerWeek").value;
+      // Store the user's level as userLevel (string/text)
+      let userLevel = document.querySelector("#level").value;
+      // Store the user's hours of study as userHours (number)
+      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
     +
+    +  // Validate the user's input
+    +  // Check if the user has provided an email address
     +  if (userEmail === "") {
     +    alert("Please enter your email address.");
     +
@@ -210,51 +215,57 @@ Now that we know where our form values are coming from, let's think how we can a
 
     :::tip[Challenge]
 
-    Can you add checks to ensure that the `userHours` field is not submitted as an empty string? 🤔
+    Can you add checks to ensure that the `userHours` and `userLevel` fields are not submitted as empty strings? 🤔
 
     #### Expected behaviour
 
-    - If the user has submitted an empty string for `userHours`, display an alert message to prompt them to enter the required information.
-    - The function should not continue to log the form data to the console if either `userEmail` or `userHours` are empty.
+    - If the user has submitted an empty string for either `userHours` or `userLevel`, display an alert message to prompt them to enter the required information.
+    - The function should not continue to log the form data to the console if `userEmail`, `userHours` or `userLevel` are empty.
     - If there are values for each of the fields, the form data should be logged to the console as before.
 
     ### Solution
 
     <MonsterReveal>
   
-    To add a check for the `userHours` field, you can follow the same pattern as the check for the `userEmail` field.
+    To add checks for the `userHours` and `userLevel` fields, you can follow the same pattern as the check for the `userEmail` field.
 
-    ```diff lang="js" title="index.js" showLineNumbers collapse={24-33}
+    ```diff lang="js" title="index.js" showLineNumbers
     // Capture user's input on form submission
     let form = document.querySelector("form");
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
 
+      // Store the user's email address as userEmail (string/text)
       let userEmail = document.querySelector("#email").value;
+      // Store the user's level as userLevel (string/text)
       let userLevel = document.querySelector("#level").value;
-      let userHours = document.querySelector("#hoursPerWeek").value;
+      // Store the user's hours of study as userHours (number)
+      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
 
+      // Validate the user's input
+      // Check if the user has provided an email address
       if (userEmail === "") {
         alert("Please enter your email address.");
 
         return;
       }
+    +
+    +  // Check if the user has selected a level
+    +  if (userLevel === "") {
+    +    alert("Please select a level of study");
+    +  }
+    +
+    +  // Check if the user has specified at least one hour of study
     +  if (userHours === "") {
     +    alert("Please how many hours of tuition you would like.");
     +
     +    return;
     +  }
-
+    +
       console.log({ userEmail, userLevel, userHours });
     });
-    // Store the user's email address as userEmail (string/text)
-    // Store the user's level as userLevel (string/text)
-    // Store the user's hours of study as userHours (number)
-    // Validate the user's input
     // Check if the user has selected a level
-    // Check if the user has provided an email address
-    // Check if the user has specified at least one hour of study
     // Check if the number of hours requested is within the allowed range
     // Calculate the total cost
     // Display the total cost to the user
@@ -358,22 +369,34 @@ One simple check that we need to do is ensure that users must enter a positive i
 
     Just below the check for an empty `userHours` field, add a second `if` condition to ensure that the value is at least 1 or above:
 
-    ```diff lang="js" title='index.js' showLineNumbers collapse={5-15, 29-38}
+    ```diff lang="js" title='index.js' showLineNumbers collapse={7-26}
     // Capture user's input on form submission
     let form = document.querySelector("form");
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
 
+      // Store the user's email address as userEmail (string/text)
       let userEmail = document.querySelector("#email").value;
+      // Store the user's level as userLevel (string/text)
       let userLevel = document.querySelector("#level").value;
+      // Store the user's hours of study as userHours (number)
       let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
 
+      // Validate the user's input
+      // Check if the user has provided an email address
       if (userEmail === "") {
         alert("Please enter your email address.");
 
         return;
       }
+
+      // Check if the user has selected a level
+      if (userLevel === "") {
+        alert("Please select a level of study");
+      }
+
+      // Check if the user has specified at least one hour of study
       if (userHours === "") {
         alert("Please how many hours of tuition you would like.");
 
@@ -387,13 +410,6 @@ One simple check that we need to do is ensure that users must enter a positive i
 
       console.log({ userEmail, userLevel, userHours });
     });
-    // Store the user's email address as userEmail (string/text)
-    // Store the user's level as userLevel (string/text)
-    // Store the user's hours of study as userHours (number)
-    // Validate the user's input
-    // Check if the user has selected a level
-    // Check if the user has provided an email address
-    // Check if the user has specified at least one hour of study
     // Check if the number of hours requested is within the allowed range
     // Calculate the total cost
     // Display the total cost to the user
@@ -401,18 +417,18 @@ One simple check that we need to do is ensure that users must enter a positive i
 
 </Steps>
 
-## Validation checklist
+### Validate level and hours
 
-With the work completed so far, you have a good foundation for validating user input in your form.
+There are at least two more validation checks we need to consider:
 
-Here's two more validation checks you should consider adding:
-
-- Has the user selected a valid level (`"basic"`, `"intermediate"`, `"advanced"`)?
+- Is the level of study selected by the user valid?
 - Is the number of hours requested within the allowed range for the level they have chosen (e.g., between 1 and 10 hours)?
 
 :::tip[Challenge]
 
-Can you add these two checks to your form validation code?
+Can you implement these two checks in your code?
+
+Discuss this with a partner or in a group first, and then try to implement the checks in your code.
 
 Are there any other validation checks that you identified while planning your logic algorithm?
 
@@ -421,6 +437,148 @@ Are there any other validation checks that you identified while planning your lo
 - If any validation check fails, display an alert message to prompt the user to enter the required information.
 - The function should not continue to log the form data to the console if any of the validation checks fail.
 - If all validation checks pass, the form data should be logged to the console as before.
+
+### Solution
+
+<MonsterReveal title="Validate hours against level of study">
+
+<Steps>
+
+1. There are several ways to do this, but one of the most efficient and scaleable is to use an object.
+
+    Place this object at the top of your event listener:
+
+    ```diff lang="js" title='index.js' showLineNumbers collapse={12-46}
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+    +  const maxHoursPerLevel = {
+    +    beginner: 5,
+    +    advanced: 10,
+    +  };
+
+      // Store the user's email address as userEmail (string/text)
+      let userEmail = document.querySelector("#email").value;
+      // Store the user's level as userLevel (string/text)
+      let userLevel = document.querySelector("#level").value;
+      // Store the user's hours of study as userHours (number)
+      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+
+      // Validate the user's input
+      // Check if the user has provided an email address
+      if (userEmail === "") {
+        alert("Please enter your email address.");
+
+        return;
+      }
+
+      // Check if the user has selected a level
+      if (userLevel === "") {
+        alert("Please select a level of study");
+      }
+
+      // Check if the user has specified at least one hour of study
+      if (userHours === "") {
+        alert("Please how many hours of tuition you would like.");
+
+        return;
+      }
+      if (userHours <Steps 1) {
+        alert("Please enter at least one hour of tuition.");
+
+        return;
+      }
+
+      // Check if the number of hours requested is within the allowed range
+      
+
+      console.log({ userEmail, userLevel, userHours });
+    });
+    // Calculate the total cost
+    // Display the total cost to the user
+    ```
+
+2. Now, just below the check for the number of hours, add the validation code that ensures the level selected is valid, and that the number of hours requested is within the allowed range:
+
+    ```diff lang="js" title='index.js' showLineNumbers collapse={12-44}
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const maxHoursPerLevel = {
+        beginner: 5,
+        advanced: 10,
+      };
+
+      // Store the user's email address as userEmail (string/text)
+      let userEmail = document.querySelector("#email").value;
+      // Store the user's level as userLevel (string/text)
+      let userLevel = document.querySelector("#level").value;
+      // Store the user's hours of study as userHours (number)
+      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+
+      // Validate the user's input
+      let errors = [];
+
+      // Check if the user has provided an email address
+      if (userEmail === "") {
+        alert("Please enter your email address.");
+
+        return;
+      }
+
+      // Check if the user has selected a level
+      if (userLevel === "") {
+        alert("Please select a level of study");
+      }
+
+      // Check if the user has specified at least one hour of study
+      if (userHours === "") {
+        alert("Please how many hours of tuition you would like.");
+
+        return;
+      }
+      if (userHours < 1) {
+        alert("Please enter at least one hour of tuition.");
+
+        return;
+      }
+    +
+    +  // Check if the userLevel exists in the maxHoursPerLevel object
+    +  if (!maxHoursPerLevel.hasOwnProperty(userLevel)) {
+    +    alert("Invalid level of study selected.");
+    +
+    +    return;
+    +  }
+    +
+    +  // Check if the number of hours requested is within the allowed range
+    +  const maxAllowedHours = maxHoursPerLevel[userLevel];
+    +  if (userHours > maxAllowedHours) {
+    +    alert(
+    +      `You can only study a maximum of ${maxAllowedHours} hours per week.`
+    +    );
+    +
+    +    return;
+    +  }
+    +
+      console.log({ userEmail, userLevel, userHours });
+    });
+    // Calculate the total cost
+    // Display the total cost to the user
+    ```
+
+3. This is approach is most efficient because it allows you to easily add more levels and their corresponding maximum hours without having to change the validation code.
+
+    Likewise, the `maxHoursPerLevel` object doubles as a reference for valid levels, as each key in the object corresponds to a valid level of study.
+
+</Steps>
+
+</MonsterReveal>
 
 :::
 

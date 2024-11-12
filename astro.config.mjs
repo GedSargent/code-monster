@@ -96,9 +96,17 @@ export default defineConfig({
                   link: "guides/programming/harmony-music/form-validation",
                 },
                 {
-                  label: "❌ Error handling",
+                  label: "💻 Error handling",
                   link: "guides/programming/harmony-music/error-handling",
                 },
+                {
+                  label: "✏️ Assignment update - mid",
+                  link: "guides/programming/harmony-music/assignment-update-mid",
+                },
+                {
+                  label: "💻 Code refactor",
+                  link: "guides/programming/harmony-music/code-refactor",
+                }
                 // {
                 //   label: "Displaying data",
                 //   link: "guides/programming/harmony-music/displaying-data",

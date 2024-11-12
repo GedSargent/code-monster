@@ -95,10 +95,10 @@ export default defineConfig({
                   label: "💻 Form validation",
                   link: "guides/programming/harmony-music/form-validation",
                 },
-                // {
-                //   label: "Error handling",
-                //   link: "guides/programming/harmony-music/error-handling",
-                // },
+                {
+                  label: "❌ Error handling",
+                  link: "guides/programming/harmony-music/error-handling",
+                },
                 // {
                 //   label: "Displaying data",
                 //   link: "guides/programming/harmony-music/displaying-data",

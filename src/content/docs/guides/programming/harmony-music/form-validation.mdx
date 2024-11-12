@@ -456,7 +456,7 @@ Are there any other validation checks that you identified while planning your lo
       event.preventDefault();
 
     +  const maxHoursPerLevel = {
-    +    beginner: 5,
+    +    basic: 5,
     +    advanced: 10,
     +  };
 
@@ -503,7 +503,7 @@ Are there any other validation checks that you identified while planning your lo
 
 2. Now, just below the check for the number of hours, add the validation code that ensures the level selected is valid, and that the number of hours requested is within the allowed range:
 
-    ```diff lang="js" title='index.js' showLineNumbers collapse={12-44}
+    ```diff lang="js" title='index.js' showLineNumbers collapse={12-42}
     // Capture user's input on form submission
     let form = document.querySelector("form");
 
@@ -511,7 +511,7 @@ Are there any other validation checks that you identified while planning your lo
       event.preventDefault();
 
       const maxHoursPerLevel = {
-        beginner: 5,
+        basic: 5,
         advanced: 10,
       };
 
@@ -523,8 +523,6 @@ Are there any other validation checks that you identified while planning your lo
       let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
 
       // Validate the user's input
-      let errors = [];
-
       // Check if the user has provided an email address
       if (userEmail === "") {
         alert("Please enter your email address.");

@@ -3,7 +3,977 @@ title: Error handling
 description: Optimise the errors shown to users when they fail to complete required information for Harmony Music Academy.
 ---
 
-import { Card } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
 import MonsterReveal from "src/components/MonsterReveal.astro";
 
 ## Introduction
+
+We are now checking for validation errors on the form, but the user experience feels a bit clunky.
+
+For example, if the user submits a form with more than one error, they are shown multiple alerts for each mistake.
+
+Let's see if we can improve this. In this guide we will:
+
+- Collect all errors into an object
+- Create a helper function to add error messages to the object
+- Use a loop to process each error
+- update our user interface to show each form field that needs correcting
+
+## Collect errors into an object
+
+<Steps>
+
+1. Firstly, let's add an object to collect all the errors into, together with a helper function to add error messages:
+
+    Open `index.js` and add the line highlighted in green below:
+
+    ```diff lang="js" title="index.js" showLineNumbers collapse={6-17, 30-60}
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const maxHoursPerLevel = {
+        basic: 5,
+        advanced: 10,
+      };
+
+      // Store the user's email address as userEmail (string/text)
+      let userEmail = document.querySelector("#email").value;
+      // Store the user's level as userLevel (string/text)
+      let userLevel = document.querySelector("#level").value;
+      // Store the user's hours of study as userHours (number)
+      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+
+      // Validate the user's input
+    +  let errors = {};
+    +
+    +  // Helper function to add error messages
+    +  function addError(field, message) {
+    +    if (!errors[field]) {
+    +      errors[field] = { messages: [] };
+    +    }
+    +    errors[field].messages.push(message);
+    +  }
+    +
+      // Check if the user has provided an email address
+      if (userEmail === "") {
+        alert("Please enter your email address.");
+
+        return;
+      }
+
+      // Check if the user has selected a level
+      if (userLevel === "") {
+        alert("Please select a level of study");
+      }
+
+      // Check if the user has specified at least one hour of study
+      if (userHours === "") {
+        alert("Please how many hours of tuition you would like.");
+
+        return;
+      }
+      if (userHours < 1) {
+        alert("Please enter at least one hour of tuition.");
+
+        return;
+      }
+
+      // Check if the userLevel exists in the maxHoursPerLevel object
+      if (!maxHoursPerLevel.hasOwnProperty(userLevel)) {
+        alert("Invalid level of study selected.");
+
+        return;
+      }
+      // Check if the number of hours requested is within the allowed range
+      const maxAllowedHours = maxHoursPerLevel[userLevel];
+      if (userHours > maxAllowedHours) {
+        alert(`You can only study a maximum of ${maxAllowedHours} hours per week.`);
+
+        return;
+      }
+
+      console.log({ userEmail, userLevel, userHours });
+    });
+    // Calculate the total cost
+    // Display the total cost to the user
+    ```
+
+2. Next, we will replace all the `alert` messages with objects that we will `push` into the `errors` array.
+
+    Carefully delete the lines highlighted in red below and replace them with those highlighted in green:
+
+    ```diff lang="js" title="index.js" showLineNumbers collapse={6-17}
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const maxHoursPerLevel = {
+        basic: 5,
+        advanced: 10,
+      };
+
+      // Store the user's email address as userEmail (string/text)
+      let userEmail = document.querySelector("#email").value;
+      // Store the user's level as userLevel (string/text)
+      let userLevel = document.querySelector("#level").value;
+      // Store the user's hours of study as userHours (number)
+      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+      
+      // Validate the user's input
+      let errors = {};
+
+      // Helper function to add error messages
+      function addError(field, message) {
+        if (!errors[field]) {
+          errors[field] = { messages: [] };
+        }
+        errors[field].messages.push(message);
+      }
+
+      // Check if the user has provided an email address
+      if (userEmail === "") {
+    -    alert("Please enter your email address.");
+    +    addError("email", "Please enter your email address.");
+    -
+    -    return;
+      }
+
+      // Check if the user has selected a level
+      if (userLevel === "") {
+    -    alert("Please select a level of study");
+    +    addError("level", "Please select a level of study");
+    -
+    -    return;
+      }
+
+      // Check if the user has specified at least one hour of study
+      if (userHours === "") {
+    -    alert("Please specify how many hours of tuition you would like.");
+    +    addError(
+    +      "hoursPerWeek",
+    +      "Please specify how many hours of tuition you would like."
+    +    );
+    -
+    -    return;
+      }
+    
+      if (userHours < 1) {
+    -    alert("Please enter at least one hour of tuition.");
+    +    addError("hoursPerWeek", "Please enter at least one hour of tuition.");
+    -
+    -    return;
+      }
+
+      // Check if the userLevel exists in the maxHoursPerLevel object
+      if (!maxHoursPerLevel.hasOwnProperty(userLevel)) {
+    -    alert("Invalid level of study selected.");
+    +    addError("level", "Invalid level of study selected.");
+    -
+    -    return;
+      }
+
+      // Check if the number of hours requested is within the allowed range
+      const maxAllowedHours = maxHoursPerLevel[userLevel];
+      if (userHours > maxAllowedHours) {
+    -    alert(`You can only study a maximum of ${maxAllowedHours} hours per week.`);
+    +    addError(
+    +      "hoursPerWeek",
+    +      `You can only study a maximum of ${maxAllowedHours} hours per week.`
+    +    );
+    -
+    -    return;
+      }
+
+      console.log({ userEmail, userLevel, userHours });
+      console.log({ errors });
+    });
+    // Calculate the total cost
+    // Display the total cost to the user
+    ```
+
+    We no longer want to `return` from the function if there is an error at this point, as we want to collect all the errors before displaying them to the user.
+
+3. Let's test the new error handling by submitting the form with some errors.
+
+    Fill in the form with some errors and submit it. You should see the errors collected in the console.
+
+    ![Errors collected in the console](/img/docs/guides/programming/harmony-music/error-handling/errors-collected-in-console.png)
+
+    The errors are now collected in an object, which we can use to display them to the user.
+
+</Steps>
+
+## Style input fields with errors
+
+<Steps>
+
+1. The first thing we should do is style the input fields that have errors.
+
+    Open `index.css` and add the following CSS towards the bottom of your file:
+
+    ```diff lang="css" title="index.css" showLineNumbers collapse={15-89}
+    :root {
+      --black: rgb(22, 22, 22);
+      --white: rgb(255, 255, 255);
+      --grey-50: rgb(250, 250, 250);
+      --grey-300: rgb(192, 198, 201);
+      --grey-500: rgb(88, 104, 112);
+      --brand-light: rgb(255, 90, 58);
+      --brand-dark: rgb(172, 62, 41);
+      --sky-500: rgb(14 165 233);
+      --box-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+        0 4px 6px -4px rgb(0 0 0 / 0.1);
+    +  --error-bkg: rgb(255, 241, 241);
+    +  --error-placeholder: rgb(255, 157, 157);
+    }
+    * {
+      color: var(--grey-500);
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+    }
+    button {
+      cursor: pointer;
+    }
+    .form-wrapper {
+      display: flex;
+      background-color: var(--grey-50);
+      min-height: 100vh;
+    }
+    .form-section {
+      width: calc(50% - 1px);
+      display: flex;
+      flex-grow: 1;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+      padding: 2rem 4rem;
+    }
+    .form-section:first-of-type {
+      border-right: 1px solid var(--grey-300);
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-start;
+      width: 100%;
+    }
+    .form-label {
+      font-size: 1.25rem;
+    }
+    .form-input {
+      background-color: var(--white);
+      border-radius: 999px;
+      border: 1px solid var(--grey-300);
+      font-size: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 300;
+      color: var(--black);
+      width: 100%;
+    }
+    .form-input::placeholder {
+      color: var(--grey-300);
+    }
+    .form-input:focus {
+      outline: none;
+      outline: 2px solid var(--sky-500);
+      box-shadow: var(--box-shadow-lg);
+    }
+    .mobile-display {
+      display: none;
+    }
+    .submit-btn {
+      border-radius: 1.75rem;
+      margin: 0 auto;
+      text-align: center;
+      color: var(--white);
+      border: 0;
+      padding: 0.75rem 2rem;
+      font-size: 1.5rem;
+      background: linear-gradient(
+        180deg,
+        var(--brand-light) 0%,
+        var(--brand-dark) 100%
+      );
+      transition: all 0.3s ease;
+      outline: none;
+      box-shadow: none;
+    }
+    .submit-btn:hover {
+      outline: 1px solid var(--brand-dark);
+      box-shadow: var(--box-shadow-lg);
+      transition: all 0.3s ease;
+    }
+    +
+    +.error-input {
+    +  background-color: var(--error-bkg);
+    +  color: var(--brand-dark);
+    +  border-color: var(--brand-dark);
+    +}
+    +.error-input::placeholder {
+    +  color: var(--error-placeholder);
+    +}
+    +.error-label {
+    +  color: var(--error-dark);
+    +}
+    +
+    @media screen and (max-width: 640px) {
+      .mobile-hidden {
+        display: none;
+      }
+      .mobile-display {
+        display: block;
+      }
+    }
+
+    ```
+
+    This CSS will simply style the input fields with errors with a red background, border, label and placeholder text.
+
+    Next, we will use JavaScript to apply this class to any input fields that contain errors.
+
+2. Open `index.js`. Add the code highlighted below just above the last two `console.log()` statements:
+
+    ```diff lang="js" title="index.js" showLineNumbers collapse={7-65}
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const maxHoursPerLevel = {
+        basic: 5,
+        advanced: 10,
+      };
+
+      // Store the user's email address as userEmail (string/text)
+      let userEmail = document.querySelector("#email").value;
+      // Store the user's level as userLevel (string/text)
+      let userLevel = document.querySelector("#level").value;
+      // Store the user's hours of study as userHours (number)
+      let userHours = document.querySelector("#hoursPerWeek").value;
+
+      // Validate the user's input
+      let errors = {};
+
+      // Helper function to add error messages
+      function addError(field, message) {
+        if (!errors[field]) {
+          errors[field] = { messages: [] };
+        }
+        errors[field].messages.push(message);
+      }
+
+      // Check if the user has provided an email address
+      if (userEmail === "") {
+        addError("email", "Please enter your email address.");
+      }
+
+      // Check if the user has selected a level
+      if (userLevel === "") {
+        addError("level", "Please select a level of study");
+      }
+
+      // Check if the user has specified at least one hour of study
+      if (userHours === "") {
+        addError(
+          "hoursPerWeek",
+          "Please specify how many hours of tuition you would like."
+        );
+      }
+      if (userHours < 1) {
+        addError("hoursPerWeek", "Please enter at least one hour of tuition.");
+      }
+
+      // Check if the userLevel exists in the maxHoursPerLevel object
+      if (!maxHoursPerLevel.hasOwnProperty(userLevel)) {
+        addError("level", "Invalid level of study selected.");
+      }
+
+      // Check if the number of hours requested is within the allowed range
+      const maxAllowedHours = maxHoursPerLevel[userLevel];
+      if (userHours > maxAllowedHours) {
+        addError(
+          "hoursPerWeek",
+          `You can only study a maximum of ${maxAllowedHours} hours per week.`
+        );
+      }
+    +
+    +  // Add error class to input elements with errors
+    +  for (let field in errors) {
+    +    let inputElement = document.querySelector(`#${field}`);
+    +    let labelElement = document.querySelector(`label[for=${field}]`);
+    +    if (inputElement) {
+    +      inputElement.classList.add("error-input");
+    +    }
+    +    if (labelElement) {
+    +      labelElement.classList.add("error-label");
+    +    }
+    +  }
+    +
+      console.log({ userEmail, userLevel, userHours });
+      console.log({ errors });
+    });
+    // Calculate the total cost
+    // Display the total cost to the user
+    ```
+    :::note[Explanation]
+
+    ### Understanding the code
+
+    - We loop through the `errors` object and get the `field` name from its keys.
+
+      ```js
+      for (let field in errors) {
+        // code here
+      }
+      ```
+      So, for example, if the `errors` object looks like this:
+
+      ```js
+      {
+        email: { messages: ["Please enter your email address."] },
+        level: { messages: ["Please select a level of study"] },
+        hoursPerWeek: { messages: ["Please specify how many hours of tuition you would like."] }
+      }
+      ```
+
+      The `field` variable will be set to `email`, `level`, and `hoursPerWeek` respectively.
+
+    - We then get the input element with matching `field` id and add the `error-input` class to it:
+
+      ```js
+      let inputElement = document.querySelector(`#${field}`);
+      if (inputElement) {
+        inputElement.classList.add("error-input");
+      }
+      ```
+
+      The `classList` property is a powerful feature of JavaScript that allows us to add, remove, or toggle CSS classes on an element, and thereby update its appearance dynamically.
+      
+      You can read more about the `classList` property [in the MDN web docs](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList).
+
+    - We also get the label element with a `for` attribute that matches the `field` value, and then add the `error-label` class to it:
+
+      ```js
+      let labelElement = document.querySelector(`label[for=${field}]`);
+      if (labelElement) {
+        labelElement.classList.add("error-label");
+      }
+      ```
+    
+    With this code in place, any input fields with errors will be styled with a red background, border, label and placeholder text:
+
+    ![Styled input fields with errors](src/assets/webp/programming/harmony-music/styled-input-fields-with-errors.webp)
+
+    :::
+
+</Steps>
+
+## Display error messages
+
+The final step is to display the error messages to the user.
+
+To do this, we will need to update the HTML to include a `div` element for each error message, and then use JavaScript to populate these elements with the error messages.
+
+<Steps>
+
+1. Open `index.html` and look carefully for each `div` element with the class `form-field`.
+
+    Inside each of these, just below the `input` element, add an empty `div` element with an `id` attribute that closely matches the `id` attribute of its corresponding `input` element:
+
+    :::caution
+
+    Take extra care in placing the highlighted lines of code below.
+    
+    They should be placed immediately below their corresponding `input` elements.
+
+    :::
+
+    ```diff lang="html" title="index.html" showLineNumbers collapse={1-14, 45-59}
+
+    <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Harmony | Sign Up</title>
+          <link rel="stylesheet" href="./index.css" />
+        </head>
+        <body>
+          <form class="form-wrapper">
+            <div class="form-section">
+              <img
+                class="mobile-display"
+                src="./assets/harmony-music-academy-logo.svg"
+                alt="Harmony Music Academy logo"
+              />
+              <div class="form-field">
+                <label for="email" class="form-label">Email*</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  class="form-input"
+                  placeholder="Your email"
+                />
+    +           <div id="email-error"></div>
+              </div>
+              <div class="form-field">
+                <label for="level" class="form-label">Level*</label>
+                <select id="level" name="level" class="form-input">
+                  <option value="basic">Basic</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+    +           <div id="level-error"></div>
+              </div>
+              <div class="form-field">
+                <label for="hoursPerWeek" class="form-label">Hours per week*</label>
+                <input
+                  id="hoursPerWeek"
+                  name="hours-per-week"
+                  type="number"
+                  class="form-input"
+                  placeholder="How many?"
+                />
+    +           <div id="hoursPerWeek-error"></div>
+              </div>
+
+              <button type="submit" class="submit-btn">Sign up</button>
+            </div>
+
+            <div class="form-section mobile-hidden">
+              <img
+                src="./assets/harmony-music-academy-logo.svg"
+                alt="Harmony Music Academy logo"
+              />
+            </div>
+          </form>
+
+          <script type="module" src="./index.js"></script>
+        </body>
+      </html>
+  
+      ```
+  
+      We have added a `div` element with an `id` attribute that matches the `id` attribute of the corresponding `input` element. This will allow us to target the `div` element and populate it with the error message.
+
+2. Next let's add the styles for this new element.
+
+    Open `index.css`, and add the code highlighted below, just below the other error stylings we added earlier:
+
+    ```diff lang="css" title="index.css" showLineNumbers collapse={1-103}
+    :root {
+      --black: rgb(22, 22, 22);
+      --white: rgb(255, 255, 255);
+      --grey-50: rgb(250, 250, 250);
+      --grey-300: rgb(192, 198, 201);
+      --grey-500: rgb(88, 104, 112);
+      --brand-light: rgb(255, 90, 58);
+      --brand-dark: rgb(172, 62, 41);
+      --sky-500: rgb(14 165 233);
+      --box-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+        0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --error-bkg: rgb(255, 241, 241);
+      --error-placeholder: rgb(255, 157, 157);
+    }
+    * {
+      color: var(--grey-500);
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+    }
+    button {
+      cursor: pointer;
+    }
+    .form-wrapper {
+      display: flex;
+      background-color: var(--grey-50);
+      min-height: 100vh;
+    }
+    .form-section {
+      width: calc(50% - 1px);
+      display: flex;
+      flex-grow: 1;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+      padding: 2rem 4rem;
+    }
+    .form-section:first-of-type {
+      border-right: 1px solid var(--grey-300);
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-start;
+      width: 100%;
+    }
+    .form-label {
+      font-size: 1.25rem;
+    }
+    .form-input {
+      background-color: var(--white);
+      border-radius: 999px;
+      border: 1px solid var(--grey-300);
+      font-size: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 300;
+      color: var(--black);
+      width: 100%;
+    }
+    .form-input::placeholder {
+      color: var(--grey-300);
+    }
+    .form-input:focus {
+      outline: none;
+      outline: 2px solid var(--sky-500);
+      box-shadow: var(--box-shadow-lg);
+    }
+    .mobile-display {
+      display: none;
+    }
+    .submit-btn {
+      border-radius: 1.75rem;
+      margin: 0 auto;
+      text-align: center;
+      color: var(--white);
+      border: 0;
+      padding: 0.75rem 2rem;
+      font-size: 1.5rem;
+      background: linear-gradient(
+        180deg,
+        var(--brand-light) 0%,
+        var(--brand-dark) 100%
+      );
+      transition: all 0.3s ease;
+      outline: none;
+      box-shadow: none;
+    }
+    .submit-btn:hover {
+      outline: 1px solid var(--brand-dark);
+      box-shadow: var(--box-shadow-lg);
+      transition: all 0.3s ease;
+    }
+
+    .error-input {
+      background-color: var(--error-bkg);
+      color: var(--brand-dark);
+      border-color: var(--brand-dark);
+    }
+    .error-input::placeholder {
+      color: var(--error-placeholder);
+    }
+    .error-label {
+      color: var(--brand-dark);
+    }
+    +.error-message ul {
+    +  padding-left: 0;
+    +}
+    +.error-message ul li {
+    +  color: var(--brand-dark);
+    +  font-weight: 800;
+    +  font-size: 0.8rem;
+    +  letter-spacing: 0.1px;
+    +  list-style: none;
+    +  margin-bottom: 0.5rem;
+    +}
+
+    @media screen and (max-width: 640px) {
+      .mobile-hidden {
+        display: none;
+      }
+      .mobile-display {
+        display: block;
+      }
+    }
+    ```
+
+    This CSS will style the error messages with a red text color, bold font weight, and a smaller font size.
+
+3. Next, let's add the JavaScript that will add this new class to any areas of the form that have errors:
+
+    ```diff lang="js" title="index.js" showLineNumbers collapse={7-76}
+      // Capture user's input on form submission
+      let form = document.querySelector("form");
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const maxHoursPerLevel = {
+          basic: 5,
+          advanced: 10,
+        };
+
+        // Store the user's email address as userEmail (string/text)
+        let userEmail = document.querySelector("#email").value;
+        // Store the user's level as userLevel (string/text)
+        let userLevel = document.querySelector("#level").value;
+        // Store the user's hours of study as userHours (number)
+        let userHours = document.querySelector("#hoursPerWeek").value;
+
+        // Validate the user's input
+        let errors = {};
+
+        // Helper function to add error messages
+        function addError(field, message) {
+          if (!errors[field]) {
+            errors[field] = { messages: [] };
+          }
+          errors[field].messages.push(message);
+        }
+
+        // Check if the user has provided an email address
+        if (userEmail === "") {
+          addError("email", "Please enter your email address.");
+        }
+
+        // Check if the user has selected a level
+        if (userLevel === "") {
+          addError("level", "Please select a level of study");
+        }
+
+        // Check if the user has specified at least one hour of study
+        if (userHours === "") {
+          addError(
+            "hoursPerWeek",
+            "Please specify how many hours of tuition you would like."
+          );
+        }
+        if (userHours < 1) {
+          addError("hoursPerWeek", "Please enter at least one hour of tuition.");
+        }
+
+        // Check if the userLevel exists in the maxHoursPerLevel object
+        if (!maxHoursPerLevel.hasOwnProperty(userLevel)) {
+          addError("level", "Invalid level of study selected.");
+        }
+
+        // Check if the number of hours requested is within the allowed range
+        const maxAllowedHours = maxHoursPerLevel[userLevel];
+        if (userHours > maxAllowedHours) {
+          addError(
+            "hoursPerWeek",
+            `You can only study a maximum of ${maxAllowedHours} hours per week.`
+          );
+        }
+
+        // Add error class to input elements with errors
+        for (let field in errors) {
+          let inputElement = document.querySelector(`#${field}`);
+          let labelElement = document.querySelector(`label[for=${field}]`);
+          if (inputElement) {
+            inputElement.classList.add("error-input");
+          }
+          if (labelElement) {
+            labelElement.classList.add("error-label");
+          }
+    +
+    +      // Populate the error message div with an unordered list of error messages
+    +      let errorDiv = document.querySelector(`#${field}-error`);
+    +      if (errorDiv) {
+    +        errorDiv.classList.add("error-message");
+    +        let ul = document.createElement("ul");
+    +
+    +        errors[field].messages.forEach((message) => {
+    +          let li = document.createElement("li");
+    +          li.textContent = message;
+    +          ul.appendChild(li);
+    +        });
+    +
+    +        errorDiv.innerHTML = ""; // Clear any existing content
+    +        errorDiv.appendChild(ul);
+    +      }
+    +    }
+    +
+        console.log({ userEmail, userLevel, userHours });
+        console.log({ errors });
+      });
+      // Calculate the total cost
+      // Display the total cost to the user
+    ```
+
+    :::note[Explanation]
+
+    ### Understanding the code
+
+    - We get the `div` element with an `id` attribute that matches the `field` value and add the `error-message` class to it:
+
+      ```js
+      let errorDiv = document.querySelector(`#${field}-error`);
+      if (errorDiv) {
+        errorDiv.classList.add("error-message");
+      }
+      ```
+
+    - We then create an unordered list element and append it to the `errorDiv` element:
+
+      ```js
+      let ul = document.createElement("ul");
+      errorDiv.appendChild(ul);
+      ```
+
+    - We loop through the error messages in the `errors` object and create a list item element for each message:
+
+      ```js
+      errors[field].messages.forEach((message) => {
+        let li = document.createElement("li");
+        li.textContent = message;
+        ul.appendChild(li);
+      });
+      ```
+
+    - Finally, we clear any existing content in the `errorDiv` element and append the unordered list element to it:
+
+      ```js
+      errorDiv.innerHTML = ""; // Clear any existing content
+      errorDiv.appendChild(ul);
+      ```
+
+    With this code in place, the error messages will be displayed to the user as a list underneath the input fields with errors:
+
+    ![Error messages displayed to the user](src/assets/webp/programming/harmony-music/error-messages-displayed-to-user.webp)
+
+    :::
+
+4. Finally, we need to `return` early if there are any messages inside the `errors` object:
+
+    ```diff lang="js" title="index.js" showLineNumbers collapse={7-91}
+      // Capture user's input on form submission
+      let form = document.querySelector("form");
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const maxHoursPerLevel = {
+          basic: 5,
+          advanced: 10,
+        };
+
+        // Store the user's email address as userEmail (string/text)
+        let userEmail = document.querySelector("#email").value;
+        // Store the user's level as userLevel (string/text)
+        let userLevel = document.querySelector("#level").value;
+        // Store the user's hours of study as userHours (number)
+        let userHours = document.querySelector("#hoursPerWeek").value;
+
+        // Validate the user's input
+        let errors = {};
+
+        // Helper function to add error messages
+        function addError(field, message) {
+          if (!errors[field]) {
+            errors[field] = { messages: [] };
+          }
+          errors[field].messages.push(message);
+        }
+
+        // Check if the user has provided an email address
+        if (userEmail === "") {
+          addError("email", "Please enter your email address.");
+        }
+
+        // Check if the user has selected a level
+        if (userLevel === "") {
+          addError("level", "Please select a level of study");
+        }
+
+        // Check if the user has specified at least one hour of study
+        if (userHours === "") {
+          addError(
+            "hoursPerWeek",
+            "Please specify how many hours of tuition you would like."
+          );
+        }
+        if (userHours < 1) {
+          addError("hoursPerWeek", "Please enter at least one hour of tuition.");
+        }
+
+        // Check if the userLevel exists in the maxHoursPerLevel object
+        if (!maxHoursPerLevel.hasOwnProperty(userLevel)) {
+          addError("level", "Invalid level of study selected.");
+        }
+
+        // Check if the number of hours requested is within the allowed range
+        const maxAllowedHours = maxHoursPerLevel[userLevel];
+        if (userHours > maxAllowedHours) {
+          addError(
+            "hoursPerWeek",
+            `You can only study a maximum of ${maxAllowedHours} hours per week.`
+          );
+        }
+
+        // Add error class to input elements with errors
+        for (let field in errors) {
+          let inputElement = document.querySelector(`#${field}`);
+          let labelElement = document.querySelector(`label[for=${field}]`);
+          if (inputElement) {
+            inputElement.classList.add("error-input");
+          }
+          if (labelElement) {
+            labelElement.classList.add("error-label");
+          }
+
+          // Populate the error message div with an unordered list of error messages
+          let errorDiv = document.querySelector(`#${field}-error`);
+          if (errorDiv) {
+            errorDiv.classList.add("error-message");
+            let ul = document.createElement("ul");
+
+            errors[field].messages.forEach((message) => {
+              let li = document.createElement("li");
+              li.textContent = message;
+              ul.appendChild(li);
+            });
+
+            errorDiv.innerHTML = ""; // Clear any existing content
+            errorDiv.appendChild(ul);
+          }
+        }
+
+    +    // Return early if there are any errors
+    +    if (Object.keys(errors).length > 0) {
+    +      return;
+    +    }
+
+        console.log({ userEmail, userLevel, userHours });
+        console.log({ errors });
+      });
+      // Calculate the total cost
+      // Display the total cost to the user
+    ```
+
+</Steps>
+
+## Test the form and commit changes
+
+Check that the form now displays all errors in one place, and that the input fields are styled correctly.
+
+If everything looks good, [commit your changes](/code-monster/guides/programming/harmony-music/committing-to-github) using Github Desktop, and remember to push them to your Github reponsitory.
+
+## Summary
+
+In this guide, we have improved the error handling for the Harmony Music Academy form by:
+
+- Collecting all errors into an object
+- Creating a helper function to add error messages to the object
+- Using a loop to process each error
+- Styling input fields with errors
+- Displaying error messages to the user
+- Returning early from the function if there are any errors
+
+This has made the user experience more intuitive and user-friendly, as users can now see all the errors they need to correct in one place.
+
+## Next steps
+
+In the next step, we will calculate the total cost of the user's tuition based on the level and number of hours they have selected.
+
+But first, let's update our assignment to include the changes we have made in this guide.
+

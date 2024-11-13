@@ -270,28 +270,27 @@ export default defineConfig({
                 },
               ]
             },
-            // {
-            //   label: "🔒 Security",
-            //   collapsed: true,
-            //   items: [
-            //     {
-            //       label: "🔒 Cross site request forgery",
-            //       link: "guides/epic-news/csrf",
-            //     },
-            //     {
-            //       label: "🔒 Spambots and honeypots",
-            //       link: "guides/epic-news/honey-pots",
-            //     },
-            //     {
-            //       label: "🔒 Account creation",
-            //       link: "guides/epic-news/account-creation",
-            //     },
-            //     {
-            //       label: "🔒 Single Sign-On",
-            //       link: "guides/epic-news/single-sign-on",
-            //     },
-            //   ]
-            // },
+            {
+              label: "🔒 Security",
+              items: [
+                {
+                  label: "🔒 Cross site request forgery",
+                  link: "guides/epic-news/csrf",
+                },
+                {
+                  label: "🔒 Spambots and honeypots",
+                  link: "guides/epic-news/honey-pots",
+                },
+                {
+                  label: "🔒 Account creation",
+                  link: "guides/epic-news/account-creation",
+                },
+                {
+                  label: "🔒 Single Sign-On",
+                  link: "guides/epic-news/single-sign-on",
+                },
+              ]
+            },
             // {
             //   label: '🗄️ Prisma database',
             //   collapsed: true,

@@ -27,7 +27,7 @@ Let's see if we can improve this. In this guide we will:
 
     Open `index.js` and add the line highlighted in green below:
 
-    ```diff lang="js" title="index.js" showLineNumbers collapse={6-17, 30-60}
+    ```diff lang="js" title="index.js" showLineNumbers collapse={6-17, 30-63}
     // Capture user's input on form submission
     let form = document.querySelector("form");
 
@@ -70,12 +70,7 @@ Let's see if we can improve this. In this guide we will:
       }
 
       // Check if the user has specified at least one hour of study
-      if (userHours === "") {
-        alert("Please how many hours of tuition you would like.");
-
-        return;
-      }
-      if (userHours < 1) {
+      if (isNaN(userHours) || userHours < 1) {
         alert("Please enter at least one hour of tuition.");
 
         return;
@@ -146,25 +141,18 @@ Let's see if we can improve this. In this guide we will:
       // Check if the user has selected a level
       if (userLevel === "") {
     -    alert("Please select a level of study");
-    +    addError("level", "Please select a level of study");
+    +    addError("level", "Please select a level of study.");
     -
     -    return;
       }
 
       // Check if the user has specified at least one hour of study
-      if (userHours === "") {
-    -    alert("Please specify how many hours of tuition you would like.");
-    +    addError(
-    +      "hoursPerWeek",
-    +      "Please specify how many hours of tuition you would like."
-    +    );
-    -
-    -    return;
-      }
-    
-      if (userHours < 1) {
+
+      // Check if the user has specified at least one hour of study
+      if (isNaN(userHours) || userHours < 1) {
     -    alert("Please enter at least one hour of tuition.");
     +    addError("hoursPerWeek", "Please enter at least one hour of tuition.");
+    -
     -
     -    return;
       }
@@ -189,8 +177,8 @@ Let's see if we can improve this. In this guide we will:
     -    return;
       }
 
-      console.log({ userEmail, userLevel, userHours });
-      console.log({ errors });
+    -  console.log({ userEmail, userLevel, userHours });
+    +  console.log({ errors });
     });
     // Calculate the total cost
     // Display the total cost to the user
@@ -200,11 +188,13 @@ Let's see if we can improve this. In this guide we will:
 
 3. Let's test the new error handling by submitting the form with some errors.
 
-    Fill in the form with some errors and submit it. You should see the errors collected in the console.
+    Fill in the form with some errors and submit it.
+    
+    You should see all the errors are now collected into a single object in the console.
 
-    ![Errors collected in the console](/img/docs/guides/programming/harmony-music/error-handling/errors-collected-in-console.png)
+    ![Errors collected in the console](src/assets/webp/programming/harmony-music/errors-collected-in-console.webp)
 
-    The errors are now collected in an object, which we can use to display them to the user.
+    We can use this single object to display all the error messages to the user at once 😎.
 
 </Steps>
 
@@ -214,7 +204,7 @@ Let's see if we can improve this. In this guide we will:
 
 1. The first thing we should do is style the input fields that have errors.
 
-    Open `index.css` and add the following CSS towards the bottom of your file:
+    Open `index.css` and add the following CSS:
 
     ```diff lang="css" title="index.css" showLineNumbers collapse={15-89}
     :root {
@@ -339,7 +329,7 @@ Let's see if we can improve this. In this guide we will:
 
     Next, we will use JavaScript to apply this class to any input fields that contain errors.
 
-2. Open `index.js`. Add the code highlighted below just above the last two `console.log()` statements:
+2. Open `index.js`. Add the code highlighted below just above the final `console.log()` statement:
 
     ```diff lang="js" title="index.js" showLineNumbers collapse={7-65}
     // Capture user's input on form submission
@@ -418,12 +408,16 @@ Let's see if we can improve this. In this guide we will:
     +    }
     +  }
     +
-      console.log({ userEmail, userLevel, userHours });
       console.log({ errors });
     });
     // Calculate the total cost
     // Display the total cost to the user
     ```
+
+    Try this in your browser now.
+    
+    You should see any input fields that have errors are now styled with a red background, border, label and placeholder text.
+
     :::note[Explanation]
 
     ### Understanding the code
@@ -481,7 +475,10 @@ Let's see if we can improve this. In this guide we will:
 
 The final step is to display the error messages to the user.
 
-To do this, we will need to update the HTML to include a `div` element for each error message, and then use JavaScript to populate these elements with the error messages.
+To do this, we will need to:
+
+- update the HTML to include an empty `div` element for each error message
+- use JavaScript to populate these new `dive` elements dynamically with the error messages.
 
 <Steps>
 
@@ -698,9 +695,17 @@ To do this, we will need to update the HTML to include a `div` element for each 
 
     This CSS will style the error messages with a red text color, bold font weight, and a smaller font size.
 
-3. Next, let's add the JavaScript that will add this new class to any areas of the form that have errors:
+3. Next, let's add the JavaScript that will add this new class to any areas of the form that have errors.
 
-    ```diff lang="js" title="index.js" showLineNumbers collapse={7-76}
+    :::caution
+
+    Take extra care in placing the highlighted lines of code below.
+
+    Note that is it placed inside the `for` loop that we added earlier.
+
+    :::
+
+    ```diff lang="js" title="index.js" showLineNumbers collapse={7-57}
       // Capture user's input on form submission
       let form = document.querySelector("form");
 
@@ -741,13 +746,7 @@ To do this, we will need to update the HTML to include a `div` element for each 
         }
 
         // Check if the user has specified at least one hour of study
-        if (userHours === "") {
-          addError(
-            "hoursPerWeek",
-            "Please specify how many hours of tuition you would like."
-          );
-        }
-        if (userHours < 1) {
+        if (isNaN(userHours) || userHours < 1) {
           addError("hoursPerWeek", "Please enter at least one hour of tuition.");
         }
 
@@ -776,23 +775,23 @@ To do this, we will need to update the HTML to include a `div` element for each 
             labelElement.classList.add("error-label");
           }
     +
-    +      // Populate the error message div with an unordered list of error messages
-    +      let errorDiv = document.querySelector(`#${field}-error`);
-    +      if (errorDiv) {
-    +        errorDiv.classList.add("error-message");
-    +        let ul = document.createElement("ul");
+    +     // Populate the error message div with an unordered list of error messages
+    +     let errorDiv = document.querySelector(`#${field}-error`);
+    +     if (errorDiv) {
+    +       errorDiv.classList.add("error-message");
+    +       let ul = document.createElement("ul");
     +
-    +        errors[field].messages.forEach((message) => {
-    +          let li = document.createElement("li");
-    +          li.textContent = message;
-    +          ul.appendChild(li);
-    +        });
+    +       errors[field].messages.forEach((message) => {
+    +         let li = document.createElement("li");
+    +         li.textContent = message;
+    +         ul.appendChild(li);
+    +       });
     +
-    +        errorDiv.innerHTML = ""; // Clear any existing content
-    +        errorDiv.appendChild(ul);
-    +      }
-    +    }
-    +
+    +       errorDiv.innerHTML = ""; // Clear any existing content
+    +       errorDiv.appendChild(ul);
+    +     }
+       }
+    
         console.log({ userEmail, userLevel, userHours });
         console.log({ errors });
       });
@@ -845,7 +844,7 @@ To do this, we will need to update the HTML to include a `div` element for each 
 
 4. Finally, we need to `return` early if there are any messages inside the `errors` object:
 
-    ```diff lang="js" title="index.js" showLineNumbers collapse={7-91}
+    ```diff lang="js" title="index.js" showLineNumbers collapse={7-85}
       // Capture user's input on form submission
       let form = document.querySelector("form");
 
@@ -886,13 +885,7 @@ To do this, we will need to update the HTML to include a `div` element for each 
         }
 
         // Check if the user has specified at least one hour of study
-        if (userHours === "") {
-          addError(
-            "hoursPerWeek",
-            "Please specify how many hours of tuition you would like."
-          );
-        }
-        if (userHours < 1) {
+        if (isNaN(userHours) || userHours < 1) {
           addError("hoursPerWeek", "Please enter at least one hour of tuition.");
         }
 
@@ -938,12 +931,11 @@ To do this, we will need to update the HTML to include a `div` element for each 
           }
         }
 
-    +    // Return early if there are any errors
-    +    if (Object.keys(errors).length > 0) {
-    +      return;
-    +    }
+    +   // Return early if there are any errors
+    +   if (Object.keys(errors).length > 0) {
+    +     return;
+    +   }
 
-        console.log({ userEmail, userLevel, userHours });
         console.log({ errors });
       });
       // Calculate the total cost

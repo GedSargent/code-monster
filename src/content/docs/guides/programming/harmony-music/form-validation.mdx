@@ -43,7 +43,7 @@ Let's start by seeing what happens when we submit the form without entering any 
       // Store the user's level as userLevel (string/text)
       let userLevel = document.querySelector("#level").value;
       // Store the user's hours of study as userHours (number)
-      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+      let userHours = document.querySelector("#hoursPerWeek").value;
       console.log({ userEmail, userLevel, userHours });
     });
     // Validate the user's input
@@ -162,7 +162,7 @@ Now that we know where our form values are coming from, let's think how we can a
       // Store the user's level as userLevel (string/text)
       let userLevel = document.querySelector("#level").value;
       // Store the user's hours of study as userHours (number)
-      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+      let userHours = document.querySelector("#hoursPerWeek").value;
     +
     +  // Validate the user's input
     +  // Check if the user has provided an email address
@@ -257,7 +257,7 @@ Now that we know where our form values are coming from, let's think how we can a
     - The function should not continue to log the form data to the console if `userEmail`, `userHours` or `userLevel` are empty.
     - If there are values for each of the fields, the form data should be logged to the console as before.
 
-    {/* ### Solution
+    ### Solution
 
     <MonsterReveal>
   
@@ -288,11 +288,13 @@ Now that we know where our form values are coming from, let's think how we can a
       // Check if the user has selected a level
     +  if (userLevel === "") {
     +    alert("Please select a level of study");
+    +
+    +    return;
     +  }
     +
       // Check if the user has specified at least one hour of study
     +  if (userHours === "") {
-    +    alert("Please how many hours of tuition you would like.");
+    +    alert("Please enter at least one hour of tuition.");
     +
     +    return;
     +  }
@@ -304,7 +306,7 @@ Now that we know where our form values are coming from, let's think how we can a
     // Calculate the total cost
     // Display the total cost to the user
     ```
-    </MonsterReveal> */}
+    </MonsterReveal>
 
     :::
 
@@ -360,7 +362,7 @@ This is actually surprising easy!
 
 ### Checking for valid hours
 
-One simple check that we need to do is ensure that users must enter a positive integer for the number of hours.
+One surprisingly tricky check is to ensure that users must enter a positive integer for the number of hours.
 
 <Steps>
 
@@ -390,7 +392,7 @@ One simple check that we need to do is ensure that users must enter a positive i
         return;
       }
       if (userHours === "") {
-        alert("Please how many hours of tuition you would like.");
+        alert("Please enter at least one hour of tuition.");
 
         return;
       }
@@ -399,11 +401,21 @@ One simple check that we need to do is ensure that users must enter a positive i
     });
     ```
 
-2. Now we can do a check on the actual number value.
+4. Now we can check whether the actual value is a positive number. But this is where it gets tricky.
 
-    Just below the check for an empty `userHours` field, add a second `if` condition to ensure that the value is at least 1 or above:
+    :::note[Unexpected behaviour]
 
-    ```diff lang="js" title='index.js' showLineNumbers collapse={7-26}
+    Our previous solution of checking if the value is an empty string will no longer work, because `parseInt()` always returns a number, *even if the user enters an empty string*.
+
+    The problem is that an empty string cannot be converted to a number, so `parseInt()` will instead return `NaN` (Not a Number) instead.
+
+    As a result, our previous presence check which looks at whether `userHours === ""` will no longer work, so we need to update it.
+
+    :::
+
+    Remove the previous check, and modify it as follows:
+
+    ```diff lang="js" title='index.js' showLineNumbers collapse={6-25}
     // Capture user's input on form submission
     let form = document.querySelector("form");
 
@@ -431,16 +443,12 @@ One simple check that we need to do is ensure that users must enter a positive i
       }
 
       // Check if the user has specified at least one hour of study
-      if (userHours === "") {
-        alert("Please how many hours of tuition you would like.");
-
+    -  if (userHours === "") {
+    +  if (isNaN(userHours) || userHours < 1) {
+        alert("Please enter at least one hour of tuition.");
+    
         return;
       }
-    +  if (userHours < 1) {
-    +    alert("Please enter at least one hour of tuition.");
-    +
-    +    return;
-    +  }
 
       console.log({ userEmail, userLevel, userHours });
     });
@@ -448,6 +456,14 @@ One simple check that we need to do is ensure that users must enter a positive i
     // Calculate the total cost
     // Display the total cost to the user
     ```
+
+5. Save your changes, and head across to your browser.
+
+    Try submitting the form with an empty hours field, and then again with `0` or a negative number.
+    
+    In each case, should see the following alert message:
+
+    ![Hourse validation](src/assets/webp/programming/harmony-music/hours-validation.webp)
 
 </Steps>
 
@@ -472,7 +488,7 @@ Are there any other validation checks that you identified while planning your lo
 - The function should not continue to log the form data to the console if any of the validation checks fail.
 - If all validation checks pass, the form data should be logged to the console as before.
 
-{/* ### Solution
+### Solution
 
 <MonsterReveal title="Validate hours against level of study">
 
@@ -482,7 +498,7 @@ Are there any other validation checks that you identified while planning your lo
 
     Place this object at the top of your event listener:
 
-    ```diff lang="js" title='index.js' showLineNumbers collapse={12-46}
+    ```diff lang="js" title='index.js' showLineNumbers collapse={12-40}
     // Capture user's input on form submission
     let form = document.querySelector("form");
 
@@ -514,20 +530,13 @@ Are there any other validation checks that you identified while planning your lo
         alert("Please select a level of study");
       }
 
-      // Check if the user has specified at least one hour of study
-      if (userHours === "") {
-        alert("Please how many hours of tuition you would like.");
 
-        return;
-      }
-      if (userHours <Steps 1) {
+      // Check if the user has specified at least one hour of study
+      if (isNaN(userHours) || userHours < 1) {
         alert("Please enter at least one hour of tuition.");
 
         return;
       }
-
-      // Check if the number of hours requested is within the allowed range
-      
 
       console.log({ userEmail, userLevel, userHours });
     });
@@ -537,7 +546,7 @@ Are there any other validation checks that you identified while planning your lo
 
 2. Now, just below the check for the number of hours, add the validation code that ensures the level selected is valid, and that the number of hours requested is within the allowed range:
 
-    ```diff lang="js" title='index.js' showLineNumbers collapse={12-42}
+    ```diff lang="js" title='index.js' showLineNumbers collapse={12-37}
     // Capture user's input on form submission
     let form = document.querySelector("form");
 
@@ -570,12 +579,7 @@ Are there any other validation checks that you identified while planning your lo
       }
 
       // Check if the user has specified at least one hour of study
-      if (userHours === "") {
-        alert("Please how many hours of tuition you would like.");
-
-        return;
-      }
-      if (userHours < 1) {
+      if (isNaN(userHours) || userHours < 1) {
         alert("Please enter at least one hour of tuition.");
 
         return;
@@ -610,7 +614,7 @@ Are there any other validation checks that you identified while planning your lo
 
 </Steps>
 
-</MonsterReveal> */}
+</MonsterReveal>
 
 :::
 

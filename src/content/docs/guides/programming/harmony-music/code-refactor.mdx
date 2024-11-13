@@ -1,6 +1,8 @@
 ---
 title: Code refactor
 description: Splitting large functions into smaller, more manageable modules
+# TODO: Remove this line
+next: false
 ---
 
 import { Steps } from '@astrojs/starlight/components';
@@ -14,13 +16,25 @@ If you have been following the previous guides, you will have around 100 lines o
 
 This is a common problem when coding - as you add more features to your project, your codebase grows and becomes harder to manage.
 
-One way to solve this problem is to refactor your code. Refactoring is the process of restructuring your code without changing its external behavior.
+One way to solve this problem is to **refactor** your code.
+
+Refactoring is the process of restructuring your code without changing its external behaviour.
 
 In this guide, we will refactor our code by splitting our large functions into smaller, more manageable modules.
 
 ## Extracting validation logic
 
 The vast majority of our code is dedicated to validating the form data. Let's extract this logic into a separate module.
+
+:::note[JavaScript Modules]
+
+In JavaScript, a **module** is simply a file that contains JavaScript code that can be reused in other files.
+
+You can `export` functions, variables, or classes from a module, and `import` them into other modules.
+
+:::
+
+### Create a new module
 
 <Steps>
 
@@ -91,13 +105,7 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
       }
 
       // Check if the user has specified at least one hour of study
-      if (userHours === "") {
-        addError(
-          "hoursPerWeek",
-          "Please specify how many hours of tuition you would like."
-        );
-      }
-      if (userHours < 1) {
+      if (isNaN(userHours) || userHours < 1) {
         addError("hoursPerWeek", "Please enter at least one hour of tuition.");
       }
 
@@ -145,7 +153,6 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
         return;
       }
 
-      console.log({ userEmail, userLevel, userHours });
       console.log({ errors });
     });
     // Calculate the total cost
@@ -211,13 +218,7 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
     -  }
     -
     -  // Check if the user has specified at least one hour of study
-    -  if (userHours === "") {
-    -    addError(
-    -      "hoursPerWeek",
-    -      "Please specify how many hours of tuition you would like."
-    -    );
-    -  }
-    -  if (userHours < 1) {
+    -  if (isNaN(userHours) || userHours < 1) {
     -    addError("hoursPerWeek", "Please enter at least one hour of tuition.");
     -  }
     -
@@ -265,7 +266,6 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
     -    return;
     -  }
 
-      console.log({ userEmail, userLevel, userHours });
       console.log({ errors });
     });
     // Calculate the total cost
@@ -304,13 +304,7 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
     +  }
     +
     +  // Check if the user has specified at least one hour of study
-    +  if (userHours === "") {
-    +    addError(
-    +      "hoursPerWeek",
-    +      "Please specify how many hours of tuition you would like."
-    +    );
-    +  }
-    +  if (userHours < 1) {
+    +  if (isNaN(userHours) || userHours < 1) {
     +    addError("hoursPerWeek", "Please enter at least one hour of tuition.");
     +  }
     +
@@ -385,7 +379,7 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
 
     At the very top of `validateForm.js`, create a new function called `displayErrors` that takes the `errors` object as an argument:
 
-    ```diff lang="js" title="validateForm.js" showLineNumbers collapse={5-83}
+    ```diff lang="js" title="validateForm.js" showLineNumbers collapse={5-77}
     +export function displayErrors(errors) {
     +}
 
@@ -416,13 +410,7 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
       }
 
       // Check if the user has specified at least one hour of study
-      if (userHours === "") {
-        addError(
-          "hoursPerWeek",
-          "Please specify how many hours of tuition you would like."
-        );
-      }
-      if (userHours < 1) {
+      if (isNaN(userHours) || userHours < 1) {
         addError("hoursPerWeek", "Please enter at least one hour of tuition.");
       }
 
@@ -474,7 +462,7 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
 
     With this in place, cut the error handling logic from the `validateForm` function and paste it into the new `displayErrors` function:
 
-    ```diff lang="js" title="validateForm.js" showLineNumbers collapse={29-77}
+    ```diff lang="js" title="validateForm.js" showLineNumbers collapse={29-71}
     export function displayErrors(errors) {
     +  for (let field in errors) {
     +    let inputElement = document.querySelector(`#${field}`);
@@ -529,13 +517,7 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
       }
 
       // Check if the user has specified at least one hour of study
-      if (userHours === "") {
-        addError(
-          "hoursPerWeek",
-          "Please specify how many hours of tuition you would like."
-        );
-      }
-      if (userHours < 1) {
+      if (isNaN(userHours) || userHours < 1) {
         addError("hoursPerWeek", "Please enter at least one hour of tuition.");
       }
 
@@ -585,9 +567,9 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
     }
     ```
 
-7. Now, let's call the new `displayErrors` function if any errors exist:
+7. Now, let's call the new `displayErrors` function if any errors exist, and return `false` from the `validateForm` function to indicate that the form data is invalid:
 
-    ```diff lang="js" title="validateForm.js" showLineNumbers collapse={2-25, 29-77}
+    ```diff lang="js" title="validateForm.js" showLineNumbers collapse={2-25, 29-71}
     export function displayErrors(errors) {
       for (let field in errors) {
         let inputElement = document.querySelector(`#${field}`);
@@ -642,13 +624,7 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
       }
 
       // Check if the user has specified at least one hour of study
-      if (userHours === "") {
-        addError(
-          "hoursPerWeek",
-          "Please specify how many hours of tuition you would like."
-        );
-      }
-      if (userHours < 1) {
+      if (isNaN(userHours) || userHours < 1) {
         addError("hoursPerWeek", "Please enter at least one hour of tuition.");
       }
 
@@ -688,7 +664,7 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
 
     At the very end of the `validateForm` function, add the following `return` statement:
 
-    ```diff lang="js" title="validateForm.js" showLineNumbers collapse={2-56}
+    ```diff lang="js" title="validateForm.js" showLineNumbers collapse={2-44}
     export function validateForm({ userEmail, userLevel, userHours }) {
       const maxHoursPerLevel = {
         basic: 5,
@@ -716,13 +692,7 @@ The vast majority of our code is dedicated to validating the form data. Let's ex
       }
 
       // Check if the user has specified at least one hour of study
-      if (userHours === "") {
-        addError(
-          "hoursPerWeek",
-          "Please specify how many hours of tuition you would like."
-        );
-      }
-      if (userHours < 1) {
+      if (isNaN(userHours) || userHours < 1) {
         addError("hoursPerWeek", "Please enter at least one hour of tuition.");
       }
 
@@ -789,7 +759,6 @@ Now that we have extracted our validation logic into a separate module, we can `
       // Validate the user's input
     +  const result = validateForm({ userEmail, userLevel, userHours });
 
-    -  console.log({ userEmail, userLevel, userHours });
     -  console.log({ errors });
     +  console.log({ result });
     });
@@ -821,7 +790,9 @@ Now that we have extracted our validation logic into a separate module, we can `
 
 In this guide, we refactored our code by splitting our large functions into smaller, more manageable modules.
 
-In particular, we:
+We've shortened a roughly 100 line file into fewer than 25!
+
+To do this, we:
 
 - Extracted the validation logic from our `index.js` file into a separate module called `validateForm.js`.
 - Separated the validation logic into two functions: `validateForm` and `displayErrors`.

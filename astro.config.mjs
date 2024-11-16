@@ -106,6 +106,10 @@ export default defineConfig({
                 {
                   label: "💻 Code refactor",
                   link: "guides/programming/harmony-music/code-refactor",
+                },
+                {
+                  label: "💻 Removing error messages",
+                  link: "guides/programming/harmony-music/removing-error-messages",
                 }
                 // {
                 //   label: "Displaying data",

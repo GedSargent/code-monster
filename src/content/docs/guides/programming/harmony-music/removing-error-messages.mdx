@@ -1,0 +1,305 @@
+---
+title: Remove error messages
+description: Remove any error messages on the form when users resubmit their information.
+# TODO: Remove this line
+next: false
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Introduction
+
+Before we calculate and display the results of the user's input, we need to remove any previous error messages that may have been displayed.
+
+This is important because we don't want to confuse the user with multiple error messages after they have fixed them.
+
+## Create a `removeErrors()` function
+
+<Steps>
+
+1. To remove the error messages, we will create a new function called `removeErrors()`.
+
+    Just after your `displayErrors(errors)` function, add the following code:
+
+    ```diff lang="javascript" title="validateForm.js" showLineNumbers collapse={2-25, 47-101}
+    export function displayErrors(errors) {
+      for (let field in errors) {
+        let inputElement = document.querySelector(`#${field}`);
+        let labelElement = document.querySelector(`label[for=${field}]`);
+        if (inputElement) {
+          inputElement.classList.add("error-input");
+        }
+        if (labelElement) {
+          labelElement.classList.add("error-label");
+        }
+
+        // Populate the error message div with an unordered list of error messages
+        let errorDiv = document.querySelector(`#${field}-error`);
+        if (errorDiv) {
+          errorDiv.classList.add("error-message");
+          let ul = document.createElement("ul");
+          errors[field].messages.forEach((message) => {
+            let li = document.createElement("li");
+            li.textContent = message;
+            ul.appendChild(li);
+          });
+          errorDiv.innerHTML = ""; // Clear any existing content
+          errorDiv.appendChild(ul);
+        }
+      }
+    }
+
+    +function removeErrors() {
+    +  let errorInputs = document.querySelectorAll(".error-input");
+    +  errorInputs.forEach((input) => {
+    +    input.classList.remove("error-input");
+    +  });
+    +
+    +  let errorLabels = document.querySelectorAll(".error-label");
+    +  errorLabels.forEach((label) => {
+    +    label.classList.remove("error-label");
+    +  });
+    +
+    +  let errorMessages = document.querySelectorAll(".error-message");
+    +  errorMessages.forEach((div) => {
+    +    div.classList.remove("error-message");
+    +    div.innerHTML = "";
+    +  });
+    +}
+    
+    export function validateForm({ userEmail, userLevel, userHours }) {
+      const maxHoursPerLevel = {
+        basic: 5,
+        advanced: 10,
+      };
+
+      let errors = {};
+
+      // Helper function to add error messages
+      function addError(field, message) {
+        if (!errors[field]) {
+          errors[field] = { messages: [] };
+        }
+        errors[field].messages.push(message);
+      }
+
+      // Check if the user has provided an email address
+      if (userEmail === "") {
+        addError("email", "Please enter your email address.");
+      }
+
+      // Check if the user has selected a level
+      if (userLevel === "") {
+        addError("level", "Please select a level of study");
+      }
+
+      // Check if the user has specified at least one hour of study
+      if (isNaN(userHours) || userHours <Steps 1) {
+        addError("hoursPerWeek", "Please enter at least one hour of tuition.");
+      }
+
+      // Check if the userLevel exists in the maxHoursPerLevel object
+      if (!maxHoursPerLevel.hasOwnProperty(userLevel)) {
+        addError("level", "Invalid level of study selected.");
+      }
+
+      // Check if the number of hours requested is within the allowed range
+      const maxAllowedHours = maxHoursPerLevel[userLevel];
+      if (userHours > maxAllowedHours) {
+        addError(
+          "hoursPerWeek",
+          `You can only study a maximum of ${maxAllowedHours} hours per week.`
+        );
+      }
+
+      if (Object.keys(errors).length > 0) {
+        displayErrors(errors);
+
+        return false;
+      }
+
+      return {
+        userEmail,
+        userLevel,
+        userHours,
+      };
+    }
+    ```
+
+    :::note[Understanding the code]
+
+    ### Understanding `document.querySelectorAll()`
+
+    `removeErrors()` makes use of the `document.querySelectorAll()` method to select all elements with the class names `error-input`, `error-label`, and `error-message`:
+
+    ```javascript showCopyToClipboardButton={false}
+    let errorInputs = document.querySelectorAll(".error-input");
+    // ...
+    let errorLabels = document.querySelectorAll(".error-label");
+    // ...
+    let errorMessages = document.querySelectorAll(".error-message");
+    // ...
+    ```
+
+    The `document.querySelectorAll()` method returns an array (or a [NodeList](https://developer.mozilla.org/en-US/docs/Web/API/NodeList)) of elements that match the specified CSS selector.
+    
+    In this case, we are selecting elements with the class names `error-input`, `error-label`, and `error-message`.
+
+    ### Removing error classes
+
+    We then use the `forEach()` method to iterate over each element in the array and remove the error classes:
+
+    ```javascript
+    errorInputs.forEach((input) => {
+      input.classList.remove("error-input");
+    });
+    ```
+
+    Just as JavaScript provides us with a `classList.add()` method to add a class to an element, we also call a `classList.remove()` method to remove a class from an element.
+
+    :::
+
+2. Navigate down to the `validateForm()` function and look carefully at the code inside.
+
+    :::tip[Challenge]
+
+    Can you work out where you should call the `removeErrors()` function?
+
+    Look through yourself, and then discuss with a partner.
+
+    When you have decided, be ready to feed your answer back to the group.
+
+    ### Solution
+
+    The `removeErrors()` function should be called at the beginning of the `validateForm()` function, just before the `errors` object is initialised.
+
+    This ensures that any existing error messages are removed before the form is validated:
+
+    ```diff lang="javascript" title="validateForm.js" showLineNumbers collapse={2-25, 29-43, 56-103}
+    export function displayErrors(errors) {
+      for (let field in errors) {
+        let inputElement = document.querySelector(`#${field}`);
+        let labelElement = document.querySelector(`label[for=${field}]`);
+        if (inputElement) {
+          inputElement.classList.add("error-input");
+        }
+        if (labelElement) {
+          labelElement.classList.add("error-label");
+        }
+
+        // Populate the error message div with an unordered list of error messages
+        let errorDiv = document.querySelector(`#${field}-error`);
+        if (errorDiv) {
+          errorDiv.classList.add("error-message");
+          let ul = document.createElement("ul");
+          errors[field].messages.forEach((message) => {
+            let li = document.createElement("li");
+            li.textContent = message;
+            ul.appendChild(li);
+          });
+          errorDiv.innerHTML = ""; // Clear any existing content
+          errorDiv.appendChild(ul);
+        }
+      }
+    }
+
+    function removeErrors() {
+      let errorInputs = document.querySelectorAll(".error-input");
+      errorInputs.forEach((input) => {
+        input.classList.remove("error-input");
+      });
+
+      let errorLabels = document.querySelectorAll(".error-label");
+      errorLabels.forEach((label) => {
+        label.classList.remove("error-label");
+      });
+
+      let errorMessages = document.querySelectorAll(".error-message");
+      errorMessages.forEach((div) => {
+        div.classList.remove("error-message");
+        div.innerHTML = "";
+      });
+    }
+
+    export function validateForm({ userEmail, userLevel, userHours }) {
+      const maxHoursPerLevel = {
+        basic: 5,
+        advanced: 10,
+      };
+
+    +  removeErrors();
+
+      let errors = {};
+
+      // Helper function to add error messages
+      function addError(field, message) {
+        if (!errors[field]) {
+          errors[field] = { messages: [] };
+        }
+        errors[field].messages.push(message);
+      }
+
+      // Check if the user has provided an email address
+      if (userEmail === "") {
+        addError("email", "Please enter your email address.");
+      }
+
+      // Check if the user has selected a level
+      if (userLevel === "") {
+        addError("level", "Please select a level of study");
+      }
+
+      // Check if the user has specified at least one hour of study
+      if (isNaN(userHours) || userHours < 1) {
+        addError("hoursPerWeek", "Please enter at least one hour of tuition.");
+      }
+
+      // Check if the userLevel exists in the maxHoursPerLevel object
+      if (!maxHoursPerLevel.hasOwnProperty(userLevel)) {
+        addError("level", "Invalid level of study selected.");
+      }
+
+      // Check if the number of hours requested is within the allowed range
+      const maxAllowedHours = maxHoursPerLevel[userLevel];
+      if (userHours > maxAllowedHours) {
+        addError(
+          "hoursPerWeek",
+          `You can only study a maximum of ${maxAllowedHours} hours per week.`
+        );
+      }
+
+      if (Object.keys(errors).length > 0) {
+        displayErrors(errors);
+
+        return false;
+      }
+
+      return {
+        userEmail,
+        userLevel,
+        userHours,
+      };
+    }
+    ```
+    :::
+
+3. Save your changes and refresh the browser.
+
+    Enter some invalid data into the form and submit it, then check that the error messages are removed when you correct the information and submit the form again:
+
+    ![Remove error messages](src/assets/gif/programming/harmony-music/remove-error-messages.gif)
+
+</Steps>
+
+## Summary
+
+In this step, we have:
+
+- Created a new function called `removeErrors()` to remove any existing error messages from the form.
+- Called the `removeErrors()` function at the beginning of the `validateForm()` function to ensure that any existing error messages are removed before the form is validated.
+- Tested the form to ensure that the error messages are removed when the user corrects the information and submits the form again.
+
+## Next steps
+
+In the next step, we will calculate the results of the user's input and print these values to the console in the browser.

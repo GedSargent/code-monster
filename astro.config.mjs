@@ -110,15 +110,15 @@ export default defineConfig({
                 {
                   label: "💻 Removing error messages",
                   link: "guides/programming/harmony-music/removing-error-messages",
+                },
+                {
+                  label: "💻 Calculating costs",
+                  link: "guides/programming/harmony-music/calculating-costs",
                 }
                 // {
                 //   label: "Displaying data",
                 //   link: "guides/programming/harmony-music/displaying-data",
                 // },
-                // {
-                //   label: "Styling output with CSS",
-                //   link: "guides/programming/harmony-music/styling-output-with-css",
-                // }
               ]
             }
           ]

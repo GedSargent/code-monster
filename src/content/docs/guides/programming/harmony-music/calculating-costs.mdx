@@ -1,0 +1,201 @@
+---
+title: Calculating Costs
+description: Creating a function to calculate the final costs for the customer.
+# TODO: Remove this line
+next: false
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Introduction
+
+Now that we've validated the information coming through from the user, we can start calculating the costs for the customer.
+
+We'll create a function that will take the user's input, calculate the final costs for the customer and then `return` an object that packages all this information together.
+
+## Creating a new function
+
+Let's start by creating a new function called `calculateCosts` that will take the user's input as an argument.
+
+<Steps>
+
+1. We will follow the same approach as before, and create a new JavaScript module (file) called `calculateCosts.js` to split our data into small, manageable chunks.
+
+    ![Add calculate costs module](src/assets/webp/programming/harmony-music/add-calculate-costs-module.webp)
+
+2. Inside this new file, add the code shown below:
+
+    ```diff lang="javascript" title="calculateCosts.js" showLineNumbers
+    +export function calculateCosts(data) {
+    +  console.log('Calculating costs...');
+    +  console.log({ data });
+    +}
+    ```
+
+    :::note
+    
+    We've added the `console.log()` statements just to confirm that our function is being called correctly.
+
+    :::
+
+3. Now, we need to `import` this function into our main `index.js` file and call it with the user's input.
+
+    :::tip[Challenge]
+
+    ### Code Challenge - `import` and call `calculateCosts`
+
+    Open `index.js`.
+
+    1. Can you `import` the `calculateCosts` function into your `index.js` file?
+    
+    2. Can you call `calculateCosts` with the `result` object that is returned from our `validateForm()` function, but ***only if*** this data is valid?
+
+    **TIPS:**
+    - Think about the value that `result` is if the form data is invalid. What is this?
+    - How could you use the value of `result` in an `if` statement to only call `calculateCosts` if the form data is valid?
+
+    If everything works correctly, you should see the following in your browser console:
+    
+    - if the data is valid, you should see the message `Calculating costs...` and the `data` value in your broswer console
+    - if the data is invalid, you should only see the value of `result` in your console
+
+    ![Calling calculateCosts conditionally](src/assets/gif/programming/harmony-music/calling-calculate-costs-conditionally.gif)
+
+    ### Solution
+
+    <MonsterReveal>
+
+    Add the code highlighted below to your `index.js` file:
+
+    ```diff lang="javascript" title="index.js" showLineNumbers collapse={8-15}
+    +import { calculateCosts } from "./calculateCosts.js";
+    import { validateForm } from "./validateForm.js";
+
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      // Store the user's email address as userEmail (string/text)
+      let userEmail = document.querySelector("#email").value;
+      // Store the user's level as userLevel (string/text)
+      let userLevel = document.querySelector("#level").value;
+      // Store the user's hours of study as userHours (number)
+      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+
+      // Validate the user's input
+      const result = validateForm({ userEmail, userLevel, userHours });
+
+      console.log({ result });
+
+    +  if (result) {
+    +    calculateCosts(result);
+    +  }
+    });
+    // Calculate the total cost
+    // Display the total cost to the user
+    ```
+
+    #### Explanation: Truthy and Falsy Values
+
+    If the form data is invalid, the value of `result` will be `false`.
+
+    An `if` statement is used to check if something is `true` or `false`.
+    
+    If validation fails on the form data, then `result` will be `false` and the `calculateCosts` function will not be called.
+
+    However, if the form data is valid, then `result` will be an object containing the user's email, level and hours of study. In JavaScript, an object is considered `truthy` when considered in a boolean context, such as inbetween the brackets of an `if` statement.
+    
+    Therefore, the `if` statement will evaluate to `true` and the `calculateCosts` function will be called.
+
+    See the MDN Web Docs for more information on [truthy and falsy values](https://developer.mozilla.org/en-US/docs/Glossary/Truthy).
+
+    </MonsterReveal>
+
+    :::
+
+</Steps>
+
+## Calculating Costs
+
+Now that we have our function set up, we can start calculating the costs for the customer.
+
+:::tip[Challenge]
+
+### Code Challenge
+
+Inside the `calculateCosts` function, implement the code that will calculate the total cost for the customer based on the `data` object values you have access to.
+
+- Beginner lessons are £12.25 per hour; advanced lessons are £15.50.
+- Use an object to store the following information:
+  - The total cost of the lessons.
+  - The user's email address.
+  - How many hours the user is studying per week.
+  - What level they are studying at (beginner or advanced)
+- You should `return` this object from the `calculateCosts` function.
+- You should capture the object that is returned from the `calculateCosts` function and call it `output`.
+- Finally, `console.log` the `output` object.
+
+**TIPS:**
+- The total cost is the cost per hour multiplied by the number of hours the user is studying per week.
+- The multiplication operator in JavaScript is `*`.
+
+{/* ![Calculating costs](src/assets/gif/programming/harmony-music/calculating-costs.gif) */}
+
+### Solution
+
+<MonsterReveal>
+
+<Steps>
+
+1. Add the code highlighted below to your `calculateCosts.js` file:
+
+    ```diff lang="javascript" title="calculateCosts.js" showLineNumbers collapse={}
+    export function calculateCosts(data) {
+    -  console.log('Calculating costs...');
+    -  console.log({ data });
+
+    +  const costPerHour = data.userLevel === 'beginner' ? 12.25 : 15.50;
+    +  const totalCost = costPerHour * data.userHours;
+    +
+    +  const output = {
+    +    totalCost,
+    +    userEmail: data.userEmail,
+    +    userHours: data.userHours,
+    +    userLevel: data.userLevel,
+    +  };
+    +
+    +  return output;
+    }
+    ```
+
+2. Add the code highlighted below to your `index.js` file:
+
+    ```diff lang="javascript" title="index.js" ins="const output = " showLineNumbers collapse={17-19}
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      // Store the user's email address as userEmail (string/text)
+      let userEmail = document.querySelector("#email").value;
+      // Store the user's level as userLevel (string/text)
+      let userLevel = document.querySelector("#level").value;
+      // Store the user's hours of study as userHours (number)
+      let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+
+      // Validate the user's input
+      const result = validateForm({ userEmail, userLevel, userHours });
+
+      if (result) {
+        const output = calculateCosts(result);
+    +    console.log({ output });
+      }
+    });
+    ```
+
+</Steps>
+
+</MonsterReveal>
+
+:::

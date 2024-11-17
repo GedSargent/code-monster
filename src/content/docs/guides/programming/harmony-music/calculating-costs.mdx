@@ -104,10 +104,18 @@ Let's start by creating a new function called `calculateCosts` that will take th
 
     An `if` statement is used to check if something is `true` or `false`.
     
-    If validation fails on the form data, then `result` will be `false` and the `calculateCosts` function will not be called.
+    If validation fails on the form data, then [`result` will be `false`](/code-monster/guides/programming/harmony-music/code-refactor#return-false-if-form-data-is-invalid) and the `calculateCosts` function will not be called.
 
-    However, if the form data is valid, then `result` will be an object containing the user's email, level and hours of study. In JavaScript, an object is considered `truthy` when considered in a boolean context, such as inbetween the brackets of an `if` statement.
+    However, if the form data is valid, then `result` will be an [object containing valid form data](/code-monster/guides/programming/harmony-music/code-refactor#returning-valid-data).
     
+    In JavaScript, an object is considered `truthy` when considered in a boolean context, such as inbetween the brackets of an `if` statement.
+    
+    ```js
+    if ({}) { // This will evaluate to true
+      console.log('This will be logged to the console');
+    }
+    ```
+
     Therefore, the `if` statement will evaluate to `true` and the `calculateCosts` function will be called.
 
     See the MDN Web Docs for more information on [truthy and falsy values](https://developer.mozilla.org/en-US/docs/Glossary/Truthy).
@@ -122,7 +130,7 @@ Let's start by creating a new function called `calculateCosts` that will take th
 
 Now that we have our function set up, we can start calculating the costs for the customer.
 
-:::tip[Challenge]
+::::tip[Challenge]
 
 ### Code Challenge
 
@@ -157,8 +165,13 @@ Inside the `calculateCosts` function, implement the code that will calculate the
     -  console.log('Calculating costs...');
     -  console.log({ data });
 
-    +  const costPerHour = data.userLevel === 'beginner' ? 12.25 : 15.50;
-    +  const totalCost = costPerHour * data.userHours;
+    +  const levelCosts = {
+    +    beginner: 12.25,
+    +    advanced: 15.5,
+    +  };
+    +
+    +  let costPerHour = levelCosts[data.userLevel];
+    +  let totalCost = (costPerHour * data.userHours).toFixed(2);
     +
     +  const output = {
     +    totalCost,
@@ -168,12 +181,59 @@ Inside the `calculateCosts` function, implement the code that will calculate the
     +  };
     +
     +  return output;
-    }
+    +}
     ```
+
+    :::note[Explanation]
+
+    - We've created a `levelCosts` object that stores the cost per hour for beginner and advanced lessons.
+
+      This follows the same design pattern as when we [validated the number of hours](/code-monster/guides/programming/harmony-music/form-validation#validating-with-an-object) the user wants to study against their chosen level.
+
+      ```js
+      const levelCosts = {
+        beginner: 12.25,
+        advanced: 15.5,
+      };
+      ```
+
+      It means that, in the future, if more levels are added, we can easily update the cost per hour in one place.
+
+    - We then store the cost per hour for the user's chosen level in the `costPerHour` variable.
+
+      ```js
+      let costPerHour = levelCosts[data.userLevel];
+      ```
+
+    - Using this, we can now calculate the `totalCost` by multiplying the `costPerHour` by the number of hours the user wants to study per week.
+
+      However, because this is a currency value, we also use the [`toFixed()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed) method to round the total cost to two decimal places.
+
+      ```js
+      let totalCost = (costPerHour * data.userHours).toFixed(2);
+      ```
+
+    - Finally, we create an `output` object that stores the total cost, the user's email address, the number of hours they want to study per week, and the level they are studying at.
+
+      ```js
+      const output = {
+        totalCost,
+        userEmail: data.userEmail,
+        userHours: data.userHours,
+        userLevel: data.userLevel,
+      };
+      ```
+    :::
 
 2. Add the code highlighted below to your `index.js` file:
 
-    ```diff lang="javascript" title="index.js" ins="const output = " showLineNumbers collapse={17-19}
+    ```diff lang="javascript" title="index.js" ins="const output = " showLineNumbers
+    import { calculateCosts } from "./calculateCosts.js";
+    import { validateForm } from "./validateForm.js";
+
+    // Capture user's input on form submission
+    let form = document.querySelector("form");
+
     form.addEventListener("submit", function (event) {
       event.preventDefault();
 
@@ -187,15 +247,36 @@ Inside the `calculateCosts` function, implement the code that will calculate the
       // Validate the user's input
       const result = validateForm({ userEmail, userLevel, userHours });
 
+      console.log({ result });
+
       if (result) {
+    +    // Calculate the total cost
         const output = calculateCosts(result);
     +    console.log({ output });
       }
     });
+    -// Calculate the total cost
+    // Display the total cost to the user
     ```
+
+    Notice that we have also updated the comment plan in the `index.js` file to reflect the new code.
 
 </Steps>
 
 </MonsterReveal>
 
-:::
+::::
+
+## Summary
+
+In this guide, we have:
+
+- Created a new function called `calculateCosts` that takes the user's input as an argument.
+- Stored in this new function in a new JavaScript module (file) called `calculateCosts.js` to help manage our code.
+- Calculated the total cost for the customer based on the user's input.
+- Used the `toFixed()` method to round the total cost to two decimal places.
+- Returned an object that packages all this information together and printed it to the console.
+
+## Next steps
+
+In the next guide, we will display the total cost to the user.

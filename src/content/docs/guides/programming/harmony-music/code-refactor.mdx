@@ -565,7 +565,9 @@ You can `export` functions, variables, or classes from a module, and `import` th
     }
     ```
 
-7. Now, let's call the new `displayErrors` function if any errors exist, and return `false` from the `validateForm` function to indicate that the form data is invalid:
+7. ### Return `false` if form data is invalid
+
+    Now, let's call the new `displayErrors` function if any errors exist, and return `false` from the `validateForm` function to indicate that the form data is invalid:
 
     ```diff lang="js" title="validateForm.js" showLineNumbers collapse={2-25, 29-71}
     export function displayErrors(errors) {
@@ -658,7 +660,9 @@ You can `export` functions, variables, or classes from a module, and `import` th
 
     :::
 
-8. Our final step is to return the valid data from our function in an object that becomes the 'single source of truth' for the rest of our application code.
+8. ### Returning valid data
+
+    Our final step is to return the valid data from our function in an object that becomes the 'single source of truth' for the rest of our application code.
 
     At the very end of the `validateForm` function, add the following `return` statement:
 

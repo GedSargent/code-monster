@@ -1,8 +1,6 @@
 ---
 title: Calculating Costs
 description: Creating a function to calculate the final costs for the customer.
-# TODO: Remove this line
-next: false
 ---
 
 import { Steps } from '@astrojs/starlight/components';
@@ -136,12 +134,12 @@ Now that we have our function set up, we can start calculating the costs for the
 
 Inside the `calculateCosts` function, implement the code that will calculate the total cost for the customer based on the `data` object values you have access to.
 
-- Beginner lessons are £12.25 per hour; advanced lessons are £15.50.
+- Basic lessons are £12.25 per hour; advanced lessons are £15.50.
 - Use an object to store the following information:
   - The total cost of the lessons.
   - The user's email address.
   - How many hours the user is studying per week.
-  - What level they are studying at (beginner or advanced)
+  - What level they are studying at (basic or advanced)
 - You should `return` this object from the `calculateCosts` function.
 - You should capture the object that is returned from the `calculateCosts` function and call it `output`.
 - Finally, `console.log` the `output` object.
@@ -166,7 +164,7 @@ Inside the `calculateCosts` function, implement the code that will calculate the
     -  console.log({ data });
 
     +  const levelCosts = {
-    +    beginner: 12.25,
+    +    basic: 12.25,
     +    advanced: 15.5,
     +  };
     +
@@ -186,13 +184,13 @@ Inside the `calculateCosts` function, implement the code that will calculate the
 
     :::note[Explanation]
 
-    - We've created a `levelCosts` object that stores the cost per hour for beginner and advanced lessons.
+    - We've created a `levelCosts` object that stores the cost per hour for basic and advanced level lessons.
 
       This follows the same design pattern as when we [validated the number of hours](/code-monster/guides/programming/harmony-music/form-validation#validating-with-an-object) the user wants to study against their chosen level.
 
       ```js
       const levelCosts = {
-        beginner: 12.25,
+        basic: 12.25,
         advanced: 15.5,
       };
       ```

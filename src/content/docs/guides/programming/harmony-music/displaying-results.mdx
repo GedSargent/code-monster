@@ -1,0 +1,327 @@
+---
+title: Displaying results
+description: Creating a function to calculate the final costs for the customer.
+# TODO: Remove this line
+next: false
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Introduction
+
+The final step we are left with is displaying the final results of the customer's order.
+
+## Displaying the final results
+
+In keeping with our previous design pattern, we will extract this logic into a separate function to keep our main `index.js` file as clean as possible.
+
+<Steps>
+
+1. Create a new JavaScript module (file) called `displayResults.js`.
+
+    ![Add display results module](src/assets/webp/programming/harmony-music/add-display-results-module.webp)
+
+2. ### Setting up the `displayResults` function
+
+    We are now ready to add our new function.
+
+    :::tip[Challenge]
+
+    In this file, can you create the starter code for our new function?
+    
+    The function should:
+    
+    - be called `displayResults`
+    - take our `output` object as an argument
+    - Use `console.log()` to display a message that says `Displaying the final results...`
+
+    ### Solution
+
+    <MonsterReveal>
+
+    1. Add the code shown below to `displayResults.js`, remembering to export the function using the `export` keyword.
+    
+    ```diff lang="javascript" title="displayResults.js" displayLineNumbers
+    +export function displayResults(output) {
+    +    console.log('Displaying the final results...');
+    +}
+    ```
+
+    2. Save the file.
+
+    3. With this in place, you should now `import` the new function into `index.js` and call it after the `calculateCost` function.
+
+        ```diff lang="javascript" title="index.js" displayLineNumbers
+        import { calculateCosts } from "./calculateCosts.js";
+        +import { displayResults } from "./displayResults.js";
+        import { validateForm } from "./validateForm.js";
+
+        // Capture user's input on form submission
+        let form = document.querySelector("form");
+
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          // Store the user's email address as userEmail (string/text)
+          let userEmail = document.querySelector("#email").value;
+          // Store the user's level as userLevel (string/text)
+          let userLevel = document.querySelector("#level").value;
+          // Store the user's hours of study as userHours (number)
+          let userHours = parseInt(document.querySelector("#hoursPerWeek").value);
+
+          // Validate the user's input
+          const result = validateForm({ userEmail, userLevel, userHours });
+
+          console.log({ result });
+
+          if (result) {
+            // Calculate the total cost
+            const output = calculateCosts(result);
+
+            console.log({ output });
+
+        +    // Display the total cost to the user
+        +    displayResults(output);
+          }
+        });
+        -// Display the total cost to the user
+        ```
+
+        Note that we've updated our comment plan to reflect the new code.
+
+        All our comments have now been placed above the correct lines of code.
+
+    </MonsterReveal>
+
+    :::
+
+3. ### Adding a HTML `id`
+
+    Next, open `index.html`.
+
+    We need find a space on the page to display the final results to the user.
+
+    There are lots of places we could choose, but here we will simply replace the form itself with the results.
+
+    This will:
+    
+    - help to minimise [cumulative layout shift](https://web.dev/cls/) and keep the user's focus on the results.
+
+    - prevent users from submitting the form multiple times.
+
+    Look carefully for the first `div` with a class of `form-section`, and add an `id` of `results` directly onto the same page element:
+
+    ```html title="index.html" showLineNumbers ins=" id="results"" collapse={10-47}
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Harmony | Sign Up</title>
+        <link rel="stylesheet" href="./index.css" />
+      </head>
+      <body>
+        <form class="form-wrapper">
+          <div id="results" class="form-section">
+            <img
+              class="mobile-display"
+              src="./assets/harmony-music-academy-logo.svg"
+              alt="Harmony Music Academy logo"
+            />
+            <div class="form-field">
+              <label for="email" class="form-label">Email*</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                class="form-input"
+                placeholder="Your email"
+              />
+              <div id="email-error"></div>
+            </div>
+            <div class="form-field">
+              <label for="level" class="form-label">Level*</label>
+              <select id="level" name="level" class="form-input">
+                <option value="basic">Basic</option>
+                <option value="advanced">Advanced</option>
+                <option value="pro">Professional</option>
+              </select>
+              <div id="level-error"></div>
+            </div>
+            <div class="form-field">
+              <label for="hoursPerWeek" class="form-label">Hours per week*</label>
+              <input
+                id="hoursPerWeek"
+                name="hours-per-week"
+                type="number"
+                class="form-input"
+                placeholder="How many?"
+              />
+              <div id="hoursPerWeek-error"></div>
+            </div>
+
+            <button type="submit" class="submit-btn">Sign up</button>
+          </div>
+
+          <div class="form-section">
+            <img
+              src="./assets/harmony-music-academy-logo.svg"
+              alt="Harmony Music Academy logo"
+            />
+          </div>
+        </form>
+
+        <script type="module" src="./index.js"></script>
+      </body>
+    </html>
+    ```
+
+4. ### Capturing the `results` element with JavaScript
+
+    Now that we have a space to display the results, we can update our `displayResults` function to show the final cost to the user.
+
+    Open `displayResults.js` and target the `#results` element using `document.querySelector()`:
+
+    ```diff lang="javascript" title="displayResults.js" displayLineNumbers
+    export function displayResults(output) {
+      console.log("Displaying the final results...");
+
+    +  let results = document.querySelector("#results");
+    }
+
+5. ### Display the user's email address
+
+    Next, we will display the user's email address as the first item in the results.
+
+    We will use the `innerHTML` property to update the `#results` element with the user's email address, and display the `output` properties via a HTML [description list (`<dl>`)](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dl).
+
+    ```diff lang="javascript" title="displayResults.js" displayLineNumbers
+    export function displayResults(output) {
+      console.log("Displaying the final results...");
+
+      let results = document.querySelector("#results");
+
+    +  results.innerHTML = `
+    +    <dl>
+    +      <dt>Email</dt>
+    +      <dd>${output.userEmail}</dd>
+    +    </dl>
+    +  `;
+    }
+    ```
+
+    :::tip[Challenge]
+
+    ## Challenge: Display all data
+
+    Can you complete the `displayResults` function to display the rest of the `output` data to the user?
+
+    The final output should include:
+
+    - The user's email address
+    - The user's chosen level
+    - The user's hours of study
+    - The total cost in UK pounds (£)
+
+    It should look like this:
+
+    ![Displaying the final results](src/assets/webp/programming/harmony-music/displaying-final-results.webp)
+
+    ### Solution
+
+    <MonsterReveal>
+
+    1. To display the rest of the user's data, we simply need to add more `<dt>` and `<dd>` elements to the `results.innerHTML` string.
+
+    ```diff lang="javascript" title="displayResults.js" displayLineNumbers
+    export function displayResults(output) {
+      console.log("Displaying the final results...");
+
+      let results = document.querySelector("#results");
+
+      results.innerHTML = `
+        <dl>
+          <dt>Email</dt>
+          <dd>${output.userEmail}</dd>
+    +      
+    +     <dt>Level</dt>
+    +     <dd>${output.userLevel}</dd>
+    +
+    +     <dt>Hours per week</dt>
+    +     <dd>${output.userHours}</dd>
+    +
+    +     <dt>Total cost</dt>
+    +     <dd>£${output.totalCost}</dd>
+        </dl>
+      `;
+    }
+    ```
+
+    2. Save the file.
+
+    3. Now, when you submit the form, the final cost will be displayed to the user:
+
+    ![Displaying the final results](src/assets/webp/programming/harmony-music/displaying-final-results.webp)
+
+    </MonsterReveal>
+
+    :::
+
+6. ## Challenge: Style the results
+
+    Finally, we can add some CSS to style the results.
+
+    Open `index.css` and add the following styles:
+
+    ```css title="index.css"
+    #results dl {
+      padding: 2rem;
+    }
+
+    #results dt {
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+      font-size: 1.2rem;
+    }
+
+    #results dd {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    ```
+
+    This will separate out the results more obviously, and make the category headings bold.
+
+    :::tip[Challenge]
+
+    Develop your CSS to fully style the results to your customer.
+
+    Below are some ideas for how your output could be designed, with increasing levels of complexity. Use these as a starting point, or design your own.
+
+    #### Basic
+
+    ![Results style basic](src/assets/webp/programming/harmony-music/results-style-basic.webp)
+
+    #### Intermediate
+
+    ![Results style basic](src/assets/webp/programming/harmony-music/results-style-intermediate.webp)
+
+    #### Advanced
+
+    ![Results style basic](src/assets/webp/programming/harmony-music/results-style-advanced.webp)
+
+    :::
+
+</Steps>
+
+## Summary
+
+In this step, we have:
+
+- Displayed the final results to the user
+- Styled the results using CSS with increasing levels of complexity
+
+## Next steps
+
+The final step of this assignment section is to write up your changes.
+
+

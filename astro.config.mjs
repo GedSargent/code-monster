@@ -114,11 +114,15 @@ export default defineConfig({
                 {
                   label: "💻 Calculating costs",
                   link: "guides/programming/harmony-music/calculating-costs",
-                }
-                // {
-                //   label: "Displaying data",
-                //   link: "guides/programming/harmony-music/displaying-data",
-                // },
+                },
+                {
+                  label: "💻 Displaying results",
+                  link: "guides/programming/harmony-music/displaying-results",
+                },
+                {
+                  label: "✏️ Assignment update - final",
+                  link: "guides/programming/harmony-music/assignment-update-final",
+                },
               ]
             }
           ]

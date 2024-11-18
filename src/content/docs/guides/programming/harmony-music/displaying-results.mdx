@@ -6,7 +6,9 @@ next: false
 ---
 
 import { Steps } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 import MonsterReveal from "src/components/MonsterReveal.astro";
+import MonsterKbd from 'src/components/MonsterKbd.astro'
 
 ## Introduction
 
@@ -36,7 +38,7 @@ In keeping with our previous design pattern, we will extract this logic into a s
     - take our `output` object as an argument
     - Use `console.log()` to display a message that says `Displaying the final results...`
 
-    ### Solution
+    {/* ### Solution
 
     <MonsterReveal>
 
@@ -92,7 +94,7 @@ In keeping with our previous design pattern, we will extract this logic into a s
 
         All our comments have now been placed above the correct lines of code.
 
-    </MonsterReveal>
+    </MonsterReveal> */}
 
     :::
 
@@ -175,11 +177,13 @@ In keeping with our previous design pattern, we will extract this logic into a s
     </html>
     ```
 
-4. ### Capturing the `results` element with JavaScript
+4. ### Capturing the `results` HTML element with JavaScript
 
     Now that we have a space to display the results, we can update our `displayResults` function to show the final cost to the user.
 
-    Open `displayResults.js` and target the `#results` element using `document.querySelector()`:
+    Open `displayResults.js`.
+    
+    Target the `#results` element using `document.querySelector()`:
 
     ```diff lang="javascript" title="displayResults.js" displayLineNumbers
     export function displayResults(output) {
@@ -209,6 +213,12 @@ In keeping with our previous design pattern, we will extract this logic into a s
     }
     ```
 
+    With this code in place, submit a valid form.
+    
+    You should see the user's email address displayed in place of the form itself:
+
+    ![Show email on submit](src/assets/gif/programming/harmony-music/show-email-on-submit.gif)
+
     :::tip[Challenge]
 
     ## Challenge: Display all data
@@ -226,7 +236,7 @@ In keeping with our previous design pattern, we will extract this logic into a s
 
     ![Displaying the final results](src/assets/webp/programming/harmony-music/displaying-final-results.webp)
 
-    ### Solution
+    {/* ### Solution
 
     <MonsterReveal>
 
@@ -262,7 +272,7 @@ In keeping with our previous design pattern, we will extract this logic into a s
 
     ![Displaying the final results](src/assets/webp/programming/harmony-music/displaying-final-results.webp)
 
-    </MonsterReveal>
+    </MonsterReveal> */}
 
     :::
 
@@ -270,26 +280,153 @@ In keeping with our previous design pattern, we will extract this logic into a s
 
     Finally, we can add some CSS to style the results.
 
-    Open `index.css` and add the following styles:
+    Open `index.css` and add the following styles towards the end of the file, just above the final media query:
 
-    ```css title="index.css"
-    #results dl {
-      padding: 2rem;
+    ```diff lang="css" title="index.css" showLineNumbers collapse={1-117}
+    :root {
+      --black: rgb(22, 22, 22);
+      --white: rgb(255, 255, 255);
+      --grey-50: rgb(250, 250, 250);
+      --grey-300: rgb(192, 198, 201);
+      --grey-500: rgb(88, 104, 112);
+      --brand-light: rgb(255, 90, 58);
+      --brand-dark: rgb(172, 62, 41);
+      --sky-500: rgb(14 165 233);
+      --box-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+        0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --error-bkg: rgb(255, 241, 241);
+      --error-placeholder: rgb(255, 157, 157);
+    }
+    * {
+      color: var(--grey-500);
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+    }
+    button {
+      cursor: pointer;
+    }
+    .form-wrapper {
+      display: flex;
+      background-color: var(--grey-50);
+      min-height: 100vh;
+    }
+    .form-section {
+      width: calc(50% - 1px);
+      display: flex;
+      flex-grow: 1;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+      padding: 2rem 4rem;
+    }
+    .form-section:first-of-type {
+      border-right: 1px solid var(--grey-300);
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-start;
+      width: 100%;
+    }
+    .form-label {
+      font-size: 1.25rem;
+    }
+    .form-input {
+      background-color: var(--white);
+      border-radius: 999px;
+      border: 1px solid var(--grey-300);
+      font-size: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 300;
+      color: var(--black);
+      width: 100%;
+    }
+    .form-input::placeholder {
+      color: var(--grey-300);
+    }
+    .form-input:focus {
+      outline: none;
+      outline: 2px solid var(--sky-500);
+      box-shadow: var(--box-shadow-lg);
+    }
+    .mobile-display {
+      display: none;
+    }
+    .submit-btn {
+      border-radius: 1.75rem;
+      margin: 0 auto;
+      text-align: center;
+      color: var(--white);
+      border: 0;
+      padding: 0.75rem 2rem;
+      font-size: 1.5rem;
+      background: linear-gradient(
+        180deg,
+        var(--brand-light) 0%,
+        var(--brand-dark) 100%
+      );
+      transition: all 0.3s ease;
+      outline: none;
+      box-shadow: none;
+    }
+    .submit-btn:hover {
+      outline: 1px solid var(--brand-dark);
+      box-shadow: var(--box-shadow-lg);
+      transition: all 0.3s ease;
     }
 
-    #results dt {
-      font-weight: bold;
-      margin-bottom: 0.25rem;
-      font-size: 1.2rem;
+    .error-input {
+      background-color: var(--error-bkg);
+      color: var(--brand-dark);
+      border-color: var(--brand-dark);
+    }
+    .error-input::placeholder {
+      color: var(--error-placeholder);
+    }
+    .error-label {
+      color: var(--error-dark);
+    }
+    .error-message ul {
+      padding-left: 0;
+    }
+    .error-message ul li {
+      color: var(--brand-dark);
+      font-weight: 800;
+      font-size: 0.8rem;
+      letter-spacing: 0.1px;
+      list-style: none;
+      margin-bottom: 0.5rem;
     }
 
-    #results dd {
-      margin-bottom: 1rem;
-      font-size: 1.2rem;
+    +#results dl {
+    +  padding: 2rem;
+    +}
+    +#results dt {
+    +  font-weight: bold;
+    +  margin-bottom: 0.25rem;
+    +  font-size: 1.2rem;
+    +}
+    +#results dd {
+    +  margin-bottom: 1rem;
+    +  font-size: 1.2rem;
+    +}
+
+    @media screen and (max-width: 640px) {
+      .mobile-display {
+        display: block;
+      }
+      .mobile-hidden {
+        display: none;
+      }
     }
     ```
 
-    This will separate out the results more obviously, and make the category headings bold.
+    This will separate out the results more obviously, and make the category headings bold:
+
+    ![Styles start](src/assets/webp/programming/harmony-music/styles-start.webp)
 
     :::tip[Challenge]
 
@@ -301,17 +438,138 @@ In keeping with our previous design pattern, we will extract this logic into a s
 
     ![Results style basic](src/assets/webp/programming/harmony-music/results-style-basic.webp)
 
-    #### Intermediate
+    {/* ### Solution 1
 
-    ![Results style basic](src/assets/webp/programming/harmony-music/results-style-intermediate.webp)
+    <MonsterReveal>
+    ```css
+    #results dl {
+      padding: 2rem;
+      background-color: var(--white);
+      width: 100%;
+      border-radius: 1rem;
+      box-shadow: var(--box-shadow-lg);
+    }
+    #results dt {
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+      font-size: 1.2rem;
+    }
+    #results dd {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    #results dd:last-of-type {
+      margin-bottom: 0;
+    }
+    ```
+    </MonsterReveal> */}
 
     #### Advanced
 
-    ![Results style basic](src/assets/webp/programming/harmony-music/results-style-advanced.webp)
+    ![Results style basic](src/assets/webp/programming/harmony-music/results-style-intermediate.webp)
+
+    {/* ### Solution 2
+
+    <MonsterReveal>
+    <Tabs>
+      <TabItem label="displayResults.js">
+      ```js
+      results.innerHTML = `
+        <dl>
+          <dd class="results-email">${output.userEmail}</dd>
+
+          <dd class="results-cost">£${output.totalCost}<span>per week</span></dd>
+
+          <div class="results-details">
+            <div>
+              <dt>Level</dt>
+              <dd class="results-detail">${output.userLevel}</dd>
+            </div>
+            <div>
+              <dt>Hours</dt>
+              <dd class="results-detail">${output.userHours}</dd>
+            </div>
+          </div>
+        </dl>
+      `;
+      ```
+      </TabItem>
+      <TabItem label="index.css">
+      ```css
+      .results-details {
+        display: flex;
+        gap: 2rem;
+        justify-content: space-evenly;
+        padding: 2rem 0;
+        text-align: center;
+      }
+      .results-detail {
+        text-transform: uppercase;
+        color: var(--grey-500);
+        font-size: 1.3rem;
+      }
+      .results-email {
+        background-color: var(--brand-light);
+        color: var(--white);
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+        padding: 0.75rem 0;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+      .results-cost {
+        text-align: center;
+        font-size: 3rem;
+        font-weight: 800;
+        padding: 2rem 0;
+        color: var(--black);
+        display: flex;
+        flex-direction: column;
+        line-height: 1;
+      }
+      .results-cost span {
+        font-size: 0.8rem;
+        color: var(--brand-dark);
+      }
+
+      #results dl {
+        background-color: var(--white);
+        width: 100%;
+        border-radius: 1rem;
+        box-shadow: var(--box-shadow-lg);
+      }
+      #results dt {
+        font-weight: 800;
+        font-size: 0.8rem;
+        text-align: center;
+        color: var(--brand-dark);
+      }
+      ```
+      </TabItem>
+    </Tabs>
+    </MonsterReveal> */}
 
     :::
 
 </Steps>
+
+## Clear `console.log()` statements
+
+As we've worked through this project, we've used `console.log()` statements to help us debug our code.
+
+Now that we have finished, we should remove these statements to keep our code clean.
+
+Use VS Code's global search feature to find and remove all instances of `console.log()` in your project:
+
+1. Press <MonsterKbd>Ctrl + Shift + F</MonsterKbd> (Windows/Linux) or <MonsterKbd>Cmd + Shift + F</MonsterKbd> (Mac) to open the global search bar.
+
+2. Search for `console.log`.
+
+3. Click each result to navigate to the line of code and delete it.
+
+![Global search](src/assets/gif/programming/harmony-music/global-search.gif)
+
+4. Remember to save your changes.
 
 ## Summary
 
@@ -319,6 +577,7 @@ In this step, we have:
 
 - Displayed the final results to the user
 - Styled the results using CSS with increasing levels of complexity
+- Removed all `console.log()` statements from our code using VS Code's global search feature
 
 ## Next steps
 

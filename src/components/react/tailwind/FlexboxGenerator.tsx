@@ -16,8 +16,8 @@ function Button({ children, onClick, disabled = false }: { children: React.React
 function CheckBox({ label, checked, onChange, disabled = false }: { label: string, checked: boolean, onChange: (checked: boolean) => void, disabled?: boolean }) {
   return (
     <div className="!m-0">
-      <label className={`!mt-0 flex gap-2 font-bold cursor-pointer transition ${disabled ? "opacity-30 cursor-not-allowed select-none" : 'hover:text-gray-600 dark:hover:text-white'} dark:text-gray-300`}>
-        <span className="!mt-0">{label}</span>
+      <label className={`!mt-0 flex gap-2 font-bold cursor-pointer transition ${disabled ? "opacity-30 select-none" : 'hover:text-gray-600 dark:hover:text-white'} dark:text-gray-300`}>
+        <span className={`!mt-0 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}>{label}</span>
         <input type="checkbox" className="!mt-0 p-2 text-sm disabled:cursor-not-allowed" checked={checked} onChange={(event) => onChange(event.target.checked)} disabled={disabled} />
       </label>
     </div>
@@ -50,12 +50,13 @@ function Select({ label, options, onChange, disabled = false }: SelectProps) {
 }
 
 function FlexboxGenerator() {
-  const [numberOfChildren, setNumberOfChildren] = React.useState(3);
+  const [numberOfChildren, setNumberOfChildren] = React.useState(2);
   const [applyFlex, setApplyFlex] = React.useState(false);
   const [flexWrap, setFlexWrap] = React.useState(false);
   const [flexDirection, setFlexDirection] = React.useState('flex-row');
   const [justifyContent, setJustifyContent] = React.useState('justify-start');
   const [alignItems, setAlignItems] = React.useState('items-start');
+  const [usingReact, setUsingReact] = React.useState(false);
 
   const handleRemoveChild = () => {
     if (numberOfChildren === 1) return;
@@ -104,6 +105,7 @@ function FlexboxGenerator() {
             <div className="!mt-0 flex items-center gap-8">
               <CheckBox label="Apply flex?" checked={applyFlex} onChange={handleApplyFlex} />
               <CheckBox label="Flex wrap?" checked={flexWrap} onChange={handleFlexWrap} disabled={!applyFlex} />
+              <CheckBox label="Using React?" checked={usingReact} onChange={setUsingReact} />
             </div>
           </div>
           
@@ -152,7 +154,7 @@ function FlexboxGenerator() {
           <h3 className="!mt-0 mb-2">Tailwind CSS - Parent</h3>
           <p className="!mt-0 mb-4 text-sm">Copy and paste the code below into your parent flex container to recreate the layout above 😎.</p>
           <pre className="!m-0 p-4 bg-gray-900 rounded-md text-sm text-gray-300">
-            <span className="text-cyan-500">className</span>=
+            <span className="text-cyan-500">{usingReact ? 'className' : 'class'}</span>=
             <span className="text-orange-300">"{`${applyFlex ? 'flex' : 'block'}${flexDirection !== "flex-row" && applyFlex ? ` ${flexDirection}` : ''}${alignItems !== 'items-start' && applyFlex ? ` ${alignItems}` : ''}${justifyContent !== 'justify-start' && applyFlex ? ` ${justifyContent}` : ''}${flexWrap && applyFlex ? ' flex-wrap' : ''}`}"</span>
           </pre>
         </div>

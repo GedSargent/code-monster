@@ -160,8 +160,8 @@ function FlexboxGenerator() {
 
         <div className="mt-4">
           <div className="!mt-0 mb-2 flex items-center gap-2">
-            <CheckBox label="Using React?" checked={usingReact} onChange={handleSetUsingReact} disabled={!usingTailwind} />
             <CheckBox label="Using Tailwind?" checked={usingTailwind} onChange={handleSetUsingTailwind} />
+            {usingTailwind ? <CheckBox label="Using React?" checked={usingReact} onChange={handleSetUsingReact} /> : null }
           </div>
           {usingTailwind ? (
             <>

@@ -57,6 +57,7 @@ function FlexboxGenerator() {
   const [justifyContent, setJustifyContent] = React.useState('justify-start');
   const [alignItems, setAlignItems] = React.useState('items-start');
   const [usingReact, setUsingReact] = React.useState(false);
+  const [usingTailwind, setUsingTailwind] = React.useState(false);
 
   const handleRemoveChild = () => {
     if (numberOfChildren === 1) return;
@@ -84,6 +85,14 @@ function FlexboxGenerator() {
     setFlexWrap(!flexWrap);
   }
 
+  const handleSetUsingTailwind = () => {
+    setUsingTailwind(!usingTailwind);
+  }
+
+  const handleSetUsingReact = () => {
+    setUsingReact(!usingReact);
+  }
+
   return (
     <div className="w-full p-4 bg-gray-100 pt-1 rounded-md dark:bg-gray-900">
       <h2 className="!mt-4 text-2xl font-bold dark:text-white">Flexbox Generator</h2>
@@ -105,7 +114,6 @@ function FlexboxGenerator() {
             <div className="!mt-0 flex items-center gap-8">
               <CheckBox label="Apply flex?" checked={applyFlex} onChange={handleApplyFlex} />
               <CheckBox label="Flex wrap?" checked={flexWrap} onChange={handleFlexWrap} disabled={!applyFlex} />
-              <CheckBox label="Using React?" checked={usingReact} onChange={setUsingReact} />
             </div>
           </div>
           
@@ -151,12 +159,33 @@ function FlexboxGenerator() {
         </div>
 
         <div className="mt-4">
-          <h3 className="!mt-0 mb-2">Tailwind CSS - Parent</h3>
-          <p className="!mt-0 mb-4 text-sm">Copy and paste the code below into your parent flex container to recreate the layout above 😎.</p>
-          <pre className="!m-0 p-4 bg-gray-900 rounded-md text-sm text-gray-300">
-            <span className="text-cyan-500">{usingReact ? 'className' : 'class'}</span>=
-            <span className="text-orange-300">"{`${applyFlex ? 'flex' : 'block'}${flexDirection !== "flex-row" && applyFlex ? ` ${flexDirection}` : ''}${alignItems !== 'items-start' && applyFlex ? ` ${alignItems}` : ''}${justifyContent !== 'justify-start' && applyFlex ? ` ${justifyContent}` : ''}${flexWrap && applyFlex ? ' flex-wrap' : ''}`}"</span>
-          </pre>
+          <div className="!mt-0 mb-2 flex items-center gap-2">
+            <CheckBox label="Using React?" checked={usingReact} onChange={handleSetUsingReact} disabled={!usingTailwind} />
+            <CheckBox label="Using Tailwind?" checked={usingTailwind} onChange={handleSetUsingTailwind} />
+          </div>
+          {usingTailwind ? (
+            <>
+            <h3 className="!mt-0 mb-2">Tailwind CSS - Parent</h3>
+            <p className="!mt-0 mb-4 text-sm">Copy and paste the code below into your parent flex container to recreate the layout above 😎.</p>
+            <pre className="!m-0 p-4 bg-gray-900 rounded-md text-sm text-gray-300">
+              <span className="text-cyan-500">{usingReact ? 'className' : 'class'}</span>=
+              <span className="text-orange-300">"{`${applyFlex ? 'flex' : 'block'}${flexDirection !== "flex-row" && applyFlex ? ` ${flexDirection}` : ''}${alignItems !== 'items-start' && applyFlex ? ` ${alignItems}` : ''}${justifyContent !== 'justify-start' && applyFlex ? ` ${justifyContent}` : ''}${flexWrap && applyFlex ? ' flex-wrap' : ''}`}"</span>
+            </pre>
+            </>
+          ): (
+            <>
+              <h3 className="!mt-0 mb-2">CSS styles</h3>
+              <p className="!mt-0 mb-4 text-sm">Copy and paste the code below into your parent flex container to recreate the layout above 😎.</p>
+              <pre className="!m-0 p-4 bg-gray-900 rounded-md text-sm text-gray-300">
+                {`display: ${applyFlex ? 'flex' : 'block'};`}
+                {flexDirection !== 'flex-row' && applyFlex ? `\nflex-direction: ${flexDirection};` : ''}
+                {alignItems !== 'items-start' && applyFlex ? `\nalign-items: ${alignItems};` : ''}
+                {justifyContent !== 'justify-start' && applyFlex ? `\njustify-content: ${justifyContent};` : ''}
+                {flexWrap && applyFlex ? '\nflex-wrap: wrap;' : ''}
+              </pre>
+            </>
+          )}
+          
         </div>
       </div>
     </div>

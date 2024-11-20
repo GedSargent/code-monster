@@ -5,6 +5,8 @@ description: Swap notes for articles throughout the project
 
 import { Icon } from "@astrojs/starlight/components";
 import MonsterReveal from "src/components/MonsterReveal.astro";
+import MonsterKbd from 'src/components/MonsterKbd.astro'
+import { Steps } from '@astrojs/starlight/components';
 
 ## Objectives
 
@@ -15,6 +17,14 @@ Now that we have updated the Prisma schema and pushed these changes to the datab
 The first thing we need to do is update the permissions in the `app/utils/user.ts` file.
 
 Open this file now in your editor.
+
+:::note
+
+### 💡 Tip - open files quickly
+
+Remember that you can quickly find a file inside VS Code by using the keyboard shortcut <MonsterKbd>CTRL + P</MonsterKbd> (Windows) or <MonsterKbd>CMD + P</MonsterKbd> (Mac) and typing the name of the file.
+
+:::
 
 Permissions describe what actions a user can perform on a specific entity. In our case, we are concentrating on two entities: `user` and `article`.
 
@@ -104,19 +114,33 @@ Let's create it now.
 
 The route file we are going to create is a little different from the others we have created so far. We are going to create something called a [**resource route**](https://remix.run/docs/en/main/guides/resource-routes).
 
+:::note
+
 ### What is a resource route?
 
 In Remix, a [**resource route**](https://remix.run/docs/en/main/guides/resource-routes) is one that doesn't render a UI to the browser, but instead can send any kind of `Response` that we need it to.
 
 We will create a new resource route to serve the images for the articles.
 
+:::
+
 ### Create `article-images.$imageId.tsx`
 
-To do this, copy the file `note-images.$imageId.tsx` inside the `app/routes/resources+` folder.
+<Steps>
 
-Paste your copy back into the same `resources+` folder and rename it to `article-images.$imageId.tsx`:
+1. Open `app/routes/resources+/note-images.$imageId.tsx`.
 
-![Create article-images file](src/assets/webp/epic-news/create-article-images-file.webp)
+2. Copy the entire file (<MonsterKbd>CTRL + C</MonsterKbd>) from the file browser on your left.
+
+3. Make sure the same `resources+` folder is still open and selected in the file browser.
+
+4. Right-click the `resources+` folder, and select 'Paste' to paste a copy of the file back into the same `resources+` folder
+
+5. Rename your newly pasted file as `article-images.$imageId.tsx`:
+
+		![Create article-images file](src/assets/webp/epic-news/create-article-images-file.webp)
+
+</Steps>
 
 ### Update `article-images.$imageId.tsx`
 
@@ -155,21 +179,54 @@ Remember to check that all your changes have been saved so far.
 
 ## Add user-article routes
 
+
 Using VS Code's file explorer, navigate to the folder `app/routes/users+/$username_+`.
 
-You will see a group of files all prefixed with `__note-` or `notes`. These files are responsible for rendering the notes for a specific user.
+To manually update each of these files inside `$username_+` would take a disproportionately long time, so instead you can download an updated version of this folder here:
 
-To manually update each of these files to reflect the changes we made to the Prisma schema would take a long time, so instead you can download an updated version of this folder here:
+:::danger
+
+These next steps can be particularly difficult, so please read them carefully and follow along closely.
+
+:::
 
 <a href="/code-monster/downloads/epic-news/$username_+.zip" class="group inline-flex border-2 gap-4 mt-8 px-8 py-4 text-xl rounded-full no-underline transition bg-blue-200 border-blue-400 hover:border-blue-600 hover:bg-blue-100 dark:bg-blue-600 dark:border-blue-400 dark:hover:border-blue-300 dark:hover:bg-blue-700">
-<Icon name="seti:folder" class="fill-blue-600 transition group-hover:scale-125 group-hover:fill-blue-800 dark:fill-blue-100 dark:group-hover:fill-blue-50" /> <span class="text-blue-600 transition group-hover:text-blue-800 dark:text-blue-100 dark:group-hover:text-blue-50">$username_+.zip</span>
+	<Icon name="seti:folder" class="fill-blue-600 transition group-hover:scale-125 group-hover:fill-blue-800 dark:fill-blue-100 dark:group-hover:fill-blue-50" /> <span class="text-blue-600 transition group-hover:text-blue-800 dark:text-blue-100 dark:group-hover:text-blue-50">$username_+.zip</span>
 </a>
 
-Once you have downloaded the folder, unzip it and replace the existing `app/routes/users+/$username_+` folder with the new one.
+<Steps>
 
-The easiest way to do this is simply drag and drop the new folder into the parent `users+` folder:
+1. After clicking on the blue download button above, navigate to your browser's download button and click to 'Show in Folder'
 
-![Copy article files to project](src/assets/gif/copy-article-files-to-project.gif)
+		![Show in folder](src/assets/webp/epic-news/download-username-zip.webp)
+
+2. Open the Downloads folder on your computer, right-click on the `$username_+.zip` file, and select 'Extract All...'.
+
+		![Extract zip](src/assets/webp/epic-news/extract-zip.webp)
+
+3. In the pop-up window that appears, click 'Browse'. Navigate to your 'Downloads' folder again, click 'Select Folder', and finally click 'Extract' to unzip the folder.
+
+		Watch the gif below to make sure you extract the folder correctly:
+
+		![Extract folder](src/assets/gif/extract-folder.gif)
+
+4. Once you have extracted the folder, you are ready to replace the existing `app/routes/users+/$username_+` folder with the new one.
+
+		Start by right-clicking the existing `$username_+` folder in your project (located at `app/routes/users+/$username_+`) and selecting 'Delete'.
+
+		![Delete existing folder](src/assets/webp/epic-news/delete-$username_+.webp)
+
+5. Finally, drag the new `$username_+` folder from your Downloads folder into the `app/routes/users+` folder in your project.
+
+		Watch the gif below ***carefully*** to make sure you drag the new folder into the correct location:
+
+		![Copy article files to project](src/assets/gif/copy-article-files-to-project.gif)
+
+</Steps>
+
+If placed correctly, your new folder structure should look like this:
+
+![New folder structure](src/assets/webp/epic-news/new-folder-structure.webp)
 
 ## Summary
 
@@ -187,8 +244,6 @@ We need to update your assignment to document this new feature. 🚀
 1. Explain the purpose of the `app/utils/permissions.ts` file.
 2. Describe the changes made to the `Entity` type definition in the `app/utils/permissions.ts` file.
 3. Explain the purpose of the `app/routes/users+/$username_+` folder.
-4. Describe the changes made to the `app/routes/users+/$username_+` folder.
-5. Explain how these changes made to the project structure reflect the changes made to the Prisma schema.
 
 :::tip
 

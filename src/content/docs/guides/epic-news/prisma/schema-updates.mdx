@@ -18,7 +18,7 @@ In this section, we will begin the process of adding articles to the app, associ
 
 ## The schema file
 
-If you remember from our [**practice project**](/code-monster/guides/prisma/prisma-schema), a Prisma schema serves as a blueprint for your database, defining the structure of your data.
+A Prisma schema is a file that serves as a blueprint for your database, defining the structure of your data.
 
 Open the Prisma schema for the project which can be found at `prisma/schema.prisma`.
 
@@ -245,7 +245,7 @@ Don't worry about these for now. We will fix these in the next step.
 
 :::
 
-```diff lang="prisma" collapse={2-14}
+```diff lang="prisma" title="prisma/schema.prisma" collapse={2-14}
 model NoteImage {
   id          String  @id @default(cuid())
   altText     String?
@@ -310,7 +310,7 @@ Let's start with just the `User` and `Article` models.
 
 Add a relationship in the `User` model to the `Article` model like so:
 
-```diff lang="prisma" collapse={2-8, 20-27, 34-36}
+```diff lang="prisma" title="prisma/schema.prisma" collapse={2-8, 20-27, 34-36}
 model User {
   id       String  @id @default(cuid())
   email    String  @unique
@@ -332,7 +332,7 @@ model User {
 
 Next, update the `Article` model to reference the `ArticleImage` model instead of the `NoteImage` model.
 
-```diff lang="prisma" collapse={2-6}
+```diff lang="prisma" title="prisma/schema.prisma" collapse={2-6}
 model Article {
   id      String @id @default(cuid())
   title   String
@@ -378,7 +378,7 @@ Remember, green lines are additions, and red lines are deletions.
 
 :::
 
-```diff lang="prisma"
+```diff lang="prisma" title="prisma/schema.prisma"
 model ArticleImage {
   id          String    @id @default(cuid())
   altText     String?
@@ -403,7 +403,7 @@ model ArticleImage {
 
 Finally, we need to add some additional fields to the `Article` model to indicate whether an article is published or draft, and when it was published:
 
-```diff lang="prisma" collapse={11-19}
+```diff lang="prisma" title="prisma/schema.prisma" collapse={11-19}
 model Article {
   id          String @id @default(cuid())
   title       String
@@ -472,7 +472,7 @@ After you've had a go at the challenge, click the section below to reveal the so
 
     This can be placed directly below the `ArticleImage` model in the Prisma schema.
 
-```prisma
+```prisma title="prisma/schema.prisma"
 model ArticleCategory {
   id          String @id @default(cuid())
   name        String
@@ -485,7 +485,7 @@ model ArticleCategory {
 ```
 
 2. Link the `Article` model to the new `ArticleCategory` model.
-```diff lang="prisma"
+```diff lang="prisma" title="prisma/schema.prisma"
 model Article {
   id          String @id @default(cuid())
   title       String

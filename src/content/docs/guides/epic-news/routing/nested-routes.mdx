@@ -68,7 +68,7 @@ Save the file and head back to your browser. Refresh the page and you should see
 
 ![News page](src/assets/png/news-page.png)
 
-The `root.tsx` file is still rendering the code for the header and footer, but now the `Outlet` component we placed [**earlier**](/code-monster/guides/epic-news/routing/outlet#the-outlet-component) is rendering the `NewsPage` component as its child route.
+The `root.tsx` file is still rendering the code for the header and footer, but now the `Outlet` component we placed [**earlier**](/code-monster/guides/epic-news/routing/outlet#the-outlet-component) is now rendering the `NewsPage` component as its child route.
 
 <NestedRouting childFilename="news.tsx" childUrl="/news"/>
 
@@ -145,9 +145,15 @@ In Remix, this is achieved through a combination of ***nested*** and ***dynamic*
 
 4. Save the file again and head back to your browser.
 
+		Visit the URL [`http://localhost:3000/news/technology`](http://localhost:3000/news/technology).
+
 		You should now see the `news.$category.tsx` route rendered as a child of the "News" page:
 
 		![Technology news page](src/assets/webp/epic-news/news-category-page.webp)
+
+		Try changing the word 'technology' in the URL to 'sport', 'entertainment', or any other word.
+		
+		You will see the same generic news category page rendered for each category. We will explain why later.
 
 </Steps>
 
@@ -224,7 +230,6 @@ You can read more about the `NavLink` component [**here**](https://remix.run/doc
 
 	- Entertainment
 	- Business
-	- Reviews
 
 	When you've finished, your final `NewsPage` component should behave something like this:
 
@@ -364,7 +369,9 @@ export default function NewsPageIndex() {
 }
 ```
 
-With this code in place, when the user visits `http://localhost:3000/news`, they will see the welcome message displayed on the page, and this will then be replaced by the different category pages when they click on a link:
+With this code in place, restart your server.
+
+When the user visits `http://localhost:3000/news`, they will see the welcome message displayed on the page, and this will then be replaced by the different category pages when they click on a link:
 
 ![News index with categories](src/assets/gif/news-index-with-categories.gif)
 

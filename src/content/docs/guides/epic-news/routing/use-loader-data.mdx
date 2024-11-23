@@ -33,12 +33,16 @@ Don't worry about this for now - we can fix it later.
 
 :::danger[Extra care]
 
-***Remember - take extra care to delete lines that are highlighted in red, and add the new lines in green exactly where shown.***
+***Remember***:
+
+- take extra care to delete lines that are highlighted in red
+- add the new lines in green exactly where shown
 
 :::
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx"
 import { type LoaderFunctionArgs, json } from '@remix-run/node'
++import { useLoaderData } from '@remix-run/react'
 +import { toTitleCase } from '~/utils/stringUtils.ts'
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -178,18 +182,6 @@ invariant(typeof category === 'string', 'Category not found')
 :::
 
 The red line has disappeared, and TypeScript now knows that `categoryTitle` will always be a string.
-
-:::tip[Challenge]
-
-## 🚀 Challenge
-
-Add links to three new categories that will feature in your `news` route.
-
-**Remember** - you don't need to create a new file for each category now. Just add a new `Link` to each one in your `app/routes/news.tsx` file.
-
-There's no solution for this challenge! You should be able to figure out this one for yourself 😅.
-
-:::
 
 ## Summary
 

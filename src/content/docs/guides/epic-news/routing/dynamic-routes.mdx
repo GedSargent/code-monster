@@ -5,54 +5,6 @@ description: Learn how to use route params to create dynamic routes in Remix, an
 
 import MonsterVideo from "src/components/MonsterVideo.astro"
 
-## Introduction
-
-In our previous step on [**nested routes**](/code-monster/guides/epic-news/routing/nested-routes), we created a "News" route that enabled users to switch between different news categories.
-
-We did this by creating a new route for each category, like this:
-
-![News routes](src/assets/png/static-news-routes.png)
-
-Creating static files for each child route is fine, but not very sustainable. 
-
-Think about this for a second.
-
-What if we want to add new categories? We'd have to create a new child file for each one, and then update the code inside each so they are all consistent.
-
-There's a much better solution - creating a single ***dynamic route*** that will handle requests for all the different news categories.
-
-In this step, we'll learn how to:
-- create a single dynamic route for all news categories.
-- use route params to to fetch the correct data.
-- access the route params using a `loader` function, and log them to the console.
-
-## Creating a dynamic route
-
-Delete all your hard-coded static child routes. So in the example from our [**previous tutorial**](/code-monster/guides/epic-news/routing/nested-routes#adding-a-navigation-link), I would be deleting:
-
-- `news.business.tsx`
-- `news.entertainment.tsx`
-- `news.reviews.tsx`
-- `news.technology.tsx`
-
-Replace all of these with a single file called `news.$category.tsx`:
-
-![Delete child routes](src/assets/gif/delete-individual-child-routes.gif)
-
-![Delete static routes](src/assets/png/delete-static-routes.png)
-
-Inside your new `news/$category.tsx` file, add the following code:
-
-```tsx
-export default function NewsCategoryPage() {
-	return (
-		<div className="container py-16">
-			<h2 className="text-h2">Generic news category page</h2>
-		</div>
-	)
-}
-```
-
 Save these changes.
 
 Now, head back to your browser and refresh your page. Try clicking the links to your different pages again. You will notice something strange has happened:

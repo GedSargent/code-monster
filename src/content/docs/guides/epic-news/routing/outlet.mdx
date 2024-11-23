@@ -3,7 +3,7 @@ title: Routing - `Outlet` and `_index.tsx`
 description: Learn how to create a nested route with the 'Outlet' component and the '_index.tsx' file.
 ---
 
-import { FileTree } from '@astrojs/starlight/components';
+import { FileTree, Steps } from '@astrojs/starlight/components';
 import NestedRouting from "src/components/epicNews/NestedRouting.astro";
 import MonsterKbd from "src/components/MonsterKbd.astro";
 
@@ -39,91 +39,182 @@ We will be using the code again later, so <u>***don't delete it***</u>!
 
 In JSX, you can comment out a block of code by wrapping it in `{/* */}`.
 
-The easiest way to do this is to select the block of code you want to comment out, and then use the keyboard shortcut <MonsterKbd>Cmd + /</MonsterKbd> on Mac or <MonsterKbd>Ctrl + /</MonsterKbd> on Windows.
+The easiest way to do this is to select the block of code you want to comment out, and then use the keyboard shortcut below:
+
+<MonsterKbd>Cmd + /</MonsterKbd> on Mac or <MonsterKbd>Ctrl + /</MonsterKbd> on Windows.
 
 :::
 
 ::::
 
+<Steps>
+
 1. Add the `Outlet` components as an extra import at the top of the `root.tsx` file:
 
-2. Comment out the all your code that is currently between the `<main>` tags in the `root.tsx` file (highlighted in white below - your actual code might be different here)
+		```diff lang="tsx" title="app/root.tsx" showLineNumbers ins="Outlet, " collapse={1-17}
+		import { type LinksFunction } from '@remix-run/node'
+		import { Outlet, useLoaderData } from '@remix-run/react'
+		import { ParallaxProvider } from 'react-scroll-parallax'
+		import Document from '~/components/shared-layout/Document'
+		import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+		import { useNonce } from '~/utils/nonce-provider.ts'
+		import rootLinkElements from '~/utils/providers/rootLinkElements'
+		import { type loader } from './__root.server'
+		import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+		import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+		import useTheme from './hooks/useTheme.tsx'
+		```
+
+2. Comment out the all your code that is currently wrapped between the `div` with a `className` of `flex-1`. 
+
+		This the opening and closing `<main>` tag, along with all its children.
+
+		I've highlighted this code in white below - your actual code will likely look different here, as you have started to customise it.
+
+				```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-17, 55-61} {31-52}
+		import { type LinksFunction } from '@remix-run/node'
+		import { Outlet, useLoaderData } from '@remix-run/react'
+		import { ParallaxProvider } from 'react-scroll-parallax'
+		import Document from '~/components/shared-layout/Document'
+		import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+		import { useNonce } from '~/utils/nonce-provider.ts'
+		import rootLinkElements from '~/utils/providers/rootLinkElements'
+		import { type loader } from './__root.server'
+		import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+		import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+		import useTheme from './hooks/useTheme.tsx'
+
+		export const links: LinksFunction = () => {
+			return rootLinkElements
+		}
+		export { headers, meta } from './__root.client.tsx'
+		export { action, loader } from './__root.server.tsx'
+
+		export default function App() {
+			const data = useLoaderData<typeof loader>()
+			const nonce = useNonce()
+			const theme = useTheme()
+
+			return (
+				<ParallaxProvider>
+					<Document nonce={nonce} theme={theme}>
+						<div className="flex h-screen flex-col justify-between">
+							<HeaderWithSearch />
+
+							<div className="flex-1">
+								{/* <main className="h-full">
+									<ParallaxBackground
+										image={heroImage}
+										title="Epic News"
+										logo={logo}
+										altText="Welcome to Epic News, where the latest developments in tech are found."
+									>
+										<div className="mx-auto flex w-fit flex-1 flex-col justify-between gap-16 bg-secondary/40 px-28 py-16 backdrop-blur-sm">
+											<p className="text-center text-4xl font-extrabold text-secondary-foreground">
+												The latest tech news in one place
+											</p>
+											<div className="flex justify-center gap-8">
+												<Button variant="default" size="wide">
+													<Link to="/signup">Sign up</Link>
+												</Button>
+												<Button variant="secondary" size="wide">
+													<Link to="/login">Login</Link>
+												</Button>
+											</div>
+										</div>
+									</ParallaxBackground>
+								</main> */}
+							</div>
+
+							<div className="container flex justify-between pb-5">
+								<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+							</div>
+
+							<FooterMenuRight />
+						</div>
+					</Document>
+				</ParallaxProvider>
+			)
+		}
+		```
 
 3. Add the `Outlet` component beneath the commented out code
 
-```diff lang="tsx" title="app/root.tsx" ins="Outlet, " showLineNumbers collapse={5-17, 56-62} {31-52}
-import { type LinksFunction } from '@remix-run/node'
-import { Outlet, useLoaderData } from '@remix-run/react'
-import { ParallaxProvider } from 'react-scroll-parallax'
-import Document from '~/components/shared-layout/Document'
-import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { type loader } from './__root.server'
-import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
-import HeaderWithSearch from './components/organisms/HeaderWithSearch'
-import useTheme from './hooks/useTheme.tsx'
+		```diff lang="tsx" title="app/root.tsx" ins="Outlet, " showLineNumbers collapse={1-17, 32-51, 56-62} {31-52}
+		import { type LinksFunction } from '@remix-run/node'
+		import { Outlet, useLoaderData } from '@remix-run/react'
+		import { ParallaxProvider } from 'react-scroll-parallax'
+		import Document from '~/components/shared-layout/Document'
+		import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
+		import { useNonce } from '~/utils/nonce-provider.ts'
+		import rootLinkElements from '~/utils/providers/rootLinkElements'
+		import { type loader } from './__root.server'
+		import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+		import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+		import useTheme from './hooks/useTheme.tsx'
 
-export const links: LinksFunction = () => {
-	return rootLinkElements
-}
-export { headers, meta } from './__root.client.tsx'
-export { action, loader } from './__root.server.tsx'
+		export const links: LinksFunction = () => {
+			return rootLinkElements
+		}
+		export { headers, meta } from './__root.client.tsx'
+		export { action, loader } from './__root.server.tsx'
 
-export default function App() {
-	const data = useLoaderData<typeof loader>()
-	const nonce = useNonce()
-	const theme = useTheme()
+		export default function App() {
+			const data = useLoaderData<typeof loader>()
+			const nonce = useNonce()
+			const theme = useTheme()
 
-	return (
-		<ParallaxProvider>
-			<Document nonce={nonce} theme={theme}>
-				<div className="flex h-screen flex-col justify-between">
-					<HeaderWithSearch />
+			return (
+				<ParallaxProvider>
+					<Document nonce={nonce} theme={theme}>
+						<div className="flex h-screen flex-col justify-between">
+							<HeaderWithSearch />
 
-					<div className="flex-1">
-						{/* <main className="h-full">
-							<ParallaxBackground
-								image={heroImage}
-								title="Epic News"
-								logo={logo}
-								altText="Welcome to Epic News, where the latest developments in tech are found."
-							>
-								<div className="mx-auto flex w-fit flex-1 flex-col justify-between gap-16 bg-secondary/40 px-28 py-16 backdrop-blur-sm">
-									<p className="text-center text-4xl font-extrabold text-secondary-foreground">
-										The latest tech news in one place
-									</p>
-									<div className="flex justify-center gap-8">
-										<Button variant="default" size="wide">
-											<Link to="/signup">Sign up</Link>
-										</Button>
-										<Button variant="secondary" size="wide">
-											<Link to="/login">Login</Link>
-										</Button>
-									</div>
-								</div>
-							</ParallaxBackground>
-						</main> */}
-+						<Outlet />
-					</div>
+							<div className="flex-1">
+								{/* <main className="h-full">
+									<ParallaxBackground
+										image={heroImage}
+										title="Epic News"
+										logo={logo}
+										altText="Welcome to Epic News, where the latest developments in tech are found."
+									>
+										<div className="mx-auto flex w-fit flex-1 flex-col justify-between gap-16 bg-secondary/40 px-28 py-16 backdrop-blur-sm">
+											<p className="text-center text-4xl font-extrabold text-secondary-foreground">
+												The latest tech news in one place
+											</p>
+											<div className="flex justify-center gap-8">
+												<Button variant="default" size="wide">
+													<Link to="/signup">Sign up</Link>
+												</Button>
+												<Button variant="secondary" size="wide">
+													<Link to="/login">Login</Link>
+												</Button>
+											</div>
+										</div>
+									</ParallaxBackground>
+								</main> */}
+		+						<Outlet />
+							</div>
 
-					<div className="container flex justify-between pb-5">
-						<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-					</div>
+							<div className="container flex justify-between pb-5">
+								<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+							</div>
 
-					<FooterMenuRight />
-				</div>
-			</Document>
-		</ParallaxProvider>
-	)
-}
-```
+							<FooterMenuRight />
+						</div>
+					</Document>
+				</ParallaxProvider>
+			)
+		}
+		```
 
-Save your changes and head back across to your browser, but *make sure you are on the home page at [**http://localhost:3000**](http://localhost:3000).*
+4. Save your changes and head back across to your browser, but *make sure you are on the home page at [**http://localhost:3000**](http://localhost:3000).*
 
-You should see the screen content has changed:
+		You should see the screen content has changed:
 
-![Hello from _index.tsx screenshot](src/assets/png/hello-from-index-tsx.png)
+		![Hello from _index.tsx screenshot](src/assets/png/hello-from-index-tsx.png)
+
+</Steps>
 
 ### Wait - what just happened? 🤔
 
@@ -156,17 +247,9 @@ So what exactly is happening here?? Why is the `Outlet` component rendering the 
 
 ::::note[Deep Dive]
 
-## Understanding `Outlet`s
-
-`Outlet` is a special Remix component that tells the browser to render a **child route** that matches the current URL.
-
-This is a strange concept to grasp at first, so let's take some time to understand what is actually happening.
-
-:::info
-
 ### What is a "route"? 🔀
 
-In a normal web application, a "route" is a URL that corresponds to a specific **page** or **view** in the app. This is usually served from a specific file in the project.
+In a web app, a "route" is a web address (URL) that shows a specific page or view in the app. Every route is served from a specific file in the code base.
 
 For example, when we run a Remix application on our local machines, the **base URL** is
 
@@ -174,7 +257,7 @@ For example, when we run a Remix application on our local machines, the **base U
 http://localhost:3000
 ```
 
-In a Remix app, this is initially served from the file at `app/root.tsx` - the very file we have been working on until now.
+In a Remix app, this is initially served from the file at `app/root.tsx`.
 
 However, if we wanted to navigate to a different page - say the 'About Us' page - then we would typically add a new **path** onto the end of the base URL like so:
 
@@ -184,7 +267,7 @@ http://localhost:3000/about-us
 
 The "route" in this case would then be served from another file in the code base.
 
-In a Remix app, this file would typically be found inside the `routes` folder, and called `about-us.tsx`.
+In a Remix app, this file would be placed inside the `routes` folder, and called `about-us.tsx`.
 
 <FileTree>
 
@@ -196,41 +279,39 @@ In a Remix app, this file would typically be found inside the `routes` folder, a
 
 </FileTree>
 
-### Introducing "parent" and "child" routes
+The file name - `about-us.tsx` - and the URL path - `/about-us` - must match in order for Remix to serve the correct page.
 
-In traditional apps, each new route request triggers a complete page reload.
-
-If you stop and think about this, it doesn't actually make much sense. If you have a navbar and footer that are the same on every page, why should they be reloaded *every time*?
-
-This can slow down the app and make it longer to load.
-
-However, in a Remix application, we can make use of something much more powerful: "**parent**" and "**child**" routes.
+### Parent and child routes
 
 A "child" route is nested _within_ another route, which we call a "parent".
 
-As soon as we place the `Outlet` component inside a route file (like we just have in `root.tsx`), it becomes a "parent" route.
+As soon as we place the `Outlet` component inside a route file (like we just have in `root.tsx`), it converts the file into a "parent" route.
 
-The `Outlet` components tells Remix to render **both** the parent **and** the matching child route(s) through it. Because the parent is already loaded into memory, the child route can be rendered much more quickly because Remix doesn't need to reload the entire page.
+`Outlet` tells Remix where to render the matching child route(s) within the parent.
+
+:::caution[Important!]
+
+Because the parent is already loaded into memory, this makes page loads quicker because Remix only needs to load the new content from the child.
+
+This is really fast! 🚀🚀🚀
+
+:::
 
 #### The main index page of a website
 
-In the case of our app at the moment, the `root.tsx` file is being served as the "parent" route, and the `_index.tsx` file is the "child" route.
-
-The reason we can still see the navbar and footer is because this is code being served from the **parent** `root.tsx` file. However, the content that we see in the middle of the page is now being served from the `_index.tsx` file through the `Outlet` component as its child.
-
-Hover your cursor over the two buttons below to see how this works in practice:
+Hover your cursor over the two buttons below to see how the parent `root.tsx` renders its child code through the `<Outlet />` component:
 
 <NestedRouting />
 
 ::::
 
-But how does Remix know which route files are related? How does it know which route files are "parents", and which should be their "children"? 🤔
-
-The answer lies in Remix's file name conventions.
-
 ## The route structure
 
-Routes in Remix are represented by files and folders in your project. The structure of your files and folders directly maps to the structure of your routes in the browser URL bar.
+So, how does Remix know which route files to load as "children" of "parents"? 🤔
+
+The answer lies in Remix's **file names**.
+
+The structure of your project's files and folders directly maps to the structure of your routes in the browser URL bar.
 
 We can see this in action by adding a new route to our app. Let's add a dummy 'about us' page.
 
@@ -248,7 +329,7 @@ Take extra care when naming your route files in Remix. The file name **must** ma
 
 For example, because we want to serve a page from the URL path `/about-us`, then the file name must also be `about-us.tsx`.
 
-If it was named `aboutUs.tsx` or `about_us.tsx`, then Remix would not be able to serve the page from the correct URL.
+If it was named `aboutUs.tsx` or `about_us.tsx`, then Remix would not be able to serve the correct page from the URL.
 
 :::
 
@@ -268,13 +349,9 @@ Head back over to your browser and navigate to [http://localhost:3000/about-us](
 
 ![About us page navigation](src/assets/gif/about-us-page.gif)
 
-Notice how the navbar, footer and theme switcher are still present on the page? This is because `/about-us` is a direct child of the base URL (`/`, served from the `root.tsx` file), so the `Outlet` component in the `root.tsx` file serves the `about-us.tsx` code inside the parent.
+Notice how the navbar, footer and theme switcher are still present on the page?
 
-As mentioned above, this is a far more efficient way of serving pages in a Remix app, as it avoids the need for a full page reload.
-
-Think of the `Outlet` component as a "window" or "placeholder" for the child route. It's a way of telling Remix where to render the child route **inside** the parent route.
-
-This is a powerful feature of Remix that we will continue to explore in more detail later.
+Think of the `Outlet` component as a "window" or "placeholder" for the child route. It's a way of telling Remix where to render the child route's code **inside** the parent.
 
 ## Update navbar links
 
@@ -326,15 +403,9 @@ export default function HeaderWithSearch() {
 }
 ```
 
-As well as the new link, you'll notice we've also added some new classes to the parent `div` element so that the links are separated visually from the logo and search bar.
-
-![About us link in navbar](src/assets/webp/epic-news/about-us-link-navbar.webp)
-
 ### Link prefetching
 
-The `Link` element in Remix is a powerful tool that allows us to navigate between pages in our app without the need for a full page reload.
-
-We can further speed up page loading times by adding a special `prefetch` attribute to the `Link` element.
+We can further speed up page loading times by adding a special `prefetch` attribute to Remix's `Link` component.
 
 When a user hovers over a link with the `prefetch` attribute, Remix will begin to load the linked page in the background. This means that when the user clicks on the link, the page will load almost instantly.
 
@@ -359,18 +430,16 @@ Notice how the browser begins to load the 'about-us' page in the background as s
 
 ### Challenge
 
-Add a new route to your app that serve pages from the URL paths below. For the time being, you can just add a simple title to each page in the same way we did for `/about-us`.
+Add a new `/contact-us` route to your app. Below are the requirements:
 
-The new route URL should be `/contact-us`.
-
-You should also add a link to the new page in your navbar, and add the `prefetch` attribute to the link to speed up page loading times.
+- For the time being, this page should just show a simple title, just like `/about-us`.
+- You should also add a link to the new page in your navbar
+- Add the `prefetch` attribute to the new navbar link to speed up page loading times.
 
 Visit each page in your browser to check that they are being served correctly:
 
 1. Visiting `http://localhost:3000/contact-us` should show a page with the title "Contact us"
 2. Make sure the navbar and footer still show as expected on each page.
-3. Update your navbar and footer to include links to these new pages.
-4. Add a `prefetch` attribute to these new links to make them load faster in the browser.
 
 :::
 

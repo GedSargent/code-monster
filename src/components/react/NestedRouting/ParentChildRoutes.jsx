@@ -104,7 +104,7 @@ function Body({ isHovering, childFilename }) {
           className="absolute grid content-center inset-0 bg-teal-400/10 border-4 border-teal-500 shadow-lg shadow-black/50 backdrop-blur-sm"
         >
           <span className="text-teal-500 font-bold uppercase text-4xl text-center drop-shadow shadow-black">
-            Child
+            Child (via {`<Outlet />`})
           </span>
         </div>
       )}

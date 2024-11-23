@@ -208,6 +208,7 @@ export default defineConfig({
             },
             {
               label: "🌞 Light and Dark Mode",
+              collapsed: true,
               items: [
                 {
                   label: "🌞 Setting up",
@@ -221,6 +222,7 @@ export default defineConfig({
             },
             {
               label: "🖥️ User Interface - Basics",
+              collapsed: true,
               items: [
                 {
                   label: "🖥️ Add Navbar and Footer",
@@ -242,6 +244,7 @@ export default defineConfig({
             },
             {
               label: "🧩 Custom Components",
+              collapsed: true,
               items: [
                 {
                   label: "🧩 `HeroCallToAction`",
@@ -281,14 +284,14 @@ export default defineConfig({
             {
               label: "🔒 Security",
               items: [
-                {
-                  label: "🔒 Cross site request forgery",
-                  link: "guides/epic-news/csrf",
-                },
-                {
-                  label: "🔒 Spambots and honeypots",
-                  link: "guides/epic-news/honey-pots",
-                },
+                // {
+                //   label: "🔒 Cross site request forgery",
+                //   link: "guides/epic-news/csrf",
+                // },
+                // {
+                //   label: "🔒 Spambots and honeypots",
+                //   link: "guides/epic-news/honey-pots",
+                // },
                 {
                   label: "🔒 Account creation",
                   link: "guides/epic-news/account-creation",

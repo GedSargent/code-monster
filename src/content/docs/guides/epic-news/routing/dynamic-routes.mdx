@@ -35,53 +35,15 @@ http://localhost:3000/news/reviews
 
 ...the `$category` value would then be the string "`reviews`", and so on.
 
-:::note[Deep Dive]
-
-### Why use route params?
-
-Route params provide an easy way to pass values to a route.
-
-They are essentially variables that can represent different a value for each URL that matches a particular base route.
-
-In Remix, when we add a `$` to a route filename, anything before the `$` can be thought of as the parent route, and anything immediately after it is a **route parameter**.
-
-:::
-
-At the moment, we are not doing anything with the `category` value. We need to update our `news/$category.tsx` file to read the `category` value from the URL and use it to display the correct data.
-
-In our case, the reason why we see the same content for each category is because we are not yet reading the `category` value from the URL.
-
-Let's fix that.
-
 ## Reading route params with the `loader` function
 
 To read the `category` value from the URL, we need to add something called a `loader` function to our `news/$category.tsx` file.
-
-But what is a `loader` function?
 
 ::::note[Info]
 
 ## What is a `loader` function?
 
-### Client vs. server code
-
-Traditionally, React code is only ever executed inside the user's browser.
-
-The user's browser is known as the **client** in web development terms.
-
-This is great for building exciting user interfaces, but the problem is that many crucial website actions, such as loading database information or accessing route parameters, can only be done on the **server**.
-
-The makers of Remix got around this problem by introducing the concept of `loader` functions:
-
-```tsx
-export async function loader({ params }: LoaderFunctionArgs) {
-	// Server-side code here...
-}
-```
-
-### Accessing server data with `loader` functions
-
-Code placed inside a Remix `loader` function is executed only on the **server**.
+Code placed inside a Remix `loader` function is executed on the **server**.
 
 There are two rules to remember when creating a `loader` function:
 
@@ -94,23 +56,6 @@ There are two rules to remember when creating a `loader` function:
 			// Server-side code here...
 		}
 		```
-
-Crucially, Remix will then execute this code on the server _**before**_ the user interface (UI) is rendered. This ensures that any required data is accessed and processed before the UI is presented by the browser.
-
-:::tip
-
-You'll notice the `loader` function can be passed a `request` object as an argument:
-
-```tsx "{ request }"
-export async function loader({ request }: LoaderFunctionArgs) {
-  // ... more code here...
-}
-```
-
-This `request` object carries crucial information about the incoming request to the server, such as the URL the user is trying to access, any search parameters they've included, headers, and more.
-
-Think of it as a toolbox that the `loader` function uses to understand exactly what the user is asking for.
-:::
 
 You can learn more about `loader` functions below:
 
@@ -143,6 +88,25 @@ export default function NewsCategoryPage() {
 	)
 }
 ```
+
+:::caution[Important]
+
+You'll notice the `loader` function is being passed a `params` object as an argument here:
+
+```tsx "{ params }"
+export async function loader({ params }: LoaderFunctionArgs) {
+  // ... more code here...
+}
+```
+
+This `params` object contains all the route parameters for the current route.
+
+In our case, we are destructuring the `category` value from the `params` object like this:
+
+```tsx "{ category }"
+const { category } = params
+```
+:::
 
 Head back to your browser and click the links between the different news categories.
 

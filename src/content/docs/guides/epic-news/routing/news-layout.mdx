@@ -77,56 +77,21 @@ This will create a layout with five columns, each containing a wireframe block:
 
 ### Wireframe layout
 
-1. Can you add a second row of wireframe blocks to your layout?
+1. Can you add some space between the page title and the wireframe blocks underneath?
+
+2. Can you add a second row of wireframe blocks to your layout?
 
 ![Five col two rows](src/assets/png/epic-news/five-col-two-rows.png)
 
-2. Can you use [**Tailwind's responsive class prefixes**](https://tailwindcss.com/docs/responsive-design) to make your layout responsive? On small screens, you should only show two columns, but on larger screens you should show five.
+### 🚀🚀 Extra Credit
+
+3. Can you use [**Tailwind's responsive class prefixes**](https://tailwindcss.com/docs/responsive-design) to make your layout responsive?
+
+		- On small screens, you should only show two columns
+		- On medium screens there should be three columns
+		- On large screens you should show five columns
 
 ![Five to two col responsive](src/assets/gif/five-to-two-col-responsive.gif)
-
-### 🚀🚀 Extra Credit (Optional)
-
-This is a bit more tricky.
-
-Can you make your responsive layouts more complex, where different rows respond in different ways to changing screen sizes?
-
-![Grid complex responsive](src/assets/gif/grid-complex-responsive.gif)
-
-**TIPS**:
-
-1. Think carefully about how to arrange your parent `div` structures to wrap the various child `WireframeBlock` components inside them.
-2. When working with child elements inside a `grid` parent, you can specify how many columns and rows a child element should span using the `col-span-` and `row-span-` classes. For example, look at the code below:
-
-```tsx
-<div className="col-span-1 sm:col-span-2 sm:row-span-2 lg:col-span-3">
-	<WireframeBlock isPrimary />
-</div>
-```
-
-Notice a few things:
-
-1. I have wrapped the `WireframeBlock` component in a `div` element so that I can apply the `col-span-` and `row-span-` classes to it.
-2. The `col-span-1` class specifies that this element should span one column on the very smallest screens.
-3. `sm:col-span-2` specifies that this element should span two ***columns*** on **small** screens (640px width) and above.
-4. `lg:col-span-3` specifies that it should span three columns on *large* (1024px width) screens and above.
-5. I've also updated the `WireframeBlock` component to accept a prop called `isPrimary` that will change the height of the block like so:
-
-```tsx
-interface WireframeBlockProps {
-	isPrimary?: boolean
-}
-
-const WireframeBlock = ({ isPrimary = false }: WireframeBlockProps) => {
-	return (
-		<div
-			className={`${isPrimary ? 'h-36 sm:h-[19.5rem]' : 'h-36'} animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700`}
-		/>
-	)
-}
-```
-
-Have a play with various values and classes, and see what interesting layouts you can come up with!
 
 :::
 
@@ -144,4 +109,4 @@ Our site is beginning to take shape!
 
 We have a home page and a shared layout for our news category page.
 
-In the next step, we will think about securing our website against some common modern security threats.
+In the next step, we will work on the database for our website.

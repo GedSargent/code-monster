@@ -3,10 +3,9 @@ title: Modify the project structure
 description: Swap notes for articles throughout the project
 ---
 
-import { Icon } from "@astrojs/starlight/components";
+import { Icon, Steps } from "@astrojs/starlight/components";
 import MonsterReveal from "src/components/MonsterReveal.astro";
 import MonsterKbd from 'src/components/MonsterKbd.astro'
-import { Steps } from '@astrojs/starlight/components';
 
 ## Objectives
 
@@ -16,99 +15,110 @@ Now that we have updated the Prisma schema and pushed these changes to the datab
 
 The first thing we need to do is update the permissions in the `app/utils/user.ts` file.
 
-Open this file now in your editor.
-
 :::note
 
-### 💡 Tip - open files quickly
+### 💡 Tip - quick file open
 
-Remember that you can quickly find a file inside VS Code by using the keyboard shortcut <MonsterKbd>CTRL + P</MonsterKbd> (Windows) or <MonsterKbd>CMD + P</MonsterKbd> (Mac) and typing the name of the file.
+Remember that you can quickly find a file inside VS Code by using the keyboard shortcut:
+
+- <MonsterKbd>CTRL + P</MonsterKbd> (Windows)
+- <MonsterKbd>CMD + P</MonsterKbd> (Mac)
+
+Type in the name of the file you want to open and select it from the list that appears.
 
 :::
 
 Permissions describe what actions a user can perform on a specific entity. In our case, we are concentrating on two entities: `user` and `article`.
 
-We will update the `Entity` type definition to accept `'article'` as well as `'user'` and `'note'`, around line 28:
+<Steps>
 
-```diff lang="tsx" title="app/utils/user.ts" ins=" | 'article'" showLineNumbers collapse={1-25}
-import { type SerializeFrom } from '@remix-run/node'
-import { useRouteLoaderData } from '@remix-run/react'
-import { type loader as rootLoader } from '#app/root.tsx'
+1. Open the `app/utils/user.ts` file.
 
-function isUser(user: any): user is SerializeFrom<typeof rootLoader>['user'] {
-	return user && typeof user === 'object' && typeof user.id === 'string'
-}
+2. We will update the `Entity` type definition to accept `'article'` as well as `'user'` and `'note'`.
 
-export function useOptionalUser() {
-	const data = useRouteLoaderData<typeof rootLoader>('root')
-	if (!data || !isUser(data.user)) {
-		return undefined
-	}
-	return data.user
-}
+		Around line 28, add the code below:
 
-export function useUser() {
-	const maybeUser = useOptionalUser()
-	if (!maybeUser) {
-		throw new Error(
-			'No user found in root loader, but user is required by useUser. If user is optional, try useOptionalUser instead.',
-		)
-	}
-	return maybeUser
-}
+		```diff lang="tsx" title="app/utils/user.ts" ins=" | 'article'" showLineNumbers collapse={1-25}
+		import { type SerializeFrom } from '@remix-run/node'
+		import { useRouteLoaderData } from '@remix-run/react'
+		import { type loader as rootLoader } from '#app/root.tsx'
 
-type Action = 'create' | 'read' | 'update' | 'delete'
-type Entity = 'user' | 'note' | 'article'
-type Access = 'own' | 'any' | 'own,any' | 'any,own'
-export type PermissionString =
-	| `${Action}:${Entity}`
-	| `${Action}:${Entity}:${Access}`
+		function isUser(user: any): user is SerializeFrom<typeof rootLoader>['user'] {
+			return user && typeof user === 'object' && typeof user.id === 'string'
+		}
 
-// ...Code omitted for brevity...
-```
+		export function useOptionalUser() {
+			const data = useRouteLoaderData<typeof rootLoader>('root')
+			if (!data || !isUser(data.user)) {
+				return undefined
+			}
+			return data.user
+		}
 
-:::caution
+		export function useUser() {
+			const maybeUser = useOptionalUser()
+			if (!maybeUser) {
+				throw new Error(
+					'No user found in root loader, but user is required by useUser. If user is optional, try useOptionalUser instead.',
+				)
+			}
+			return maybeUser
+		}
 
-Remember to save your changes before moving on to the next step.
+		type Action = 'create' | 'read' | 'update' | 'delete'
+		type Entity = 'user' | 'note' | 'article'
+		type Access = 'own' | 'any' | 'own,any' | 'any,own'
+		export type PermissionString =
+			| `${Action}:${Entity}`
+			| `${Action}:${Entity}:${Access}`
 
-:::
+		// ...Code omitted for brevity...
+		```
+
+3. Remember to **save** your changes before moving on to the next step.
+
+</Steps>
 
 ## Add `getArticleImgSrc` function
 
 Inside the `utils` folder, there is a file called `misc.tsx`.
 
-Open `app/utils/misc.tsx` now.
+<Steps>
 
-This file contains a function called `getNoteImgSrc` (around line 12) that is used to generate the URL for a note image.
+1. Open `app/utils/misc.tsx`.
 
-We will copy this code and create a new function beneath it called `getArticleImgSrc` that uses the same logic, but will generate the URL for an article image:
+2. Create a new function called `getArticleImgSrc` by adding the code below:
 
-```diff title="app/utils/misc.tsx" lang="tsx"
-import { useFormAction, useNavigation } from '@remix-run/react'
-import { clsx, type ClassValue } from 'clsx'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSpinDelay } from 'spin-delay'
-import { extendTailwindMerge } from 'tailwind-merge'
-import { extendedTheme } from './extended-theme.ts'
+		This simply generates a URL for an article image:
 
-export function getUserImgSrc(imageId?: string | null) {
-	return imageId ? `/resources/user-images/${imageId}` : '/img/user.png'
-}
+		```diff title="app/utils/misc.tsx" lang="tsx"
+		import { useFormAction, useNavigation } from '@remix-run/react'
+		import { clsx, type ClassValue } from 'clsx'
+		import { useEffect, useMemo, useRef, useState } from 'react'
+		import { useSpinDelay } from 'spin-delay'
+		import { extendTailwindMerge } from 'tailwind-merge'
+		import { extendedTheme } from './extended-theme.ts'
 
-export function getNoteImgSrc(imageId: string) {
-	return `/resources/note-images/${imageId}`
-}
+		export function getUserImgSrc(imageId?: string | null) {
+			return imageId ? `/resources/user-images/${imageId}` : '/img/user.png'
+		}
 
-+export function getArticleImgSrc(imageId: string) {
-+	return `/resources/article-images/${imageId}`
-+}
-```
+		export function getNoteImgSrc(imageId: string) {
+			return `/resources/note-images/${imageId}`
+		}
 
-As you can see, this function generates a URL for an article image using the `imageId` parameter.
+		+export function getArticleImgSrc(imageId: string) {
+		+	return `/resources/article-images/${imageId}`
+		+}
+		```
 
-However, if we look inside the `resources` folder, we will see this route file doesn't exist yet.
+3. Save your changes.
 
-Let's create it now.
+</Steps>
+
+This new function simply generates a URL to load an article image from the database. However, the file for this new URL doesn't exist yet.
+
+Let's create it in the next step.
 
 ## Resources routes
 
@@ -118,7 +128,7 @@ The route file we are going to create is a little different from the others we h
 
 ### What is a resource route?
 
-In Remix, a [**resource route**](https://remix.run/docs/en/main/guides/resource-routes) is one that doesn't render a UI to the browser, but instead can send any kind of `Response` that we need it to.
+In Remix, a [**resource route**](https://remix.run/docs/en/main/guides/resource-routes) is one that doesn't render a page to their browser, but instead can send any kind of `Response` that we need it to.
 
 We will create a new resource route to serve the images for the articles.
 
@@ -128,57 +138,46 @@ We will create a new resource route to serve the images for the articles.
 
 <Steps>
 
-1. Open `app/routes/resources+/note-images.$imageId.tsx`.
+1. Create a new file inside `app/routes/resources+/` called `article-images.$imageId.tsx`:
 
-2. Copy the entire file (<MonsterKbd>CTRL + C</MonsterKbd>) from the file browser on your left.
+		![Create article-images file](src/assets/webp/epic-news/create-article-images-route.webp)
 
-3. Make sure the same `resources+` folder is still open and selected in the file browser.
+2. Add the code below to it:
 
-4. Right-click the `resources+` folder, and select 'Paste' to paste a copy of the file back into the same `resources+` folder
+		```diff title="app/routes/resources+/article-images.$imageId.tsx" lang="tsx" showLineNumbers
+		+import { invariantResponse } from '@epic-web/invariant'
+		+import { type LoaderFunctionArgs } from '@remix-run/node'
+		+import { prisma } from '~/utils/db.server.ts'
+		+
+		+export async function loader({ params }: LoaderFunctionArgs) {
+		+	invariantResponse(params.imageId, 'Image ID is required', { status: 400 })
+		+	const image = await prisma.articleImage.findUnique({
+		+		where: { id: params.imageId },
+		+		select: { contentType: true, blob: true },
+		+	})
+		+
+		+	invariantResponse(image, 'Not found', { status: 404 })
+		+
+		+	return new Response(image.blob, {
+		+		headers: {
+		+			'Content-Type': image.contentType,
+		+			'Content-Length': Buffer.byteLength(image.blob).toString(),
+		+			'Content-Disposition': `inline; filename="${params.imageId}"`,
+		+			'Cache-Control': 'public, max-age=31536000, immutable',
+		+		},
+		+	})
+		+}
+		```
 
-5. Rename your newly pasted file as `article-images.$imageId.tsx`:
+		3. Save your changes.
 
-		![Create article-images file](src/assets/webp/epic-news/create-article-images-file.webp)
+		4. Take a moment to look through the code, and see if you can understand what it does.
+
+				What do you notice is missing from this route file that is present in the others?
 
 </Steps>
 
-### Update `article-images.$imageId.tsx`
-
-Once created, we then need to make one simple change so that it serves images for articles instead of notes:
-
-```diff title="app/routes/resources+/article-images.$imageId.tsx" ins="articleImage" lang="tsx" showLineNumbers
-import { invariantResponse } from '@epic-web/invariant'
-import { type LoaderFunctionArgs } from '@remix-run/node'
-import { prisma } from '~/utils/db.server.ts'
-
-export async function loader({ params }: LoaderFunctionArgs) {
-	invariantResponse(params.imageId, 'Image ID is required', { status: 400 })
-	const image = await prisma.articleImage.findUnique({
-		where: { id: params.imageId },
-		select: { contentType: true, blob: true },
-	})
-
-	invariantResponse(image, 'Not found', { status: 404 })
-
-	return new Response(image.blob, {
-		headers: {
-			'Content-Type': image.contentType,
-			'Content-Length': Buffer.byteLength(image.blob).toString(),
-			'Content-Disposition': `inline; filename="${params.imageId}"`,
-			'Cache-Control': 'public, max-age=31536000, immutable',
-		},
-	})
-}
-```
-
-:::caution
-
-Remember to check that all your changes have been saved so far.
-
-:::
-
 ## Add user-article routes
-
 
 Using VS Code's file explorer, navigate to the folder `app/routes/users+/$username_+`.
 

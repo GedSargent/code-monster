@@ -3,7 +3,9 @@ title: Creating articles
 description: Configuring the app to create articles
 ---
 
-With our database schema and seed data in place, let's move on to creating articles.
+import { Steps } from '@astrojs/starlight/components';
+
+With our database schema and security in place, let's move on to creating articles.
 
 ## The articles route
 
@@ -13,94 +15,104 @@ Once logged in, access your user's site profile via the user actions dropdown in
 
 ![User actions dropdown](src/assets/png/epic-news/user-actions-dropdown.png)
 
+This is the user profile page:
+
+![Profile page start](src/assets/webp/epic-news/profile-screen-start.webp)
+
 Once on your user's profile page, let's quickly add a button link to the 'Articles' page.
 
-Open the file at `app/routes/users+/$username.tsx`.
+### Add an articles page link
 
-Find the `ProfileRoute` component (around line 31), and add the following code to it, looking carefully at the code below to see where it should be placed (just before the 'My Notes' button).
+<Steps>
 
-Feel free to expand the collapsed code sections to see the full component:
+1. Open the file at `app/routes/users+/$username.tsx`.
 
-```diff lang="tsx" title="app/routes/users+/$username.tsx" collapse={2-42, 61-73}
-export default function ProfileRoute() {
-	const data = useLoaderData<typeof loader>()
-	const user = data.user
-	const userDisplayName = user.name ?? user.username
-	const loggedInUser = useOptionalUser()
-	const isLoggedInUser = data.user.id === loggedInUser?.id
+2. Find the `ProfileRoute` component (around line 31), and add the following code to it, looking carefully at where it should be placed (just before the 'My Notes' button).
 
-	return (
-		<div className="container mb-48 mt-36 flex flex-col items-center justify-center">
-			<Spacer size="4xs" />
+		Feel free to expand the collapsed code sections to see the full component:
 
-			<div className="container flex flex-col items-center rounded-3xl bg-muted p-12">
-				<div className="relative w-52">
-					<div className="absolute -top-40">
-						<div className="relative">
-							<img
-								src={getUserImgSrc(data.user.image?.id)}
-								alt={userDisplayName}
-								className="h-52 w-52 rounded-full object-cover"
-							/>
+		```diff lang="tsx" title="app/routes/users+/$username.tsx" collapse={2-42, 61-73}
+		export default function ProfileRoute() {
+			const data = useLoaderData<typeof loader>()
+			const user = data.user
+			const userDisplayName = user.name ?? user.username
+			const loggedInUser = useOptionalUser()
+			const isLoggedInUser = data.user.id === loggedInUser?.id
+
+			return (
+				<div className="container mb-48 mt-36 flex flex-col items-center justify-center">
+					<Spacer size="4xs" />
+
+					<div className="container flex flex-col items-center rounded-3xl bg-muted p-12">
+						<div className="relative w-52">
+							<div className="absolute -top-40">
+								<div className="relative">
+									<img
+										src={getUserImgSrc(data.user.image?.id)}
+										alt={userDisplayName}
+										className="h-52 w-52 rounded-full object-cover"
+									/>
+								</div>
+							</div>
+						</div>
+
+						<Spacer size="sm" />
+
+						<div className="flex flex-col items-center">
+							<div className="flex flex-wrap items-center justify-center gap-4">
+								<h1 className="text-center text-h2">{userDisplayName}</h1>
+							</div>
+							<p className="mt-2 text-center text-muted-foreground">
+								Joined {data.userJoinedDisplay}
+							</p>
+							{isLoggedInUser ? (
+								<Form action="/logout" method="POST" className="mt-3">
+									<Button type="submit" variant="link" size="pill">
+										<Icon name="exit" className="scale-125 max-md:scale-150">
+											Logout
+										</Icon>
+									</Button>
+								</Form>
+							) : null}
+							<div className="mt-10 flex gap-4">
+								{isLoggedInUser ? (
+									<>
+		+								<Button asChild>
+		+									<Link to="articles" prefetch="intent">
+		+										My articles
+		+									</Link>
+		+								</Button>
+										<Button asChild>
+											<Link to="notes" prefetch="intent">
+												My notes
+											</Link>
+										</Button>
+										<Button asChild>
+											<Link to="/settings/profile" prefetch="intent">
+												Edit profile
+											</Link>
+										</Button>
+									</>
+								) : (
+									<Button asChild>
+										<Link to="notes" prefetch="intent">
+											{userDisplayName}'s notes
+										</Link>
+									</Button>
+								)}
+							</div>
 						</div>
 					</div>
 				</div>
+			)
+		}
+		```
 
-				<Spacer size="sm" />
+3. Save your changes, and head back to the browser. You should see the new button link to the 'Articles' page:
 
-				<div className="flex flex-col items-center">
-					<div className="flex flex-wrap items-center justify-center gap-4">
-						<h1 className="text-center text-h2">{userDisplayName}</h1>
-					</div>
-					<p className="mt-2 text-center text-muted-foreground">
-						Joined {data.userJoinedDisplay}
-					</p>
-					{isLoggedInUser ? (
-						<Form action="/logout" method="POST" className="mt-3">
-							<Button type="submit" variant="link" size="pill">
-								<Icon name="exit" className="scale-125 max-md:scale-150">
-									Logout
-								</Icon>
-							</Button>
-						</Form>
-					) : null}
-					<div className="mt-10 flex gap-4">
-						{isLoggedInUser ? (
-							<>
-+								<Button asChild>
-+									<Link to="articles" prefetch="intent">
-+										My articles
-+									</Link>
-+								</Button>
-								<Button asChild>
-									<Link to="notes" prefetch="intent">
-										My notes
-									</Link>
-								</Button>
-								<Button asChild>
-									<Link to="/settings/profile" prefetch="intent">
-										Edit profile
-									</Link>
-								</Button>
-							</>
-						) : (
-							<Button asChild>
-								<Link to="notes" prefetch="intent">
-									{userDisplayName}'s notes
-								</Link>
-							</Button>
-						)}
-					</div>
-				</div>
-			</div>
-		</div>
-	)
-}
-```
+		![Profile with articles link](src/assets/webp/epic-news/profile-with-articles-link.webp)
 
-Save your changes, and head back to the browser. You should see the new button link to the 'Articles' page:
-
-![Profile with articles link](src/assets/webp/epic-news/profile-with-articles-link.webp)
+</Steps>
 
 ### Creating a new article
 
@@ -112,138 +124,144 @@ Once here, click the `+ New Article` button and fill in the form to create a new
 
 Click the 'Submit' button when finished, and your article will be created.
 
-## Adding a category
+## Add an article category
 
 This is great, but we can make it even better by adding a category to our next article.
 
 To do this, we will need to make some updates to the code.
 
-### Loading `article` categories
+### Loading categories from the database
 
 If we are to edit an existing article, we will need to load the existing `category` value for the said article from the database.
 
 This is defined in `app/routes/users+/$username_+/articles.$articleId.tsx`, where the `loader` function makes a call to the database to retrieve the article data.
 
-Open `app/routes/users+/$username_+/articles.$articleId.tsx` now.
+<Steps>
 
-At the moment, the `article` being loaded does not contain any `category` data. Let's update this:
+1. Open `app/routes/users+/$username_+/articles.$articleId.tsx`.
 
-:::caution[Ignore red lines]
+2. At the moment, the `article` being loaded does not contain any `category` data. Let's update this.
 
-Adding the code below will start to make the code editor show red lines, indicating TypeScript errors.
+		Adding the code below will start to make the code editor show red lines, indicating TypeScript errors.
 
-This is because we are adding new fields to the article object that are not yet defined in the form we are passing it to.
+		Don't worry about this for now. We will fix it later.
 
-Don't worry about this for now, as we will update the form to include the new `category` field later.
+		```diff lang="tsx" title="app/routes/users+/$username_+/articles.$articleId.tsx" showLineNumbers collapse={1-30, 56-64}
+		import { getFormProps, useForm } from '@conform-to/react'
+		import { parseWithZod } from '@conform-to/zod'
+		import { invariantResponse } from '@epic-web/invariant'
+		import {
+			json,
+			type LoaderFunctionArgs,
+			type ActionFunctionArgs,
+		} from '@remix-run/node'
+		import {
+			Form,
+			Link,
+			useActionData,
+			useLoaderData,
+			type MetaFunction,
+		} from '@remix-run/react'
+		import { formatDistanceToNow } from 'date-fns'
+		import { z } from 'zod'
+		import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
+		import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
+		import { ErrorList } from '~/components/forms.tsx'
+		import { Button } from '~/components/ui/button.tsx'
+		import { Icon } from '~/components/ui/icon.tsx'
+		import { StatusButton } from '~/components/ui/status-button.tsx'
+		import { requireUserId } from '~/utils/auth.server.ts'
+		import { prisma } from '~/utils/db.server.ts'
+		import { getArticleImgSrc, useIsPending } from '~/utils/misc.tsx'
+		import { requireUserWithPermission } from '~/utils/permissions.server.ts'
+		import { redirectWithToast } from '~/utils/toast.server.ts'
+		import { userHasPermission, useOptionalUser } from '~/utils/user.ts'
+		import { type loader as articlesLoader } from './articles.tsx'
 
-:::
-
-```diff lang="tsx" title="app/routes/users+/$username_+/articles.$articleId.tsx" showLineNumbers collapse={1-30, 56-64}
-import { getFormProps, useForm } from '@conform-to/react'
-import { parseWithZod } from '@conform-to/zod'
-import { invariantResponse } from '@epic-web/invariant'
-import {
-	json,
-	type LoaderFunctionArgs,
-	type ActionFunctionArgs,
-} from '@remix-run/node'
-import {
-	Form,
-	Link,
-	useActionData,
-	useLoaderData,
-	type MetaFunction,
-} from '@remix-run/react'
-import { formatDistanceToNow } from 'date-fns'
-import { z } from 'zod'
-import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
-import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
-import { ErrorList } from '~/components/forms.tsx'
-import { Button } from '~/components/ui/button.tsx'
-import { Icon } from '~/components/ui/icon.tsx'
-import { StatusButton } from '~/components/ui/status-button.tsx'
-import { requireUserId } from '~/utils/auth.server.ts'
-import { prisma } from '~/utils/db.server.ts'
-import { getArticleImgSrc, useIsPending } from '~/utils/misc.tsx'
-import { requireUserWithPermission } from '~/utils/permissions.server.ts'
-import { redirectWithToast } from '~/utils/toast.server.ts'
-import { userHasPermission, useOptionalUser } from '~/utils/user.ts'
-import { type loader as articlesLoader } from './articles.tsx'
-
-export async function loader({ params }: LoaderFunctionArgs) {
-	const article = await prisma.article.findUnique({
-		where: { id: params.articleId },
-		select: {
-			id: true,
-			title: true,
-			content: true,
-			ownerId: true,
-			updatedAt: true,
-+			category: {
-+				select: {
-+					id: true,
-+					name: true,
-+				},
-+			},
-			images: {
+		export async function loader({ params }: LoaderFunctionArgs) {
+			const article = await prisma.article.findUnique({
+				where: { id: params.articleId },
 				select: {
 					id: true,
-					altText: true,
+					title: true,
+					content: true,
+					ownerId: true,
+					updatedAt: true,
+		+			category: {
+		+				select: {
+		+					id: true,
+		+					name: true,
+		+				},
+		+			},
+					images: {
+						select: {
+							id: true,
+							altText: true,
+						},
+					},
 				},
-			},
-		},
-	})
+			})
 
-	invariantResponse(article, 'Not found', { status: 404 })
+			invariantResponse(article, 'Not found', { status: 404 })
 
-	const date = new Date(article.updatedAt)
-	const timeAgo = formatDistanceToNow(date)
+			const date = new Date(article.updatedAt)
+			const timeAgo = formatDistanceToNow(date)
 
-	return json({
-		article,
-		timeAgo,
-	})
-}
-```
+			return json({
+				article,
+				timeAgo,
+			})
+		}
+		```
+
+</Steps>
 
 ### Display the `category` name
 
 With this in place, we can now display the `category` name in the browser.
 
-Navigate down to the `ArticleRoute` component in the same file (around line 120), and add the JSX highlighted in green just below the `h2` element:
+<Steps>
 
-```diff lang="tsx" title="app/routes/users+/$username_+/articles.$articleId.tsx"
-export default function ArticleRoute() {
-	const data = useLoaderData<typeof loader>()
-	const user = useOptionalUser()
-	const isOwner = user?.id === data.article.ownerId
-	const canDelete = userHasPermission(
-		user,
-		isOwner ? `delete:article:own` : `delete:article:any`,
-	)
-	const displayBar = canDelete || isOwner
+1. Navigate down to the `ArticleRoute` component in the same file (around line 120), and add the JSX highlighted in green just below the `h2` element:
 
-	return (
-		<div className="absolute inset-0 flex flex-col px-10">
-			<h2 className="mb-2 pt-12 text-h2 lg:mb-6">{data.article.title}</h2>
-+			<div className="mb-4">
-+				<p className="w-fit rounded-lg bg-card px-4 py-2 text-sm text-card-foreground">
-+					{data.article.category?.name ?? 'General News'}
-+				</p>
-+			</div>
-			<div className={`${displayBar ? 'pb-24' : 'pb-12'} overflow-y-auto`}>
-			// ... Code omitted for brevity ...
-```
+		```diff lang="tsx" title="app/routes/users+/$username_+/articles.$articleId.tsx"
+		export default function ArticleRoute() {
+			const data = useLoaderData<typeof loader>()
+			const user = useOptionalUser()
+			const isOwner = user?.id === data.article.ownerId
+			const canDelete = userHasPermission(
+				user,
+				isOwner ? `delete:article:own` : `delete:article:any`,
+			)
+			const displayBar = canDelete || isOwner
 
-With this in place, save your changes and you should now see the `category` name displayed on the article page:
+			return (
+				<div className="absolute inset-0 flex flex-col px-10">
+					<h2 className="mb-2 pt-12 text-h2 lg:mb-6">{data.article.title}</h2>
+		+			<div className="mb-4">
+		+				<p className="w-fit rounded-lg bg-card px-4 py-2 text-sm text-card-foreground">
+		+					{data.article.category?.name ?? 'General News'}
+		+				</p>
+		+			</div>
+					<div className={`${displayBar ? 'pb-24' : 'pb-12'} overflow-y-auto`}>
+					// ... Code omitted for brevity ...
+		```
 
-![Article with category](src/assets/webp/epic-news/article-with-category.webp)
+2. Save your changes
 
-## Opening the article editor
+3. Check your browser, and you should now see the `category` name displayed on the article page:
+
+		![Article with category](src/assets/webp/epic-news/article-with-category.webp)
+
+</Steps>
+
+## The article editor
 
 Now that we can see the `category` name on the article page, let's add a `category` field to the article editor.
 
-If a user clicks on an existing article they are the owner of (or have permissions to edit), they should be presented with an 'Edit' button. Clicking this button will take them to the article editor form, where they can update the article:
+If a user clicks on an existing article they are the owner of (or have permissions to edit), they should be presented with an 'Edit' button.
+
+Clicking the 'Edit' button opens the article editor form:
 
 ![Display editor form](src/assets/gif/display-editor-form.gif)
 
@@ -270,86 +288,84 @@ export default function ArticlesRoute() {
 
 ### Load `categories`
 
-Although this is the same article data, it's actually slightly different. This is because we've now opened the article editor form, which is a separate route in the app.
+To edit the article, we need to find a different route file.
 
-As such, Remix has loaded the article data again, but this time it's for the article editor form.
+<Steps>
 
-Open the file at `app/routes/users+/$username_+/articles.$articleId_.edit.tsx`, and update the code as follows:
+1. Open the file at `app/routes/users+/$username_+/articles.$articleId_.edit.tsx`.
 
-:::caution[Ignore red lines]
+2. Add the code shown below.
 
-Adding the code below will start to make the code editor show red lines, indicating TypeScript errors.
+		This will produce red lines under some code, indicating TypeScript errors.
 
-This is because we are adding new fields to the article object that are not yet defined in the form we are passing it to.
+		Don't worry about this for now. We will fix it later.
 
-Don't worry about this for now, as we will update the form to include the new `category` field later.
+		```diff lang="tsx" title="app/routes/users+/$username_+/articles.$articleId_.edit.tsx" showLineNumbers collapse={1-9} ins=", categories" ins=" categories={data.categories}"
+		import { invariantResponse } from '@epic-web/invariant'
+		import { json, type LoaderFunctionArgs } from '@remix-run/node'
+		import { useLoaderData } from '@remix-run/react'
+		import { GeneralErrorBoundary } from '#app/components/ErrorBoundary.js'
+		import { requireUserId } from '#app/utils/auth.server.ts'
+		import { prisma } from '#app/utils/db.server.ts'
+		import { ArticleEditor } from './__article-editor.tsx'
 
-:::
+		export { action } from './__article-editor.server.tsx'
 
-```diff lang="tsx" title="app/routes/users+/$username_+/articles.$articleId_.edit.tsx" showLineNumbers collapse={1-9} ins=", categories" ins=" categories={data.categories}"
-import { invariantResponse } from '@epic-web/invariant'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import { GeneralErrorBoundary } from '#app/components/ErrorBoundary.js'
-import { requireUserId } from '#app/utils/auth.server.ts'
-import { prisma } from '#app/utils/db.server.ts'
-import { ArticleEditor } from './__article-editor.tsx'
-
-export { action } from './__article-editor.server.tsx'
-
-export async function loader({ params, request }: LoaderFunctionArgs) {
-	const userId = await requireUserId(request)
-+	const categories = await prisma.articleCategory.findMany({
-+		select: {
-+			id: true,
-+			name: true,
-+		},
-+	})
-	const article = await prisma.article.findFirst({
-		select: {
-			id: true,
-			title: true,
-			content: true,
-+			category: {
-+				select: {
-+					id: true,
-+					name: true,
-+				},
-+			},
-			images: {
+		export async function loader({ params, request }: LoaderFunctionArgs) {
+			const userId = await requireUserId(request)
+		+	const categories = await prisma.articleCategory.findMany({
+		+		select: {
+		+			id: true,
+		+			name: true,
+		+		},
+		+	})
+			const article = await prisma.article.findFirst({
 				select: {
 					id: true,
-					altText: true,
+					title: true,
+					content: true,
+		+			category: {
+		+				select: {
+		+					id: true,
+		+					name: true,
+		+				},
+		+			},
+					images: {
+						select: {
+							id: true,
+							altText: true,
+						},
+					},
 				},
-			},
-		},
-		where: {
-			id: params.articleId,
-			ownerId: userId,
-		},
-	})
-	invariantResponse(article, 'Not found', { status: 404 })
-	return json({ article: article, categories })
-}
+				where: {
+					id: params.articleId,
+					ownerId: userId,
+				},
+			})
+			invariantResponse(article, 'Not found', { status: 404 })
+			return json({ article: article, categories })
+		}
 
-export default function ArticleEdit() {
-	const data = useLoaderData<typeof loader>()
+		export default function ArticleEdit() {
+			const data = useLoaderData<typeof loader>()
 
-	return <ArticleEditor categories={data.categories} article={data.article} />
-}
+			return <ArticleEditor categories={data.categories} article={data.article} />
+		}
 
-export function ErrorBoundary() {
-	return (
-		<GeneralErrorBoundary
-			statusHandlers={{
-				404: ({ params }) => (
-					<p>No article with the id "{params.articleId}" exists</p>
-				),
-			}}
-		/>
-	)
-}
-```
+		export function ErrorBoundary() {
+			return (
+				<GeneralErrorBoundary
+					statusHandlers={{
+						404: ({ params }) => (
+							<p>No article with the id "{params.articleId}" exists</p>
+						),
+					}}
+				/>
+			)
+		}
+		```
+
+</Steps>
 
 :::note[What's happening here?]
 
@@ -413,140 +429,152 @@ export default function ArticleEdit() {
 
 We will also now need to load `categories` when creating a new article.
 
-Open the file at `app/routes/users+/$username_+/articles.new.tsx` and add the code below:
+<Steps>
 
-```diff lang="tsx" title="app/routes/users+/$username_+/articles.new.tsx" showLineNumbers collapse={}
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-import { requireUserId } from '~/utils/auth.server.ts'
-import { ArticleEditor } from './__article-editor.tsx'
-+import { prisma } from '~/utils/db.server.ts'
-+import { useLoaderData } from '@remix-run/react'
+1. Open the file `app/routes/users+/$username_+/articles.new.tsx` 
 
-export { action } from './__article-editor.server.tsx'
+2. Add the code below:
 
-export async function loader({ request }: LoaderFunctionArgs) {
-	await requireUserId(request)
-+	const categories = await prisma.articleCategory.findMany({
-+		select: {
-+			id: true,
-+			name: true,
-+		},
-+	})
+		```diff lang="tsx" title="app/routes/users+/$username_+/articles.new.tsx" showLineNumbers collapse={}
+		import { json, type LoaderFunctionArgs } from '@remix-run/node'
+		import { requireUserId } from '~/utils/auth.server.ts'
+		import { ArticleEditor } from './__article-editor.tsx'
+		+import { prisma } from '~/utils/db.server.ts'
+		+import { useLoaderData } from '@remix-run/react'
 
--	return json({})
-+	return json({ categories })
-}
+		export { action } from './__article-editor.server.tsx'
 
--export default ArticleEditor
-+export default function ArticleNew() {
-+	const data = useLoaderData<typeof loader>()
-+
-+	return <ArticleEditor categories={data.categories} />
-+}
-```
+		export async function loader({ request }: LoaderFunctionArgs) {
+			await requireUserId(request)
+		+	const categories = await prisma.articleCategory.findMany({
+		+		select: {
+		+			id: true,
+		+			name: true,
+		+		},
+		+	})
+
+		-	return json({})
+		+	return json({ categories })
+		}
+
+		-export default ArticleEditor
+		+export default function ArticleNew() {
+		+	const data = useLoaderData<typeof loader>()
+		+
+		+	return <ArticleEditor categories={data.categories} />
+		+}
+		```
+
+</Steps>
 
 With this in place, let's now update the editor form to include the new information being passed to it.
 
 ### Update imports
 
-Open the file at `app/routes/users+/$username_+/__article-editor.tsx` now. This file handles the actual article editor form.
+<Steps>
 
-Start by updating the imports at the top:
+1. Open the file at `app/routes/users+/$username_+/__article-editor.tsx`.
 
-```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx" showLineNumbers collapse={1-9, 17-27}
-import {
-	FormProvider,
-	getFieldsetProps,
-	getFormProps,
-	getInputProps,
-	getTextareaProps,
-	useForm,
-	type FieldMetadata,
-} from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import {
-+	ArticleCategory,
-	type Article,
-	type ArticleImage,
-} from '@prisma/client'
-import { type SerializeFrom } from '@remix-run/node'
-import { Form, useActionData } from '@remix-run/react'
-import { useState } from 'react'
-import { z } from 'zod'
-import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
-import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
-import { ErrorList, Field, TextareaField } from '~/components/forms.tsx'
-import { Button } from '~/components/ui/button.tsx'
-import { Icon } from '~/components/ui/icon.tsx'
-import { Label } from '~/components/ui/label.tsx'
-import { StatusButton } from '~/components/ui/status-button.tsx'
-import { Textarea } from '~/components/ui/textarea.tsx'
-import { cn, getArticleImgSrc, useIsPending } from '~/utils/misc.tsx'
-import { type action } from './__article-editor.server'
-+import SelectorGroup from '~/components/molecules/SelectorGroup.js'
-```
+		This file handles the actual article editor form.
 
-### Update the `ArticleEditorSchema`
+2. Start by updating the imports at the top:
 
-Just beneath the imports at the top of the screen is a list of `const` variables declaring the min and max lengths for the article `title` and `content`. Lets some new values here for our `category` field:
+		```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx" showLineNumbers collapse={1-9, 17-27}
+		import {
+			FormProvider,
+			getFieldsetProps,
+			getFormProps,
+			getInputProps,
+			getTextareaProps,
+			useForm,
+			type FieldMetadata,
+		} from '@conform-to/react'
+		import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+		import {
+		+	ArticleCategory,
+			type Article,
+			type ArticleImage,
+		} from '@prisma/client'
+		import { type SerializeFrom } from '@remix-run/node'
+		import { Form, useActionData } from '@remix-run/react'
+		import { useState } from 'react'
+		import { z } from 'zod'
+		import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
+		import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
+		import { ErrorList, Field, TextareaField } from '~/components/forms.tsx'
+		import { Button } from '~/components/ui/button.tsx'
+		import { Icon } from '~/components/ui/icon.tsx'
+		import { Label } from '~/components/ui/label.tsx'
+		import { StatusButton } from '~/components/ui/status-button.tsx'
+		import { Textarea } from '~/components/ui/textarea.tsx'
+		import { cn, getArticleImgSrc, useIsPending } from '~/utils/misc.tsx'
+		import { type action } from './__article-editor.server'
+		+import SelectorGroup from '~/components/molecules/SelectorGroup.js'
+		```
 
-```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx" collapse={1-26}
-import {
-  FormProvider,
-  getFieldsetProps,
-  getFormProps,
-  getInputProps,
-  getTextareaProps,
-  useForm,
-  type FieldMetadata,
-} from '@conform-to/react'
-import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import {
-  ArticleCategory,
-  type Article,
-  type ArticleImage,
-} from '@prisma/client'
-import { type SerializeFrom } from '@remix-run/node'
-import { Form, useActionData } from '@remix-run/react'
-import { useState } from 'react'
-import { z } from 'zod'
-import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
-import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
-import { ErrorList, Field, TextareaField } from '~/components/forms.tsx'
-import { Button } from '~/components/ui/button.tsx'
-import { Icon } from '~/components/ui/icon.tsx'
-import { Label } from '~/components/ui/label.tsx'
-import { StatusButton } from '~/components/ui/status-button.tsx'
-import { Textarea } from '~/components/ui/textarea.tsx'
-import { cn, getArticleImgSrc, useIsPending } from '~/utils/misc.tsx'
-import { type action } from './__article-editor.server'
-import SelectorGroup from '#app/components/molecules/SelectorGroup.js'
+3. ### Update the `ArticleEditorSchema`
 
-const titleMinLength = 1
-const titleMaxLength = 100
-const contentMinLength = 1
-const contentMaxLength = 10000
-+const categoryMinLength = 1
-+const categoryMaxLength = 30
+		Just beneath the imports at the top of the screen is a list of `const` variables declaring the min and max lengths for the article `title` and `content`. Lets some new values here for our `category` field:
 
-// ... Code omitted for brevity ...
-```
+		```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx" collapse={1-26}
+		import {
+			FormProvider,
+			getFieldsetProps,
+			getFormProps,
+			getInputProps,
+			getTextareaProps,
+			useForm,
+			type FieldMetadata,
+		} from '@conform-to/react'
+		import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+		import {
+			ArticleCategory,
+			type Article,
+			type ArticleImage,
+		} from '@prisma/client'
+		import { type SerializeFrom } from '@remix-run/node'
+		import { Form, useActionData } from '@remix-run/react'
+		import { useState } from 'react'
+		import { z } from 'zod'
+		import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
+		import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
+		import { ErrorList, Field, TextareaField } from '~/components/forms.tsx'
+		import { Button } from '~/components/ui/button.tsx'
+		import { Icon } from '~/components/ui/icon.tsx'
+		import { Label } from '~/components/ui/label.tsx'
+		import { StatusButton } from '~/components/ui/status-button.tsx'
+		import { Textarea } from '~/components/ui/textarea.tsx'
+		import { cn, getArticleImgSrc, useIsPending } from '~/utils/misc.tsx'
+		import { type action } from './__article-editor.server'
+		import SelectorGroup from '#app/components/molecules/SelectorGroup.js'
 
-Next, add these new values to the `ArticleEditorSchema` object, defined around line 54 to include the new `category` field:
+		const titleMinLength = 1
+		const titleMaxLength = 100
+		const contentMinLength = 1
+		const contentMaxLength = 10000
+		+const categoryMinLength = 1
+		+const categoryMaxLength = 30
 
-```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx"
-export const ArticleEditorSchema = z.object({
-	id: z.string().optional(),
-	title: z.string().min(titleMinLength).max(titleMaxLength),
-+	categoryId: z
-+		.string()
-+		.min(categoryMinLength)
-+		.max(categoryMaxLength)
-+		.optional(),
-	content: z.string().min(contentMinLength).max(contentMaxLength),
-	images: z.array(ImageFieldsetSchema).max(5).optional(),
-})
-```
+		// ... Code omitted for brevity ...
+		```
+
+4. Next, add these new values to the `ArticleEditorSchema` object, defined around line 54 to include the new `category` field:
+
+		```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx"
+		export const ArticleEditorSchema = z.object({
+			id: z.string().optional(),
+			title: z.string().min(titleMinLength).max(titleMaxLength),
+		+	categoryId: z
+		+		.string()
+		+		.min(categoryMinLength)
+		+		.max(categoryMaxLength)
+		+		.optional(),
+			content: z.string().min(contentMinLength).max(contentMaxLength),
+			images: z.array(ImageFieldsetSchema).max(5).optional(),
+		})
+		```
+
+</Steps>
 
 :::note[What's happening here?]
 
@@ -835,49 +863,53 @@ Let's do this now.
 
 :::
 
-Open the component file at `app/components/molecules/SelectorGroup.tsx` and take a look at the code.
+<Steps>
 
-Add the code shown below:
+1. Open the component file at `app/components/molecules/SelectorGroup.tsx` and take a look at the code.
 
-```diff lang="tsx" title="app/components/molecules/SelectorGroup.tsx" showLineNumbers ins="initialValue ?? ''"
-import * as RadioGroup from '@radix-ui/react-radio-group'
-import { useState } from 'react'
+2. Add the code shown below:
 
-interface SelectorGroupProps {
-	options: { value: string; label: string }[]
-+	name: string
-+	initialValue?: string
-}
+		```diff lang="tsx" title="app/components/molecules/SelectorGroup.tsx" showLineNumbers ins="initialValue ?? ''"
+		import * as RadioGroup from '@radix-ui/react-radio-group'
+		import { useState } from 'react'
 
-export default function SelectorGroup({
-	options,
-+	name,
-+	initialValue,
-}: SelectorGroupProps) {
-	let [selectedValue, setSelectedValue] = useState(initialValue ?? '')
+		interface SelectorGroupProps {
+			options: { value: string; label: string }[]
+		+	name: string
+		+	initialValue?: string
+		}
 
-	return (
-		<RadioGroup.Root className="space-y-4">
-			{options.map(option => (
-				<RadioGroup.Item
-					className={`flex w-full rounded-md border p-4 ${
-						option.value === selectedValue
-							? 'border-sky-500 ring-1 ring-inset ring-sky-500'
-							: 'border-gray-500'
-					}`}
-					key={option.value}
-					type="button"
-					onClick={() => setSelectedValue(option.value)}
-					value={selectedValue}
-				>
-					<span className="font-semibold">{option.label}</span>
-				</RadioGroup.Item>
-			))}
-+			<input type="hidden" name={name} value={selectedValue} />
-		</RadioGroup.Root>
-	)
-}
-```
+		export default function SelectorGroup({
+			options,
+		+	name,
+		+	initialValue,
+		}: SelectorGroupProps) {
+			let [selectedValue, setSelectedValue] = useState(initialValue ?? '')
+
+			return (
+				<RadioGroup.Root className="space-y-4">
+					{options.map(option => (
+						<RadioGroup.Item
+							className={`flex w-full rounded-md border p-4 ${
+								option.value === selectedValue
+									? 'border-sky-500 ring-1 ring-inset ring-sky-500'
+									: 'border-gray-500'
+							}`}
+							key={option.value}
+							type="button"
+							onClick={() => setSelectedValue(option.value)}
+							value={selectedValue}
+						>
+							<span className="font-semibold">{option.label}</span>
+						</RadioGroup.Item>
+					))}
+		+			<input type="hidden" name={name} value={selectedValue} />
+				</RadioGroup.Root>
+			)
+		}
+		```
+
+</Steps>
 
 :::note[What's happening here?]
 
@@ -916,23 +948,29 @@ Remember to save your changes before moving on.
 
 With these new changes to `SelectorGroup`, we now need to pass in the new props we've defined.
 
-Go back to the code in `app/routes/users+/$username_+/__article-editor.tsx`, and add the following props:
+<Steps>
 
-```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx"
-<div className="pb-8">
-	<Label>Category</Label>
-	<SelectorGroup
-+		name="categoryId"
-+		initialValue={article?.category?.id ?? ''}
-		options={categories.map(category => ({
-			value: category.id,
-			label: category.name,
-		}))}
-	/>
-</div>
-```
+1. Go back to the code in `app/routes/users+/$username_+/__article-editor.tsx`
 
-Save your changes, and we can move on to the next step of handling the data once it is sent.
+2. Add the following props:
+
+		```diff lang="tsx" title="app/routes/users+/$username_+/__article-editor.tsx"
+		<div className="pb-8">
+			<Label>Category</Label>
+			<SelectorGroup
+		+		name="categoryId"
+		+		initialValue={article?.category?.id ?? ''}
+				options={categories.map(category => ({
+					value: category.id,
+					label: category.name,
+				}))}
+			/>
+		</div>
+		```
+
+3. Save your changes, and we can move on to the next step of handling the data once it is sent.
+
+</Steps>
 
 ### Update `ArticleEditor.server.tsx`
 
@@ -1092,12 +1130,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
 1. We capture the new `categoryId` field from the `submission` object, which is itself extracted from the form data:
 
-```diff lang=tsx
+```diff lang=tsx {5}
 const {
 	id: articleId,
 	title,
 	content,
-+	categoryId,
+	categoryId,
 	imageUpdates = [],
 	newImages = [],
 } = submission.value
@@ -1105,18 +1143,18 @@ const {
 
 2. We then include the `categoryId` field in the `create` and `update` objects when creating or updating an article in the database:
 
-```diff lang=tsx
+```diff lang=tsx {4, 10}
 create: {
 	ownerId: userId,
 	title,
 	content,
-+	categoryId,
+	categoryId,
 	images: { create: newImages },
 },
 update: {
 	title,
 	content,
-+	categoryId,
+	categoryId,
 	images: {
 		deleteMany: { id: { notIn: imageUpdates.map(i => i.id) } },
 		updateMany: imageUpdates.map(updates => ({
@@ -1138,7 +1176,7 @@ With these changes in place, you should now be able to create new articles with 
 
 Navigate to the 'Articles' page, and click the `+ New Article` button to start creating some new articles.
 
-Aim for 10-15 new articles, each with different categories, and some with no category at all.
+Aim for 3-5 new articles, each with different categories, and some with no category at all.
 
 Don't worry about the content of each article for now, just paste in some *lorum ipsum* placeholder text from a website like [Lorum Ipsum](https://www.lipsum.com/).
 

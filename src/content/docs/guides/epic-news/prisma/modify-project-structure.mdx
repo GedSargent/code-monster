@@ -227,12 +227,93 @@ If placed correctly, your new folder structure should look like this:
 
 ![New folder structure](src/assets/webp/epic-news/new-folder-structure.webp)
 
+## Replace the seed data
+
+Finally, we need to update the `seed.ts` file so that we can populate the database with new test data that reflects the changes we have made.
+
+:::note
+
+You can read more about seeding data in the [Prisma documentation](https://www.prisma.io/docs/orm/prisma-migrate/workflows/seeding).
+
+:::
+
+<Steps>
+
+1. Delete the existing seed file at `prisma/seed.ts`.
+
+		![Delete seed file](src/assets/webp/epic-news/delete-seed-file.webp)
+
+2. Download the new seed file by clicking the link below:
+
+		<a href="/code-monster/downloads/epic-news/seed.ts" download="seed.ts" class="group inline-flex border-2 gap-4 mt-8 px-8 py-4 text-xl rounded-full no-underline transition bg-blue-200 border-blue-400 hover:border-blue-600 hover:bg-blue-100 dark:bg-blue-600 dark:border-blue-400 dark:hover:border-blue-300 dark:hover:bg-blue-700">
+			<Icon name="seti:markdown" class="fill-blue-600 transition group-hover:scale-125 group-hover:fill-blue-800 dark:fill-blue-100 dark:group-hover:fill-blue-50" /> <span class="text-blue-600 transition group-hover:text-blue-800 dark:text-blue-100 dark:group-hover:text-blue-50">seed.ts</span>
+		</a>
+
+3. Click the download icon in your browser and select 'Show in folder'.
+
+		![Show seed file in folder](src/assets/webp/epic-news/show-seed-file-in-folder.webp)
+
+4. Drag the downloaded `seed.ts` file into the `prisma` folder in your project.
+
+		Take extra care to place the file in the correct location.
+
+		![Place new seed file](src/assets/gif/place-new-seed-file.gif)
+
+</Steps>
+
+## Run the seed script
+
+Now that we have updated the seed script, we can run it to populate the database with new dummy data.
+
+To do this, run the following command in your terminal:
+
+```txt frame="terminal"
+npm run setup
+```
+
+After a few moments, you should see something similar to the following output (the time taken may vary):
+
+```txt frame="none" {7, 10}
+Running seed command `tsx prisma/seed.ts` ...
+🌱 Seeding...
+prisma:query - 36ms - DELETE from "User"
+🧹 Cleaned up the database...: 62.516ms
+🔑 Created permissions...: 11.604ms
+👑 Created roles...: 26.458ms
+📝 Created article categories...: 27.36ms
+👤 Created 5 users...: 1.489s
+🐨 Created admin user "kody": 673.453ms
+🌱 Database has been seeded: 2.292s
+
+The seed command has been executed.
+```
+:::note
+
+Notice the `article categories` that have been created in the output? This is the new seed data that we have added to the database.
+
+:::
+
+After seeing this message, we are ready to check the new database in Prisma Studio.
+
+Run the following command in your terminal:
+
+```txt frame="terminal"
+npx prisma studio
+```
+
+You should see your database has been populated with new data:
+
+![Database with seed data](src/assets/webp/epic-news/new-db-with-seed-data.webp)
+
+Feel free to click into the database and explore how the categories appear in the new table.
+
 ## Summary
 
 In this tutorial, we updated the project structure to reflect the changes we made to the Prisma schema.
 
 - We updated the permissions in the `app/utils/permissions.ts` file to reflect the new entity name.
 - We replaced the `note` files in the `app/routes/users+/$username_+` folder with the updated `article` files.
+- Updated the seed data to include new article categories and dummy articles.
 
 ::::note[Assignment]
 

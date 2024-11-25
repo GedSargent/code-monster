@@ -4,6 +4,7 @@ description: Learn how to protect your website from CSRF attacks by adding a CSR
 ---
 
 import MonsterKbd from 'src/components/MonsterKbd.astro'
+import { Icon, Steps } from "@astrojs/starlight/components";
 
 ## Introduction
 
@@ -57,59 +58,64 @@ Let's add this now.
 
 Luckily, adding CSRF protection to our application is straightforward.
 
-Firstly, add the following import to the top of our `app/root.tsx` file:
+<Steps>
 
-```diff lang="tsx" title="app/root.tsx"
-import { type LinksFunction } from '@remix-run/node'
-import Document from '~/components/shared-layout/Document'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import HeaderWithSearch from './components/organisms/HeaderWithSearch'
-import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
-import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
-import { loader } from './__root.server.tsx'
-import { Outlet, useLoaderData } from '@remix-run/react'
-import useTheme from './hooks/useTheme.tsx'
-+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
-```
+1. Open `app/root.tsx`.
 
-We simply need to wrap our application with this `AuthenticityTokenProvider` to ensure that a valid CSRF token is checked for every request across the entire application.
+2. Add the following import to the top of your `app/root.tsx` file:
 
-This is done by wrapping the JSX returned by the `App` component with the `AuthenticityTokenProvider`, then passing a `csrfToken` from the `data` object to the `AuthenticityTokenProvider` component:
+		```diff lang="tsx" title="app/root.tsx"
+		import { type LinksFunction } from '@remix-run/node'
+		import Document from '~/components/shared-layout/Document'
+		import { useNonce } from '~/utils/nonce-provider.ts'
+		import rootLinkElements from '~/utils/providers/rootLinkElements'
+		import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+		import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
+		import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
+		import { loader } from './__root.server.tsx'
+		import { Outlet, useLoaderData } from '@remix-run/react'
+		import useTheme from './hooks/useTheme.tsx'
+		+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
+		```
 
-```diff lang="tsx" title="app/root.tsx"
-export default function App() {
-	const data = useLoaderData<typeof loader>()
-	const nonce = useNonce()
-	const theme = useTheme()
+3. We simply need to wrap our application with this `AuthenticityTokenProvider` to ensure that a valid CSRF token is checked for every request across the entire application.
 
-	useToast(data.toast)
+		This is done by wrapping the JSX returned by the `App` component with the `AuthenticityTokenProvider`, then passing a `csrfToken` from the `data` object to the `AuthenticityTokenProvider` component:
 
-	return (
-+		<AuthenticityTokenProvider token={data.csrfToken}>
-			<Document nonce={nonce} theme={theme}>
-				<div className="flex h-screen flex-col justify-between">
-					<HeaderWithSearch />
+		```diff lang="tsx" title="app/root.tsx"
+		export default function App() {
+			const data = useLoaderData<typeof loader>()
+			const nonce = useNonce()
+			const theme = useTheme()
 
-					<div className="flex-1">
-						<Outlet />
-					</div>
+			useToast(data.toast)
 
-					<div className="container flex justify-between pb-5">
-						<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-					</div>
+			return (
+		+		<AuthenticityTokenProvider token={data.csrfToken}>
+					<Document nonce={nonce} theme={theme}>
+						<div className="flex h-screen flex-col justify-between">
+							<HeaderWithSearch />
 
-				<FooterMenuRight />
-				</div>
-			</Document>
-+		</AuthenticityTokenProvider>
-	)
-}
-```
+							<div className="flex-1">
+								<Outlet />
+							</div>
 
-As you can see, we pass in the `csrfToken` from the `data` object that is provided by our `loader` function to the `AuthenticityTokenProvider` component directly.
+							<div className="container flex justify-between pb-5">
+								<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+							</div>
 
-Before moving on to the next step, make sure you rearrange the imports at the top of the `app/root.tsx` file by using the VS Code keyboard shortcut <MonsterKbd>SHIFT + ALT + O</MonsterKbd> (Windows) or <MonsterKbd>SHIFT + OPT + O</MonsterKbd> (Mac)
+						<FooterMenuRight />
+						</div>
+					</Document>
+		+		</AuthenticityTokenProvider>
+			)
+		}
+		```
+
+3. Save your changes.
+
+4. Before moving on to the next tutorial, make sure you rearrange the imports at the top of the `app/root.tsx` file by using the VS Code keyboard shortcut <MonsterKbd>SHIFT + ALT + O</MonsterKbd> (Windows) or <MonsterKbd>SHIFT + OPT + O</MonsterKbd> (Mac)
+</Steps>
 
 ## Summary
 

@@ -296,63 +296,63 @@ export default defineConfig({
                   label: '🗄️ Modify project structure',
                   link: 'guides/epic-news/prisma/modify-project-structure'
                 },
-                {
-                  label: '🗄️ Modify seed file',
-                  link: 'guides/epic-news/prisma/modify-seed-file'
-                },
+                // {
+                //   label: '🗄️ Modify seed file',
+                //   link: 'guides/epic-news/prisma/modify-seed-file'
+                // },
               ]
             },
             {
-              label: "🔒 Security",
+              label: "🔒 Security 101",
               items: [
-                // {
-                //   label: "🔒 Cross site request forgery",
-                //   link: "guides/epic-news/csrf",
-                // },
-                // {
-                //   label: "🔒 Spambots and honeypots",
-                //   link: "guides/epic-news/honey-pots",
-                // },
+                {
+                  label: "🔒 Cross site request forgery",
+                  link: "guides/epic-news/csrf",
+                },
+                {
+                  label: "🔒 Spambots and honeypots",
+                  link: "guides/epic-news/honey-pots",
+                },
                 {
                   label: "🔒 Account creation",
                   link: "guides/epic-news/account-creation",
                 },
+                // {
+                //   label: "🔒 Single Sign-On",
+                //   link: "guides/epic-news/single-sign-on",
+                // },
+              ]
+            },
+            {
+              label: "🖥️ Displaying Articles",
+              collapsed: true,
+              items: [
                 {
-                  label: "🔒 Single Sign-On",
-                  link: "guides/epic-news/single-sign-on",
+                  label: '🖥️ Creating articles',
+                  link: 'guides/epic-news/displaying-articles/creating-articles'
+                },
+                {
+                  label: '🖥️ Loading Dummy Articles',
+                  link: 'guides/epic-news/displaying-articles/loading-dummy-articles'
+                },
+                {
+                  label: '🖥️ Style Dummy Articles',
+                  link: 'guides/epic-news/displaying-articles/style-article-card'
+                },
+                {
+                  label: '🖥️ Display an array of dummy articles',
+                  link: 'guides/epic-news/displaying-articles/display-array-of-dummy-articles'
+                },
+                {
+                  label: '🖥️ Load and display all real articles',
+                  link: 'guides/epic-news/displaying-articles/load-and-display-all-real-articles'
+                },
+                {
+                  label: '🖥️ Filter articles by category',
+                  link: 'guides/epic-news/displaying-articles/filter-articles-by-category'
                 },
               ]
             },
-            // {
-            //   label: "🖥️ Displaying Articles",
-            //   collapsed: true,
-            //   items: [
-            //     {
-            //       label: '🖥️ Creating articles',
-            //       link: 'guides/epic-news/displaying-articles/creating-articles'
-            //     },
-            //     {
-            //       label: '🖥️ Loading Dummy Articles',
-            //       link: 'guides/epic-news/displaying-articles/loading-dummy-articles'
-            //     },
-            //     {
-            //       label: '🖥️ Style Dummy Articles',
-            //       link: 'guides/epic-news/displaying-articles/style-article-card'
-            //     },
-            //     {
-            //       label: '🖥️ Display an array of dummy articles',
-            //       link: 'guides/epic-news/displaying-articles/display-array-of-dummy-articles'
-            //     },
-            //     {
-            //       label: '🖥️ Load and display all real articles',
-            //       link: 'guides/epic-news/displaying-articles/load-and-display-all-real-articles'
-            //     },
-            //     {
-            //       label: '🖥️ Filter articles by category',
-            //       link: 'guides/epic-news/displaying-articles/filter-articles-by-category'
-            //     },
-            //   ]
-            // },
             // {
             //   label: "📝 Single article page",
             //   collapsed: true,

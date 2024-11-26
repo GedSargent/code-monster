@@ -42,653 +42,294 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 ```
 
+Let's fix this so that only articles in the specified category are retrieved.
+
 ### Filtering queries with Prisma's `where` option
 
-Let's start by renaming `allArticles` to something more suitable:
+<Steps>
 
-```diff lang="tsx" title="app/routes/news.$category.tsx"
-export async function loader({ params }: LoaderFunctionArgs) {
-	const { category } = params
+1. Open the `app/routes/news.$category.tsx` file.
 
-	invariant(typeof category === 'string', 'Category not found')
+2. Let's start by renaming `allArticles` to something more suitable:
 
--	const allArticles = await prisma.article.findMany({
-+	const filteredArticles = await prisma.article.findMany({
-		select: {
-			id: true,
-			title: true,
-			category: { select: { name: true } },
-			images: { select: { id: true } },
+		```diff lang="tsx" title="app/routes/news.$category.tsx"
+		export async function loader({ params }: LoaderFunctionArgs) {
+			const { category } = params
+
+			invariant(typeof category === 'string', 'Category not found')
+
+		-	const allArticles = await prisma.article.findMany({
+		+	const filteredArticles = await prisma.article.findMany({
+				select: {
+					id: true,
+					title: true,
+					category: { select: { name: true } },
+					images: { select: { id: true } },
+				},
+			})
+
+		-	return json({ category, allArticles })
+		+	return json({ category, filteredArticles })
+		}
+		```
+
+3. Next, we need to actually implement the filtering logic.
+
+		We'll use Prisma's `where` option to filter articles by `category`.
+
+	:::note[More complex queries]
+
+	### Prisma's `where` option
+
+	Prisma's `where` option let's us target a field we want to filter by. The value (after the colon) is the filter we want to check it against.
+	
+	For example, if we want to filter articles that are published, we can use the following query:
+
+	```tsx
+	const publishedArticles = await prisma.article.findMany({
+		where: {
+			isPublished: true,
 		},
 	})
+	```
 
--	return json({ category, allArticles })
-+	return json({ category, filteredArticles })
-}
-```
+	This would return all information about articles that are published.
 
-Next, we need to actually implement the filtering logic.
+	You can read more about `where` in [**Prisma's documentation**](https://www.prisma.io/docs/orm/prisma-client/queries/filtering-and-sorting).
 
-We'll use Prisma's `where` option to filter articles by `category`.
+	:::
 
-:::note[More complex queries]
+4. ### Filter articles by `category`
 
-### Prisma's `where` option
+	We already have access to the `category` parameter, so let's add a `where` option to our query:
 
-Whenever we want to filter data in Prisma, we can use the `where` option as described in [**Prisma's documentation**](https://www.prisma.io/docs/orm/prisma-client/queries/filtering-and-sorting).
+	```diff lang="tsx" title="app/routes/news.$category.tsx"
+	export async function loader({ params }: LoaderFunctionArgs) {
+		const { category } = params
 
-The `where` option takes an object where the key is the field we want to filter by, and the value is the filter we want to check it against. For example, if we want to filter articles that are published, we can use the following query:
+		invariant(typeof category === 'string', 'Category not found')
+		const categoryTitle = toTitleCase(category)
 
-```tsx
-const publishedArticles = await prisma.article.findMany({
-	where: {
-		isPublished: true,
-	},
-})
-```
+		const filteredArticles = await prisma.article.findMany({
+	+		where: {
+	+			category: {
+	+				slug: category, // Retrieves only articles in the specified category
+	+			},
+	+		},
+			select: {
+				id: true,
+				title: true,
+				category: { select: { name: true } },
+				images: { select: { id: true } },
+			},
+		})
 
-This would return all information about articles that are published.
-
-:::
-
-### Filter articles by `catergory`
-
-We already have access to the `category` parameter, so let's add a `where` option to our query:
-
-:::caution[Published articles]
-
-You might remember that we added an `isPublished` field to our `Article` model in the [**Prisma schema updates**](/code-monster/guides/epic-news/prisma/schema-updates#4-additional-article-fields) guide.
-
-We will add this additional filter in a future lesson, but for now let's only filter by `category`.
-
-:::
-
-```diff lang="tsx" title="app/routes/news.$category.tsx"
-export async function loader({ params }: LoaderFunctionArgs) {
-	const { category } = params
-
-	invariant(typeof category === 'string', 'Category not found')
-	const categoryTitle = toTitleCase(category)
-
-	const filteredArticles = await prisma.article.findMany({
-+		where: {
-+			category: {
-+				slug: category, // Ensures only articles in the specified category are retrieved
-+			},
-+		},
-		select: {
-			id: true,
-			title: true,
-			category: { select: { name: true } },
-			images: { select: { id: true } },
-		},
-	})
-
-	return json({ categoryTitle, filteredArticles })
-}
-```
-
-## Update `useLoaderData` with `filteredArticles`
-
-Finally, we need to update the `useLoaderData` hook in our `NewsIndexPage` component to return the `filteredArticles` data, and `map` through this in place of the old `allArticles` array:
-
-```diff lang="tsx" title="app/routes/news.$category.tsx" ins="filteredArticles"
-export default function NewsCategoryPage() {
-	const { category, filteredArticles } = useLoaderData<typeof loader>()
-
-	return (
-		<div className="container py-8 lg:py-16">
-			<h2 className="mb-16 text-h2">{category}</h2>
-
-			<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
-				{filteredArticles.map(article => {
-					return (
-						<ArticleCard
-							key={article.id}
-							title={article.title}
-							categoryTitle={categoryTitle}
-							imageId={article.images[0]?.id}
-						/>
-					)
-				})}
-			</div>
-		</div>
-	)
-}
-```
-
-## Check filters in the browser
-
-Now, if you navigate to the news index page and click on a category, you should see the articles update based on the selected category:
-
-![Category filter working](src/assets/gif/category-filter-working.gif)
-
-::::tip[Challenge]
-
-## Code challenges
-
-## Dynamic category icons
-
-- You will notice that all of the article cards display the same icon regardless of the category:
-
-	![Article card icons](src/assets/gif/article-card-icons.gif)
-
-		Can you update the `ArticleCard` component to display a different icon based on the category of the article?
-
-		It is up to you which icons you choose for which categories, but remember there are some supplied in **OneNote > 🧑🏽‍💻 - Components and props**.
-
-## Solution
-
-<MonsterReveal title="1. Extract `ArticleCard` to separate file">
-
-### 1. Extract `ArticleCard` to separate file
-
-Firstly, I've extracted the `ArticleCard` to its own file. This is a good practice as it keeps the component code clean and easy to read.
-
-I placed my new `ArticleCard` component in the `app/components/organisms` directory:
-
-![Create ArticleCard component](src/assets/webp/epic-news/create-article-card-component.webp)
-
-Just remember to `import` the `ArticleCard` component back into the top of the `app\routes\news.$category.tsx` file, and remove the `import`s you no longer need:
-
-```diff lang="tsx" title="app/routes/news.$category.tsx"
-import { invariant } from '@epic-web/invariant'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
--import defaultIcon from '~/assets/png/ai-logo@2x.png'
--import businessIcon from '~/assets/png/business-logo@2x.png'
--import siteLogo from '~/assets/png/epic-news-logo@2x.png'
--import entertainmentIcon from '~/assets/png/games-logo@2x.png'
--import techIcon from '~/assets/png/tech-logo@2x.png'
-import { prisma } from '~/utils/db.server.ts'
--import { getArticleImgSrc } from '~/utils/misc.tsx'
-import { toTitleCase } from '~/utils/stringUtils'
-+import ArticleCard from '~/components/organisms/ArticleCard.tsx'
-```
-
-(Remember you can quickly remove unused imports in VS Code by pressing <MonsterKbd>SHIFT + ALT + O</MonsterKbd> on Windows, or <MonsterKbd>SHIFT + OPT + O</MonsterKbd> on Mac.)
-
-</MonsterReveal>
-
-<MonsterReveal title="2. Adding imports">
-
-### 2. Adding imports
-
-With my `ArticleCard` component in its own file, I can now add the necessary imports for the icons I want to use for each category, together with the `getArticleImgSrc` function.
-
-Back inside `app/components/organisms/ArticleCard.tsx`, add the following imports (assuming you are using the files shared in **OneNote > 🧑🏽‍💻 - Components and props**):
-
-```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx"
-import defaultIcon from '~/assets/png/ai-logo@2x.png'
-import businessIcon from '~/assets/png/business-logo@2x.png'
-import siteLogo from '~/assets/png/epic-news-logo@2x.png'
-import entertainmentIcon from '~/assets/png/games-logo@2x.png'
-import techIcon from '~/assets/png/tech-logo@2x.png'
-import { getArticleImgSrc } from '~/utils/misc.js'
-```
-
-</MonsterReveal>
-
-<MonsterReveal title="3. Category logic">
-
-### 3. Category logic
-
-Next, we need to think about the logic for selecting the correct icon based on the category.
-
-You could do this with an `if`, `else if`, `else` statement. For example, you could write:
-
-```tsx
-let categoryIcon = ''
-
-if (category === 'business') {
-	categoryIcon = businessIcon
-} else if (category === 'entertainment') {
-	categoryIcon = entertainmentIcon
-} else if (category === 'tech') {
-	categoryIcon = techIcon
-} else {
-	categoryIcon = defaultIcon
-}
-```
-
-This would work fine, but as the categories grow the conditional statement gets longer and less efficient.
-
-A more elegant solution would be to use an [**object**](https://www.programiz.com/javascript/object) to map each category to its corresponding icon.
-
-```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx" ins="categoryTitle?" ins="{categoryIcon}" ins="{categoryTitle || 'General News'}"
-import defaultIcon from '~/assets/png/ai-logo@2x.png'
-import businessIcon from '~/assets/png/business-logo@2x.png'
-import siteLogo from '~/assets/png/epic-news-logo@2x.png'
-import entertainmentIcon from '~/assets/png/games-logo@2x.png'
-import techIcon from '~/assets/png/tech-logo@2x.png'
-import { getArticleImgSrc } from '~/utils/misc.js'
-
-interface ArticleCardProps {
-	title: string
-	categoryTitle?: string
-	imageId?: string
-}
-export default function ArticleCard({
-	title,
-	categoryTitle,
-	imageId,
-}: ArticleCardProps) {
-	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
-+	const categoryIcons: Record<string, string> = {
-+		Technology: techIcon,
-+		Business: businessIcon,
-+		Entertainment: entertainmentIcon,
-+	}
-+
-+	const categoryIcon = categoryTitle
-+		? categoryIcons[categoryTitle]
-+		: defaultIcon
-
-	return (
-		<div>
-			<div className={`relative h-44 lg:h-52`}>
-				<div className="absolute inset-0 ">
-					<img
-						className="h-full w-full rounded-t-md object-cover"
-						src={imageSrc}
-						alt={title}
-					/>
-				</div>
-			</div>
-			<div
-				className={`flex h-40 flex-col justify-between rounded-b-md bg-muted p-6 lg:h-44`}
-			>
-				<h3 className={`line-clamp-2 text-2xl font-bold text-foreground`}>
-					{title}
-				</h3>
-				<div className="flex items-center gap-3">
-					<img src={categoryIcon} alt={categoryTitle} className="h-6 w-6" />
-					<span className="text-sm text-muted-foreground">
-						{categoryTitle || 'General News'}
-					</span>
-				</div>
-			</div>
-		</div>
-	)
-}
-
-```
-Take extra care to ensure that you have changed the `categoryTitle` prop to be optional in the `ArticleCardProps` interface.
-
-This is important for a later step below, when we create a general news page.
-
-With this in place, different categories are assigned their own icon dynamically based on the category title.
-
-</MonsterReveal>
-
-## Extra credit 1 - all articles page 🚀
-
-- Head over to [**`http://localhost:3000/news`**](http://localhost:3000/news) in your browser window.
-
-- Currently the `/news` page only displays a message asking the user to select a category:
-
-		![News page welcome text](src/assets/png/epic-news/news-page-welcome-text.png)
-
-		Can you update this route so that it displays *all* the articles in the database?
-
-		You should also add an extra link to the navigation bar that takes the user back to the `/news` page. You decide what the link should be called.
-
-## Solution - Extra credit 1 🚀
-
-<MonsterReveal title="1. Extract Prisma Query">
-
-### 1. Extract Prisma query
-
-Firstly, I'm going to be making use of the same Prisma query that I've set up on the `/news/$category` page.
-
-#### Reuse the Prisma query
-
-Rather than duplicate the code and have it in two places (which is a bad practice), I'm going to create a new folder called `models` in the `app` directory:
-
-![Create models folder](src/assets/webp/epic-news/create-models-folder.webp)
-
-Inside this folder, I'll create a new file called `article.server.tsx`:
-
-![Create article.server.tsx file](src/assets/webp/epic-news/create-article-server-file.webp)
-
-#### Remix server-side files
-
-You'll notice that the new file has a `.server.tsx` extension.
-
-Remix knows that any file with a `.server.tsx` extension is a server-side file and will only be run on the server.
-
-This is a much neater solution that keeps all server-side code in one place.
-
-</MonsterReveal>
-
-<MonsterReveal title="2. Create new Prisma Query">
-
-### 2. Create new Prisma Query
-
-Inside this new file, I'll create a new function called `getAllArticles`.
-
-This will be pretty much the same code I had originally in the `app/routes/news.$category.tsx` file.
-
-The only difference will be that the function will have the `select` option removed:
-
-```tsx title="app/models/article.server.tsx"
-import { prisma } from '~/utils/db.server.js'
-
-export async function getAllArticles() {
-	return await prisma.article.findMany({
-		select: {
-			id: true,
-			title: true,
-			category: { select: { name: true } },
-			images: { select: { id: true } },
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-	})
-}
-```
-
-</MonsterReveal>
-
-<MonsterReveal title="3. Update `news._index.tsx`">
-
-### 3. Update `news._index.tsx`
-
-Let's create a new `loader` function in the `news._index.tsx` file that will call the `getAllArticles` function:
-
-:::caution
-
-If you haven't got a `news._index.tsx` file, you can create one in the `app/routes` directory.
-
-:::
-
-```diff lang="tsx" title="app/routes/news._index.tsx" ins="json, "
-import { json, useLoaderData } from '@remix-run/react'
-+import { getAllArticles } from '~/models/article.server.tsx'
-+import { toTitleCase } from '~/utils/stringUtils.js'
-+import ArticleCard from '~/components/organisms/ArticleCard.tsx'
-
-+export async function loader() {
-+	const allArticles = await getAllArticles()
-+
-+	return json({ allArticles })
-+}
-
-// ...Code omitted for brevity ...
-```
-
-#### Display articles
-
-Now that I have the articles loaded, I can `.map` through them on the page:
-
-```diff lang="tsx" title="app/routes/news._index.tsx" showLineNumbers collapse={}
-import { json, useLoaderData } from '@remix-run/react'
-import { getAllArticles } from '~/models/article.server.tsx'
-import ArticleCard from '~/components/organisms/ArticleCard.tsx'
-
-export async function loader() {
-	const allArticles = await getAllArticles()
-
-	return json({ allArticles })
-}
-
-export default function NewsPageIndex() {
-+	const { allArticles } = useLoaderData<typeof loader>()
-
-	return (
-		<main className="container py-16">
-			<h2 className="pb-16 text-h2">All news</h2>
-
-			<div className="grid grid-cols-3 gap-8">
-+				{allArticles.map(article => {
-+					return (
-+						<ArticleCard
-+							key={article.id}
-+							title={article.title}
-+							categoryTitle={article.category?.name}
-+							imageId={article.images[0]?.id}
-+						/>
-+					)
-+				})}
-			</div>
-		</main>
-	)
-}
-```
-
-</MonsterReveal>
-
-### Extra credit 2 - advanced grid layout 🚀🚀
-
-- If you completed a previous [**Extra Credit challenge**](/code-monster/guides/epic-news/routing/use-loader-data#-extra-credit-2) on the `/news` page, you will have the wireframe of a more complex layout for the news index page.
-
-		Can you update the `/news` to implement this wireframe design with real news stories?
-
-![Wireframe to page](src/assets/webp/epic-news/wireframe-to-page.webp)
-
-		The layout should remain consistent for the `/news/$category` dynamic route as well.
-
-<MonsterReveal title="Advanced layout solution">
-
-There are, of course, multiple ways you could implement this layout, but here is one possible solution:
-
-<Tabs>
-
-<TabItem label="ArticleCard.tsx">
-
-```diff lang="tsx" title="~/components/organisms/ArticleCard.tsx" showLineNumbers ins="${imageWrapperClasses[level]}" ins="${textWrapperClasses[level]}"
-import defaultIcon from '~/assets/png/ai-logo@2x.png'
-import businessIcon from '~/assets/png/business-logo@2x.png'
-import siteLogo from '~/assets/png/epic-news-logo@2x.png'
-import entertainmentIcon from '~/assets/png/games-logo@2x.png'
-import techIcon from '~/assets/png/tech-logo@2x.png'
-import { getArticleImgSrc } from '~/utils/misc.js'
-
-interface ArticleCardProps {
-	title: string
-	categoryTitle?: string
-	imageId?: string
-+	level?: 'primary' | 'secondary' | 'tertiary'
-}
-export default function ArticleCard({
-	title,
-	categoryTitle,
-	imageId,
-+	level = 'tertiary',
-}: ArticleCardProps) {
-	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
-	const categoryIcons: Record<string, string> = {
-		Technology: techIcon,
-		Business: businessIcon,
-		Entertainment: entertainmentIcon,
+		return json({ categoryTitle, filteredArticles })
 	}
+	```
 
-	const categoryIcon = categoryTitle
-		? categoryIcons[categoryTitle]
-		: defaultIcon
+5. ## Update `useLoaderData` with `filteredArticles`
 
-+	const imageWrapperClasses = {
-+		primary:
-+			'hidden relative w-full object-cover sm:block sm:h-[12rem] md:h-[23rem]',
-+		secondary:
-+			'hidden relative w-full rounded-t-lg object-cover sm:block sm:h-[11rem]',
-+		tertiary: 'hidden',
-+	}
-+
-+	const textWrapperClasses = {
-+		primary:
-+			'h-[10rem] flex flex-col justify-between rounded-lg bg-muted p-6 sm:rounded-t-none md:h-[22.5rem]',
-+		secondary:
-+			'h-[10rem] flex flex-col justify-between bg-muted p-6 sm:rounded-b-lg sm:h-[11rem]',
-+		tertiary:
-+			'h-[10.25rem] flex flex-col rounded-lg justify-between bg-muted p-6',
-+	}
+	Finally, we need to update the `useLoaderData` hook in our `NewsIndexPage` component to return the `filteredArticles` data, and `map` through this in place of the old `allArticles` array:
 
-	return (
-		<div>
-			<div className={`${imageWrapperClasses[level]}`}>
-				<div className="absolute inset-0 ">
-					<img
-						className="h-full w-full rounded-t-md object-cover"
-						src={imageSrc}
-						alt={title}
-					/>
-				</div>
-			</div>
-			<div className={`${textWrapperClasses[level]}`}>
-				<h3 className={`line-clamp-2 text-2xl font-bold text-foreground`}>
-					{title}
-				</h3>
-				<div className="flex items-center gap-3">
-					<img src={categoryIcon} alt={categoryTitle} className="h-6 w-6" />
-					<span className="text-sm text-muted-foreground">
-						{categoryTitle || 'General News'}
-					</span>
-				</div>
-			</div>
-		</div>
-	)
-}
+	```diff lang="tsx" title="app/routes/news.$category.tsx" ins="filteredArticles"
+	export default function NewsCategoryPage() {
+		const { category, filteredArticles } = useLoaderData<typeof loader>()
 
-```
+		return (
+			<div className="container py-8 lg:py-16">
+				<h2 className="mb-16 text-h2">{category}</h2>
 
-</TabItem>
-
-<TabItem label="NewsIndexGrid.tsx">
-
-```tsx title="~/components/organisms/NewsIndexGrid.tsx"
-import ArticleCard from '~/components/organisms/ArticleCard.tsx'
-
-interface IndexArticle {
-	title: string
-	images: {
-		id: string
-	}[]
-	id: string
-	category: {
-		name: string
-	} | null
-}
-interface NewsIndexGridProps {
-	articles: IndexArticle[]
-	categoryTitle?: string
-}
-
-export default function NewsIndexGrid({
-	articles,
-	categoryTitle,
-}: NewsIndexGridProps) {
-	return (
-		<>
-			<div className="py-8 lg:py-16">
-				<h2 className="mb-16 text-h2">{categoryTitle}</h2>
-
-				<div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 lg:grid-rows-4">
-					{articles.map((article, index) => {
-						const level =
-							index === 0 ? 'primary' : index < 5 ? 'secondary' : 'tertiary'
-
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-4 xl:grid-cols-3">
+					{filteredArticles.map(article => {
 						return (
-							<div
+							<ArticleCard
 								key={article.id}
-								className={`col-span-1 ${level === 'secondary' ? 'sm:row-span-2' : ''} ${level === 'primary' ? 'sm:col-span-2 sm:row-span-4' : ''}`}
-							>
-								<ArticleCard
-									title={article.title}
-									categoryTitle={categoryTitle}
-									imageId={article.images[0]?.id}
-									level={level}
-								/>
-							</div>
+								title={article.title}
+								categoryTitle={categoryTitle}
+								imageId={article.images[0]?.id}
+							/>
 						)
 					})}
 				</div>
 			</div>
-		</>
-	)
-}
-```
+		)
+	}
+	```
 
-</TabItem>
+6. ## Check filters in the browser
 
-<TabItem label="article.server.tsx">
+	Now, if you navigate to the news index page and click on a category, you should see the articles update based on the selected category:
 
-```diff lang="tsx" title="~/models/article.server.tsx"
-import { prisma } from '~/utils/db.server.js'
+	![Category filter working](src/assets/gif/category-filter-working.gif)
 
-export async function getAllArticles() {
-	return await prisma.article.findMany({
-		select: {
-			id: true,
-			title: true,
-			category: { select: { name: true } },
-			images: { select: { id: true } },
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-	})
-}
+</Steps>
 
-+export async function getFilteredArticles(category: string) {
-+	return await prisma.article.findMany({
-+		where: {
-+			category: {
-+				slug: category,
-+			},
-+		},
-+		select: {
-+			id: true,
-+			title: true,
-+			category: { select: { name: true } },
-+			images: { select: { id: true } },
-+		},
-+		orderBy: {
-+			createdAt: 'desc',
-+		},
-+		take: 9, // Limits the number of articles returned
-+	})
-+}
-```
+::::tip[Challenge]
 
-</TabItem>
+## All articles landing page
 
-<TabItem label="news._index.tsx">
+Head over to your landing page [**`http://localhost:3000`**](http://localhost:3000) in the browser.
 
-```tsx title="~/routes/news._index.tsx"
-import { json, useLoaderData } from '@remix-run/react'
-import { getFilteredArticles } from '~/models/article.server.tsx'
-import NewsIndexGrid from '~/components/organisms/NewsIndexGrid.js'
+It's quite common on a news website to have a page that displays articles from all categories.
 
-export async function loader() {
-	const techArticles = await getFilteredArticles('technology')
-	const businessArticles = await getFilteredArticles('business')
-	const entertainmentArticles = await getFilteredArticles('entertainment')
+Remember - this page is being served from `app/routes/_index.tsx`. Open this file now and look at the code carefully.
 
-	return json({ techArticles, businessArticles, entertainmentArticles })
-}
+Can you update this route so that it displays *all* the articles in the database?
 
-export default function NewsPageIndex() {
-	const { techArticles, businessArticles, entertainmentArticles } =
-		useLoaderData<typeof loader>()
+#### Tips
 
-	return (
-		<main className="container py-16">
-			<NewsIndexGrid articles={techArticles} categoryTitle="Technology" />
-			<NewsIndexGrid articles={businessArticles} categoryTitle="Business" />
-			<NewsIndexGrid
-				articles={entertainmentArticles}
-				categoryTitle="Entertainment"
-			/>
-		</main>
-	)
-}
-```
+- You will need a new `loader` function in the `app/routes/_index.tsx` file.
+- You'll need to create a new Prisma query inside this `loader` function that `return`s all the articles.
+- You will need a `useLoaderData` hook to access the data in the `Index` component.
 
-</TabItem>
+## Solution
 
-</Tabs>
+As always, try to solve this yourself before checking the solution below 👀.
+
+<MonsterReveal>
+
+<Steps>
+
+1. Firstly, import the `prisma` client, the `json` helper and your `ArticleCard` component at the top of your file.
+
+		```diff lang="tsx" title="app/routes/_index.tsx" ins="json, "
+		import { type MetaFunction } from '@remix-run/node'
+		import { json, Link, useLoaderData } from '@remix-run/react'
+		import heroImage from '~/assets/jpg/sample-hero.jpg'
+		import { Button } from '~/components/atoms/Button.tsx'
+		+import ArticleCard from '~/components/organisms/ArticleCard.tsx'
+		import HeroCallToAction from '~/components/organisms/Hero/HeroCallToAction.tsx'
+		+import { prisma } from '~/utils/db.server.ts'
+		```
+
+2. Next, add a `loader` function between the `meta` function and your `Index` component.
+
+		```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={1-7, 25-45}
+		import { type MetaFunction } from '@remix-run/node'
+		import { json, Link, useLoaderData } from '@remix-run/react'
+		import heroImage from '~/assets/jpg/sample-hero.jpg'
+		import { Button } from '~/components/atoms/Button.tsx'
+		import ArticleCard from '~/components/organisms/ArticleCard.tsx'
+		import HeroCallToAction from '~/components/organisms/Hero/HeroCallToAction.tsx'
+		import { prisma } from '~/utils/db.server.ts'
+
+		export const meta: MetaFunction = () => [{ title: 'Epic News' }]
+
+		+export async function loader() {
+		+	const allArticles = await prisma.article.findMany({
+		+		select: {
+		+			id: true,
+		+			title: true,
+		+			category: { select: { name: true } },
+		+			images: { select: { id: true } },
+		+		},
+		+	})
+		+
+		+	return json({ allArticles })
+		+}
+
+		export default function Index() {
+			return (
+				<main>
+					<HeroCallToAction
+						image={heroImage}
+						imageRight={true}
+						hasBackgroundColour={true}
+					>
+						<div className="flex h-full flex-1 flex-col justify-between p-16">
+							<div className="flex flex-col gap-8">
+								<h2 className="text-h2">Welcome to Epic News</h2>
+								<p className="text-lg">
+									Keep up to date with the latest tech news.
+								</p>
+							</div>
+							<Button asChild variant="default" size="lg">
+								<Link to="/signup">Sign up</Link>
+							</Button>
+						</div>
+					</HeroCallToAction>
+				</main>
+			)
+		}
+		```
+
+3. Finally, add a section to populate with articles.
+
+		I've chosen a space just below my hero section, but you can place this wherever you like.
+
+		```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={1-22, 30-44}
+		import { type MetaFunction } from '@remix-run/node'
+		import { json, Link, useLoaderData } from '@remix-run/react'
+		import heroImage from '~/assets/jpg/sample-hero.jpg'
+		import { Button } from '~/components/atoms/Button.tsx'
+		import ArticleCard from '~/components/organisms/ArticleCard.tsx'
+		import HeroCallToAction from '~/components/organisms/Hero/HeroCallToAction.tsx'
+		import { prisma } from '~/utils/db.server.ts'
+
+		export const meta: MetaFunction = () => [{ title: 'Epic News' }]
+
+		export async function loader() {
+			const allArticles = await prisma.article.findMany({
+				select: {
+					id: true,
+					title: true,
+					category: { select: { name: true } },
+					images: { select: { id: true } },
+				},
+			})
+
+			return json({ allArticles })
+		}
+
+		export default function Index() {
+			const { allArticles } = useLoaderData<typeof loader>()
+
+			return (
+				<main>
+					<HeroCallToAction
+						image={heroImage}
+						imageRight={true}
+						hasBackgroundColour={true}
+					>
+						<div className="flex h-full flex-1 flex-col justify-between p-16">
+							<div className="flex flex-col gap-8">
+								<h2 className="text-h2">Welcome to Epic News</h2>
+								<p className="text-lg">
+									Keep up to date with the latest tech news.
+								</p>
+							</div>
+							<Button asChild variant="default" size="lg">
+								<Link to="/signup">Sign up</Link>
+							</Button>
+						</div>
+					</HeroCallToAction>
+
+		+			<div className="container py-16">
+		+				<h2 className="mb-8 text-h2 font-normal">Latest news</h2>
+		+
+		+				<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+		+					{allArticles.length > 0 ? (
+		+						allArticles.map(article => (
+		+							<ArticleCard
+		+								key={article.id}
+		+								title={article.title}
+		+								category={article.category?.name}
+		+								imageId={article.images[0]?.id}
+		+							/>
+		+						))
+		+					) : (
+		+						<p>No articles found</p>
+		+					)}
+		+				</div>
+		+			</div>
+				</main>
+			)
+		}
+		```
+
+
+</Steps>
 
 </MonsterReveal>
 
@@ -702,7 +343,7 @@ In this guide, we have:
 - Updated the `loader` function in our `app/routes/news.$category.tsx` file to filter articles by category and if they are published or not.
 - Updated the `useLoaderData` hook in our `NewsIndexPage` component to return the `filteredArticles` data and map through this in place of the old `allArticles` array.
 - Checked the filters in the browser to ensure they are working as expected.
-- Completed some code challenges to further enhance the news index page.
+- Further enhanced the news index page.
 
 ::::note[Assignment]
 

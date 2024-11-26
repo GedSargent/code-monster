@@ -350,10 +350,10 @@ export default defineConfig({
                   label: '🖥️ Article images (optional)',
                   link: 'guides/epic-news/displaying-articles/article-images'
                 },
-                // {
-                //   label: '🖥️ Filter articles by category',
-                //   link: 'guides/epic-news/displaying-articles/filter-articles-by-category'
-                // },
+                {
+                  label: '🖥️ Filter articles by category',
+                  link: 'guides/epic-news/displaying-articles/filter-articles-by-category'
+                },
               ]
             },
             // {

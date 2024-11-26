@@ -354,20 +354,77 @@ How you do this is up to you, but you could try:
 - Add a hover effect to each card ([hint](https://tailwindcss.com/docs/hover-focus-and-other-states#hover))
 - Truncating the article title if it is too long ([hint](https://tailwindcss.com/docs/line-clamp))
 
-### 🚀 Extra credit (optional)
+### 🚀 Extra credit
 
 - Create a component called `ArticleCard` that you can reuse for each article. It should take the `title` and `category` as props.
-- Use the `ArticleCard` component inside the `map` function to render each article.
+- You should create this component in a new file called `ArticleCard.tsx` in the `components/organisms` folder:
+
+	![Create ArticleCard component](src/assets/webp/epic-news/create-article-card-component.webp)
+
+- Use the `ArticleCard` component inside the `map` function to render each article, so that your final code looks like this:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={8-29} {39-46}
+import { invariant } from '@epic-web/invariant'
+import { type LoaderFunctionArgs, json } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
++import ArticleCard from '~/components/organisms/ArticleCard.tsx'
+import { prisma } from '~/utils/db.server.ts'
+import { toTitleCase } from '~/utils/stringUtils.ts'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { category } = params
+
+	invariant(typeof category === 'string', 'Category not found')
+	const categoryTitle = toTitleCase(category)
+
+	const filteredArticles = await prisma.article.findMany({
+		where: {
+			category: {
+				slug: category, // Retrieves only articles in the specified category
+			},
+		},
+		select: {
+			id: true,
+			title: true,
+			category: { select: { name: true } },
+			images: { select: { id: true } },
+		},
+	})
+
+	return json({ categoryTitle, filteredArticles })
+}
+
+export default function NewsCategoryPage() {
+	const { categoryTitle, filteredArticles } = useLoaderData<typeof loader>()
+
+	return (
+		<div className="container py-16">
+			<h2 className="mb-8 text-h2">{categoryTitle}</h2>
+
+			<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+				{filteredArticles.map(article => (
+					<ArticleCard
+						key={article.id}
+						title={article.title}
+						category={article.category?.name}
+						imageId={article.images[0]?.id}
+					/>
+				))}
+			</div>
+		</div>
+	)
+}
+```
 
 ### 🚀🚀 Super extra credit (optional)
 
 - Having extracted your `ArticleCard` component, can you display an icon for each category next to the category name?
 
-	There is an NPM package installed in the project called [React Icons](https://react-icons.github.io/react-icons/), which you might use.
+-	There is an NPM package installed in the project called [React Icons](https://react-icons.github.io/react-icons/), which you might use.
 	
-	Alternatively, you can source the icons yourself, save them in the `assets` folder, and import them into your component.
+- Alternatively, you can source the icons yourself, save them in the `assets` folder, and import them into your component.
 
-	You will also need to develop the logic to display the correct icon for each category.
+-	You will also need to develop the logic to display the correct icon for each category.
 
 Below is an idea for how the finished article cards might look in the browser, but feel free to implement your own design and interactions:
 

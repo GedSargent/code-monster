@@ -30,3 +30,236 @@ If you want to continue working on this project, here are some ideas for extra f
 - Allow admin users to edit all articles on the single article page (i.e. on a new `article.$articleId.edit.tsx` route)
 - Allow normal users to edit their ***own*** articles (but not anyone else's) on the single article page (i.e. on a new `article.$articleId.edit.tsx` route)
 - The 'search' field in the navbar currently only searches for users registered on the site. Modify this so that it searches for articles by their title.
+
+### 🚀🚀 Extra credit 2 - advanced grid layout 
+
+- Currently, if you have followed the guides so far, you will have a simple grid layout for displaying news article cards.
+
+		Can you update this design wireframe design to something more advanced?
+
+    ![Wireframe to page](src/assets/webp/epic-news/wireframe-to-page.webp)
+
+		The layout should remain consistent for the `/news/$category` dynamic route as well.
+
+<MonsterReveal title="Advanced layout solution">
+
+There are, of course, multiple ways you could implement this layout, but here is one possible solution:
+
+<Tabs>
+
+<TabItem label="ArticleCard.tsx">
+
+```diff lang="tsx" title="~/components/organisms/ArticleCard.tsx" showLineNumbers ins="${imageWrapperClasses[level]}" ins="${textWrapperClasses[level]}"
+import defaultIcon from '~/assets/png/ai-logo@2x.png'
+import businessIcon from '~/assets/png/business-logo@2x.png'
+import siteLogo from '~/assets/png/epic-news-logo@2x.png'
+import entertainmentIcon from '~/assets/png/games-logo@2x.png'
+import techIcon from '~/assets/png/tech-logo@2x.png'
+import { getArticleImgSrc } from '~/utils/misc.js'
+
+interface ArticleCardProps {
+	title: string
+	categoryTitle?: string
+	imageId?: string
++	level?: 'primary' | 'secondary' | 'tertiary'
+}
+export default function ArticleCard({
+	title,
+	categoryTitle,
+	imageId,
++	level = 'tertiary',
+}: ArticleCardProps) {
+	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
+	const categoryIcons: Record<string, string> = {
+		Technology: techIcon,
+		Business: businessIcon,
+		Entertainment: entertainmentIcon,
+	}
+
+	const categoryIcon = categoryTitle
+		? categoryIcons[categoryTitle]
+		: defaultIcon
+
++	const imageWrapperClasses = {
++		primary:
++			'hidden relative w-full object-cover sm:block sm:h-[12rem] md:h-[23rem]',
++		secondary:
++			'hidden relative w-full rounded-t-lg object-cover sm:block sm:h-[11rem]',
++		tertiary: 'hidden',
++	}
++
++	const textWrapperClasses = {
++		primary:
++			'h-[10rem] flex flex-col justify-between rounded-lg bg-muted p-6 sm:rounded-t-none md:h-[22.5rem]',
++		secondary:
++			'h-[10rem] flex flex-col justify-between bg-muted p-6 sm:rounded-b-lg sm:h-[11rem]',
++		tertiary:
++			'h-[10.25rem] flex flex-col rounded-lg justify-between bg-muted p-6',
++	}
+
+	return (
+		<div>
+			<div className={`${imageWrapperClasses[level]}`}>
+				<div className="absolute inset-0 ">
+					<img
+						className="h-full w-full rounded-t-md object-cover"
+						src={imageSrc}
+						alt={title}
+					/>
+				</div>
+			</div>
+			<div className={`${textWrapperClasses[level]}`}>
+				<h3 className={`line-clamp-2 text-2xl font-bold text-foreground`}>
+					{title}
+				</h3>
+				<div className="flex items-center gap-3">
+					<img src={categoryIcon} alt={categoryTitle} className="h-6 w-6" />
+					<span className="text-sm text-muted-foreground">
+						{categoryTitle || 'General News'}
+					</span>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+```
+
+</TabItem>
+
+<TabItem label="NewsIndexGrid.tsx">
+
+```tsx title="~/components/organisms/NewsIndexGrid.tsx"
+import ArticleCard from '~/components/organisms/ArticleCard.tsx'
+
+interface IndexArticle {
+	title: string
+	images: {
+		id: string
+	}[]
+	id: string
+	category: {
+		name: string
+	} | null
+}
+interface NewsIndexGridProps {
+	articles: IndexArticle[]
+	categoryTitle?: string
+}
+
+export default function NewsIndexGrid({
+	articles,
+	categoryTitle,
+}: NewsIndexGridProps) {
+	return (
+		<>
+			<div className="py-8 lg:py-16">
+				<h2 className="mb-16 text-h2">{categoryTitle}</h2>
+
+				<div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 lg:grid-rows-4">
+					{articles.map((article, index) => {
+						const level =
+							index === 0 ? 'primary' : index < 5 ? 'secondary' : 'tertiary'
+
+						return (
+							<div
+								key={article.id}
+								className={`col-span-1 ${level === 'secondary' ? 'sm:row-span-2' : ''} ${level === 'primary' ? 'sm:col-span-2 sm:row-span-4' : ''}`}
+							>
+								<ArticleCard
+									title={article.title}
+									categoryTitle={categoryTitle}
+									imageId={article.images[0]?.id}
+									level={level}
+								/>
+							</div>
+						)
+					})}
+				</div>
+			</div>
+		</>
+	)
+}
+```
+
+</TabItem>
+
+<TabItem label="article.server.tsx">
+
+```diff lang="tsx" title="~/models/article.server.tsx"
+import { prisma } from '~/utils/db.server.js'
+
+export async function getAllArticles() {
+	return await prisma.article.findMany({
+		select: {
+			id: true,
+			title: true,
+			category: { select: { name: true } },
+			images: { select: { id: true } },
+		},
+		orderBy: {
+			createdAt: 'desc',
+		},
+	})
+}
+
++export async function getFilteredArticles(category: string) {
++	return await prisma.article.findMany({
++		where: {
++			category: {
++				slug: category,
++			},
++		},
++		select: {
++			id: true,
++			title: true,
++			category: { select: { name: true } },
++			images: { select: { id: true } },
++		},
++		orderBy: {
++			createdAt: 'desc',
++		},
++		take: 9, // Limits the number of articles returned
++	})
++}
+```
+
+</TabItem>
+
+<TabItem label="news._index.tsx">
+
+```tsx title="~/routes/news._index.tsx"
+import { json, useLoaderData } from '@remix-run/react'
+import { getFilteredArticles } from '~/models/article.server.tsx'
+import NewsIndexGrid from '~/components/organisms/NewsIndexGrid.js'
+
+export async function loader() {
+	const techArticles = await getFilteredArticles('technology')
+	const businessArticles = await getFilteredArticles('business')
+	const entertainmentArticles = await getFilteredArticles('entertainment')
+
+	return json({ techArticles, businessArticles, entertainmentArticles })
+}
+
+export default function NewsPageIndex() {
+	const { techArticles, businessArticles, entertainmentArticles } =
+		useLoaderData<typeof loader>()
+
+	return (
+		<main className="container py-16">
+			<NewsIndexGrid articles={techArticles} categoryTitle="Technology" />
+			<NewsIndexGrid articles={businessArticles} categoryTitle="Business" />
+			<NewsIndexGrid
+				articles={entertainmentArticles}
+				categoryTitle="Entertainment"
+			/>
+		</main>
+	)
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+</MonsterReveal>

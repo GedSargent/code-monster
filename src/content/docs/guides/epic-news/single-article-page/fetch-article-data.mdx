@@ -30,9 +30,9 @@ For the time being, just display the article title on the screen. We will look a
 
 ### Tips
 
-- In the news index page, we used Prisma's `findMany()` function. However, in this case you will need to research and find out how to use the [**`findUnique()`**](https://www.prisma.io/docs/orm/reference/prisma-client-reference#findunique) function to fetch a single article.
+- In this case you will need to research and find out how to use Prisma's [**`findUnique()`**](https://www.prisma.io/docs/orm/reference/prisma-client-reference#findunique) function to fetch a single article.
 
-- You will need to use the `articleId` parameter from the URL to fetch the article data.
+- You can use the `articleId` parameter from the URL to fetch the article data.
 
 - What will you show on the screen if the article is not found? How will you handle this in the code?
 
@@ -40,53 +40,36 @@ For the time being, just display the article title on the screen. We will look a
 
 <MonsterReveal title="1. Create Prisma Query">
 
-### 1. Create Prisma query
+### 1. Create a Prisma query
 
-First, let's create the query to fetch the single article data.
+1. Open the file at `app/routes/article.$articleId.tsx`.
 
-I could, of course, write this straight into the `loader` function. However, because I started a [**dedicated file for server-side queries previously**](/code-monster/guides/epic-news/displaying-articles/filter-articles-by-category#extra-credit-1---all-articles-page), I will add the function there to keep my code organised.
+2. At the top of your file, import the `invariant` package and the Prisma client:
 
-Open the file at `models/article.server.tsx` (or create this file if you haven't already) and add the following code:
+```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers
++import { invariant } from '@epic-web/invariant'
+import { type LoaderFunctionArgs, json } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
++import { prisma } from '~/utils/db.server.ts'
+```
 
-```diff lang="tsx" title="app/models/article.server.tsx" showLineNumbers collapse={3-35}
-import { prisma } from '~/utils/db.server.js'
+3. Add your query inside the `loader` function.
 
-export async function getAllArticles() {
-	return await prisma.article.findMany({
-		select: {
-			id: true,
-			title: true,
-			category: { select: { name: true } },
-			images: { select: { id: true } },
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-	})
-}
+		Remember to `return` the `article` object from the query, rather than the old `articleId`:
 
-export async function getFilteredArticles(category: string) {
-	return await prisma.article.findMany({
-		where: {
-			category: {
-				slug: category,
-			},
-		},
-		select: {
-			id: true,
-			title: true,
-			category: { select: { name: true } },
-			images: { select: { id: true } },
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-		take: 9, // Limits the number of articles returned
-	})
-}
+```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers collapse={26-34}
+import { invariant } from '@epic-web/invariant'
+import { type LoaderFunctionArgs, json } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import { prisma } from '~/utils/db.server.ts'
 
-+export async function getSingleArticle(articleId: string) {
-+	return await prisma.article.findUnique({
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { articleId } = params
+
++	invariant(typeof articleId === 'string', 'No article ID provided')
+
++	// Fetch the article by ID
++	const article = await prisma.article.findUnique({
 +		where: { id: articleId },
 +		select: {
 +			id: true,
@@ -97,28 +80,57 @@ export async function getFilteredArticles(category: string) {
 +			images: { select: { id: true } },
 +		},
 +	})
-+}
++
++	return json({ article })
+-	return json({ articleId })
+}
+
+export default function ArticlePage() {
+	const { articleId } = useLoaderData<typeof loader>()
+
+	return (
+		<div className="container py-16">
+			<h2 className="pb-8 text-h2">My amazing news article</h2>
+
+			<p>Article ID: {articleId}</p>
+		</div>
+	)
+}
 ```
 
 </MonsterReveal>
 
-<MonsterReveal title="2. Update `article.$articleId.tsx`">
+<MonsterReveal title="2. User interface update">
 
-### 2. Update `article.$articleId.tsx`
+### 2. User Interface update
 
-```diff lang="tsx" title="app/routes/article.$articleId.tsx"
-+import { invariant } from '@epic-web/invariant'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-+import { useLoaderData } from '@remix-run/react'
-+import { getSingleArticle } from '~/models/article.server.js'
+Add the code below to display the article title, and a fallback message if no article is found:
+
+```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers collapse={1-25}
+import { invariant } from '@epic-web/invariant'
+import { type LoaderFunctionArgs, json } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import { prisma } from '~/utils/db.server.ts'
 
 export async function loader({ params }: LoaderFunctionArgs) {
 	const { articleId } = params
-+	invariant(typeof articleId === 'string', 'No article ID provided')
-+
-+	const article = await getSingleArticle(articleId)
-+
-+	return json({ article })
+
+	invariant(typeof articleId === 'string', 'No article ID provided')
+
+	// Fetch the article by ID
+	const article = await prisma.article.findUnique({
+		where: { id: articleId },
+		select: {
+			id: true,
+			title: true,
+			content: true,
+			category: { select: { name: true } },
+			owner: { select: { name: true } },
+			images: { select: { id: true } },
+		},
+	})
+
+	return json({ article })
 }
 
 +const ArticleNotFound = () => {

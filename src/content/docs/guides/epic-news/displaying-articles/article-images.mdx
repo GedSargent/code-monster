@@ -1,0 +1,319 @@
+---
+title: Show article images (optional)
+description: Add a thumbnail of your article image to article cards
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+:::note
+
+This tutorial guide is optional. Only complete this if you feel you have time, or return to it as an optional extra at the end of your project.
+
+## Pre-requisites
+
+To complete this tutorial, you will need to have successfully extract the `ArticleCard` component in the [Extra Credit challenge](/code-monster/guides/epic-news/displaying-articles/load-and-display-article-data#-extra-credit-optional)
+
+:::
+
+## Introduction
+
+We are currently only fetching the `id` of each image from the database. To display the images on the page, we will need to generate a `src` for each image using a utility function from the Epic Stack.
+
+If you remember from a [**previous guide**](/code-monster/guides/epic-news/prisma/modify-project-structure#add-getarticleimgsrc-function), we created a utility function called `getArticleImgSrc` to generate a `src` for each article image.
+
+:::caution[Check previous work]
+
+#### Check your previous work
+
+Check that your `getArticleImgSrc` function is correctly implemented in the `app/utils/misc.tsx` file.
+
+If the function is missing, you will need to go back to the [**previous guide**](/code-monster/guides/epic-news/prisma/modify-project-structure#add-getarticleimgsrc-function) and follow the steps to add it correctly.
+
+:::
+
+## Configuring `ArticleCard`
+
+If you have the `getArticleImgSrc` function in place, we can now use it to display real article images on the page.
+
+<Steps>
+
+1. Open `app/routes/news.$category.tsx`.
+
+	:::note
+	
+	Adding the code below will produce a red underline, but don't worry, we will fix this in the next steps.
+
+	To display the article images on the page, we need to pass the `id` of each article image to the `ArticleCard` component.
+		
+	This `id` will be used to generate the `src` for each article image using the `getArticleImgSrc` function.
+
+	:::
+
+	Add the line of code below to pass the `id` of the first article image to the `ArticleCard` component:
+
+		```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={1-24}
+		import { invariant } from '@epic-web/invariant'
+		import { type LoaderFunctionArgs, json } from '@remix-run/node'
+		import { useLoaderData } from '@remix-run/react'
+		import ArticleCard from '#app/components/organisms/ArticleCard.tsx'
+		import { prisma } from '~/utils/db.server.ts'
+		import { toTitleCase } from '~/utils/stringUtils.ts'
+
+		export async function loader({ params }: LoaderFunctionArgs) {
+			const { category } = params
+
+			invariant(typeof category === 'string', 'Category not found')
+			const categoryTitle = toTitleCase(category)
+
+			const allArticles = await prisma.article.findMany({
+				select: {
+					id: true,
+					title: true,
+					category: { select: { name: true } },
+					images: { select: { id: true } },
+				},
+			})
+
+			return json({ categoryTitle, allArticles })
+		}
+
+		export default function NewsCategoryPage() {
+			const { categoryTitle, allArticles } = useLoaderData<typeof loader>()
+
+			return (
+				<div className="container py-16">
+					<h2 className="mb-8 text-h2">{categoryTitle}</h2>
+
+					<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+						{allArticles.map(article => (
+							<ArticleCard
+								key={article.id}
+								title={article.title}
+								category={article.category?.name}
+		+						imageId={article.images[0]?.id}
+							/>
+						))}
+					</div>
+				</div>
+			)
+		}
+		```
+
+1. Open your `ArticleCard` component.
+
+	:::note
+	
+	When following this guide, your `ArticleCard` code will likely be:
+	
+	- different to that shown in the examples
+	- found in a different location to the one given
+
+	Be sure to adapt the instructions to fit around your code.
+
+	:::
+
+2. Add the following import statements at the top of the `ArticleCard` component file to import the `getArticleImgSrc` function:
+
+		```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx" showLineNumbers collapse={10-35}
+		import {
+			MdOutlineBusinessCenter,
+			MdOutlineTheaters,
+			MdOutlineDesktopMac,
+			MdOutlineNewspaper,
+		} from 'react-icons/md'
+		+import { getArticleImgSrc } from '~/utils/misc.tsx'
+		+import siteLogo from '~/assets/svg/site-logo.svg'
+
+		interface ArticleCardProps {
+			title: string
+			category?: string
+		}
+
+		export default function ArticleCard({
+			title,
+			category = 'General news',
+		}: ArticleCardProps) {
+			const categoryIcons: { [key: string]: JSX.Element } = {
+				Business: <MdOutlineBusinessCenter size={20} className="text-red-300" />,
+				Entertainment: <MdOutlineTheaters size={20} className="text-red-300" />,
+				Technology: <MdOutlineDesktopMac size={20} className="text-red-300" />,
+				'General news': <MdOutlineNewspaper size={20} className="text-red-300" />,
+			}
+
+			return (
+				<div className="flex h-64 cursor-pointer flex-col justify-between rounded bg-red-900 p-4 transition-all duration-500 hover:scale-110">
+					<h3 className="line-clamp-3 text-xl font-bold">{title}</h3>
+
+					<div className="flex items-center gap-2">
+						{categoryIcons[category]}
+						<p className="text-sm text-red-300">{category}</p>
+					</div>
+				</div>
+			)
+		}
+		```
+
+	:::note
+
+	- The `getArticleImgSrc` function is how we will generate the `src` for each article image.
+	- The `siteLogo` is a fallback image in case an article does not have an image.
+
+	:::
+
+4. With this in place, let's now modify the logic inside our `ArticleCard` component to display the article image above the title:
+
+		```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={1-8, 23-28}
+		import {
+			MdOutlineBusinessCenter,
+			MdOutlineTheaters,
+			MdOutlineDesktopMac,
+			MdOutlineNewspaper,
+		} from 'react-icons/md'
+		import siteLogo from '~/assets/svg/site-logo.svg'
+		import { getArticleImgSrc } from '~/utils/misc.tsx'
+
+		interface ArticleCardProps {
+			title: string
+			category?: string
+		+	imageId?: string
+		}
+
+		export default function ArticleCard({
+			title,
+			category = 'General news',
+		+	imageId,
+		}: ArticleCardProps) {
+		+	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
+
+			const categoryIcons: { [key: string]: JSX.Element } = {
+				Business: <MdOutlineBusinessCenter size={20} className="text-red-300" />,
+				Entertainment: <MdOutlineTheaters size={20} className="text-red-300" />,
+				Technology: <MdOutlineDesktopMac size={20} className="text-red-300" />,
+				'General news': <MdOutlineNewspaper size={20} className="text-red-300" />,
+			}
+
+			return (
+		+		<div>
+		+			<div>
+		+				<img
+		+					src={imageSrc}
+		+					alt={title}
+		+				/>
+		+			</div>
+					<div className="flex h-64 cursor-pointer flex-col justify-between rounded bg-red-900 p-4 transition-all duration-500 hover:scale-110">
+						<h3 className="line-clamp-3 text-xl font-bold">{title}</h3>
+
+						<div className="flex items-center gap-2">
+							{categoryIcons[category]}
+							<p className="text-sm text-red-300">{category}</p>
+						</div>
+					</div>
+		+		</div>
+			)
+		}
+		```
+
+5. Check the browser. You should now see the article images displayed above the title on each article card, although they are not perfect yet:
+
+		![Unstyled article card images](src/assets/gif/article-card-unstyled-images.gif)
+
+</Steps>
+
+:::tip[Challenge]
+
+## Challenge: style article images
+
+Can you style the article images to make them a consistent size and shape?
+
+- Make each image a consistent height
+- If you have used curved corners for your article cards, fix the corners of the card as a whole
+- Make sure that any hover effects apply to the article card as a whole, including the image
+- Fix any other styling issues that might have arisen
+
+Below is an example of how my cards look once styled, but feel free to make yours look different:
+
+![Styled article card images](src/assets/gif/article-card-styled-images.gif)
+
+### Solution
+
+I'd strongly recommend that you find your own solution for this challenge, but if you get really stuck or want to compare your solution, take a look at the code below.
+
+<MonsterReveal title="ArticleCard.tsx">
+
+```tsx title="app/components/organisms/ArticleCard.tsx"
+import {
+	MdOutlineBusinessCenter,
+	MdOutlineTheaters,
+	MdOutlineDesktopMac,
+	MdOutlineNewspaper,
+} from 'react-icons/md'
+import siteLogo from '~/assets/svg/site-logo.svg'
+import { getArticleImgSrc } from '~/utils/misc.tsx'
+
+interface ArticleCardProps {
+	title: string
+	category?: string
+	imageId?: string
+}
+
+export default function ArticleCard({
+	title,
+	category = 'General news',
+	imageId,
+}: ArticleCardProps) {
+	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
+
+	const categoryIcons: { [key: string]: JSX.Element } = {
+		Business: <MdOutlineBusinessCenter size={20} className="text-red-300" />,
+		Entertainment: <MdOutlineTheaters size={20} className="text-red-300" />,
+		Technology: <MdOutlineDesktopMac size={20} className="text-red-300" />,
+		'General news': <MdOutlineNewspaper size={20} className="text-red-300" />,
+	}
+
+	return (
+		<div className="cursor-pointer transition-all duration-500 hover:scale-105">
+			<div>
+				<img
+					src={imageSrc}
+					alt={title}
+					className="h-64 w-full rounded-t object-cover"
+				/>
+			</div>
+			<div className="flex h-64 flex-col justify-between rounded-b bg-red-900 p-4">
+				<h3 className="line-clamp-3 text-xl font-bold">{title}</h3>
+
+				<div className="flex items-center gap-2">
+					{categoryIcons[category]}
+					<p className="text-sm text-red-300">{category}</p>
+				</div>
+			</div>
+		</div>
+	)
+}
+```
+
+This can then be imported and called from anywhere in the project like this:
+
+```tsx
+<ArticleCard
+	title={article.title}
+	category={article.category?.name}
+	imageId={article.images[0]?.id}
+/>
+```
+
+</MonsterReveal>
+
+:::
+
+## Summary
+
+In this guide, we learned how to:
+
+- Pass the `id` of each article image to the `ArticleCard` component
+- Use the `getArticleImgSrc` function to generate the `src` for each article image
+- Display the article images above the title on each article card
+- Style the article images to make them a consistent size and shape
+
+In the next guide, we will learn how to filter articles by the correct category.

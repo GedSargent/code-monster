@@ -358,7 +358,6 @@ export default defineConfig({
             },
             {
               label: "📝 Single article page",
-              collapsed: true,
               items: [
                 {
                   label: '📝 Create a single article page',

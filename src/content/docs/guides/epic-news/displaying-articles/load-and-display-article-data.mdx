@@ -1,0 +1,387 @@
+---
+title: Load and display article data
+description: Learn how to load and display all real articles on the Epic News index page.
+---
+
+import { Steps } from '@astrojs/starlight/components';
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+## Introduction
+
+We are now ready to load articles from the database and display them on the page.
+
+To do this, we will use the `prisma` client to fetch all articles from the database first.
+
+## Updating the `loader` function
+
+Open `app/routes/news.$category.tsx`.
+
+Take a look at the `loader` function that we created in this file, and take a moment to remind yourself what it does:
+
+```tsx title="app/routes/news.$category" showLineNumbers {6-13} collapse={25-40}
+import { invariant } from '@epic-web/invariant'
+import { type LoaderFunctionArgs, json } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import { toTitleCase } from '~/utils/stringUtils.ts'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { category } = params
+
+	invariant(typeof category === 'string', 'Category not found')
+	const categoryTitle = toTitleCase(category)
+
+	return json({ categoryTitle })
+}
+
+const WireframeBlock = () => {
+	return (
+		<div className="h-72 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
+	)
+}
+
+export default function NewsCategoryPage() {
+	const { categoryTitle } = useLoaderData<typeof loader>()
+
+	return (
+		<div className="container py-16">
+			<h2 className="mb-8 text-h2">{categoryTitle}</h2>
+
+			<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+				<WireframeBlock />
+				<WireframeBlock />
+				<WireframeBlock />
+				<WireframeBlock />
+				<WireframeBlock />
+				<WireframeBlock />
+				<WireframeBlock />
+				<WireframeBlock />
+				<WireframeBlock />
+				<WireframeBlock />
+			</div>
+		</div>
+	)
+}
+```
+
+### Import the `prisma` client
+
+Add an `import` to the `prisma` client at the top of the file:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx"
+import { invariant } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import techIcon from '~/assets/png/news-categories/tech-logo@2x.png'
++import { prisma } from '~/utils/db.server.ts'
+```
+
+:::note
+
+### What is a 'Prisma Client'?
+
+The Prisma Client is used to query your database and perform CRUD (create, read, update, delete) operations.
+
+It allows us to interact with the database using JavaScript.
+
+Furthermore, it is 'type-safe', meaning that it knows what data types are expected in the database and can provide type hints and autocompletion in your code editor.
+
+:::
+
+### Fetch all database articles
+
+Next, let's fetch all articles from the database using the `prisma` client inside the `loader` function, and then export them as JSON:
+
+```diff lang="tsx" title="app/routes/news.$category.tsx" ins=", allArticles" collapse={1-5}
+import { invariant } from '@epic-web/invariant'
+import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import { toTitleCase } from '~/utils/stringUtils'
+import siteLogo from '~/assets/png/epic-news-logo@2x.png'
+import techIcon from '~/assets/png/tech-logo@2x.png'
+import { prisma } from '~/utils/db.server.ts'
+
+export async function loader({ params }: LoaderFunctionArgs) {
+	const { category } = params
+
+	invariant(typeof category === 'string', 'No category provided')
+	const categoryTitle = toTitleCase(category)
+
++	const allArticles = await prisma.article.findMany({
++		select: {
++			id: true,
++			title: true,
++			category: { select: { name: true } },
++			images: { select: { id: true } },
++		},
++	})
+
+	return json({ categoryTitle, allArticles })
+}
+```
+
+:::note
+
+### Understanding the `select` option
+
+The `select` option is used to specify which fields from each record to include in the query result.
+
+```tsx mark={2-7}
+  const allArticles = await prisma.article.findMany({
+    select: {
+      id: true,
+      title: true,
+      category: { select: { name: true } },
+      images: { select: { id: true } },
+    },
+  })
+```
+
+In this case, we are fetching the `id`, `title`, `category`, and `images` fields from the `article` table.
+
+We don't need the `content` of each article as this is just an index page, so we are only fetching the fields that we need.
+
+:::
+
+## Display article data
+
+Now that we have fetched all the articles from the database, let's display them on the page.
+
+At first, we will just display the title and category of each article within the grid that we populated with wireframe blocks earlier.
+
+<Steps>
+
+1. Firstly, delete the `WireframeBlock` components from the page, as we don't need them anymore:
+
+		```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={1-23}
+		import { invariant } from '@epic-web/invariant'
+		import { type LoaderFunctionArgs, json } from '@remix-run/node'
+		import { useLoaderData } from '@remix-run/react'
+		import { prisma } from '~/utils/db.server.ts'
+		import { toTitleCase } from '~/utils/stringUtils.ts'
+
+		export async function loader({ params }: LoaderFunctionArgs) {
+			const { category } = params
+
+			invariant(typeof category === 'string', 'Category not found')
+			const categoryTitle = toTitleCase(category)
+
+			const allArticles = await prisma.article.findMany({
+				select: {
+					id: true,
+					title: true,
+					category: { select: { name: true } },
+					images: { select: { id: true } },
+				},
+			})
+
+			return json({ categoryTitle, allArticles })
+		}
+
+		-const WireframeBlock = () => {
+		-	return (
+		-		<div className="h-72 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700" />
+		-	)
+		-}
+
+		export default function NewsCategoryPage() {
+			const { categoryTitle } = useLoaderData<typeof loader>()
+
+			return (
+				<div className="container py-16">
+					<h2 className="mb-8 text-h2">{categoryTitle}</h2>
+
+					<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+		-				<WireframeBlock />
+		-				<WireframeBlock />
+		-				<WireframeBlock />
+		-				<WireframeBlock />
+		-				<WireframeBlock />
+		-				<WireframeBlock />
+		-				<WireframeBlock />
+		-				<WireframeBlock />
+		-				<WireframeBlock />
+		-				<WireframeBlock />
+					</div>
+				</div>
+			)
+		}
+		```
+
+2. Next, we will return `allArticles` from the `useLoaderData` function that we now have access to, and loop through the articles using a `map` function.
+
+	:::note
+
+	### The `map` function
+
+	The `map` function in JavaScript is used regularly in React.
+	
+	It allows us to loop through an array and apply a function to each element, returning a ***new array*** with the results.
+
+	Let's quickly see how the `map` function works with a simple JavaScript example.
+
+	```javascript
+	const numbers = [1, 2, 3];
+
+	const doubledNumbers = numbers.map((number) => {
+		return number * 2;
+	});
+
+	console.log(doubledNumbers); // -> [2, 4, 6]
+	console.log(numbers); // -> [1, 2, 3]
+	```
+
+	In this example, we have an array of `numbers`.
+
+	We use the `map` function to loop through each number and multiply it by 2. The result is a ***new array*** with the doubled numbers.
+
+	In React, we can use the `map` function to loop through an array of data and render components for each item.
+
+	:::
+
+		```diff lang="tsx" title="app/routes/news.$category.tsx" ins=", allArticles" showLineNumbers collapse={1-23}
+		import { invariant } from '@epic-web/invariant'
+		import { type LoaderFunctionArgs, json } from '@remix-run/node'
+		import { useLoaderData } from '@remix-run/react'
+		import { prisma } from '~/utils/db.server.ts'
+		import { toTitleCase } from '~/utils/stringUtils.ts'
+
+		export async function loader({ params }: LoaderFunctionArgs) {
+			const { category } = params
+
+			invariant(typeof category === 'string', 'Category not found')
+			const categoryTitle = toTitleCase(category)
+
+			const allArticles = await prisma.article.findMany({
+				select: {
+					id: true,
+					title: true,
+					category: { select: { name: true } },
+					images: { select: { id: true } },
+				},
+			})
+
+			return json({ categoryTitle, allArticles })
+		}
+
+		export default function NewsCategoryPage() {
+			const { categoryTitle, allArticles } = useLoaderData<typeof loader>()
+
+			return (
+				<div className="container py-16">
+					<h2 className="mb-8 text-h2">{categoryTitle}</h2>
+
+					<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+		+				{allArticles.map(article => (
+		+					<div key={article.id}>
+		+						<h3>{article.title}</h3>
+		+						<p>{article.category?.name || 'General News'}</p>
+		+					</div>
+		+				))}
+					</div>
+				</div>
+			)
+		}
+		```
+
+3. Save the file and check the browser to see the unstyled article data displayed on the page:
+
+	![Unstyled article data](src/assets/webp/epic-news/unstyled-article-data.webp)
+
+4. Let's make them a little clearer by adding a background and some padding to each article 'card':
+
+		```tsx title="app/routes/news.$category.tsx" showLineNumbers ins=" className="bg-red-900 p-4"" collapse={1-23}
+		import { invariant } from '@epic-web/invariant'
+		import { type LoaderFunctionArgs, json } from '@remix-run/node'
+		import { useLoaderData } from '@remix-run/react'
+		import { prisma } from '~/utils/db.server.ts'
+		import { toTitleCase } from '~/utils/stringUtils.ts'
+
+		export async function loader({ params }: LoaderFunctionArgs) {
+			const { category } = params
+
+			invariant(typeof category === 'string', 'Category not found')
+			const categoryTitle = toTitleCase(category)
+
+			const allArticles = await prisma.article.findMany({
+				select: {
+					id: true,
+					title: true,
+					category: { select: { name: true } },
+					images: { select: { id: true } },
+				},
+			})
+
+			return json({ categoryTitle, allArticles })
+		}
+
+		export default function NewsCategoryPage() {
+			const { categoryTitle, allArticles } = useLoaderData<typeof loader>()
+
+			return (
+				<div className="container py-16">
+					<h2 className="mb-8 text-h2">{categoryTitle}</h2>
+
+					<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
+						{allArticles.map(article => (
+							<div className="bg-red-900 p-4" key={article.id}>
+								<h3>{article.title}</h3>
+								<p>{article.category?.name || 'General News'}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			)
+		}
+		```
+
+5. Save the file and check the browser to see the styled article data displayed on the page:
+
+	![Article data with background](src/assets/webp/epic-news/article-data-with-bg.webp)
+
+</Steps>
+
+:::tip[Challenge]
+
+### Style the article cards
+
+Can you style the article cards to make them look more professional?
+
+How you do this is up to you, but you could try:
+
+- Making each card the same height ([hint](https://tailwindcss.com/docs/height))
+- Adding rounded corners to each card ([hint](https://tailwindcss.com/docs/border-radius))
+- Separating the title and category clearly through spacing and typography ([hint](/code-monster/reference/css-styling/))
+- Add a hover effect to each card ([hint](https://tailwindcss.com/docs/hover-focus-and-other-states#hover))
+- Truncating the article title if it is too long ([hint](https://tailwindcss.com/docs/line-clamp))
+
+### 🚀 Extra credit (optional)
+
+- Create a component called `ArticleCard` that you can reuse for each article. It should take the `title` and `category` as props.
+- Use the `ArticleCard` component inside the `map` function to render each article.
+
+### 🚀🚀 Super extra credit (optional)
+
+- Having extracted your `ArticleCard` component, can you display an icon for each category next to the category name?
+
+	There is an NPM package installed in the project called [React Icons](https://react-icons.github.io/react-icons/), which you might use.
+	
+	Alternatively, you can source the icons yourself, save them in the `assets` folder, and import them into your component.
+
+	You will also need to develop the logic to display the correct icon for each category.
+
+Below is an idea for how the finished article cards might look in the browser, but feel free to implement your own design and interactions:
+
+![Styled article cards](src/assets/gif/styled-article-cards-no-image.gif)
+
+:::
+
+## Summary
+
+In this guide, we learned how to:
+
+- Use the `select` option in Prisma to only return the fields we need from a database.
+- Load real articles from the database and display them on the page.
+- Loop through these real articles using JavaScript's `map` function and display them on the page.
+- Style the article cards in line with your brand design.
+
+In the next guide, we will learn how to filter articles by the correct category.

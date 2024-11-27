@@ -377,32 +377,31 @@ export default defineConfig({
                 },
               ]
             },
-            // {
-            //   label: "🛡️ Admin page",
-            //   collapsed: true,
-            //   items: [
-            //     {
-            //       label: '🛡️ Create an admin review page',
-            //       link: 'guides/epic-news/admin-page/create-admin-page'
-            //     },
-            //     {
-            //       label: '🛡️ Protecting routes',
-            //       link: 'guides/epic-news/admin-page/protecting-routes'
-            //     },
-            //     {
-            //       label: '🛡️ Admin-only links',
-            //       link: 'guides/epic-news/admin-page/admin-only-links'
-            //     },
-            //     {
-            //       label: '🛡️ Filter published articles',
-            //       link: 'guides/epic-news/admin-page/filter-published-articles'
-            //     }
-            //   ]
-            // },
-            // {
-            //   label: '🚀 Wrapping up - extra credits',
-            //   link: 'guides/epic-news/wrapping-up'
-            // }
+            {
+              label: "🛡️ Admin page",
+              items: [
+                {
+                  label: '🛡️ Create an admin review page',
+                  link: 'guides/epic-news/admin-page/create-admin-page'
+                },
+                {
+                  label: '🛡️ Protecting routes',
+                  link: 'guides/epic-news/admin-page/protecting-routes'
+                },
+                {
+                  label: '🛡️ Admin-only links',
+                  link: 'guides/epic-news/admin-page/admin-only-links'
+                },
+                {
+                  label: '🛡️ Filter published articles',
+                  link: 'guides/epic-news/admin-page/filter-published-articles'
+                }
+              ]
+            },
+            {
+              label: '🚀 Wrapping up - extra credits',
+              link: 'guides/epic-news/wrapping-up'
+            }
           ],
         },
         {

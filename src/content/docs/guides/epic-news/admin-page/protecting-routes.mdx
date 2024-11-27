@@ -20,12 +20,14 @@ We will do this across two stages:
 
 ## 1. Protect the admin review page
 
-This first step is surprisingly easy - we only need to add a single line of code!
+This first step is surprisingly easy because the Epic Stack comes with functions that handle authentication and authorisation!
 
-Open `app/routes/admin-review.tsx` and add the code shown below:
+We therefore only need to add a few lines of code 😎.
 
-```diff lang="tsx" title="app/routes/admin-review.tsx" ins="LoaderFunctionArgs, " ins="{ request }: LoaderFunctionArgs"
-import { LoaderFunctionArgs, json } from '@remix-run/node'
+Open `app/routes/admin-review.tsx` and make the additions shown below:
+
+```diff lang="tsx" title="app/routes/admin-review.tsx" ins="type LoaderFunctionArgs, " ins="{ request }: LoaderFunctionArgs"
+import { type LoaderFunctionArgs, json } from '@remix-run/node'
 import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
 import { prisma } from '~/utils/db.server.ts'
 import { cn } from '~/utils/misc.tsx'
@@ -42,7 +44,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 ```
 
-The `requireUserWithRole` function is already included in the Epic Stack. It firstly checks if a user is logged in and has the specified role. In this case, if the user does not have the 'admin' role, it will throw an unauthorised (403) error.
+:::note
+
+The `requireUserWithRole` function checks if a user is logged in and has the specified role.
+
+In this case, if the user does not have the 'admin' role, it will throw an unauthorised (403) error.
+
+:::
 
 ### Test protection with unauthorized user
 
@@ -58,32 +66,40 @@ Let's improve this by adding an `ErrorBoundary` component to catch the error and
 
 ### Add an `ErrorBoundary` component
 
-An `ErrorBoundary` is a React component that catches JavaScript errors (such as the 403 'Unauthorized' error shown here) anywhere in its child component tree and logs those errors, displaying a fallback UI instead of crashing the whole app.
+:::note
+
+An `ErrorBoundary` is a React component that catches JavaScript errors (such as the 403 'Unauthorized' error shown here) anywhere in its child component tree.
+
+It then displays a fallback UI instead of crashing the whole app.
+
+You can read more about them in the [Remix docs](https://remix.run/docs/en/main/route/error-boundary).
+
+:::
 
 Let's add an `ErrorBoundary` component to `app/routes/admin-review.tsx`.
 
-First, import the `GeneralErrorBoundary` and `Button`
+First, import the `GeneralErrorBoundary` and `Button` components:
 
 ```diff lang="tsx" title="app/routes/admin-review.tsx"
-import { LoaderFunctionArgs, json } from '@remix-run/node'
+import { type LoaderFunctionArgs, json } from '@remix-run/node'
 import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
-+import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
-+import { Button } from '~/components/atoms/Button.js'
 import { prisma } from '~/utils/db.server.ts'
 import { cn } from '~/utils/misc.tsx'
 import { requireUserWithRole } from '~/utils/permissions.server.js'
++import { Button } from '~/components/atoms/Button.js'
++import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
 ```
 
 Next, scroll all the way to the bottom of the component file, and add the code below:
 
 ```diff lang="tsx" title="app/routes/admin-review.tsx" showLineNumbers collapse={10-16, 19-30, 33-72}
-import { LoaderFunctionArgs, json } from '@remix-run/node'
+import { type LoaderFunctionArgs, json } from '@remix-run/node'
 import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
-import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
-import { Button } from '~/components/atoms/Button.js'
 import { prisma } from '~/utils/db.server.ts'
 import { cn } from '~/utils/misc.tsx'
 import { requireUserWithRole } from '~/utils/permissions.server.js'
+import { Button } from '~/components/atoms/Button.js'
+import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin')

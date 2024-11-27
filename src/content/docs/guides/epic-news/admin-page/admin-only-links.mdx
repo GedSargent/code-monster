@@ -113,7 +113,7 @@ Finally, open `app/components/organisms/HeaderWithSearch.tsx`.
 
 Add the following code to the `HeaderWithSearch` component:
 
-```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers ins="{ isAdminUser }: HeaderWithSearchProps" ins="flex flex-1 items-center justify-center gap-8" collapse={32-50}
+```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers ins="{ isAdminUser }: HeaderWithSearchProps" ins="flex flex-1 items-center justify-center gap-8" collapse={38-50}
 import { Link, useMatches } from '@remix-run/react'
 import logo from '~/assets/png/epic-news-logo.png'
 import { SearchBar } from '../molecules/SearchBar'
@@ -178,7 +178,7 @@ export default function HeaderWithSearch({ isAdminUser }: HeaderWithSearchProps)
 }
 ```
 
-### Testing
+### Testing - admin user login
 
 Whilst logged in as a normal user, or when not logged in at all, you should not be able to see the new admin link in the navbar:
 
@@ -193,9 +193,7 @@ Once successfully logged out, log back in with the following details:
 
 :::note
 
-<MonsterKbd>Kody</MonsterKbd> is a default admin user that is set up in the `prisma/seed.ts` file.
-
-Feel free to open this file and see if you can work out where the user is created.
+<MonsterKbd>kody</MonsterKbd> is a default admin user that is set up in the `prisma/seed.ts` file.
 
 :::
 

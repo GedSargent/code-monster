@@ -398,10 +398,20 @@ export default defineConfig({
                 }
               ]
             },
-            {
-              label: '🚀 Wrapping up - extra credits',
-              link: 'guides/epic-news/wrapping-up'
-            }
+            { label: '🚀 Wrapping up', items: [
+              {
+                label: '🚀 Functionality complete!',
+                link: 'guides/epic-news/wrapping-up/functionality-complete'
+              },
+              {
+                label: '🚀 Extra credit - Single sign-on',
+                link: 'guides/epic-news/wrapping-up/single-sign-on'
+              },
+              {
+                label: '🚀 Extra credit - Advanced grid layout',
+                link: 'guides/epic-news/wrapping-up/advanced-grid-layout'
+              }
+            ]}
           ],
         },
         {

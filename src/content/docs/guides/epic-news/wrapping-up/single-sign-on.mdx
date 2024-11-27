@@ -5,9 +5,13 @@ description: Learn how to configure single-sign-on (SSO) with Github for your ap
 
 import { Steps } from '@astrojs/starlight/components';
 
-Another way to sign up for an account is with a single-sign-on (SSO) provider. Using a SSO provider like GitHub is a great way to reduce the number of passwords a user has to remember. A single digital identity can be used to access multiple applications.
+Currently, the application only allows users to sign up for an account using a local username and password.
 
-In this guide, we'll use GitHub, which is pre-installed in the Epic Stack, but it's possible to add more if you want to.
+Another way to sign up for an account is with a single-sign-on (SSO) provider. This is a great way to reduce the number of passwords a user has to remember.
+
+In this guide, we'll use GitHub, which is pre-installed in the Epic Stack, but it's possible to add more SSO providers like Google if you want.
+
+:::note
 
 ## What is SSO and OAuth?
 
@@ -18,6 +22,8 @@ With SSO, a user can sign up for an account using an existing account with a thi
 [**OAuth**](https://auth0.com/intro-to-iam/what-is-oauth-2) is a protocol that allows a user to grant a third-party application access to their account without sharing their password.
 
 When you sign up for an "Epic News" account using GitHub, you are using OAuth to authenticate with GitHub.
+
+:::
 
 ## Set up a GitHub OAuth application
 

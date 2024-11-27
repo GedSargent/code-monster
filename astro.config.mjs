@@ -296,10 +296,6 @@ export default defineConfig({
                   label: '🗄️ Modify project structure',
                   link: 'guides/epic-news/prisma/modify-project-structure'
                 },
-                // {
-                //   label: '🗄️ Modify seed file',
-                //   link: 'guides/epic-news/prisma/modify-seed-file'
-                // },
               ]
             },
             {
@@ -317,10 +313,6 @@ export default defineConfig({
                   label: "🔒 Account creation",
                   link: "guides/epic-news/account-creation",
                 },
-                // {
-                //   label: "🔒 Single Sign-On",
-                //   link: "guides/epic-news/single-sign-on",
-                // },
               ]
             },
             {
@@ -330,18 +322,6 @@ export default defineConfig({
                   label: '🖥️ Creating articles',
                   link: 'guides/epic-news/displaying-articles/creating-articles'
                 },
-                // {
-                //   label: '🖥️ Loading Dummy Articles',
-                //   link: 'guides/epic-news/displaying-articles/loading-dummy-articles'
-                // },
-                // {
-                //   label: '🖥️ Style Dummy Articles',
-                //   link: 'guides/epic-news/displaying-articles/style-article-card'
-                // },
-                // {
-                //   label: '🖥️ Display an array of dummy articles',
-                //   link: 'guides/epic-news/displaying-articles/display-array-of-dummy-articles'
-                // },
                 {
                   label: '🖥️ Load and display article data',
                   link: 'guides/epic-news/displaying-articles/load-and-display-article-data'

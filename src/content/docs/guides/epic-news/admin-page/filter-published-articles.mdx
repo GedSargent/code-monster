@@ -5,273 +5,212 @@ description: Modify the `/news` and `/article/$articleId` routes to display only
 
 import MonsterReveal from 'src/components/MonsterReveal.astro'
 
-Now that we've implemented the functionality to publish and unpublish articles, we need to modify the `/news` and `/article/$articleId` routes to display only published articles.
+Now that we've implemented the functionality to publish and unpublish articles, we need to modify the home page and `/article/$articleId` routes to display only published articles.
 
-## Modify the `/news` route
+## Modify the home page
 
-Open the file at `app/routes/news._index.tsx` and remind yourself of the code we wrote to fetch all articles:
+Open the file at `app/routes/_index.tsx` and remind yourself of the code we wrote to fetch all articles:
 
-```tsx title="app/routes/news._index.tsx" showLineNumbers {2, 5-14} collapse={16-30}
-import { json, useLoaderData } from '@remix-run/react'
-import { getFilteredArticles } from '~/models/article.server.js'
-import NewsIndexGrid from '~/components/organisms/NewsIndexGrid.js'
+```tsx title="app/routes/_index.tsx" showLineNumbers {12-21} collapse={1-9, 24-68}
+import { type MetaFunction } from '@remix-run/node'
+import { json, Link, useLoaderData } from '@remix-run/react'
+import heroImage from '~/assets/jpg/sample-hero.jpg'
+import { Button } from '~/components/atoms/Button.tsx'
+import ArticleCard from '~/components/organisms/ArticleCard.tsx'
+import HeroCallToAction from '~/components/organisms/Hero/HeroCallToAction.tsx'
+import { prisma } from '~/utils/db.server.ts'
+
+export const meta: MetaFunction = () => [{ title: 'Epic News' }]
 
 export async function loader() {
-	const [techArticles, businessArticles, entertainmentArticles] =
-		await Promise.all([
-			getFilteredArticles('technology'),
-			getFilteredArticles('business'),
-			getFilteredArticles('entertainment'),
-		])
+	const allArticles = await prisma.article.findMany({
+		select: {
+			id: true,
+			title: true,
+			category: { select: { name: true } },
+			images: { select: { id: true } },
+		},
+	})
 
-	return json({ techArticles, businessArticles, entertainmentArticles })
+	return json({ allArticles })
 }
 
-export default function NewsPageIndex() {
-	const { techArticles, businessArticles, entertainmentArticles } =
-		useLoaderData<typeof loader>()
+export default function Index() {
+	const { allArticles } = useLoaderData<typeof loader>()
 
 	return (
-		<main className="container py-16">
-			<NewsIndexGrid articles={techArticles} categoryTitle="Technology" />
-			<NewsIndexGrid articles={businessArticles} categoryTitle="Business" />
-			<NewsIndexGrid
-				articles={entertainmentArticles}
-				categoryTitle="Entertainment"
-			/>
+		<main>
+			<HeroCallToAction
+				image={heroImage}
+				imageRight={true}
+				hasBackgroundColour={true}
+			>
+				<div className="flex h-full flex-1 flex-col justify-between p-16">
+					<div className="flex flex-col gap-8">
+						<h2 className="text-h2">Welcome to Epic News</h2>
+						<p className="text-lg">
+							Keep up to date with the latest tech news.
+						</p>
+					</div>
+					<Button asChild variant="default" size="lg">
+						<Link to="/signup">Sign up</Link>
+					</Button>
+				</div>
+			</HeroCallToAction>
+
+			<div className="container py-16">
+				<h2 className="mb-8 text-h2 font-normal">Latest news</h2>
+
+				<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+					{allArticles.length > 0 ? (
+						allArticles.map(article => (
+							<ArticleCard
+								key={article.id}
+								articleId={article.id}
+								title={article.title}
+								category={article.category?.name}
+								imageId={article.images[0]?.id}
+							/>
+						))
+					) : (
+						<p>No articles found</p>
+					)}
+				</div>
+			</div>
 		</main>
 	)
 }
 ```
 
-If you have followed the previous tutorials, then you will have a file called `app/models/article.server.tsx` where we placed all the functions that interact with the database.
-
-At the very bottom of this file, add a new function called `getPublishedArticlesByCategory` that fetches only the articles that are published:
-
-```diff lang="tsx" title="app/models/article.server.tsx" showLineNumbers collapse={3-49}
-import { prisma } from '~/utils/db.server.js'
-
-export async function getAllArticles() {
-	return await prisma.article.findMany({
-		select: {
-			id: true,
-			title: true,
-			category: { select: { name: true } },
-			images: { select: { id: true } },
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-	})
-}
-
-export async function getFilteredArticles(category: string) {
-	return await prisma.article.findMany({
-		where: {
-			category: {
-				slug: category,
-			},
-		},
-		select: {
-			id: true,
-			title: true,
-			category: { select: { name: true } },
-			images: { select: { id: true } },
-		},
-		orderBy: {
-			createdAt: 'desc',
-		},
-		take: 9, // Limits the number of articles returned
-	})
-}
-
-export async function getSingleArticle(articleId: string) {
-	return await prisma.article.findUnique({
-		where: { id: articleId },
-		select: {
-			id: true,
-			title: true,
-			content: true,
-			category: { select: { name: true } },
-			owner: { select: { name: true } },
-			images: { select: { id: true } },
-		},
-	})
-}
-
-+export async function getPublishedArticlesByCategory(category: string) {
-+	return await prisma.article.findMany({
-+		where: {
-+			category: {
-+				slug: category,
-+			},
-+			isPublished: true,
-+		},
-+		select: {
-+			id: true,
-+			title: true,
-+			category: { select: { name: true } },
-+			images: { select: { id: true } },
-+		},
-+		orderBy: {
-+			createdAt: 'desc',
-+		},
-+		take: 9, // Limits the number of articles returned
-+	})
-+}
-
-```
-
-As you can see, this is virtually identical to the `getFilteredArticles` function we wrote earlier, but with an additional `where` clause that filters out articles that are not published.
-
-With this in place, swap out the `getFilteredArticles` function in the `loader` function of `app/routes/news._index.tsx` with `getPublishedArticlesByCategory`:
-
-```diff title="app/routes/news._index.tsx" {5}
-import { json, useLoaderData } from '@remix-run/react'
--import { getFilteredArticles } from '~/models/article.server.js'
-+import { getPublishedArticlesByCategory } from '~/models/article.server.js'
-import NewsIndexGrid from '~/components/organisms/NewsIndexGrid.js'
-
-export async function loader() {
-	const [techArticles, businessArticles, entertainmentArticles] =
-		await Promise.all([
--			getFilteredArticles('technology'),
--			getFilteredArticles('business'),
--			getFilteredArticles('entertainment'),
-+			getPublishedArticlesByCategory('technology'),
-+			getPublishedArticlesByCategory('business'),
-+			getPublishedArticlesByCategory('entertainment'),
-		])
-
-	return json({ techArticles, businessArticles, entertainmentArticles })
-}
-```
-
-Save your changes, then navigate to the `/news` route in your browser. You should now see only the published articles appear:
-
-![Published news articles](src/assets/webp/epic-news/published-news-articles.webp)
-
-Test this further by heading over to `/admin-review` and publishing another article. When you return to the `/news` route, you should see that article is displayed.
-
 :::tip[Challenge]
 
-## News category page and article detail page
+Can you modify this Prisma query to fetch only published articles?
 
-Although the articles are now filtered on the `/news` index route, the `/news/$category` and `/article/$articleId` routes still display all articles, regardless of whether they are published or not.
-
-Can you modify these routes to display only published articles?
+How will you handle the case where there are no published articles to display?
 
 ### Tips
 
-1. Look carefully at how we have filtered published articles in the solution above, then apply the same logic to the two routes mentioned.
-2. What will you show the user if there are no published artiles in a given category? How will you handle this?
+1. Remind yourself how to use Prisma's `where` option. Remember that we used this in a previous lesson to [filter articles by category](/code-monster/guides/epic-news/displaying-articles/filter-articles-by-category#filtering-queries-with-prismas-where-option).
+2. Look at the `isPublished` field in the `Article` table in Prisma Studio. How can you filter articles based on this field?
 
-## Solution
+### Solution
 
-<MonsterReveal title="1. Modify `/news/$category` route">
+<MonsterReveal>
 
-### 1. Modify `/news/$category` route
+The change require is only small:
 
-1. Open the file at `app/routes/news.$category.tsx` and modify the `loader` function to fetch only published articles:
+```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={1-9, 25-69}
+import { type MetaFunction } from '@remix-run/node'
+import { json, Link, useLoaderData } from '@remix-run/react'
+import heroImage from '~/assets/jpg/sample-hero.jpg'
+import { Button } from '~/components/atoms/Button.tsx'
+import ArticleCard from '~/components/organisms/ArticleCard.tsx'
+import HeroCallToAction from '~/components/organisms/Hero/HeroCallToAction.tsx'
+import { prisma } from '~/utils/db.server.ts'
 
-```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers
-import { invariant } from '@epic-web/invariant'
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import { toTitleCase } from '~/utils/stringUtils'
-import NewsIndexGrid from '~/components/organisms/NewsIndexGrid.js'
-+import { getPublishedArticlesByCategory } from '~/models/article.server.js'
+export const meta: MetaFunction = () => [{ title: 'Epic News' }]
 
-export async function loader({ params }: LoaderFunctionArgs) {
-	const { category } = params
+export async function loader() {
+	const allArticles = await prisma.article.findMany({
++		where: { isPublished: true },
+		select: {
+			id: true,
+			title: true,
+			category: { select: { name: true } },
+			images: { select: { id: true } },
+		},
+	})
 
-	invariant(typeof category === 'string', 'No category provided')
-	const categoryTitle = toTitleCase(category)
-
-+	const filteredArticles = await getPublishedArticlesByCategory(category)
-
-	return json({ categoryTitle, filteredArticles })
+	return json({ allArticles })
 }
 
-export default function NewsCategoryPage() {
-	const { categoryTitle, filteredArticles } = useLoaderData<typeof loader>()
+export default function Index() {
+	const { allArticles } = useLoaderData<typeof loader>()
 
 	return (
-		<div className="container py-16">
-			<NewsIndexGrid
-				articles={filteredArticles}
-				categoryTitle={categoryTitle}
-			/>
-		</div>
+		<main>
+			<HeroCallToAction
+				image={heroImage}
+				imageRight={true}
+				hasBackgroundColour={true}
+			>
+				<div className="flex h-full flex-1 flex-col justify-between p-16">
+					<div className="flex flex-col gap-8">
+						<h2 className="text-h2">Welcome to Epic News</h2>
+						<p className="text-lg">
+							Keep up to date with the latest tech news.
+						</p>
+					</div>
+					<Button asChild variant="default" size="lg">
+						<Link to="/signup">Sign up</Link>
+					</Button>
+				</div>
+			</HeroCallToAction>
+
+			<div className="container py-16">
+				<h2 className="mb-8 text-h2 font-normal">Latest news</h2>
+
+				<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+					{allArticles.length > 0 ? (
+						allArticles.map(article => (
+							<ArticleCard
+								key={article.id}
+								articleId={article.id}
+								title={article.title}
+								category={article.category?.name}
+								imageId={article.images[0]?.id}
+							/>
+						))
+					) : (
+						<p>No articles found</p>
+					)}
+				</div>
+			</div>
+		</main>
 	)
 }
 ```
 
-</MonsterReveal>
+Save your changes, then navigate to your site's homepage in Chrome. You should now see only the published articles appear:
 
-<MonsterReveal title="2. Hide draft single articles">
+![Published news articles](src/assets/webp/epic-news/home-page-published-articles-only.webp)
 
-### 2. Hide draft single articles
+Test this further by heading over to `/admin-review` and publishing another article.
 
-For this solution, we need to update the `getSingleArticle` function in `app/models/article.server.tsx` to fetch only published articles:
-
-```tsx title="app/models/article.server.tsx" ins=", isPublished: true"
-export async function getSingleArticle(articleId: string) {
-	return await prisma.article.findUnique({
-		where: { id: articleId, isPublished: true	},
-		select: {
-			id: true,
-			title: true,
-			content: true,
-			category: { select: { name: true } },
-			owner: { select: { name: true } },
-			images: { select: { id: true } },
-		},
-	})
-}
-```
-
-Our code in the `app/routes/article.$articleId.tsx` file will remain the same, as we are already using the `getSingleArticle` function to fetch the article data, and showing a fallback UI if the article is not found.
-
-You can test this by:
-
-1. Opening a split terminal in your project directory by clicking the button below:
-
-![Split terminal button](src/assets/webp/epic-news/split-terminal-button.webp)
-
-2. In your new terminal panel, fire up the Prisma Studio server:
-
-```bash
-npx prisma studio
-```
-
-3. Once Prisma Studio has opened in your browser, open the `Article` table and find an article where `isPublished` is set to `false`.
-
-		Double-click into the `id` field of the unpublished article and copy its value.
-
-![Select draft article id](src/assets/webp/epic-news/select-draft-article-id.webp)
-
-Then navigate to the `/article/$articleId` route in your browser, replacing `$articleId` with the actual id of the article. For example, if my unplublished article had an ID of `123456`, I would visit:
-
-```bash mark="/123456"
-http://localhost:3000/article/123456
-```
-
-If the article is unpublished, you should see the fallback UI displayed:
-
-![Unpublished article fallback UI](src/assets/webp/epic-news/unpublished-article-fallback-ui.webp)
+When you return to the home page, you should see that article is displayed.
 
 </MonsterReveal>
+
 :::
 
-With these changes in place, your `/news` index, `/news/$category`, and `/article/$articleId` routes should now display only published articles.
+## News category page and article detail page
+
+Although the articles are now filtered on the home page, the `/news/$category` and `/article/$articleId` routes still display all articles, regardless of whether they are published or not.
+
+:::tip[Challenge]
+
+Can you modify these routes to display only published articles?
+
+- What will you show the user if there are no published articles in a given category? How will you handle this?
+
+There is no solution for this! You have all the knowledge you need to try this on your own 😉.
+
+### Tips
+
+1. Look carefully at how we have filtered published articles in the solution above, then apply the same logic to the two routes mentioned.
+2. Consider how we used a ternary statement in `app/routes/article.$articleId.tsx` to handle the case where an article is not found.
+
+		You can use a similar approach here.
+
+:::
+
+With these changes in place, your homepage, `/news/$category`, and `/article/$articleId` routes should now display only published articles.
 
 ## Summary
 
 In this step, we have:
 
-- Modified the `/news` index, `/news/$category`, and `/article/$articleId` routes to display only published articles.
-- Updated the `getPublishedArticlesByCategory` function in `app/models/article.server.tsx` to fetch only published articles.
+- Modified the homepage, `/news/$category`, and `/article/$articleId` routes to display only published articles.
 - Added a fallback UI to display a message when no published articles are found in a category.
 
 ::::note[Assignment]
@@ -280,8 +219,7 @@ In this step, we have:
 
 Update your assignment to include explanations of the following:
 
-- What changes did you make to the `getPublishedArticlesByCategory` and `getSingleArticle` functions in `app/models/article.server.tsx` to fetch only published articles?
-- How did you modify the `/news` index, `/news/$category`, and `/article/$articleId` routes to display only published articles?
+- What changes did you make to fetch only published articles?
 - What did you show the user if there are no published articles in a given category?
 
 ::::

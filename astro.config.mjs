@@ -51,9 +51,11 @@ export default defineConfig({
       sidebar: [
         {
           label: "Programming Principles",
+          collapsed: true,
           items: [
             {
               label: "Harmony Music Academy",
+              collapsed: true,
               items: [
                 {
                   label: "📄 Client brief",
@@ -129,7 +131,6 @@ export default defineConfig({
         },
         {
           label: "React 101",
-          collapsed: true,
           items: [
             {
               label: "⚛️ Getting started",
@@ -147,11 +148,9 @@ export default defineConfig({
         },
         {
           label: "Prisma",
-          collapsed: true,
           items: [
             {
               label: "🗄️ Database config",
-              collapsed: true,
               items: [
                 {
                   label: "🗄️ Getting started",
@@ -181,7 +180,6 @@ export default defineConfig({
             },
             {
               label: "🖥️ Displaying data",
-              collapsed: true,
               items: [
                 {
                   label: "🖥️ Props and interfaces",
@@ -197,6 +195,7 @@ export default defineConfig({
         },
         {
           label: "Epic News",
+          collapsed: true,
           items: [
             {
               label: "🛠 Project setup",

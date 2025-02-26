@@ -6,21 +6,23 @@ description: Defining your database tables, fields and relationships
 import MonsterReveal from 'src/components/MonsterReveal.astro'
 import MonsterKbd from 'src/components/MonsterKbd.astro'
 
-All database interactions begin with the Prisma [**schema**](https://www.prisma.io/docs/orm/prisma-schema/overview).
+In Prisma, all database interactions begin with the [**schema**](https://www.prisma.io/docs/orm/prisma-schema/overview).
 
-This can be found in the `prisma/schema.prisma` file in the root of the project.
+This can be found in the `prisma/schema.prisma` file in the root of your project.
 
 ![Prisma Schema Folder](src/assets/png/prisma/prisma-schema-folder.png)
 
 The schema is a file that defines the database tables and their fields. It also defines the relationships between the tables.
 
-Let's take a look at the Prisma schema for the starter Remix project you have been working from:
+Let's take a look at the Prisma schema for our starter project:
 
 ![Prisma Schema](src/assets/png/prisma/prisma-schema-start.png)
 
 :::note[Info]
 
-So far, the schema is virtually empty. It defines a `generator` that Prisma uses to generate the client library for the database, and source of the database file that Prisma will connect our application to.
+So far, the schema is virtually empty, but it already has some crucial code.
+
+1. It defines a `generator` that Prisma uses to generate the client library for the database, and source of the database file that Prisma will connect our application to.
 
 In this case, the source is a SQLite database, which is a file-based database that is easy to set up and use for development purposes.
 

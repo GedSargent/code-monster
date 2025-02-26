@@ -1,15 +1,14 @@
 ---
 title: Reading data - loader functions
 description: Reading data from a database using Prisma and Remix
+next: false
 ---
 
-:::danger[Prerequisites]
+import { Steps } from '@astrojs/starlight/components'
 
-Make sure that you have completed the lesson on [**seeding data**](/code-monster/guides/prisma/seed-files) before starting this one.
+We are now ready to read data from the database using Prisma and Remix.
 
-:::
-
-We are now ready to read data from the database using Prisma and Remix. We will start by creating a new route that will display a list of all the articles in the database.
+Let's get started!
 
 ## Start the development server
 
@@ -19,127 +18,93 @@ Start the development server by running the following command in your terminal:
 npm run dev
 ```
 
-## Create a new route
+You should see the landing page of our application:
 
-Create a new file called `articles.tsx` inside the `app/routes` directory:
+![Hello Gamelogger](src/assets/webp/prisma/hello-gamelogger.webp)
 
-![Create articles route](src/assets/png/prisma/articles-route-file.png)
+## Finding our code
 
-Add the following code to the file, and save your changes:
+How can we work out where this page is coming from?
 
-```tsx title="app/routes/articles.tsx"
-import HomeButton from '~/components/challenges/HomeButton'
+The easiest way is to simply copy the 'Hello Gamelogger' text and search for it in the codebase. Let's do that now.
 
-function Article() {
-	return (
-		<div className="flex h-96 w-96 items-center justify-center justify-self-center rounded-xl bg-white/20">
-			<p className="text-center text-4xl text-gray-300">Article</p>
-		</div>
-	)
-}
+<Steps>
 
-export default function ArticlesRoute() {
-	return (
-		<main className="min-h-screen">
-			<div className="container mx-auto py-28">
-				<HomeButton />
-				<h1 className="mb-32 text-center text-8xl font-bold text-white">
-					Articles
-				</h1>
+1. Copy the text 'Hello Gamelogger' from your browser window.
 
-				<div className="grid grid-cols-2 gap-4">
-					<Article />
-					<Article />
-				</div>
-			</div>
-		</main>
-	)
-}
-```
+2. In VS Code, press `Ctrl + Shift + F` to open the project search bar, or click the magnifying glass icon at the top left of your screen.
 
-With your server still running, head back to your browser and navigate to `http://localhost:3000/articles`.
+	Paste the text you copied into the search bar.
 
-You should see a page with the title "Articles" and two "Article" component placeholders, like this:
+3. Press `Enter` to search for the text.
 
-![Articles page start](src/assets/png/prisma/articles-page-start.png)
+4. Should see an exerpt of code from the `app/routes/index.tsx` file.
+
+	Click on the file name to open the code in your editor.
+
+	![Project Search](src/assets/webp/prisma/project-search.webp)
+
+</Steps>
+
+:::tip[Challenge]
+
+Can you update the text in the `index.tsx` file to say 'Hello, world!' instead of 'Hello Gamelogger'?
+
+Once you have, save the file and refresh the page in your browser to see the changes.
+
+:::
+
+This is how we can change the page content in Remix.
+
+Let's now move on to reading data from the database.
 
 ## Fetch data from the database
 
-We now need to fetch the articles from the database and display them on the page.
+We now need to fetch the games from the database and display them on the page.
 
-We will do this by adding a Remix [**loader function**](https://remix.run/docs/en/main/route/loader) to the `articles.tsx` file:
+We will do this by adding a Remix [**loader function**](https://remix.run/docs/en/main/route/loader) to the `_index.tsx` file:
 
-```diff lang="tsx" title="app/routes/articles.tsx" showLineNumbers collapse={14-20, 27-41}
+```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={6-11}
 +import { PrismaClient } from '@prisma/client'
 +import { json } from '@remix-run/node'
 +import { useLoaderData } from '@remix-run/react'
-import HomeButton from '~/components/challenges/HomeButton'
+import type { MetaFunction } from "@remix-run/node";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "New Remix App" },
+    { name: "description", content: "Welcome to Remix!" },
+  ];
+};
 
 +export async function loader() {
 +	const prisma = new PrismaClient()
 +
-+	const articles = await prisma.article.findMany()
++	const games = await prisma.game.findMany()
 +
-+	return json({ articles })
++	return json({ games })
 +}
 
-function Article() {
-	return (
-		<div className="flex h-96 w-96 items-center justify-center justify-self-center rounded-xl bg-white/20">
-			<p className="text-center text-4xl text-gray-300">Article</p>
-		</div>
-	)
-}
-
-export default function ArticlesRoute() {
-+	const { articles } = useLoaderData<typeof loader>()
+export default function Index() {
++	const { games } = useLoaderData<typeof loader>()
 +
-+	console.log({ articles })
++	console.log({ games })
 
-	return (
-		<main className="min-h-screen">
-			<div className="container mx-auto py-28">
-				<HomeButton />
-				<h1 className="mb-32 text-center text-8xl font-bold text-white">
-					Articles
-				</h1>
-
-				<div className="grid grid-cols-2 gap-4">
-					<Article />
-					<Article />
-				</div>
-			</div>
-		</main>
-	)
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <h1 className="text-4xl font-bold">Hello, world!</h1>
+    </div>
+  );
 }
 ```
 
-If you save these changes, then head over to your browser and refresh the page, you should see the articles we have loaded from the database displayed in the console:
+Save these changes, then head over to your browser and refresh the page.
 
-```bash title="Console"
-GET / 200 - - 69.668 ms
-{
-  articles: [
-    {
-      id: 'cltu63o8x0002moxjqz269ef3',
-      title: 'My first article!',
-      content: 'Hello, world!',
-      createdAt: '2024-03-16T14:12:48.129Z',
-      updatedAt: '2024-03-16T14:12:48.129Z',
-      authorId: 'cltu63o8u0000moxj5dfh8xqn'
-    },
-    {
-      id: 'cltu63o8y0004moxj47f5fcpt',
-      title: 'My second article',
-      content: 'Hello again, world!',
-      createdAt: '2024-03-16T14:12:48.131Z',
-      updatedAt: '2024-03-16T14:12:48.131Z',
-      authorId: 'cltu63o8u0000moxj5dfh8xqn'
-    }
-  ]
-}
-GET /articles 200 - - 38.458 ms
-```
+Right-click on the page, choose 'Inspect' and check the 'Console' tab.
+
+You should see the game we have loaded from the database displayed in the console:
+
+![Console log of games](src/assets/webp/prisma/log-games.webp)
 
 This is great!
 
@@ -157,13 +122,17 @@ The makers of Remix got around this problem by introducing `loader` functions.
 
 ### Accessing server data with `loader` functions
 
-If a `loader` function is exported from a **route** file (i.e. from a `tsx` file placed inside the `routes` folder), then Remix will execute this code on the **server** _before_ the user interface (UI) is rendered. This ensures that any required data is accessed and processed before the UI is presented by the browser.
+All `.tsx` files inside the `routes` folder are known as **route files** in Remix.
+
+If a `loader` function is exported from a **route** file, Remix will run this code on the **server** _before_ the user interface (UI) is rendered.
+
+This ensures that any required data is accessed and processed before the UI is presented by the browser.
 
 Look closely at the flow of data in the following diagram:
 
 ![Client server side code](src/assets/png/client-server-side-code.png)
 
-In the example shown here, the `loader` function is getting the articles from the database and returning them as JSON data.
+In the example shown here, the `loader` function is getting articles from a database and returning them as JSON data.
 
 This data is then accessed by the `LandingPage` component using the `useLoaderData` hook.
 
@@ -177,6 +146,6 @@ You can learn more about `loader` functions via the [**Remix docs**](https://rem
 
 ::::
 
-In our case, we want to use the `articles` data to render a list of articles on the page.
+In our case, we want to use the `games` data to render a list of games on the page.
 
-Let's update our code to do just this.
+We will do this in the next section.

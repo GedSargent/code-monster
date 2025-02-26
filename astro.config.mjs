@@ -164,33 +164,33 @@ export default defineConfig({
                   label: "🗄️ Prisma Studio",
                   link: "guides/prisma/prisma-studio",
                 },
-                {
-                  label: "🗄️ Database relationships",
-                  link: "guides/prisma/database-relationships",
-                },
-                {
-                  label: "🌱 Seed files",
-                  link: "guides/prisma/seed-files",
-                },
+                // {
+                //   label: "🗄️ Database relationships",
+                //   link: "guides/prisma/database-relationships",
+                // },
+                // {
+                //   label: "🌱 Seed files",
+                //   link: "guides/prisma/seed-files",
+                // },
                 {
                   label: "🗄️ Reading data - loader functions",
                   link: "guides/prisma/reading-data",
                 }
               ]
             },
-            {
-              label: "🖥️ Displaying data",
-              items: [
-                {
-                  label: "🖥️ Props and interfaces",
-                  link: "guides/prisma/displaying-data",
-                },
-                {
-                  label: "🖥️ The map function",
-                  link: "guides/prisma/using-map",
-                }
-              ]
-            },
+            // {
+            //   label: "🖥️ Displaying data",
+            //   items: [
+            //     {
+            //       label: "🖥️ Props and interfaces",
+            //       link: "guides/prisma/displaying-data",
+            //     },
+            //     {
+            //       label: "🖥️ The map function",
+            //       link: "guides/prisma/using-map",
+            //     }
+            //   ]
+            // },
           ]
         },
         {

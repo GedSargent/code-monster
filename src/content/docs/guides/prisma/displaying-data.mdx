@@ -1,161 +1,273 @@
 ---
-title: 🖥️ Displaying data - props and interfaces
+title: 🖥️ Displaying data with `map`
 description: Using props to display data in a component
+next: false
 ---
 
-In our [**previous step**](/code-monster/guides/prisma/reading-data), we fetched a list of articles from the database and displayed them on the page.
+import MonsterReveal from 'src/components/MonsterReveal.astro'
 
-In this step, we will update the `Article` component to accept a `title` prop, and then use this prop to display the article title dynamically on screen.
+In our [**previous step**](/code-monster/guides/prisma/reading-data), we fetched a list of games from the database and displayed them on the page.
 
-## Add props to the `Article` component
+In this step, we will start by displaying the game titles on the page.
 
-If you look at the `Article` component, you will see that it is currently hardcoded to display the text "Article".
+## Start the development server
 
-We want to update this component to accept a `title` **prop**, and then use this prop to display the article title dynamically on screen.
+If you need to, start the development server by running the following command in your terminal:
 
-### What are props?
+```bash
+npm run dev
+```
 
-In React, **props** are used to pass data from a parent component to a child component. They are read-only and help to make components reusable.
+## Data in React
 
-:::tip
+Look again at the shape of the data we fetched in the [**previous step**](/code-monster/guides/prisma/reading-data):
 
-You can learn more about props in the [**React docs**](https://react.dev/learn/passing-props-to-a-component).
+```ts
+games: [
+	{
+		id: 'cm7s2xqfx0000xiv0eig2y3va',
+		title: 'The Legend of Zelda: Breath of the Wild',
+		description: 'An open-world adventure game set in the kingdom of Hyrule.',
+		price: 59.99,
+		rating: 4.9,
+		releaseDate: '2017-03-03T00:00:00.000Z',
+		createdAt: '2025-03-02T20:24:32.541Z',
+		updatedAt: '2025-03-02T20:24:32.541Z'
+	},
+	{
+		id: 'cm7s2xqg00001xiv0adp4zac7',
+		title: 'The Witcher 3: Wild Hunt',
+		description: 'An action RPG set in a fantasy world full of monsters and magic.',
+		price: 39.99,
+		rating: 4.8,
+		releaseDate: '2015-05-19T00:00:00.000Z',
+		createdAt: '2025-03-02T20:24:32.545Z',
+		updatedAt: '2025-03-02T20:24:32.545Z'
+	},
+	// ... more games here...
+]
+```
+
+Notice the square brackets `[]` around the object? This means that `games` is an [***array***](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Arrays) of objects.
+
+We need some way to take each of these objects and display their properties on the page.
+
+But how? 🤔
+
+## The `map` function
+
+The [`map` function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) in JavaScript allows us to loop through an array and apply a function to each element, returning a new array with the results.
+
+::::note[Example]
+
+Let's see how the `map` function works with a simple example.
+
+```javascript
+const numbers = [1, 2, 3];
+
+const doubledNumbers = numbers.map((number) => {
+  return number * 2;
+});
+
+console.log(doubledNumbers); // -> [2, 4, 6]
+console.log(numbers); // -> [1, 2, 3]
+```
+
+<MonsterReveal title="🧑‍💻 Explanation">
+
+We start with an array of `numbers`.
+
+```ts
+const numbers = [1, 2, 3];
+```
+
+We use the `map` function to loop through each number and multiply it by 2. The result is a ***new array*** with the doubled numbers.
+
+```ts
+const doubledNumbers = numbers.map((number) => {
+  return number * 2;
+});
+```
+
+We store this new array in the `doubledNumbers` variable and log it to the console.
+
+```ts
+console.log(doubledNumbers); // -> [2, 4, 6]
+```
+
+:::caution[Important]
+
+Note that when we `console.log` the original `numbers` array, it remains unchanged.
+
+```ts
+console.log('Original numbers:');
+console.log(numbers); // -> [1, 2, 3]
+```
+
+The `map` function ***does not modify the original array***, it returns a completely new one.
 
 :::
 
-We will update the `Article` component to accept a `title` prop, and then use this prop to display the article `title` on screen.
+If you want to learn more about the `map` function, I recommend reading the excellent [**MDN documentation**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) to understand it better.
 
-### Define props on a component
+</MonsterReveal>
 
-Firstly, add the following code to the `Article` component:
+::::
 
-```diff lang="tsx" title="app/routes/articles.tsx" ins="{ title }: ArticleProps" ins="{title}"
-+interface ArticleProps {
-+  title: string
-+}
+Now that we understand how the `map` function works, let's see how we can use it in React to display a list of items.
 
-function Article({ title }: ArticleProps) {
+## Rendering arrays in React components
+
+It turns out that React automatically renders the content of an array directly to the screen when used in JSX.
+
+We can see this if we replace the main page title with an array of strings:
+
+```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={1-19} ins="{["Hello", "World!"]}"
+import { PrismaClient } from '@prisma/client'
+import { json } from '@remix-run/node'
+import { useLoaderData } from '@remix-run/react'
+import type { MetaFunction } from "@remix-run/node";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "New Remix App" },
+    { name: "description", content: "Welcome to Remix!" },
+  ];
+};
+
+export async function loader() {
+  const prisma = new PrismaClient()
+
+  const games = await prisma.game.findMany()
+
+  return json({ games })
+}
+
+export default function Index() {
+  const { games } = useLoaderData<typeof loader>()
+
+  console.log({ games })
+  
   return (
-    <div className="flex h-96 w-96 items-center justify-center justify-self-center rounded-xl bg-white/20">
-      <p className="text-center text-4xl text-gray-300">{title}</p>
+    <div className="flex items-center justify-center min-h-screen">
+      <h1 className="text-4xl font-bold">{["Hello", "World!"]}</h1>
     </div>
-  )
+  );
 }
 ```
 
-:::note[Info]
+If you check the browser, you will see that the page title is now "HelloWorld!":
 
-## What is an `interface`?
+![Title as array](src/assets/webp/prisma/title-as-array.webp)
 
-### The problem with JavaScript
+### Arrays of React components
 
-Imagine that you have an object called `person` that you declare like this:
+If we take this a step further, what do you think will happen if we replace the plain strings inside this array with full React components?
 
-```javascript
-const person = {
-  name: 'John',
-  age: 30
+```diff lang="tsx" title="app/routes/_index.tsx"
+export default function Index() {
+  const { games } = useLoaderData<typeof loader>()
+
+  console.log({ games })
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+-      <h1 className="text-4xl font-bold">{["Hello", "World!"]}</h1>
++				<h1 className="text-4xl font-bold">
++					{[
++            <span key="1" className="border border-red-500 p-2 text-red-500">
++              Hello
++            </span>,
++            <span key="2" className="border border-green-500 p-2 text-green-500">
++              World!
++            </span>
++					]}
++				</h1>
+    </div>
+  );
 }
 ```
 
-Later in your code, you want to display the person's name. You might write something like this:
+Head back to your browser, and you should see the page title has changed again:
 
-```javascript
-const message = `Hello, ${person.Name}, how are you?`;
-```
+![MyBrilliantArticles styled](src/assets/webp/prisma/title-as-array-styled.webp)
 
-Take a second and look back at this code. Can you see the problem?
+With this knowledge in mind, let's think how we can use the `map` function to dynamically render our list of `games`.
 
-<p class="text-8xl">🧐</p>
+:::caution[Before you continue]
 
-The `person` object doesn't have a `Name` property, it has a `name` property (with a lowercase "n").
+If you were following the previous steps and altering code, make sure to revert your page title back to its original state before continuing.
 
-This means that the `message` will actually read `Hello, undefined, how are you?`. Definitely not what we wanted!
-
-Unfortunately, if we are coding in JavaScript, this bug will only be discovered at **runtime**, when the code is executed and already in our customer's browser. This can be a problem, especially in large applications.
-
-### TypeScript to the rescue
-
-To fix this problem and others like it, many developers now use [**TypeScript**](https://www.typescriptlang.org/), and this is the language Remix has adopted.
-
-TypeScript is built on top of JavaScript, and lets us annotate code with descriptions of what our variables, objects and functions should look like. This means that we can catch bugs like the one above while we are still coding, long before any customers might come across it.
-
-### Understanding `interfaces`
-
-With objects like `person` above, we can declare an `interface` to define a new custom [**type**](https://www.typescripttutorial.net/typescript-tutorial/typescript-types).
-
-In the `person` example, we could define an interface like this:
-
-```typescript
-interface Person {
-  name: string;
-  age: number;
-}
-```
-
-This means that we can now declare a new `person` object like this:
-
-```typescript ins=": Person"
-const person: Person = {
-  name: 'John',
-  age: 30
-}
-```
-
-The `: Person` annotation tells TypeScript that the object we are declaring should have the same properties as the `Person` interface.
-
-Now, if we try to access a `Name` property on the `person` object, TypeScript will throw an error. Our code editor knows in advance that the `person` object should have a property called `name`, not `Name`:
-
-![TypeScript error](src/assets/gif/typescript-error.gif)
-
-This lets TypeScript ensure that data is passed correctly throughout an application, which in turn helps to prevent bugs from occurring.
+(Unless you like the new look, of course! 😄)
 
 :::
 
-OK. Back to our articles page code.
+## Using `map` to loop through an array of items
 
-We've now replaced the hardcoded "Article" placeholder text with the `title` prop. This means that when we pass a `title` prop to the `Article` component, it will display the title on screen.
+Let's recap what we know so far:
 
-## Passing props to the `Article` component
+1. If we embed an array inside some JSX, React will automatically render the elements of this array straight out to the screen.
+2. The `map` function ***produces a new array from an existing one*** by applying a **callback function** to each element, e.g.
 
-If you scroll down to where the `Article` component is called, you will see that TypeScript is angry.
+```ts mark="(number) => {" mark="  return number * 2" mark="}"
+const doubledNumbers = numbers.map((number) => {
+  return number * 2;
+});
+```
 
-It's telling us that we need to pass a `title` prop to the `Article` component:
+:::tip[Aha!]
 
-![Title prop needed](src/assets/png/prisma/title-prop-needed.png)
+<p class="text-center text-8xl">💡</p>
 
-Let's fix this by passing the `title` of each `article` to the `Article` component:
+This means that we can use the `map` function to loop through an array of objects (like our `games` array) and return a ***new array of components***.
 
-```diff lang="tsx" title="app/routes/articles.tsx" ins=" title={articles[0].title}" ins=" title={articles[1].title}"
-export default function ArticlesRoute() {
-	const { articles } = useLoaderData<typeof loader>()
+:::
 
-	console.log({ articles })
+Let's see how we can use this to display a list of games.
 
-	return (
-		<main className="min-h-screen">
-			<div className="container mx-auto py-28">
-				<HomeButton />
-				<h1 className="mb-32 text-center text-8xl font-bold text-white">
-					Articles
-				</h1>
+```diff lang="tsx" title="app/routes/_index.tsx"
+export default function Index() {
+  const { games } = useLoaderData<typeof loader>();
+-
+-  console.log({ games });
 
-				<div className="grid grid-cols-2 gap-4">
-					<Article title={articles[0].title} />
-					<Article title={articles[1].title} />
-				</div>
-			</div>
-		</main>
-	)
+  return (
+    <div className="flex items-center justify-center min-h-screen">
++      <div>
+        <h1 className="text-4xl font-bold">Hello, World!</h1>
++        {games.map((game) => (
++          <div key={game.id}>
++            <h2>{game.title}</h2>
++          </div>
++        ))}
++      </div>
+    </div>
+  );
 }
 ```
 
-If all goes well, you should now see the titles of the articles displayed on the page:
+Save the changes to your file and check the browser. You should see that the game titles are now displayed on screen:
 
-![Articles with titles](src/assets/png/prisma/articles-with-titles.png)
+![Unstyled game title list](src/assets/webp/prisma/unstyled-game-title-list.webp)
 
-So far, so good.
+## Summary
 
-But what if we want to display more than two articles? What if we don't know exactly how many articles we will have?
+In this step, we learned how to use the `map` function to loop through an array of items and display a list of game titles from our database.
 
-This is precisely what the `.map()` function can help us with, and we will explore this in the next step.
+There are many more JavaScript array functions that can be used to manipulate arrays in different ways. Below are a few examples for you to research further and experiment with:
+
+- `find`: returns the first element that passes a test
+- `some`: returns `true` if at least one element in an array passes a test
+- `every`: returns `true` if all elements in an array pass a test
+- `includes`: returns `true` if an array contains a certain element
+- `filter`: returns a new array of elements that pass a certain test or condition
+- `reduce`: reduces an array to a single value
+
+Kent C. Dodds has a great game on [**JavaScript to know for React**](https://kentcdodds.com/blog/javascript-to-know-for-react#array-methods) that demonstrates these methods in action.
+
+:::tip[Challenge]
+
+1. Display the price of each game along with its title.
+2. Make sure each price contains a `£` sign before it.
+
+:::

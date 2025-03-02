@@ -178,19 +178,15 @@ export default defineConfig({
                 }
               ]
             },
-            // {
-            //   label: "🖥️ Displaying data",
-            //   items: [
-            //     {
-            //       label: "🖥️ Props and interfaces",
-            //       link: "guides/prisma/displaying-data",
-            //     },
-            //     {
-            //       label: "🖥️ The map function",
-            //       link: "guides/prisma/using-map",
-            //     }
-            //   ]
-            // },
+            {
+              label: "🖥️ Displaying data",
+              items: [
+                {
+                  label: "🖥️ Displaying data with `map`",
+                  link: "guides/prisma/displaying-data",
+                },
+              ]
+            },
           ]
         },
         {

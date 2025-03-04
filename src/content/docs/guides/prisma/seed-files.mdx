@@ -3,215 +3,401 @@ title: Seed files
 description: Quickly generating data for your database
 ---
 
-Before we can read or write data to our database, we need to have some data in it.
-
-We could manually add data to our database via Prisma Studio, but that would be time-consuming and error-prone.
-
-Instead, this is where seed files come in.
-
 ## What is a seed file? 🌱
 
-Seed files are a way to quickly generate data for your database. They are typically written in your project's programming language of choice (JavaScript in our case), and used to populate your database with some initial data.
+Seed files are a way to quickly generate data for your database.
 
-In Prisma, the seed file is usually located in `prisma/seed.ts` or `prisma/seed.js`. For ease of use in this guide, we will use JavaScript (`.js`).
+In Prisma, the seed file is located in `prisma/seed.ts`. Open this now in your code editor.
 
-## Add a seed command to Prisma
-
-To run our seed file, we need to add a new command to our `package.json` file.
-
-```diff lang="json" title="package.json" ins="},"
-{
-	"name": "react-remix-tailwind",
-	// ...Code omitted for brevity...
-	"engines": {
-    "node": ">=18.0.0"
-  },
-+	"prisma": {
-+    "seed": "node prisma/seed.js"
-+  }
-}
-```
-
-:::caution
-
-Check carefully that you:
-
-- add a comma to the closing brack of the `"engines"` object
-- add the code above to the very bottom of the `package.json` file, just above the final closing bracket `}` of the file.
-
-:::
-
-## Create a seed file
-
-Create a new file at `prisma/seed.js`:
-
-![Add seed file](src/assets/png/prisma/add-seed-file.png)
-
-### Add a user
+### Adding categories.
 
 Inside your new `prisma/seed.js` file, add the following code:
 
-:::caution
+```diff lang="ts" title="prisma/seed.ts" showLineNumbers collapse={7-82}
+import { PrismaClient } from "@prisma/client";
 
-Ignore the red underlines that will appear under `seed` and `user` after you add the code below.
-
-If you hover your cursor over the underlined text, you will see a message that says the variable is declared but its value is never read. This is because we haven't yet called the `seed` function anywhere yet:
-
-![Ignore the red underlines](src/assets/png/prisma/ignore-red-underlines.png)
-
-This is absolutely fine - we will call the `seed` function and `user` variable later in the guide.
-
-:::
-
-```typescript title="prisma/seed.js"
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function seed() {
-	const email = "test@email.com";
+  const games = [
+    {
+      title: "The Legend of Zelda: Breath of the Wild",
+      description: "An open-world adventure game set in the kingdom of Hyrule.",
+      price: 59.99,
+      rating: 4.9,
+      releaseDate: new Date("2017-03-03"),
+    },
+    {
+      title: "The Witcher 3: Wild Hunt",
+      description:
+        "An action RPG set in a fantasy world full of monsters and magic.",
+      price: 39.99,
+      rating: 4.8,
+      releaseDate: new Date("2015-05-19"),
+    },
+    {
+      title: "Red Dead Redemption 2",
+      description: "An open-world western adventure game.",
+      price: 59.99,
+      rating: 4.7,
+      releaseDate: new Date("2018-10-26"),
+    },
+    {
+      title: "God of War",
+      description: "An action-adventure game based on Norse mythology.",
+      price: 49.99,
+      rating: 4.9,
+      releaseDate: new Date("2018-04-20"),
+    },
+    {
+      title: "Minecraft",
+      description:
+        "A sandbox game where players can build and explore their own worlds.",
+      price: 26.95,
+      rating: 4.8,
+      releaseDate: new Date("2011-11-18"),
+    },
+    {
+      title: "Fortnite",
+      description:
+        "A battle royale game where players fight to be the last one standing.",
+      price: 0.0,
+      rating: 4.5,
+      releaseDate: new Date("2017-07-25"),
+    },
+    {
+      title: "Cyberpunk 2077",
+      description: "An open-world RPG set in a dystopian future.",
+      price: 59.99,
+      rating: 4.0,
+      releaseDate: new Date("2020-12-10"),
+    },
+    {
+      title: "Among Us",
+      description:
+        "A multiplayer game where players work together to complete tasks on a spaceship.",
+      price: 4.99,
+      rating: 4.4,
+      releaseDate: new Date("2018-06-15"),
+    },
+    {
+      title: "Animal Crossing: New Horizons",
+      description:
+        "A life simulation game where players can build and manage their own island.",
+      price: 59.99,
+      rating: 4.9,
+      releaseDate: new Date("2020-03-20"),
+    },
+    {
+      title: "Hades",
+      description:
+        "A rogue-like dungeon crawler where players fight their way out of the Underworld.",
+      price: 24.99,
+      rating: 4.9,
+      releaseDate: new Date("2020-09-17"),
+    },
+  ];
 
-  // cleanup the existing database
-  await prisma.user.delete({ where: { email } }).catch(() => {
-    // no worries if it doesn't exist yet
+  for (const game of games) {
+    await prisma.game.create({ data: game });
+  }
+
++  console.log("👾 Games created successfully");
++
++  const categories = [
++    {
++      title: "Action",
++      description:
++        "Games that require quick reflexes and hand-eye coordination.",
++    },
++    {
++      title: "Adventure",
++      description: "Games that involve exploration and puzzle-solving.",
++    },
++    {
++      title: "RPG",
++      description: "Games that focus on character development and story.",
++    },
++    {
++      title: "Simulation",
++      description: "Games that simulate real-world activities or systems.",
++    },
++    {
++      title: "Strategy",
++      description: "Games that require strategic thinking and planning.",
++    },
++    {
++      title: "Puzzle",
++      description:
++        "Games that challenge players with logic and problem-solving.",
++    },
++    {
++      title: "Sports",
++      description: "Games that simulate sports or physical activities.",
++    },
++    {
++      title: "Multiplayer",
++      description: "Games that can be played with multiple players.",
++    },
++    {
++      title: "Indie",
++      description: "Games developed by independent studios or individuals.",
++    },
++    {
++      title: "Horror",
++      description: "Games that aim to scare or unsettle players.",
++    },
++  ];
++
++  for (const category of categories) {
++    await prisma.category.create({ data: category });
++  }
++
++  console.log("🎮 Categories created successfully");
+
+  console.log("Seed data created successfully");
+}
+
+seed()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
-
-	const user = await prisma.user.create({
-		data: {
-			email,
-		},
-	})
-}
 ```
 
-Can you work out what this is doing?
+:::note[What does this code do?]
 
-:::note[Code breakdown]
-
-1. First, we import the Prisma client and create a new instance of it. It is through this instance that we can interact with our database.
-
-```typescript title="prisma/seed.js"
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-```
-
-2. Then, we define an `async` function called `seed`. This is what we will call later to populate the database with data. Inside the `seed` function, we first create a generic `email` address for our new user.
-
-```typescript title="prisma/seed.js"
-async function seed() {
-	const email = "test@email.com";
-	// ...
-}
-```
-3. Then, we delete any existing user with a matching email address. This is to ensure we don't create duplicate users every time we run the seed file.
-
-```typescript title="prisma/seed.js"
-	// cleanup the existing database
-	await prisma.user.delete({ where: { email } }).catch(() => {
-		// no worries if it doesn't exist yet
-	});
-```
-4. Finally, we create a new user with the email `"test@email.com"`.
-```typescript title="prisma/seed.js"
-	const user = await prisma.user.create({
-		data: {
-			email,
-		},
-	})
-```
-
+- We've added a new array called `categories` that holds all the information we want to write to our database:
+	```ts
+	const categories = [
+	  {
+	    title: "Action",
+	    description:
+	      "Games that require quick reflexes and hand-eye coordination.",
+	  },
+	  {
+	    title: "Adventure",
+	    description: "Games that involve exploration and puzzle-solving.",
+	  },
+	  // ... more categories here...
+	];
+	```
+- We loop through each category and create it in the database using `prisma.category.create`: 
+	```ts
+	for (const category of categories) {
+	  await prisma.category.create({ data: category });
+	}
+	```
+- We log a message to the console once all categories have been created:
+	```ts
+	console.log("🎮 Categories created successfully");
+	```
 :::
 
-### Adding articles
+## Linking games to categories
 
-Let's add some articles to our database, and associate these with the `user` we just created
+Now that we have our categories in the database, let's link them to our games.
 
-Add the code highlighted in green below, making sure you add it just inside the closing `}` of the `seed` function:
+Add the code below to your `prisma/seed.ts` file:
 
-```diff lang="typescript" title="prisma/seed.js"
+```diff lang="ts" title="prisma/seed.ts" showLineNumbers collapse={6-138}
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
 async function seed() {
-	// ...Code omitted for brevity...
+  const games = [
+    {
+      title: "The Legend of Zelda: Breath of the Wild",
+      description: "An open-world adventure game set in the kingdom of Hyrule.",
+      price: 59.99,
+      rating: 4.9,
+      releaseDate: new Date("2017-03-03"),
+    },
+    {
+      title: "The Witcher 3: Wild Hunt",
+      description:
+        "An action RPG set in a fantasy world full of monsters and magic.",
+      price: 39.99,
+      rating: 4.8,
+      releaseDate: new Date("2015-05-19"),
+    },
+    {
+      title: "Red Dead Redemption 2",
+      description: "An open-world western adventure game.",
+      price: 59.99,
+      rating: 4.7,
+      releaseDate: new Date("2018-10-26"),
+    },
+    {
+      title: "God of War",
+      description: "An action-adventure game based on Norse mythology.",
+      price: 49.99,
+      rating: 4.9,
+      releaseDate: new Date("2018-04-20"),
+    },
+    {
+      title: "Minecraft",
+      description:
+        "A sandbox game where players can build and explore their own worlds.",
+      price: 26.95,
+      rating: 4.8,
+      releaseDate: new Date("2011-11-18"),
+    },
+    {
+      title: "Fortnite",
+      description:
+        "A battle royale game where players fight to be the last one standing.",
+      price: 0.0,
+      rating: 4.5,
+      releaseDate: new Date("2017-07-25"),
+    },
+    {
+      title: "Cyberpunk 2077",
+      description: "An open-world RPG set in a dystopian future.",
+      price: 59.99,
+      rating: 4.0,
+      releaseDate: new Date("2020-12-10"),
+    },
+    {
+      title: "Among Us",
+      description:
+        "A multiplayer game where players work together to complete tasks on a spaceship.",
+      price: 4.99,
+      rating: 4.4,
+      releaseDate: new Date("2018-06-15"),
+    },
+    {
+      title: "Animal Crossing: New Horizons",
+      description:
+        "A life simulation game where players can build and manage their own island.",
+      price: 59.99,
+      rating: 4.9,
+      releaseDate: new Date("2020-03-20"),
+    },
+    {
+      title: "Hades",
+      description:
+        "A rogue-like dungeon crawler where players fight their way out of the Underworld.",
+      price: 24.99,
+      rating: 4.9,
+      releaseDate: new Date("2020-09-17"),
+    },
+  ];
 
-	const user = await prisma.user.create({
-		data: {
-			email: 'test@email.com',
-		},
-	})
+  for (const game of games) {
+    await prisma.game.create({ data: game });
+  }
 
-+	await prisma.article.create({
-+		data: {
-+			title: 'My first article!',
-+			content: 'Hello, world!',
-+			authorId: user.id,
-+		},
-+	})
+  console.log("👾 Games created successfully");
+
+  const categories = [
+    {
+      title: "Action",
+      description:
+        "Games that require quick reflexes and hand-eye coordination.",
+    },
+    {
+      title: "Adventure",
+      description: "Games that involve exploration and puzzle-solving.",
+    },
+    {
+      title: "RPG",
+      description: "Games that focus on character development and story.",
+    },
+    {
+      title: "Simulation",
+      description: "Games that simulate real-world activities or systems.",
+    },
+    {
+      title: "Strategy",
+      description: "Games that require strategic thinking and planning.",
+    },
+    {
+      title: "Puzzle",
+      description:
+        "Games that challenge players with logic and problem-solving.",
+    },
+    {
+      title: "Sports",
+      description: "Games that simulate sports or physical activities.",
+    },
+    {
+      title: "Multiplayer",
+      description: "Games that can be played with multiple players.",
+    },
+    {
+      title: "Indie",
+      description: "Games developed by independent studios or individuals.",
+    },
+    {
+      title: "Horror",
+      description: "Games that aim to scare or unsettle players.",
+    },
+  ];
+
+  for (const category of categories) {
+    await prisma.category.create({ data: category });
+  }
+
+  console.log("🎮 Categories created successfully");
+
++  console.log("🔗 Linking each game to a category");
 +
-+	await prisma.article.create({
-+		data: {
-+			title: 'My second article',
-+			content: 'Hello again, world!',
-+			authorId: user.id,
-+		},
-+	})
++  // Fetch games from the database
++  const dbGames = await prisma.game.findMany();
 +
-+	console.log(`Database has been seeded. 🌱`)
++  // Fetch categories from the database
++  const dbCategories = await prisma.category.findMany();
++
++  // Link each game to a category
++  for (const game of dbGames) {
++    const category =
++      dbCategories[Math.floor(Math.random() * dbCategories.length)];
++    await prisma.game.update({
++      where: { id: game.id },
++      data: { categoryId: category.id },
++    });
++  }
++
++  console.log("🔗 Games and categories linked successfully");
+
+  console.log("Seed data created successfully");
 }
+
+seed()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
 ```
 
-## Run the seed command
-
-Now that we have our `seed` function written, we should run it to populate our database with some initial data.
-
-To do this, we firstly need to add the code below to actually call and execute the function.
-
-```diff lang="typescript" title="prisma/seed.js"
-async function seed() {
-	// ...Code omitted for brevity...
-
-	console.log(`Database has been seeded. 🌱`)
-}
-
-+seed()
-+  .catch((e) => {
-+    console.error(e);
-+    process.exit(1);
-+  })
-+  .finally(async () => {
-+    await prisma.$disconnect();
-+  });
-```
-
-:::caution
-
-Check carefully that you add the code above to the very bottom of the `prisma/seed.js` file, ***after*** the final closing bracket `}` of the `seed` function itself.
-
-:::
-
-Now, with your seed file saved, run the following command in your terminal:
+With this in place, we can run the seed file to populate our database with games and categories:
 
 ```bash
-npx prisma db seed
+npm run setup
 ```
 
-If all went well, you should see the following output in your terminal:
+## Checking the database
 
-![Seed output](src/assets/png/prisma/seed-output.png)
-
-### Check Prisma Studio
-
-Let's finalise this section by checking that our seed file has produced the expected records in our database.
-
-Open Prisma Studio:
+To verify that the seed file worked correctly, open the Prisma Studio:
 
 ```bash
 npx prisma studio
 ```
 
-If all has gone well, you should see that some records have appeared in the `User` and `Article` tables:
+You should see a list of games and categories in the database:
 
-![Prisma Studio after seeding](src/assets/png/prisma/prisma-studio-after-seeding.png)
+![Prisma Studio with games and categories](src/assets/webp/prisma/full-game-and-category-models.webp)
 
-Click into the tables to see the records in more detail.
+Furthermore, if you click into the 'Game' model and scroll to the far right-hand side of the table, you should see the 'Category' column populated with the category each game belongs to:
 
-When you are ready, we can begin to read this data from our database using Remix's powerful data loading features.
+![Prisma Studio with games and categories linked](src/assets/webp/prisma/game-category-links.webp)
+
+Now that we've got some data in our database, we can move on to displaying it in our Remix app. 🚀

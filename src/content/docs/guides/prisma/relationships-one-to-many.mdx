@@ -1,0 +1,151 @@
+---
+title: One-to-many relationships in Prisma
+description: Linking database tables with Prisma - one-to-many relationships
+---
+
+import MonsterReveal from 'src/components/MonsterReveal.astro'
+import MonsterKbd from 'src/components/MonsterKbd.astro'
+import MonsterVideo from 'src/components/MonsterVideo.astro'
+
+## What is a database relationship?
+
+A database [**relationship**](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations) is a connection between two tables.
+
+In a relational database, such as SQLite, tables can be connected to each other using [**foreign keys**](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations#relational-databases). These foreign keys are used to establish a link between the data in the two tables.
+
+:::note[Information]
+
+There are three main relationships that can be established between database tables:
+
+- [**One-to-one**](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/one-to-one-relations): Each record in the first table is related to one record in the second table.
+- [**One-to-many**](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/one-to-many-relations): Each record in the first table is related to one or more records in the second table.
+- [**Many-to-many**](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations): Each record in the first table is related to one or more records in the second table, and each record in the second table is related to one or more records in the first table.
+
+This sounds a bit abstract, but [**this video**](https://youtu.be/fpBYj55-zd8?si=nLyBxsfkBVdPzqKL) explains them in a very clear way.
+
+<MonsterVideo src="https://www.youtube.com/embed/fpBYj55-zd8?si=nFMV5VpLQ5dAHAWZ" />
+
+:::
+
+We are going to set up a database relationship using Prisma. We will create a new table called `Category` and link it to the `Game` table.
+
+Each game must belong to a category, and each category can have many games. From the three types of relationships described above, which one do you think this is? 🤔
+
+## Setting up a database relationship
+
+### Create the `Category` table
+
+We will start by creating a new table called `Category` in the `schema.prisma` file. This table will have the following attributes:
+- an `id` field that will be the primary key
+- a `title` field
+- an optional `description` field
+- `createdAt` and `updatedAt` fields to keep track of when the category was created and last updated.
+- an association with the `Game` table
+
+Add this model to the `schema.prisma` file directly beneath the `Game` model we created in the [**previous lesson**](/code-monster/guides/prisma/prisma-schema):
+
+```diff lang="tsx" title="prisma/schema.prisma"
+model Game {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  rating      Float
+  releaseDate DateTime
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
++  categoryId  String
++  category    Category @relation(fields: [categoryId], references: [id])
+}
+
++model Category {
++  id          String @id @default(cuid())
++  title       String
++  description String?
++  createdAt   DateTime @default(now())
++  updatedAt   DateTime @updatedAt
++  games       Game[]
+}
+```
+
+:::note[One-to-many relationship - notes]
+
+- To create the relationship between the `Game` and `Category` tables, we have added a new field called `categoryId` to the `Game` model, together with a `category` reference.
+  ```prisma showLineNumbers mark={11-12} collapse={2-7}
+  model Game {
+    id          String   @id @default(cuid())
+    title       String
+    description String
+    price       Float
+    rating      Float
+    releaseDate DateTime
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    categoryId  String?
+    category    Category? @relation(fields: [categoryId], references: [id])
+  }
+  ```
+
+- We set an optional foreign key on the `Game` table using the `@relation` attribute because we say a game "belongs to" a category:
+  - The `@relation` attribute specifies the fields that are used to establish the relationship between the two tables.
+  - The `@relation` attribute takes two arguments: `fields` and `references`.
+  - The `fields` argument specifies the field on the current table that is used to establish the relationship.
+  - The `references` argument specifies the field on the related table that the relationship is based on.
+- We've also added a `games` field to the `Category` model to establish a one-to-many relationship between the `Category` and `Game` tables.
+  ```prisma showLineNumbers mark={8}
+  model Category {
+    id          String @id @default(cuid())
+    title       String
+    description String?
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+    games       Game[]
+  }
+  ```
+
+
+:::
+
+### Apply the changes to the database
+
+We have made changes to the `schema.prisma` file, but these changes have not yet been applied to the database.
+
+If you remember from our previous lesson, we can apply these changes to the database by generating a migration file. This migration will contain the SQL commands needed to update the database schema to match the new `schema.prisma` file.
+
+:::tip[Challenge]
+
+Can you can work out how to generate a migration file to apply the new changes to your database? 🤔
+
+#### TIPS
+
+- Refresh your memory of how to generate a migration file by reviewing the [**previous lesson**](/code-monster/guides/prisma/prisma-schema#creating-a-migration-file).
+- Remember that you will need to name the migration file with something suitable - `add-category-model` would work.
+
+<MonsterReveal>
+Running the command below in your terminal window will generate the file you need:
+
+```bash
+npx prisma migrate dev --name add-category-model
+    ```
+</MonsterReveal>
+
+:::
+
+## Checking the database
+
+Finally, let's fire up Prisma Studio to check that the changes have been applied to the database.
+
+```bash
+npx prisma studio
+```
+
+If all is good, you should see the new (empty!) `Category` table in your browser:
+
+![Prisma Studio with Category table](src/assets/webp/prisma/game-and-category-models.webp)
+
+Next, we will learn how to use seed files to populate our database with information.
+
+🚀🚀🚀

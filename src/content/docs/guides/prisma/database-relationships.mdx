@@ -22,15 +22,15 @@ This sounds a bit abstract, but [**this video**](https://youtu.be/fpBYj55-zd8?si
 
 :::
 
-We are going to set up a database relationship using Prisma. We will create a new table called `Article` and link it to the `User` table.
+We are going to set up a database relationship using Prisma. We will create a new table called `Category` and link it to the `User` table.
 
 Each user can have multiple articles associated with them, and each article must belong to a user. From the three types of relationships described above, which one do you think this is? 🤔
 
 ## Setting up a database relationship
 
-### Create the `Article` table
+### Create the `Category` table
 
-We will start by creating a new table called `Article` in the `schema.prisma` file. This table will have a `title` and a `content` field, as well as a `createdAt` and `updatedAt` field to keep track of when the article was created and last updated.
+We will start by creating a new table called `Category` in the `schema.prisma` file. This table will have a `title` and a `description` field, as well as a `createdAt` and `updatedAt` field to keep track of when the article was created and last updated.
 
 Add this model to the `schema.prisma` file directly beneath the `User` model we created in the [**previous lesson**](/code-monster/guides/prisma/prisma-schema):
 
@@ -43,39 +43,39 @@ model User {
   updatedAt DateTime @updatedAt
 }
 +
-+model Article {
++model Category {
 +  id        String @id @default(cuid())
 +  title     String
-+  content   String
++  description   String
 +
 +  createdAt DateTime @default(now())
 +  updatedAt DateTime @updatedAt
 +}
 ```
 
-This adds a new `Article` model which shares several similar fields to the `User` model, but differs in the `title` and `content` fields.
+This adds a new `Category` model which shares several similar fields to the `User` model, but differs in the `title` and `description` fields.
 
 At the moment, the two tables are completely unaware of each other in the database. We need to change that.
 
-### Link the `Article` and `User` tables
+### Link the `Category` and `User` tables
 
-If every `Article` will belong to a single `User`, which fields do you think we can use to link the `Article` and `User` tables together? 🤔
+If every `Category` will belong to a single `User`, which fields do you think we can use to link the `Category` and `User` tables together? 🤔
 
 ***HINT**: Remember that each user can have multiple articles associated with them, and each article must belong to a user.*
 
 <MonsterReveal>
   <div>
-    <p>We can use the `id` field of the `User` table to link it to the `Article` table.</p>
+    <p>We can use the `id` field of the `User` table to link it to the `Category` table.</p>
     <p>This is a common pattern in databases, where the `id` field of one table is used as a foreign key in another table.</p>
   </div>
 </MonsterReveal>
 
 Let's implement this relationship now.
 
-1. Firstly, we will add a new field to the `Article` model called `authorId`. This field will be of type `String` and will store the `id` of the `User` who created the article.
-2. Next, we will add another new field called `author` to the same model. This field will be of type `User` and will link the `Article` and `User` tables together. We will add a `@relation` attribute to the `author` field to specify the fields that the relationship is based on.
+1. Firstly, we will add a new field to the `Category` model called `authorId`. This field will be of type `String` and will store the `id` of the `User` who created the article.
+2. Next, we will add another new field called `author` to the same model. This field will be of type `User` and will link the `Category` and `User` tables together. We will add a `@relation` attribute to the `author` field to specify the fields that the relationship is based on.
 
-Make the changes shown below to the `Article` model in the `schema.prisma` file to implement the relationship.
+Make the changes shown below to the `Category` model in the `schema.prisma` file to implement the relationship.
 
 :::caution
 
@@ -84,10 +84,10 @@ Don't worry about a red squiggly line appearing under the `author` field. We wil
 :::
 
 ```diff lang="tsx" title="prisma/schema.prisma"
-model Article {
+model Category {
   id        String   @id @unique @default(cuid())
   title     String
-  content   String
+  description   String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -97,7 +97,7 @@ model Article {
 }
 ```
 
-The red squiggly line under the `author` field indicates that the `User` model doesn't yet share a relation field with the `Article` model.
+The red squiggly line under the `author` field indicates that the `User` model doesn't yet share a relation field with the `Category` model.
 
 We need to fix this by adding a new field to the `User` model:
 
@@ -109,7 +109,7 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-+  articles Article[]
++  articles Category[]
 }
 ```
 
@@ -137,7 +137,7 @@ Can you can work out how to generate a migration file to apply the new changes t
     npx prisma migrate dev --name add-article-model
     ```
     <p>Don't worry if you see the warning below:</p>
-    ![Article migration warning](src/assets/png/prisma/article-migration-warning.png)
+    ![Category migration warning](src/assets/png/prisma/article-migration-warning.png)
     <p>We don't have any data in the database yet, so can ignore this. Just hit <MonsterKbd>y</MonsterKbd> and continue 😎</p>
   </div>
 </MonsterReveal>
@@ -150,7 +150,7 @@ npx prisma studio
 
 If all is good, you should see the new table in your browser:
 
-![Prisma Studio with Article table](src/assets/png/prisma/prisma-studio-article-table.png)
+![Prisma Studio with Category table](src/assets/png/prisma/prisma-studio-article-table.png)
 
 Next, we will learn how to create, read, update, and delete data in the database using Remix and Prisma together.
 

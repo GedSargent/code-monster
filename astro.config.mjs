@@ -164,14 +164,14 @@ export default defineConfig({
                   label: "🗄️ Prisma Studio",
                   link: "guides/prisma/prisma-studio",
                 },
-                // {
-                //   label: "🗄️ Database relationships",
-                //   link: "guides/prisma/database-relationships",
-                // },
-                // {
-                //   label: "🌱 Seed files",
-                //   link: "guides/prisma/seed-files",
-                // },
+                {
+                  label: "🗄️ One-to-many relationships",
+                  link: "guides/prisma/relationships-one-to-many",
+                },
+                {
+                  label: "🌱 Seed files",
+                  link: "guides/prisma/seed-files",
+                },
                 {
                   label: "🗄️ Reading data - loader functions",
                   link: "guides/prisma/reading-data",

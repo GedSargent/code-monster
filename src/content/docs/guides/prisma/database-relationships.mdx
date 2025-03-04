@@ -130,27 +130,13 @@ Can you can work out how to generate a migration file to apply the new changes t
 - Refresh your memory of how to generate a migration file by reviewing the [**previous lesson**](/code-monster/guides/prisma/prisma-schema#creating-a-migration-file).
 - Remember that you will need to change the name of the migration file from `add-user-model` to something more appropriate for the changes we have made here.
 
-<MonsterReveal>
-  <div>
-    <p>Running the command below in your terminal window will generate the file you need:</p>
-    ```bash
-    npx prisma migrate dev --name add-article-model
-    ```
-    <p>Don't worry if you see the warning below:</p>
-    ![Category migration warning](src/assets/png/prisma/article-migration-warning.png)
-    <p>We don't have any data in the database yet, so can ignore this. Just hit <MonsterKbd>y</MonsterKbd> and continue 😎</p>
-  </div>
-</MonsterReveal>
-
 Finally, let's fire up Prisma Studio to check that the changes have been applied to the database.
 
 ```bash
 npx prisma studio
 ```
 
-If all is good, you should see the new table in your browser:
-
-![Prisma Studio with Category table](src/assets/png/prisma/prisma-studio-article-table.png)
+If all is good, you should see the new table in your browser.
 
 Next, we will learn how to create, read, update, and delete data in the database using Remix and Prisma together.
 

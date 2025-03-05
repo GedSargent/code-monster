@@ -147,6 +147,15 @@ export default defineConfig({
           ],
         },
         {
+          label: "📱 React Native",
+          items: [
+            {
+              label: "📱 Getting started with Expo Snacks",
+              link: "guides/react-native/what-is-react-native",
+            },
+          ],
+        },
+        {
           label: "Prisma",
           items: [
             {

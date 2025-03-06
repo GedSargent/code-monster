@@ -14,7 +14,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Code Monster",
-      favicon: "/src/assets/favicon/favicon.ico",
+      favicon: "/images/favicon.ico",
       customCss: ["./src/tailwind.css", "./src/fonts/font-face.css"],
       components: {
         Hero: "/src/components/MonsterHero.astro",

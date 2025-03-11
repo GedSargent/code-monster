@@ -1,0 +1,189 @@
+---
+title: "Code up a Figma Design in React Native"
+description: "Using React Native to recreate a design in Figma"
+---
+
+import { Steps } from "@astrojs/starlight/components";
+import MonsterReveal from "src/components/MonsterReveal.astro";
+
+In this guide, we'll use React Native to recreate the design for a single todo item from Figma.
+
+## 1. Consider the design
+
+The first step in recreating a design is to consider the design itself.
+
+With a partner, look carefully at the design below:
+
+![Design for incomplete todo item](src/assets/svg/react-native/incomplete-todo-design.svg)
+
+:::tip[Challenge]
+
+Decide on the following:
+
+- what styles you would apply to each component:
+  - what colours will you need?
+  - what size fonts?
+  - what padding and margins?
+- breaking down `View` and `Text` components:
+  - what would be the parent `View` component?
+  - what would be the child `View` components?
+  - what would be the `Text` components?
+
+<MonsterReveal title="Viewing design attributes in Figma">
+
+### - Styles and colours
+
+We can lift things like colour, font and text size directly from Figma.
+
+For example, just select a text element and copy the colour code from the 'Fill' field.
+
+![Viewing design attributes in Figma](src/assets/webp/react-native/viewing-design-attributes.webp)
+
+As you can see, the font family, size, weight, line-height and alignment are all available as well.
+
+### - Padding and margins
+
+In a similar way, we can measure the padding and margins of elements in Figma.
+
+Click on the element in your layers panel and, if this is an autolayout frame, you can see the padding and margin values on the right of your screen.
+
+![Padding and layout in Figma](src/assets/webp/react-native/padding-and-margins.webp)
+
+### - View and Text components
+
+Here again, Figma can help. Broadly speaking, each frame in Figma can be thought of as a `View` component in React Native.
+
+Look at how the design below can be broken down into three `View` components:
+
+![View and Text components in Figma](src/assets/svg/react-native/incomplete-todo-design-with-components.svg)
+
+Here we have:
+
+- a main parent (outlined in blue)
+- a child component for the checkbox (outlined in pink)
+- a child component for the text (outlined in green)
+
+</MonsterReveal>
+
+:::
+
+## 2. Create the components
+
+With this structure in mind, let's take a look at how we might build the component in React Native code.
+
+<Steps>
+
+1. Open the project in your code editor and run the app with the command below:
+
+    ```bash
+    npm run dev
+    ```
+
+2. Decide if you want to see the app on your phone or in the browser by following the instructions in your terminal.
+
+3. Open `app/index.tsx` and replace all the code inside with the following:
+
+    ```jsx title="app/index.tsx"
+    import { View, Text } from "react-native";
+
+    export default function HomeScreen() {
+      return (
+        <View className="flex flex-1 py-32 bg-background">
+          <Text className="text-white text-center">Hello, world!</Text>
+        </View>
+      );
+    }
+    ```
+
+    This gives us a simple `View` component with a `Text` component inside it:
+
+    ![Todo screen 1](src/assets/webp/react-native/todo-01.webp)
+
+4. Remind yourself how we said the component structure might look:
+
+    ![View and Text components in Figma](src/assets/svg/react-native/incomplete-todo-design-with-components.svg)
+
+    To recreate this, I'm going to:
+      - delete the 'Hello, world!' placeholder text
+      - create a parent `View` component and give it an articfical height and border so that it matches the outlines above:
+
+    ```diff lang="jsx" title="app/index.tsx"
+    import { View, Text } from "react-native";
+
+    export default function HomeScreen() {
+      return (
+        <View className="flex flex-1 py-32 bg-background">
+    -      <Text className="text-white text-center">Hello, world!</Text>
+    +      <View className="h-20 w-full border-2 border-cyan-400"></View>
+        </View>
+      );
+    }
+    ```
+
+    ![Todo screen 2](src/assets/webp/react-native/todo-02.webp)
+
+5. Next, I'll add two `View` components inside the parent, and give these temporary borders that match the plan above:
+
+    ```diff lang="jsx" title="app/index.tsx"
+    import { Text, View } from "react-native";
+
+    export default function HomeScreen() {
+      return (
+        <View className="flex flex-1 py-32 bg-background">
+          <View className="flex flex-row h-20 w-full border-2 border-cyan-400">
+    +        <View className="flex w-24 h-full border-2 border-pink-400"></View>
+    +        <View className="flex flex-1 h-full border-2 border-green-400">
+    +
+    +        </View>
+          </View>
+        </View>
+      );
+    }
+    ```
+
+    ![Todo screen 3](src/assets/webp/react-native/todo-03.webp)
+  
+6. Let's add some text inside the green `View` component:
+
+    ```diff lang="jsx" title="app/index.tsx"
+    import { Text, View } from "react-native";
+
+    export default function HomeScreen() {
+      return (
+        <View className="flex flex-1 py-32 bg-background">
+          <View className="flex flex-row h-20 w-full border-2 border-cyan-400">
+            <View className="flex w-24 h-full border-2 border-pink-400">
+    +          <Text className="text-foreground">Feed the cat</Text>
+            </View>
+          </View>
+        </View>
+      );
+    }
+    ```
+
+    ![Todo screen 4](src/assets/webp/react-native/todo-04.webp)
+
+</Steps>
+
+:::tip[Challenge]
+
+## 3. Style the todo item
+
+1. Style the text inside the green `View` component to match the design. You will need to think about:
+    - the font size
+    - the font colours (tip - use the `text-foreground` and `text-foreground-transparent` classes)
+
+2. Add a checkbox in the pink `View` component. You will need to install and use the `checkbox` component from `React Native Reusables'.
+    - Research how to install and use this by following the [documentation](https://rnr-docs.vercel.app/components/checkbox/).
+
+3. Remove the placeholder borders from the `View` components and style them to match the design. You will need to think about:
+    - the border along the bottom of the todo item (tip - use the `border-b` and `border-foreground-transparent` classes where you feel is correct)
+    - the padding and margins
+
+Your final implementation should look and behave something like this:
+
+<video controls autoplay loop name="media">
+  <source src="https://res.cloudinary.com/dptdx8zuv/video/upload/v1741728506/05-todo_dxvp8n.mp4" type="video/mp4" />
+</video>
+
+:::

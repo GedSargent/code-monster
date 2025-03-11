@@ -153,6 +153,10 @@ export default defineConfig({
               label: "📱 Getting started with Expo Snacks",
               link: "guides/react-native/what-is-react-native",
             },
+            {
+              label: "📱 Coding a Figma Design",
+              link: "guides/react-native/recreating-a-design",
+            },
           ],
         },
         {

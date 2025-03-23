@@ -5,6 +5,7 @@ import {
   SandpackProvider,
   SandpackThemeProvider,
   type SandpackFiles,
+  type SandpackInternalOptions,
   type SandpackProviderProps,
   type SandpackSetup
 } from "@codesandbox/sandpack-react";
@@ -51,7 +52,8 @@ const CodePlayground = ({
 }: CodeSandboxProps) => {
   const codeMirrorInstance = useRef<any>(undefined);
   const wrapperRef = useRef<any>(null);
-  const combinedOptions = {
+  const combinedOptions: SandpackInternalOptions = {
+    autoReload: false,
     externalResources: ["https://cdn.tailwindcss.com"],
     ...customOptions
   }

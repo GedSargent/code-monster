@@ -18,11 +18,11 @@ const CustomControlsBar = ({
   wrapperRef
 }: CustomControlsBarProps) => {
   return (
-    <div className="flex min-w-full items-center justify-between overflow-hidden rounded-t-xl px-2 py-1">
+    <div className="flex min-w-full items-center justify-between overflow-hidden rounded-t-xl px-2 py-2">
       <span className="mx-2 text-xs font-bold uppercase text-neutral-400">
         {title}
       </span>
-      <div className="flex items-center">
+      <div className="flex gap-2 items-center">
         <ResetCodeBtn />
         <FullScreenBtn
           isFullScreen={isFullScreen}

@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 
-const { data } = Astro.props.entry;
+const { data } = Astro.locals.starlightRoute.entry;
 const { tagline, image } = data.hero || {};
 
 const imageAttrs = {

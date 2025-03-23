@@ -1,8 +1,8 @@
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
-import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections'
-import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
-import tailwind from "@astrojs/tailwind";
+import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections';
+import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 export const lightDarkModeDir = "guides/epic-news/light-and-dark-mode";
@@ -11,11 +11,14 @@ export const lightDarkModeDir = "guides/epic-news/light-and-dark-mode";
 export default defineConfig({
   site: "https://gedsargent.github.io",
   base: "/code-monster",
+  vite: {
+    plugins: [tailwindcss()],
+  },
   integrations: [
     starlight({
       title: "Code Monster",
       favicon: "/images/favicon.ico",
-      customCss: ["./src/tailwind.css", "./src/fonts/font-face.css"],
+      customCss: ["./src/styles/global.css", "./src/fonts/font-face.css"],
       components: {
         Hero: "/src/components/MonsterHero.astro",
       },
@@ -410,10 +413,6 @@ export default defineConfig({
           },
         },
       ],
-    }),
-    tailwind({
-      // Disable the default base styles:
-      applyBaseStyles: true,
     }),
     react(),
   ],

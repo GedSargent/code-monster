@@ -22,6 +22,7 @@
 }
 
 @theme {
+  --animate-draw-circle: border 1500ms ease-in-out 1 forwards;
   --color-accent-200: hsl(224, 100%, 85%);
   --color-accent-600: hsl(234, 100%, 61%);
   --color-accent-900: hsl(230, 66%, 28%);
@@ -62,16 +63,16 @@ code {
     box-shadow: 8px -8px 0 2px var(--bgColor), -8px -8px 0 2px var(--bgColor), -8px 8px 0 2px var(--bgColor), 8px 8px 0 2px var(--bgColor), 0 0 0 2px var(--bgColor);
   }
   25% {
-    boxShadow: 0 -21px 0 2px var(--bgColor), -8px -8px 0 2px var(--bgColor), -8px 8px 0 2px var(--bgColor), 8px 8px 0 2px var(--bgColor), 0 0 0 2px #fff;
+    box-shadow: 0 -21px 0 2px var(--bgColor), -8px -8px 0 2px var(--bgColor), -8px 8px 0 2px var(--bgColor), 8px 8px 0 2px var(--bgColor), 0 0 0 2px #fff;
   }
   50% {
-    boxShadow: 0 -21px 0 2px var(--bgColor), -21px 0px 0 2px var(--bgColor), -8px 8px 0 2px var(--bgColor), 8px 8px 0 2px var(--bgColor), 0 0 0 2px #fff;
+    box-shadow: 0 -21px 0 2px var(--bgColor), -21px 0px 0 2px var(--bgColor), -8px 8px 0 2px var(--bgColor), 8px 8px 0 2px var(--bgColor), 0 0 0 2px #fff;
   }
   75% {
-    boxShadow: 0 -21px 0 2px var(--bgColor), -21px 0px 0 2px var(--bgColor), 0px 21px 0 2px var(--bgColor), 8px 8px 0 2px var(--bgColor), 0 0 0 2px #fff;
+    box-shadow: 0 -21px 0 2px var(--bgColor), -21px 0px 0 2px var(--bgColor), 0px 21px 0 2px var(--bgColor), 8px 8px 0 2px var(--bgColor), 0 0 0 2px #fff;
   }
   100% {
-    boxShadow: 0 -21px 0 2px var(--bgColor), -21px 0px 0 2px var(--bgColor), 0px 21px 0 2px var(--bgColor), 16px 40px 0 2px var(--bgColor), 0 0 0 2px #fff;
+    box-shadow: 0 -21px 0 2px var(--bgColor), -21px 0px 0 2px var(--bgColor), 0px 21px 0 2px var(--bgColor), 16px 40px 0 2px var(--bgColor), 0 0 0 2px #fff;
   }
 }
 .animate-draw-circle {

@@ -15,8 +15,13 @@ const ResetCodeBtn = () => {
   const handleOnMouseDown = () => {
     setIsPressingReset(true);
 
-    timerRef.current = setTimeout(() => {
+    timerRef.current = setTimeout(async () => {
       sandpack.resetAllFiles();
+      sandpack.openFile("/App.tsx");
+      sandpack.setActiveFile("/App.tsx");
+      
+      await sandpack.runSandpack();
+
       setIsPressingReset(false);
     }, 1500);
   };

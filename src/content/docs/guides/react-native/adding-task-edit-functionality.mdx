@@ -1,0 +1,396 @@
+---
+title: Adding Task Editing Functionality
+description: Learn how to implement long-press editing for tasks in your React Native app
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+In this tutorial, we'll add the ability for users to edit their tasks by tapping on them. This will open a dialog where they can modify the task's title and category.
+
+## Step 1: Install the Portal Component
+
+First, we need to install the Portal component from React Native Primitives:
+
+```bash
+npx expo install @rn-primitives/portal
+```
+
+## Step 2: Update the Root Layout
+
+We need to add a Portal Host to our root layout to support dialogs:
+
+```tsx path="app/_layout.tsx"
+import { PortalHost } from "@rn-primitives/portal";
+
+// Inside your return statement, wrap the Tab.Navigator in a fragment
+// and add the PortalHost component after it
+return (
+  <>
+    <Tab.Navigator>
+      {/* existing Tab.Navigator code */}
+    </Tab.Navigator>
+    <PortalHost />
+  </>
+);
+```
+
+## Step 3: Install Dialog Components
+
+Install the dialog components from React Native Reusables:
+
+```bash
+npx @react-native-reusables/cli@latest add dialog
+npx @react-native-reusables/cli@latest add input
+npx @react-native-reusables/cli@latest add button
+```
+
+:::note
+Simply agree to all the default options when prompted.
+:::
+
+## Step 4: Update the Task Component
+
+Now we'll modify our Task component to include the dialog functionality:
+
+```tsx path="app/index.tsx"
+import { TouchableOpacity, View } from "react-native";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+  DialogDescription,
+} from "~/components/ui/dialog";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+
+interface TaskProps {
+  title: string;
+  category: string;
+  isChecked: boolean;
+  onEdit?: (newTitle: string, newCategory: string) => void;
+}
+```
+
+## Step 5: Implement the Dialog UI
+
+Replace the Task component implementation with this updated version:
+
+```tsx path="app/index.tsx"
+function Task({ title, category, isChecked, onEdit }: TaskProps) {
+  const [checked, setChecked] = React.useState(isChecked);
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <TouchableOpacity className="flex flex-row w-full" delayLongPress={500}>
+          <View className="px-8 py-5 flex w-24 h-full">
+            <Checkbox
+              className="border-foreground checked:bg-foreground"
+              checked={checked}
+              onCheckedChange={setChecked}
+            />
+          </View>
+          <View className="py-4 flex gap-1 flex-1 h-full border-b border-foreground-transparent">
+            <Text className="text-foreground text-xl">{title}</Text>
+            <Text className="text-foreground-transparent text-xl">
+              {category}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </DialogTrigger>
+
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Task</DialogTitle>
+          <DialogDescription>
+            Make changes to your task details here.
+          </DialogDescription>
+        </DialogHeader>
+
+        <View className="gap-4">
+          <Input defaultValue={title} placeholder="Task title" />
+          <Input defaultValue={category} placeholder="Category" />
+        </View>
+
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">
+              <Text>Cancel</Text>
+            </Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button>
+              <Text>Save changes</Text>
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+### What's Happening Here?
+
+<Steps>
+1. We've wrapped our task in a `Dialog` component
+2. The `DialogTrigger` opens the dialog when the user taps on a task
+3. Inside `DialogContent`, we've created:
+    - A header with title and description
+    - Input fields pre-filled with the current task details
+    - Footer buttons to save or cancel changes
+</Steps>
+
+### Testing Your Changes
+
+After implementing these changes:
+
+<Steps>
+1. Tap on any task in your app
+2. A dialog will appear with the current title and category
+3. You can modify these values (though we haven't implemented saving yet)
+4. Click "Cancel" to close without saving or "Save changes" to close the dialog
+</Steps>
+
+## Step 6: Create a separate Task Component file
+
+First, let's create a new file for our Task component:
+
+```bash
+touch app/components/Task.tsx
+```
+
+Then, move the Task component code from `app/index.tsx` to `app/components/Task.tsx`.
+
+```tsx path="app/components/Task.tsx"
+import * as React from "react";
+import { TouchableOpacity, View } from "react-native";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Text } from "~/components/ui/text";
+import TaskDialog from "./TaskDialogue";
+
+export interface Task {
+  id: number;
+  title: string;
+  category: string;
+  isChecked: boolean;
+}
+
+export interface TaskProps {
+  task: Task;
+}
+
+export default function Task({ task: propTask }: TaskProps) {
+  const [task, setTask] = React.useState(propTask);
+  const [showDialog, setShowDialog] = React.useState(false);
+  const { title, category, isChecked } = task;
+
+  const handleSetChecked = () => {
+    const nextChecked = !task.isChecked;
+    setTask({ ...task, isChecked: nextChecked });
+  };
+
+  return (
+    <>
+      <TouchableOpacity
+        className="flex flex-row w-full bg-gray-800"
+        delayLongPress={500}
+        onLongPress={() => setShowDialog(true)}
+      >
+        <View className="px-8 pt-8 w-24 h-full">
+          <Checkbox
+            className="border-foreground checked:bg-foreground"
+            checked={isChecked}
+            onCheckedChange={handleSetChecked}
+          />
+        </View>
+        <View className="py-4 flex gap-1 flex-1 h-full border-b border-foreground-transparent">
+          <Text className="text-foreground text-xl">{title}</Text>
+          <Text className="text-foreground-transparent text-xl">
+            {category}
+          </Text>
+        </View>
+      </TouchableOpacity>
+
+      <TaskDialog
+        task={task}
+        setTask={setTask}
+        showDialog={showDialog}
+        setShowDialog={setShowDialog}
+      />
+    </>
+  );
+}
+```
+
+## Step 7: Create the TaskDialog Component
+
+Create a new file for the TaskDialog component:
+
+```bash
+touch app/components/TaskDialogue.tsx
+```
+
+Then, move the TaskDialog component code from `app/index.tsx` to `app/components/TaskDialogue.tsx`.
+
+```tsx path="app/components/TaskDialogue.tsx"
+import React from "react";
+import { View } from "react-native";
+import { Task } from "./Task";
+import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+import { Input } from "./ui/input";
+import { Text } from "./ui/text";
+
+interface TaskDialogProps {
+  task: Task;
+  setTask: (task: Task) => void;
+  setShowDialog: (showDialog: boolean) => void;
+  showDialog: boolean;
+}
+
+export default function TaskDialog({
+  task,
+  setTask,
+  setShowDialog,
+  showDialog,
+}: TaskDialogProps) {
+  const [editedTitle, setEditedTitle] = React.useState(task.title);
+  const [editedCategory, setEditedCategory] = React.useState(task.category);
+
+  const { title, category } = task;
+
+  const handleUpdateTitle = (title: string) => {
+    setEditedTitle(title);
+  };
+  
+  const handleUpdateCategory = (category: string) => {
+    setEditedCategory(category);
+  };
+
+  const handleSave = () => {
+    const nextTask = {
+      ...task,
+      title: editedTitle,
+      category: editedCategory,
+    };
+
+    setTask(nextTask);
+    setShowDialog(false);
+  };
+
+  return (
+    <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Task</DialogTitle>
+          <DialogDescription>
+            Make changes to your task details here.
+          </DialogDescription>
+        </DialogHeader>
+
+        <View className="gap-4">
+          <Input
+            defaultValue={title}
+            placeholder="Task title"
+            onChangeText={handleUpdateTitle}
+          />
+          <Input
+            defaultValue={category}
+            placeholder="Category"
+            onChangeText={handleUpdateCategory}
+          />
+        </View>
+
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">
+              <Text>Cancel</Text>
+            </Button>
+          </DialogClose>
+          <DialogClose asChild>
+            <Button onPress={handleSave}>
+              <Text>Save changes</Text>
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+## Step 8: Update the HomeScreen Component
+
+Finally, let's update our HomeScreen component to use the new Task component:
+
+```tsx path="app/index.tsx"
+import * as React from "react";
+import { View } from "react-native";
+import Task from "~/components/Task";
+
+export default function HomeScreen() {
+  const tasks = [
+    { id: 1, title: "Task 1", category: "Category 1", isChecked: false },
+    { id: 2, title: "Task 2", category: "Category 2", isChecked: false },
+    { id: 3, title: "Task 3", category: "Category 3", isChecked: false },
+    { id: 4, title: "Task 4", category: "Category 2", isChecked: true },
+  ];
+
+  return (
+    <View className="flex-1 justify-center items-center gap-5 p-6 bg-background">
+      {tasks.map((task) => (
+        <Task key={task.id} task={task} />
+      ))}
+    </View>
+  );
+}
+```
+
+### What's Happening Here?
+
+<Steps>
+1. **Code Organization**: We've moved the Task component to its own file and created a separate TaskDialog component for better code organization.
+2. **Task Component**: 
+    - Now accepts a complete `task` object instead of individual props
+    - Manages its own state with `useState`
+    - Opens the dialog on long press with `onLongPress`
+    - Handles checkbox state changes with `handleSetChecked`
+3. TaskDialog Component:
+    - Manages the edited title and category with separate state variables
+    - Provides handlers for updating the title and category
+    - Implements a `handleSave` function that updates the task with the edited values
+    - Closes the dialog after saving
+4. HomeScreen Component:
+    - Simplified to just render the Task components with the task data
+</Steps>
+
+## Testing Your Changes
+
+After implementing these changes:
+
+<Steps>
+1. Long-press on any task in your app
+2. A dialog will appear with the current title and category
+3. You can modify these values
+4. Click "Cancel" to close without saving or "Save changes" to close the dialog
+5. The task will update with the new values
+</Steps>
+
+This implementation provides a complete task editing experience with proper state management and component organization.
+
+## Next Steps
+
+In the next tutorial, we will look at how to add a new task to the list.

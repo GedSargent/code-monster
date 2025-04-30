@@ -1,0 +1,135 @@
+---
+title: Saving Tasks to Local Storage
+description: Learn how to save tasks to the user's phone with AsyncStorage.
+---
+
+## Step 1: Install the Package
+
+```bash
+npx expo install @react-native-async-storage/async-storage
+```
+
+## Step 2: Import AsyncStorage
+
+In your main file (`app/index.tsx`):
+
+```diff lang="tsx" showLineNumbers title="app/index.tsx" ins="AsyncStorage, "
+import AsyncStorage from "@react-native-async-storage/async-storage";
+```
+
+## Step 3: Define a Storage Key
+
+:::note[What is a Storage Key?]
+A storage key is a unique identifier for your data.
+
+It's like a label that helps your app find your data later.
+:::
+
+Create a constant to identify your data:
+
+```diff lang="tsx" showLineNumbers title="app/index.tsx"
+const TASKS_STORAGE_KEY = "hallpass_tasks";
+```
+
+## Step 4: Load Tasks on App Start
+
+Add this code to your main file. It will load tasks from storage when the app starts:
+
+```diff lang="tsx" showLineNumbers title="app/index.tsx" ins="useEffect, "
+// Load tasks from storage when app starts
+React.useEffect(() => {
+  const loadTasks = async () => {
+    try {
+      const storedTasks = await AsyncStorage.getItem(TASKS_STORAGE_KEY);
+      if (storedTasks !== null) {
+        setTasks(JSON.parse(storedTasks));
+      }
+    } catch (error) {
+      console.error("Failed to load tasks:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  loadTasks();
+}, []);
+```
+
+## Step 5: Create a Function to Save Tasks
+
+Add this function to your main file. It will save tasks to storage whenever they change:
+
+```diff lang="tsx" showLineNumbers title="app/index.tsx" ins="saveTasks, "
+// Save tasks to storage whenever they change
+const saveTasks = async (updatedTasks: TaskItem[]) => {
+  try {
+    await AsyncStorage.setItem(
+      TASKS_STORAGE_KEY,
+      JSON.stringify(updatedTasks)
+    );
+  } catch (error) {
+    console.error("Failed to save tasks:", error);
+  }
+};
+```
+
+We will call this function whenever we update or add a task.
+
+## Step 6: Call `saveTasks` When Tasks Change
+
+```diff lang="tsx" showLineNumbers title="app/index.tsx" ins="saveTasks, "
+export default function HomeScreen() {
+  const [tasks, setTasks] = React.useState<TaskItem[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  // ... (rest of the code)
+
+  const handleAddTask = (title: string, category: string) => {
+    // ... (rest of the code)
+
+    setTasks([...tasks, newTask]);
++   saveTasks([...tasks, newTask]);
+  };
+
+  const handleEditTask = (taskId: number, newTitle: string, newCategory: string) => {
+    const updatedTasks = tasks.map(task =>
+      task.id === taskId ? { ...task, title: newTitle, category: newCategory } : task
+    );
+    setTasks(updatedTasks);
++   saveTasks(updatedTasks);
+  };
+}
+```
+
+## Step 7: Update Task Component to use `onUpdate`
+
+Make sure your Task component accepts and uses the onUpdate prop:
+
+```diff lang="tsx" showLineNumbers title="app/index.tsx" ins="onUpdate, "
+export interface TaskProps {
+  task: Task;
+  onUpdate?: (task: Task) => void;
+}
+
+export default function Task({ task: propTask, onUpdate }: TaskProps) {
+  // ...existing code...
+
+  const handleSetChecked = () => {
+    const updatedTask = { ...task, isChecked: !task.isChecked };
+    setTask(updatedTask);
+    if (onUpdate) {
+      onUpdate(updatedTask);
+    }
+  };
+}
+```
+
+## That's it!
+
+Once you have implemented `AsyncStorage` successfully, your app now:
+
+- Loads tasks from storage when it starts
+- Saves tasks whenever they're added or updated
+- Shows a loading state while tasks are being fetched
+- Displays a message when no tasks exist
+- All changes are automatically saved to the user's device!

@@ -1,0 +1,217 @@
+---
+title: Creating New Tasks
+description: Learn how to create new tasks in your React Native app
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+In this tutorial, we'll implement functionality to add new tasks to our task list. We'll update our UI to include a scrollable task list and a floating action button that opens a dialog for adding new tasks.
+
+## Step 1: Update the HomeScreen Component
+
+First, let's update our HomeScreen component to manage tasks with state and add the ability to create new tasks:
+
+```tsx path="app/index.tsx"
+import * as React from "react";
+import { ScrollView, View } from "react-native";
+import AddTask from "~/components/AddTask";
+import Task from "~/components/Task";
+import { Text } from "~/components/ui/text";
+
+interface TaskItem {
+  id: number;
+  title: string;
+  category: string;
+  isChecked: boolean;
+}
+
+export default function HomeScreen() {
+  const [tasks, setTasks] = React.useState<TaskItem[]>([
+    { id: 1, title: "Task 1", category: "Category 1", isChecked: false },
+    { id: 2, title: "Task 2", category: "Category 2", isChecked: true },
+    { id: 3, title: "Task 3", category: "Category 3", isChecked: false },
+    { id: 4, title: "Task 4", category: "Category 2", isChecked: true },
+  ]);
+
+  const handleAddTask = (title: string, category: string) => {
+    const nextId =
+      tasks.length > 0 ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+    setTasks([...tasks, { id: nextId, title, category, isChecked: false }]);
+  };
+
+  return (
+    <View className="flex-1 flex justify-between bg-background">
+      <View className="flex flex-row justify-center">
+        <Text className="pt-20 text-foreground font-bold text-6xl">
+          HallPass
+        </Text>
+      </View>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingVertical: 16,
+        }}
+      >
+        {tasks.map((task) => (
+          <Task key={task.id} task={task} />
+        ))}
+      </ScrollView>
+      <View className="relative flex items-center">
+        <AddTask onAdd={handleAddTask} />
+      </View>
+    </View>
+  );
+}
+```
+
+### What's Changed?
+
+<Steps>
+1. We've converted our static tasks array to a state variable using `useState`
+2. We've added a `handleAddTask` function that creates a new task with a unique ID
+3. We've replaced the regular `View` with a `ScrollView` to handle many tasks
+4. We've restructured our layout to have a header, scrollable content, and a footer
+5. We're passing the `handleAddTask` function to our `AddTask` component
+</Steps>
+
+## Step 2: Update the AddTask Component
+
+Now, let's update our AddTask component to handle adding new tasks:
+
+```tsx path="app/components/AddTask.tsx"
+import * as React from "react";
+import { TouchableOpacity, View } from "react-native";
+import { Plus } from "~/lib/icons/Plus";
+import TaskDialog from "./TaskDialogue";
+
+interface AddTaskProps {
+  onAdd: (title: string, category: string) => void;
+}
+
+export default function AddTask({ onAdd }: AddTaskProps) {
+  const [showDialog, setShowDialog] = React.useState(false);
+  const [title, setTitle] = React.useState("");
+  const [category, setCategory] = React.useState("");
+
+  const handleSave = () => {
+    if (title.trim()) {
+      onAdd(title, category);
+      setTitle("");
+      setCategory("");
+      setShowDialog(false);
+    }
+  };
+
+  return (
+    <View className="absolute -bottom-0 z-10">
+      <View className="w-24 h-24 p-1 bg-brand-primary rounded-full flex items-center justify-center">
+        <TouchableOpacity onPress={() => setShowDialog(true)}>
+          <View className="w-full h-auto p-3 bg-brand-primary rounded-full flex items-center justify-center border-4 border-background">
+            <Plus size={48} color="white" />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      <TaskDialog
+        task={{ id: 0, title, category, isChecked: false }}
+        setTask={(newTask) => {
+          setTitle(newTask.title);
+          setCategory(newTask.category);
+        }}
+        showDialog={showDialog}
+        setShowDialog={setShowDialog}
+        onSave={handleSave}
+      />
+    </View>
+  );
+}
+```
+
+### Understanding the AddTask Component
+
+<Steps>
+1. The component now accepts an `onAdd` prop, which is a function that will be called when a new task is added
+1. We're using state variables to track the title and category of the new task
+1. The `handleSave` function validates that the title isn't empty, then calls the `onAdd` function with the title and category
+1. We're using the same `TaskDialog` component that we use for editing tasks, but with different props
+1. The floating action button (FAB) is positioned at the bottom of the screen with absolute positioning
+</Steps>
+
+## Step 3: Update the TaskDialogue Component
+
+Finally, let's update our TaskDialog component to support both editing existing tasks and creating new ones:
+
+```tsx path="app/components/TaskDialogue.tsx"
+interface TaskDialogProps {
+  task: Task;
+  setTask: (task: Task) => void;
+  setShowDialog: (showDialog: boolean) => void;
+  showDialog: boolean;
+  onSave?: () => void;
+}
+
+export default function TaskDialog({
+  task,
+  setTask,
+  setShowDialog,
+  showDialog,
+  onSave,
+}: TaskDialogProps) {
+  const isNewTask = task.title === "" && task.category === "";
+
+  // Rest of the component...
+
+  const handleSave = () => {
+    const nextTask = {
+      ...task,
+      title: editedTitle,
+      category: editedCategory,
+    };
+
+    setTask(nextTask);
+    if (onSave) {
+      onSave();
+    } else {
+      setShowDialog(false);
+    }
+  };
+
+  // Rest of the component...
+}
+```
+
+### What's Changed?
+
+<Steps>
+1. We've added an `onSave` prop to the TaskDialog component
+1. We've added a check to see if the task is new or not
+1. If the task is new, we call the `onSave` function when the user saves the task
+1. If it's an existing task we are editing, we close the dialog when the user saves the task
+</Steps>
+
+## How it all works together
+
+<Steps>
+1. The `HomeScreen` component manages the list of tasks with state
+1. It passes the `handleAddTask` function to the `AddTask` component
+1. The `AddTask` component opens a dialog when the user taps the FAB
+1. The `TaskDialog` component handles the creation of new tasks
+1. When the user saves a new task, the `handleAddTask` function is called, which adds the new task to the list
+</Steps>
+
+## Testing your changes
+
+After implementing these changes:
+
+<Steps>
+1. You should see a floating "+" button at the bottom of your screen
+1. Tap the FAB to open the dialog
+2. Enter a title and category for the new task
+3. Tap "Save changes" to add the task to the list
+4. You can still edit existing tasks by long-pressing on them
+4. As you add more tasks, you can scroll through the list to see all of them
+</Steps>
+
+## Next Steps
+
+In the next tutorial, we'll look at how to save our tasks to local storage so they persist between app sessions.

@@ -160,6 +160,18 @@ export default defineConfig({
               label: "📱 Coding a Figma Design",
               link: "guides/react-native/recreating-a-design",
             },
+            {
+              label: "📱 Editing tasks",
+              link: "guides/react-native/adding-task-edit-functionality",
+            },
+            {
+              label: "📱 Creating new tasks",
+              link: "guides/react-native/creating-new-tasks",
+            },
+            {
+              label: "📱 Saving tasks to local storage",
+              link: "guides/react-native/saving-tasks-to-localstorage",
+            },
           ],
         },
         {

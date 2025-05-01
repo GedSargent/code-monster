@@ -162,7 +162,7 @@ export default defineConfig({
             },
             {
               label: "📱 Editing tasks",
-              link: "guides/react-native/adding-task-edit-functionality",
+              link: "guides/react-native/editing-tasks",
             },
             {
               label: "📱 Creating new tasks",

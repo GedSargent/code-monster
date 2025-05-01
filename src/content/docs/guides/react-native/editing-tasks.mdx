@@ -1,5 +1,5 @@
 ---
-title: Adding Task Editing Functionality
+title: Editing Tasks
 description: Learn how to implement long-press editing for tasks in your React Native app
 ---
 
@@ -19,7 +19,7 @@ npx expo install @rn-primitives/portal
 
 We need to add a Portal Host to our root layout to support dialogs:
 
-```tsx path="app/_layout.tsx"
+```tsx title="app/_layout.tsx"
 import { PortalHost } from "@rn-primitives/portal";
 
 // Inside your return statement, wrap the Tab.Navigator in a fragment
@@ -52,7 +52,7 @@ Simply agree to all the default options when prompted.
 
 Now we'll modify our Task component to include the dialog functionality:
 
-```tsx path="app/index.tsx"
+```tsx title="app/index.tsx"
 import { TouchableOpacity, View } from "react-native";
 import {
   Dialog,
@@ -79,7 +79,7 @@ interface TaskProps {
 
 Replace the Task component implementation with this updated version:
 
-```tsx path="app/index.tsx"
+```tsx title="app/index.tsx"
 function Task({ title, category, isChecked, onEdit }: TaskProps) {
   const [checked, setChecked] = React.useState(isChecked);
 
@@ -166,7 +166,7 @@ touch app/components/Task.tsx
 
 Then, move the Task component code from `app/index.tsx` to `app/components/Task.tsx`.
 
-```tsx path="app/components/Task.tsx"
+```tsx title="app/components/Task.tsx"
 import * as React from "react";
 import { TouchableOpacity, View } from "react-native";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -237,7 +237,7 @@ touch app/components/TaskDialogue.tsx
 
 Then, move the TaskDialog component code from `app/index.tsx` to `app/components/TaskDialogue.tsx`.
 
-```tsx path="app/components/TaskDialogue.tsx"
+```tsx title="app/components/TaskDialogue.tsx"
 import React from "react";
 import { View } from "react-native";
 import { Task } from "./Task";
@@ -336,7 +336,7 @@ export default function TaskDialog({
 
 Finally, let's update our HomeScreen component to use the new Task component:
 
-```tsx path="app/index.tsx"
+```tsx title="app/index.tsx"
 import * as React from "react";
 import { View } from "react-native";
 import Task from "~/components/Task";

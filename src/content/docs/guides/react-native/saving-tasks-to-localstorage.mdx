@@ -3,128 +3,409 @@ title: Saving Tasks to Local Storage
 description: Learn how to save tasks to the user's phone with AsyncStorage.
 ---
 
+import { Steps } from "@astrojs/starlight/components";
+
+In this tutorial, we'll implement functionality to save tasks to the device's local storage, allowing them to persist between app sessions. We'll use React Native's AsyncStorage to achieve this.
+
 ## Step 1: Install the Package
 
 ```bash
 npx expo install @react-native-async-storage/async-storage
 ```
 
-## Step 2: Import AsyncStorage
+## Step 2: Import AsyncStorage and Define a Storage Key
 
 In your main file (`app/index.tsx`):
 
-```diff lang="tsx" showLineNumbers title="app/index.tsx" ins="AsyncStorage, "
-import AsyncStorage from "@react-native-async-storage/async-storage";
+```diff lang="tsx" title="app/index.tsx"
+import * as React from "react";
+import { ScrollView, View } from "react-native";
++import AsyncStorage from "@react-native-async-storage/async-storage";
+import AddTask from "~/components/AddTask";
+import Task from "~/components/Task";
+import { Text } from "~/components/ui/text";
+
+interface TaskItem {
+  id: number;
+  title: string;
+  category: string;
+  isChecked: boolean;
+}
+
++// Key for storing tasks in AsyncStorage
++const TASKS_STORAGE_KEY = "hallpass_tasks";
 ```
 
-## Step 3: Define a Storage Key
+:::note[What is AsyncStorage?]
+AsyncStorage is a simple, unencrypted, asynchronous, persistent, key-value storage system that is global to your app. It's the React Native equivalent of localStorage in web browsers.
 
-:::note[What is a Storage Key?]
-A storage key is a unique identifier for your data.
-
-It's like a label that helps your app find your data later.
+The storage key is a unique identifier for your data, like a label that helps your app find your data later.
 :::
 
-Create a constant to identify your data:
+## Step 3: Load Tasks from Storage on App Start
 
-```diff lang="tsx" showLineNumbers title="app/index.tsx"
-const TASKS_STORAGE_KEY = "hallpass_tasks";
+```diff lang="tsx" title="app/index.tsx"
+export default function HomeScreen() {
+-  const [tasks, setTasks] = React.useState<TaskItem[]>([
+-    { id: 1, title: "Task 1", category: "Category 1", isChecked: false },
+-    { id: 2, title: "Task 2", category: "Category 2", isChecked: true },
+-    { id: 3, title: "Task 3", category: "Category 3", isChecked: false },
+-    { id: 4, title: "Task 4", category: "Category 2", isChecked: true },
+-  ]);
++  const [tasks, setTasks] = React.useState<TaskItem[]>([]);
++  const [isLoading, setIsLoading] = React.useState(true);
++
++  // Load tasks from storage when app starts
++  React.useEffect(() => {
++    const loadTasks = async () => {
++      try {
++        const storedTasks = await AsyncStorage.getItem(TASKS_STORAGE_KEY);
++        if (storedTasks !== null) {
++          setTasks(JSON.parse(storedTasks));
++        }
++      } catch (error) {
++        console.error("Failed to load tasks:", error);
++      } finally {
++        setIsLoading(false);
++      }
++    };
++
++    loadTasks();
++  }, []);
 ```
 
-## Step 4: Load Tasks on App Start
+:::note[Understanding useEffect]
+
+The useEffect hook runs code after the component renders. By providing an empty dependency array [], we ensure this code only runs once when the component first mounts.
+
+Inside this effect, we:
+
+<Steps>
+1. Define an async function to load tasks from storage
+1. Try to get the stored tasks using the storage key
+1. If tasks exist, parse the JSON string and update our state
+1. Set isLoading to false when done, regardless of success or failure
+</Steps>
+
+:::
+
+## Step 4: Create a Function to Save Tasks
 
 Add this code to your main file. It will load tasks from storage when the app starts:
 
-```diff lang="tsx" showLineNumbers title="app/index.tsx" ins="useEffect, "
-// Load tasks from storage when app starts
-React.useEffect(() => {
-  const loadTasks = async () => {
-    try {
-      const storedTasks = await AsyncStorage.getItem(TASKS_STORAGE_KEY);
-      if (storedTasks !== null) {
-        setTasks(JSON.parse(storedTasks));
-      }
-    } catch (error) {
-      console.error("Failed to load tasks:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  loadTasks();
-}, []);
+```diff lang="tsx" title="app/index.tsx"
++  // Save tasks to storage whenever they change
++  const saveTasks = async (updatedTasks: TaskItem[]) => {
++    try {
++      await AsyncStorage.setItem(
++        TASKS_STORAGE_KEY,
++        JSON.stringify(updatedTasks)
++      );
++    } catch (error) {
++      console.error("Failed to save tasks:", error);
++    }
++  };
 ```
 
-## Step 5: Create a Function to Save Tasks
+:::note[Why JSON.stringify?]
+AsyncStorage can only store string values. `JSON.stringify()` converts our JavaScript object (the tasks array) into a JSON string that can be stored.
 
-Add this function to your main file. It will save tasks to storage whenever they change:
+Later, when we retrieve this data, we use `JSON.parse()` to convert it back into a JavaScript object.
+:::
 
-```diff lang="tsx" showLineNumbers title="app/index.tsx" ins="saveTasks, "
-// Save tasks to storage whenever they change
-const saveTasks = async (updatedTasks: TaskItem[]) => {
-  try {
-    await AsyncStorage.setItem(
-      TASKS_STORAGE_KEY,
-      JSON.stringify(updatedTasks)
-    );
-  } catch (error) {
-    console.error("Failed to save tasks:", error);
-  }
-};
-```
+## Step 5: Update Task Handlers to Save Changes
 
-We will call this function whenever we update or add a task.
-
-## Step 6: Call `saveTasks` When Tasks Change
-
-```diff lang="tsx" showLineNumbers title="app/index.tsx" ins="saveTasks, "
-export default function HomeScreen() {
-  const [tasks, setTasks] = React.useState<TaskItem[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  // ... (rest of the code)
-
+```diff lang="tsx" title="app/index.tsx"
   const handleAddTask = (title: string, category: string) => {
-    // ... (rest of the code)
-
-    setTasks([...tasks, newTask]);
-+   saveTasks([...tasks, newTask]);
+    const nextId =
+      tasks.length > 0 ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+-    setTasks([...tasks, { id: nextId, title, category, isChecked: false }]);
++    const updatedTasks = [
++      ...tasks,
++      { id: nextId, title, category, isChecked: false },
++    ];
++    setTasks(updatedTasks);
++    saveTasks(updatedTasks);
++  };
++
++  const handleTaskUpdate = (updatedTask: TaskItem) => {
++    const updatedTasks = tasks.map((task) =>
++      task.id === updatedTask.id ? updatedTask : task
++    );
++    setTasks(updatedTasks);
++    saveTasks(updatedTasks);
   };
-
-  const handleEditTask = (taskId: number, newTitle: string, newCategory: string) => {
-    const updatedTasks = tasks.map(task =>
-      task.id === taskId ? { ...task, title: newTitle, category: newCategory } : task
-    );
-    setTasks(updatedTasks);
-+   saveTasks(updatedTasks);
-  };
-}
 ```
 
-## Step 7: Update Task Component to use `onUpdate`
+:::note[Immutable Updates]
+Notice how we create new arrays instead of modifying the existing ones:
 
-Make sure your Task component accepts and uses the onUpdate prop:
+<Steps>
+1. For adding a task, we use the spread operator (`...tasks`) to create a new array with all existing tasks plus the new one
+1. For updating a task, we use `map()` to create a new array where the matching task is replaced
+1. This approach (immutable updates) is a React best practice that helps prevent bugs
+</Steps>
 
-```diff lang="tsx" showLineNumbers title="app/index.tsx" ins="onUpdate, "
+:::
+
+## Step 6: Update the UI to Handle Loading State
+
+```diff lang="tsx" title="app/index.tsx"
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingVertical: 16,
+        }}
+      >
+-        {tasks.map((task) => (
+-          <Task key={task.id} task={task} />
+-        ))}
++        {isLoading ? (
++          <Text className="text-center text-foreground text-lg">
++            Loading tasks...
++          </Text>
++        ) : tasks.length === 0 ? (
++          <Text className="text-center text-foreground text-lg">
++            Please add your first task...
++          </Text>
++        ) : (
++          tasks.map((task) => (
++            <Task key={task.id} task={task} onUpdate={handleTaskUpdate} />
++          ))
++        )}
+      </ScrollView>
+```
+
+:::note[Conditional Rendering]
+We're using nested conditional (ternary) operators to show different content based on the app's state:
+
+<Steps>
+1. If isLoading is true, show a loading message
+1. Otherwise, if there are no tasks, show a message prompting the user to add a task
+1. Otherwise, render the list of tasks
+1. This pattern is common in React for handling different UI states.
+</Steps>
+
+:::
+
+## Step 7: Update the Task Component to Propagate Changes
+
+```diff lang="tsx" title="app/components/Task.tsx"
+export interface Task {
+  id: number;
+  title: string;
+  category: string;
+  isChecked: boolean;
+}
+
 export interface TaskProps {
   task: Task;
-  onUpdate?: (task: Task) => void;
++  onUpdate?: (task: Task) => void;
 }
 
-export default function Task({ task: propTask, onUpdate }: TaskProps) {
-  // ...existing code...
+-export default function Task({ task: propTask }: TaskProps) {
++export default function Task({ task: propTask, onUpdate }: TaskProps) {
+  const [task, setTask] = React.useState(propTask);
+  const [showDialog, setShowDialog] = React.useState(false);
+  const { title, category, isChecked } = task;
 
   const handleSetChecked = () => {
-    const updatedTask = { ...task, isChecked: !task.isChecked };
-    setTask(updatedTask);
-    if (onUpdate) {
-      onUpdate(updatedTask);
-    }
+-    const nextChecked = !task.isChecked;
+-    setTask({ ...task, isChecked: nextChecked });
++    const updatedTask = { ...task, isChecked: !task.isChecked };
++    setTask(updatedTask);
++    if (onUpdate) {
++      onUpdate(updatedTask);
++    }
++  };
++
++  const handleTaskUpdate = (updatedTask: Task) => {
++    setTask(updatedTask);
++    if (onUpdate) {
++      onUpdate(updatedTask);
++    }
   };
+```
+
+:::note[Prop Drilling]
+We're using a pattern called "prop drilling" to pass the update function down from the parent component. When a task is updated (either by checking/unchecking or editing), we:
+
+<Steps>
+1. Update the local state with setTask
+1. Call the onUpdate function passed from the parent to propagate the change upward
+1. The parent then saves the updated tasks to AsyncStorage
+1. This creates a complete data flow: UI → Component State → Parent State → AsyncStorage
+</Steps>
+
+:::
+
+## Step 8: Improve the TaskDialog Component
+
+```diff lang="tsx" title="app/components/TaskDialogue.tsx"
+interface TaskDialogProps {
+  task: Task;
+  setTask: (task: Task) => void;
+  setShowDialog: (showDialog: boolean) => void;
+  showDialog: boolean;
++  onSave?: () => void;
+}
+
+export default function TaskDialog({
+  task,
+  setTask,
+  setShowDialog,
+  showDialog,
++  onSave,
+}: TaskDialogProps) {
+  const isNewTask = task.title === "" && task.category === "";
+
+  // Rest of the component...
+
+  const handleSave = () => {
+    const nextTask = {
+      ...task,
+      title: editedTitle,
+      category: editedCategory,
+    };
+
+    setTask(nextTask);
++    if (onSave) {
++      onSave();
++    } else {
+      setShowDialog(false);
++    }
+  };
+
+  // Rest of the component...
 }
 ```
 
+:::note[Controlled Components]
+We've switched from using `defaultValue` to `value` in our inputs, making them "controlled components." This means:
+
+React fully controls the input's value through state
+The input's value always reflects the component's state
+Changes to the input update the state, which then updates the input
+This creates a more predictable data flow and makes it easier to validate inputs or reset forms.
+:::
+
+```diff lang="tsx" title="app/components/TaskDialogue.tsx"
+        <View className="gap-4">
+          <Input
+-            defaultValue={title}
++            value={editedTitle}
+            placeholder="Task title"
+            onChangeText={handleUpdateTitle}
+          />
+          <Input
+-            defaultValue={category}
++            value={editedCategory}
+            placeholder="Category"
+            onChangeText={handleUpdateCategory}
+          />
+        </View>
+
+        <DialogFooter>
+-          <DialogClose asChild>
+-            <Button variant="outline">
+-              <Text>Cancel</Text>
+-            </Button>
+-          </DialogClose>
+-          <DialogClose asChild>
+-            <Button onPress={handleSave}>
+-              <Text>Save changes</Text>
+-            </Button>
+-          </DialogClose>
++          <Button variant="outline" onPress={() => setShowDialog(false)}>
++            <Text>Cancel</Text>
++          </Button>
++          <Button onPress={handleSave}>
++            <Text>Save changes</Text>
++          </Button>
+        </DialogFooter>
+```
+
+:::note[Direct Event Handling]
+We've replaced `DialogClose` with direct event handlers on the buttons. This gives us more control over when the dialog closes, allowing us to:
+
+<Steps>
+1. Validate input before closing
+1. Perform additional actions (like saving to storage)
+1. Decide whether to close based on conditions
+</Steps>
+:::
+
+## Step 9: Reset Form Fields in AddTask
+
+```diff lang="tsx" title="app/components/AddTask.tsx"
+export default function AddTask({ onAdd }: AddTaskProps) {
+  const [showDialog, setShowDialog] = React.useState(false);
+  const [title, setTitle] = React.useState("");
+  const [category, setCategory] = React.useState("");
+
++  // This function will be called when the user saves a new task
+  const handleSave = () => {
+    if (title.trim()) {
++      // Call the onAdd function passed from the parent component
+      onAdd(title, category);
++
++      // Reset the form fields and close dialog
+      setTitle("");
+      setCategory("");
+      setShowDialog(false);
+    }
+  };
+
++  // Reset fields when dialog closes
++  React.useEffect(() => {
++    if (!showDialog) {
++      setTitle("");
++      setCategory("");
++    }
++  }, [showDialog]);
+```
+
+:::note[Cleanup on Dialog Close]
+This effect runs whenever `showDialog` changes. When the dialog closes (`showDialog` becomes false), we reset the form fields to ensure a clean slate for the next new task.
+:::
+
+## How it all works together
+
+<Steps>
+1. When the app starts, it loads tasks from `AsyncStorage`
+1. While loading, it shows a "Loading tasks..." message
+1. If no tasks exist, it shows a prompt to add the first task
+1. When a task is added or updated:
+    - The component state is updated
+    - The change is propagated to the parent component
+    - The parent saves all tasks to `AsyncStorage`
+    - When the app is reopened later, the saved tasks are loaded from storage
+</Steps>
+
+## Testing Your Implementation
+
+After implementing these changes:
+
+<Steps>
+1. Add a few tasks to your app
+1. Close the app completely
+1. Reopen the app - your tasks should still be there!
+1. Edit a task or mark it as complete - these changes should persist after closing and reopening the app
+</Steps>
+
+:::note[Real-World Considerations]
+In a production app, you might want to add:
+
+<Steps>
+1. Error handling for failed storage operations
+1. A way to sync with a remote server
+1. Data migration strategies for app updates
+1. Performance optimizations for large task lists
+</Steps>
+:::
+
 ## That's it!
+Congratulations! Your app now has a complete task management system with persistent storage.
 
 Once you have implemented `AsyncStorage` successfully, your app now:
 
@@ -133,3 +414,5 @@ Once you have implemented `AsyncStorage` successfully, your app now:
 - Shows a loading state while tasks are being fetched
 - Displays a message when no tasks exist
 - All changes are automatically saved to the user's device!
+
+Users can add, edit, and complete tasks, and all changes are automatically saved to their device.

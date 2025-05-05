@@ -1,0 +1,451 @@
+---
+title: Writing Tests
+description: Learn how to write tests for your React Native app
+---
+
+import { Steps } from "@astrojs/starlight/components";
+import { FileTree } from "@astrojs/starlight/components";
+
+Here's a simple step-by-step guide to help you write your first tests for the Hall Pass application.
+
+## Step 1: Install Required Packages
+
+Open your terminal in the project directory and run:
+
+```bash
+npm install --save-dev react-test-renderer@18.2.0 @testing-library/react-native@12.3.0 babel-plugin-module-resolver
+```
+
+:::note[What are these packages?]
+<Steps>
+1. **@testing-library/react-native**: A testing utility that helps you test React Native components in a way that resembles how users interact with your app
+2. **react-test-renderer**: Required as a peer dependency for React Native Testing Library
+3. **babel-plugin-module-resolver**: Helps resolve path aliases (like `~/components`) in your tests
+</Steps>
+:::
+
+## Step 2: Configure Jest
+
+Create a Jest configuration file called `jest.config.js` in the root of your project.
+
+<FileTree>
+- global.css
+- index.js
+- **jest.config.js**
+- metro.config
+- nativewind-env.d.ts
+</FileTree>
+
+This file allows you to customize how tests are run by adding the code below:
+
+```js title="jest.config.js"
+module.exports = {
+  preset: "react-native",
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
+  testMatch: ["**/tests/**/*.test.js"],
+  moduleNameMapper: {
+    "^~/(.*)": "<rootDir>/$1",
+  },
+  transformIgnorePatterns: [
+    "node_modules/(?!(react-native|@react-native|@rn-primitives|react-native-.*)/)",
+  ],
+};
+```
+
+:::note[Understanding the Jest Configuration]
+<Steps>
+1. `preset: "react-native"` - Uses the React Native preset for Jest, which includes transformers for React Native code
+2. `moduleFileExtensions` - Specifies which file extensions Jest should look for
+3. `testMatch` - Tells Jest where to find test files (in this case, any .test.js file in the tests directory)
+4. `moduleNameMapper` - Maps the `~/` path alias to the root directory, allowing imports like `import Component from '~/components/Component'`
+5. `transformIgnorePatterns` - Tells Jest which node_modules to transform (React Native modules need to be transformed)
+</Steps>
+:::
+
+## Step 3: Update package.json
+
+Add a test script and Jest configuration to your `package.json` file:
+
+```diff lang="json" title="package.json" showLineNumbers collapse={9-14, 17-51}
+{
+  "name": "hall-pass",
+  "main": "index.js",
+  "version": "1.0.0",
+  "scripts": {
++    "test": "npx jest --config jest.config.js",
+    "dev": "expo start -c",
+    "dev:web": "expo start -c --web",
+    "dev:android": "expo start -c --android",
+    "android": "expo start -c --android",
+    "ios": "expo start -c --ios",
+    "web": "expo start -c --web",
+    "clean": "rm -rf .expo node_modules",
+    "postinstall": "npx tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-navigation/bottom-tabs": "^7.2.0",
+    "@react-navigation/native": "^7.0.14",
+    "@rn-primitives/avatar": "~1.1.0",
+    "@rn-primitives/checkbox": "^1.1.0",
+    "@rn-primitives/dialog": "^1.1.0",
+    "@rn-primitives/portal": "~1.1.0",
+    "@rn-primitives/progress": "~1.1.0",
+    "@rn-primitives/slot": "~1.1.0",
+    "@rn-primitives/tooltip": "~1.1.0",
+    "@rn-primitives/types": "~1.1.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "expo": "~52.0.32",
+    "expo-linking": "~7.0.4",
+    "expo-navigation-bar": "~4.0.7",
+    "expo-router": "~4.0.16",
+    "expo-splash-screen": "~0.29.20",
+    "expo-status-bar": "~2.0.1",
+    "expo-system-ui": "~4.0.7",
+    "lucide-react-native": "^0.378.0",
+    "nativewind": "^4.1.23",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-native": "0.76.7",
+    "react-native-gesture-handler": "~2.20.2",
+    "react-native-reanimated": "~3.16.1",
+    "react-native-safe-area-context": "^4.12.0",
+    "react-native-screens": "~4.4.0",
+    "react-native-svg": "15.8.0",
+    "react-native-web": "~0.19.13",
+    "tailwind-merge": "^2.2.1",
+    "tailwindcss": "3.3.5",
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@testing-library/react-native": "^12.3.0",
+    "@types/react": "~18.3.12",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "react-test-renderer": "^18.2.0",
+    "typescript": "^5.3.3"
+  },
+  "private": true,
++  "jest": {
++    "preset": "react-native",
++    "testsMatch": [
++      "**/tests/**/*.test.js"
++    ]
++  }
+}
+
+```
+:::note[What's happening here?]
+<Steps>
+1. `test` script - Runs Jest with the specified configuration file. You can now run tests with `npm run test`
+2. `jest` configuration - Specifies the preset and which folder Jest should look for tests in
+</Steps>
+:::
+
+## Step 4: Create your first test - the `Task` component
+
+Create a new folder called `tests` at the root of your project, and place a `Task.test.js` file in here:
+
+<FileTree>
+- lib/
+- node_modules/
+- **tests**
+	- **Task.test.js**
+- global.css
+- index.js
+</FileTree>
+
+This will contain all the tests for the `Task` component
+
+Add your first test code below to `Task.test.js`:
+
+```diff lang="js" title="tests/Task.test.js"
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react-native";
+import Task from "../components/Task"; // Adjust path as needed
+
+// Mock any components or contexts used by Task
+jest.mock("~/lib/TaskContext", () => ({
+  useTasks: () => ({
+    updateTask: jest.fn(),
+    deleteTask: jest.fn(),
+  }),
+}));
+
+describe("Task", () => {
+  test("renders a task", () => {
+    const task = {
+      id: 1,
+      title: "Test Task",
+      category: "Test Category",
+      isChecked: false,
+    };
+
+    render(<Task task={task} />);
+
+    // Just check if the title and category are displayed
+    const titleElement = screen.getByText("Test Task");
+    const categoryElement = screen.getByText("Test Category");
+    expect(titleElement).toBeTruthy();
+    expect(categoryElement).toBeTruthy();
+  });
+});
+```
+
+:::note[Understanding the Test]
+
+<Steps>
+1. **Imports**: We import `React`, testing utilities, and the component we want to test
+2. **Mocks**: We mock the `TaskContext` to provide fake implementations of functions our component might use
+3. **Test Structure**: - `describe` groups related tests - `test` (or `it`) defines a single test case
+4. **Component Rendering**: We render the Task component with test props
+5. **Assertions**: We check if the component displays the expected text
+</Steps>
+
+## What is `screen`?
+
+The `screen` object provides methods to query the rendered component, similar to how a user would interact with your app:
+
+<Steps>
+1. `getByText`: Finds elements by their text content
+2. `getByTestId`: Finds elements by their testID prop
+</Steps>
+
+And many more query methods!
+:::
+
+## Step 5: Run your test
+
+Run your test with the command below:
+
+```bash
+npm run test
+```
+
+This will execute Jest with your configuration and run all tests matching the pattern in your testMatch configuration.
+
+:::note[What to expect when running tests]
+<Steps>
+1. Jest will find all files inside the `tests` folder
+2. It will run the tests in those files
+3. It will report which tests passed or failed
+4. For failed tests, it will show what was expected vs. what was received
+</Steps>
+:::
+
+When you run the test, you should see a passing test for our `Task` component:
+
+![Tests passing](src/assets/webp/react-native/tests-passing.webp)
+
+## Step 6: Understanding Component Rendering Tests
+
+The test we wrote in Step 4 is a basic component rendering test. It verifies that our component correctly displays the data it receives as props. This type of test is essential for ensuring your UI components render correctly.
+
+However, real applications need more than just static rendering - they need to respond to user interactions!
+
+## Step 7: Adding Interaction Tests
+
+Let's enhance our test suite by adding an interaction test that verifies the checkbox in our Task component works correctly when pressed.
+
+First, we need to add a `testID` to our checkbox component to make it easier to find in our tests:
+
+```diff lang="tsx" title="components/Task.tsx"
+<Checkbox
++  testID="checkbox"
+  className="border-foreground checked:bg-foreground"
+  checked={isChecked}
+  onCheckedChange={handleSetChecked}
+/>
+```
+
+Now, let's add a new test to our `Task.test.js` file that verifies the checkbox calls the correct function when pressed:
+
+```diff lang="tsx" title="tests/Task.test.js" showLineNumbers collapse={1-12, 14-29}
+import React from "react";
++import { render, screen, userEvent } from "@testing-library/react-native";
+import Task from "../components/Task"; // Adjust path as needed
+
+// Mock any components or contexts used by Task
+jest.mock("~/lib/TaskContext", () => ({
+  useTasks: () => ({
+    updateTask: jest.fn(),
+    deleteTask: jest.fn(),
+  }),
+}));
+
+describe("Task", () => {
+  test("renders a task", () => {
+    const task = {
+      id: 1,
+      title: "Test Task",
+      category: "Test Category",
+      isChecked: false,
+    };
+
+    render(<Task task={task} />);
+
+    // Just check if the title is displayed
+    const titleElement = screen.getByText("Test Task");
+    const categoryElement = screen.getByText("Test Category");
+    expect(titleElement).toBeTruthy();
+    expect(categoryElement).toBeTruthy();
+  });
+
++  test("toggles completion status when pressed", async () => {
++    const mockToggle = jest.fn(); // Create a mock function
++    const task = {
++      id: 1,
++      title: "Test Task",
++      category: "Test Category",
++      isChecked: false,
++    };
++
++    render(<Task task={task} onUpdate={mockToggle} />);
++
++    const checkbox = screen.getByTestId("checkbox"); // Find the checkbox element
++
++    const user = userEvent.setup();
++    await user.press(checkbox);
++
++    // Check if our mock function was called
++    expect(mockToggle).toHaveBeenCalled();
++  });
+});
+```
+
+:::note[Understanding Interaction Tests]
+<Steps>
+1. **Mock Functions**: We create a mock function (`jest.fn()`) that we can pass as a prop to track if and how it's called
+2. **Finding Elements**: We use `getByTestId` to find elements with a specific `testID` prop
+3. **Simulating Events**: We use `userEvent` to simulate user interactions like pressing a button
+4. **Verifying Behavior**: We check if our mock function was called, indicating the component behaved as expected
+</Steps>
+:::
+
+### What is `userEvent`?
+
+The `userEvent` function allows you to simulate user interactions with your components.
+
+These must always be placed inside an `async` function, because they use `await` internally.
+
+<Steps>
+1. `const userEvent = userEvent.setup();` - Sets up the user event simulation
+2. `await user.press(checkbox);` - Simulates pressing/tapping an element
+3. `await user.type(textInput, 'Hello world!');` - Simulates typing in a text input
+4. You can find out more about `userEvent` in the [official documentation](https://callstack.github.io/react-native-testing-library/docs/api/events/user-event)
+</Steps>
+
+This is powerful because it lets you test not just what your component looks like, but how it responds to user input!
+
+## Step 8: Testing More Complex Interactions
+
+Now that we've covered the basics of interaction testing, let's explore how to test more complex scenarios:
+
+## Step 9: Testing with More Specific Assertions
+
+Our current test only verifies that the `onUpdate` function was called, but we can make our test more specific by checking exactly how it was called:
+
+```diff lang="tsx" title="tests/Task.test.js" ins=", userEvent"
+  import { render, screen, userEvent } from "@testing-library/react-native";
+
+  // ... other imports and setup
+
+  test("toggles completion status when pressed", async () => {
+    const mockToggle = jest.fn();
+    const task = {
+      id: 1,
+      title: "Test Task",
+      category: "Test Category",
+      isChecked: false,
+    };
+
+    render(<Task task={task} onUpdate={mockToggle} />);
+
+    const checkbox = screen.getByTestId("checkbox");
+
+    const user = userEvent.setup();
+    await user.press(checkbox);
+
+-   // Check if our mock function was called
+-   expect(mockToggle).toHaveBeenCalled();
++   // Check if our mock function was called with the correct arguments
++   expect(mockToggle).toHaveBeenCalledWith({
++     ...task,
++     isChecked: true  // The checkbox should toggle from false to true
++   });
+  });
+```
+
+## Step 10: Testing Multiple States
+
+It's also important to test different starting states. Let's add another test for when the task is already checked:
+
+```diff lang="tsx" title="tests/Task.test.js"
+  test("toggles from checked to unchecked when pressed", async () => {
+    const mockToggle = jest.fn();
+    const task = {
+      id: 1,
+      title: "Test Task",
+      category: "Test Category",
+      isChecked: true, // Starting as checked
+    };
+
+    render(<Task task={task} onUpdate={mockToggle} />);
+
+    const checkbox = screen.getByTestId("checkbox");
+
+    const user = userEvent.setup();
+    await user.press(checkbox);
+
+    // Check if our mock function was called with the correct arguments
+    expect(mockToggle).toHaveBeenCalledWith({
+      ...task,
+      isChecked: false, // The checkbox should toggle from true to false
+    });
+  });
+```
+
+### Best Practices for Interaction Tests
+
+When writing interaction tests, keep these principles in mind:
+
+<Steps>
+1. **Test user behavior, not implementation details**: Focus on what the user does and sees, not on internal component state or methods
+2. **Use testIDs strategically**: Add testIDs to elements that need to be interacted with in tests
+3. **Test edge cases**: Consider different starting states and user interactions
+4. **Keep tests independent**: Each test should be able to run on its own without depending on other tests
+5. **Mock external dependencies**: Use Jest's mocking capabilities to isolate the component you're testing
+</Steps>
+
+By following these practices, you'll create a robust test suite that gives you confidence in your application's behavior.
+
+## Conclusion
+
+Congratulations! You've learned how to:
+
+<Steps>
+1. Set up a testing environment for your React Native application
+2. Write basic component rendering tests
+3. Add testIDs to make components easier to find in tests
+4. Create interaction tests that simulate user behavior
+5. Use mock functions to verify component behavior
+6. Apply best practices for writing effective tests
+</Steps>
+
+Testing is an essential part of building reliable applications. By investing time in writing good tests, you'll catch bugs earlier, make changes with confidence, and create a more maintainable codebase.
+
+### Next Steps
+
+To continue improving your testing skills:
+
+<Steps>
+1. Add tests for your other components
+2. Learn about the full [React Native Testing Library API](https://callstack.github.io/react-native-testing-library/)
+3. See an example of a test using React Native Testing Library in the [official documentation](https://testing-library.com/docs/react-native-testing-library/example-intro)
+</Steps>
+
+Remember, the goal of testing isn't 100% code coverage, but rather confidence that your application works as expected.
+
+Focus on testing the most critical parts of your application first, and gradually expand your test suite as your application grows.

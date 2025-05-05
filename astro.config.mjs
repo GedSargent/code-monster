@@ -172,6 +172,10 @@ export default defineConfig({
               label: "📱 Saving tasks to local storage",
               link: "guides/react-native/saving-tasks-to-localstorage",
             },
+            {
+              label: "📱 Writing tests",
+              link: "guides/react-native/writing-tests",
+            },
           ],
         },
         {

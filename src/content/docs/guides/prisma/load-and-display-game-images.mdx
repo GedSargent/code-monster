@@ -1,0 +1,153 @@
+---
+title: 🖥️ Load and display game images
+description: Update the GameCard component to display game images
+next: false
+---
+
+import MonsterReveal from 'src/components/MonsterReveal.astro'
+import { Steps } from '@astrojs/starlight/components'
+
+In this guide, we will learn how to load and display game images from the database. In the previous guide, we added an `image` field to our `Game` model. Now, we'll update our application to fetch and display these images.
+
+## Start the development server
+
+If you need to, start the development server by running the following command in your terminal:
+
+```bash
+npm run dev
+```
+
+## Step 1: Update the GameCard Component Props
+
+First, we need to update our `GameCard` component to accept an image URL as a prop.
+
+```diff lang="tsx" title="app/components/GameCard.tsx"
+interface GameCardProps {
+  title: string;
+  releaseDate: string;
+  genre: string;
++  imageUrl: string;
+}
+-export default function GameCard({ title, releaseDate, genre }: GameCardProps) {
++export default function GameCard({
++  title,
++  releaseDate,
++  genre,
++  imageUrl,
++}: GameCardProps) {
+  const formattedDate = releaseDate.substring(0, 10);
+```
+
+:::note
+We've added a new `imageUrl` prop to our `GameCardProps` interface and updated the function parameters to include this new prop. We're also using a more readable multi-line format for the function parameters since we now have more props.
+:::
+
+## Step 2: Use the Image Prop in the Component
+
+Next, we need to update the JSX in our `GameCard` component to use the image URL passed as a prop instead of the placeholder image.
+
+```diff lang="tsx" title="app/components/GameCard.tsx"
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="relative h-72 overflow-hidden">
+        <img
+-          src="https://picsum.photos/400/300"
+-          alt="Game Cover"
++          src={imageUrl}
++          alt={`${title} cover`}
+          className="absolute inset-0 w-full h-full object-cover rounded-xl"
+        />
+      </div>
+```
+
+:::note
+We're replacing the hardcoded placeholder image URL with the dynamic `imageUrl` value that we're receiving as a prop. We're also making the alt text more descriptive by including the game title, which improves accessibility.
+:::
+
+## Step 3: Update the Prisma Query to Include Image Data
+
+Now, we need to update our Prisma query in the loader function to include the image field for each game.
+
+```diff lang="tsx" title="app/routes/_index.tsx"
+import { PrismaClient } from "@prisma/client";
+import { json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import type { MetaFunction } from "@remix-run/node";
+import GameCard from "~/components/GameCard";
++import gamelogFallback from "~/assets/svg/gamelog-fallback.svg"; // You will need to add your own image here
+
+export async function loader() {
+  const prisma = new PrismaClient();
+
+  const games = await prisma.game.findMany({
+    select: {
+      id: true,
+      title: true,
+      releaseDate: true,
++      imageUrl: true,
+      category: {
+        select: {
+          title: true,
+        },
+      },
+    },
+  });
+
+  return json({ games });
+}
+```
+
+:::note
+We've added the `imageUrl` field to our Prisma query's `select` object. This ensures that the image URL is included in the data returned from the database.
+
+We're also importing a fallback image that we'll use in place of games that don't have an image.
+
+You will need to add your own fallback image to the `assets` folder for this to work.
+
+Below is an example of a fallback image I created (feel free to use it if you want!)
+
+![GameCard fallback image](src/assets/svg/prisma/gamecard-fallback-image.svg)
+:::
+
+## Step 4: Pass the Image URL to the GameCard Component
+
+Finally, we need to update our index route to pass the image URL to the `GameCard` component.
+
+```diff lang="tsx" title="app/routes/_index.tsx"
+      {games.map((game) => (
+        <div key={game.id}>
+          <GameCard
+            key={game.id}
+            title={game.title}
+            releaseDate={game.releaseDate}
++            imageUrl={game.imageUrl || gamelogFallback}
+            genre={game.category?.title || "Unknown"}
+          />
+        </div>
+      ))}
+```
+
+:::note
+We're passing the `game.imageUrl` value as the `imageUrl` prop to the `GameCard` component. We're also using the logical OR operator (`||`) to provide a fallback image (`gamelogFallback`) in case a game doesn't have an image URL. This ensures that our UI always displays an image, even if the data is incomplete.
+:::
+
+## What We've Learned
+
+In this tutorial, we've:
+
+<Steps>
+1. Updated our `GameCard` component to accept an image URL as a prop
+2. Modified the component to use the provided image URL instead of a placeholder
+3. Updated our Prisma query to include the image field in the data returned from the database
+4. Added a fallback image for games that don't have an image URL
+</Steps>
+
+These changes allow our application to display actual game images from our database, making our UI more visually appealing and informative:
+
+![Game images displaying](src/assets/webp/prisma/gamelog-index-with-games.webp)
+
+<MonsterReveal>
+  Excellent work!
+  
+  You've successfully updated your application to load and display game images from the database. This is a significant improvement to your UI, making it more engaging and informative for users. Remember that handling images is an important aspect of web development, and there are many techniques and best practices to consider as you continue to enhance your application.
+</MonsterReveal>

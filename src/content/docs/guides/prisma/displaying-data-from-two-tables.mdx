@@ -1,7 +1,6 @@
 ---
 title: 🖥️ Display data from two tables
 description: Using props to display data in a component
-next: false
 ---
 
 import MonsterReveal from 'src/components/MonsterReveal.astro'
@@ -18,4 +17,117 @@ If you need to, start the development server by running the following command in
 npm run dev
 ```
 
-## Load the category of each game
+## Understanding Prisma Relations
+
+In our database, we have a relationship between the `Game` and `Category` tables. Each game belongs to a category, and this relationship is defined in our Prisma schema. We can use Prisma's query capabilities to fetch data from both tables in a single query.
+
+## Step 1: Update the Prisma Query to Include Category Data
+
+First, we need to modify our Prisma query in the loader function to include the category information for each game.
+
+```diff lang="tsx" title="app/routes/_index.tsx"
+export async function loader() {
+  const prisma = new PrismaClient();
+
+-  const games = await prisma.game.findMany();
++  const games = await prisma.game.findMany({
++    select: {
++      id: true,
++      title: true,
++      releaseDate: true,
++      category: {
++        select: {
++          title: true,
++        },
++      },
++    },
++  });
+
+  return json({ games });
+}
+```
+
+:::note
+Prisma's `select` option allows us to specify exactly which fields we want to include in our query results. Here, we're selecting the `id`, `title`, and `releaseDate` fields from the `Game` table, as well as the `title` field from the related `Category` table.
+
+This is more efficient than fetching all fields, as it only retrieves the data we need.
+:::
+
+## Step 2: Update the GameCard Component Props Interface
+
+Now that we're fetching the category information, we need to update our `GameCard` component to accept and display this data.
+
+```diff lang="tsx" title="app/components/GameCard.tsx"
+interface GameCardProps {
+  title: string;
+  releaseDate: string;
++  genre: string;
+}
+-export default function GameCard({ title, releaseDate }: GameCardProps) {
++export default function GameCard({ title, releaseDate, genre }: GameCardProps) {
+  const formattedDate = releaseDate.substring(0, 10);
+
+  return (
+```
+
+:::note
+We've added a new `genre` prop to our `GameCardProps` interface and updated the function parameters to include this new prop.
+:::
+
+## Step 3: Display the Category Title in the GameCard Component
+
+Next, we need to update the JSX in our `GameCard` component to display the category title.
+
+```diff lang="tsx" title="app/components/GameCard.tsx"
+      <div className="flex justify-between">
+        <div className="flex flex-col justify-between w-2/3">
+          <h3 className="font-bold text-2xl text-slate-300">{title}</h3>
+-          <p className="text-cyan-300 uppercase text-sm font-semibold">Genre</p>
++          <p className="text-cyan-300 uppercase text-sm font-semibold">
++            {genre}
++          </p>
+          <p className="text-slate-200/60 text-sm font-semibold">
+            {formattedDate}
+          </p>
+        </div>
+```
+
+:::note
+We're replacing the hardcoded "Genre" text with the dynamic `genre` value that we're receiving as a prop.
+:::
+
+## Step 4: Pass the Category Title to the GameCard Component
+
+Finally, we need to update our index route to pass the category title to the `GameCard` component.
+
+```diff lang="tsx" title="app/routes/_index.tsx"
+      {games.map((game) => (
+        <div key={game.id}>
+          <GameCard
+            key={game.id}
+            title={game.title}
+            releaseDate={game.releaseDate}
++            genre={game.category?.title || "Unknown"}
+          />
+        </div>
+      ))}
+```
+
+:::note
+We're using the optional chaining operator (`?.`) to safely access the category title. If a game doesn't have a category, this would return `undefined`, and we're providing a fallback value of "Unknown" using the logical OR operator (`||`).
+:::
+
+## What We've Learned
+
+In this tutorial, we've:
+
+1. Updated our Prisma query to fetch data from related tables using the `select` option
+2. Added a new prop to our `GameCard` component to accept the category title
+3. Updated the component to display the dynamic category title
+4. Used optional chaining and fallback values to handle cases where a game might not have a category
+
+This approach allows us to efficiently fetch and display data from multiple related tables in our database, providing a more complete and informative user interface.
+
+<MonsterReveal>
+  Great job! You've learned how to work with related data in Prisma. This is a powerful feature that allows you to efficiently fetch data from multiple tables in a single query, reducing the number of database requests and improving your application's performance.
+</MonsterReveal>

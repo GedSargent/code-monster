@@ -207,7 +207,7 @@ export default defineConfig({
                 {
                   label: "🗄️ Reading data - loader functions",
                   link: "guides/prisma/reading-data",
-                }
+                },
               ]
             },
             {
@@ -216,6 +216,22 @@ export default defineConfig({
                 {
                   label: "🖥️ Displaying data with `map`",
                   link: "guides/prisma/displaying-data",
+                },
+                {
+                  label: "🖥️ Passing data into components",
+                  link: "guides/prisma/passing-data-into-components",
+                },
+                {
+                  label: "🖥️ Displaying data from two tables",
+                  link: "guides/prisma/displaying-data-from-two-tables",
+                },
+                {
+                  label: "🖥️ Adding an image to the Game model",
+                  link: "guides/prisma/adding-an-image-to-the-game-model",
+                },
+                {
+                  label: "🖥️ Load and display game images",
+                  link: "guides/prisma/load-and-display-game-images",
                 },
               ]
             },

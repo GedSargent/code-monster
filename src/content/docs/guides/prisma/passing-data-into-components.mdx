@@ -1,0 +1,116 @@
+---
+title: 🖥️ Passing data into components
+description: Using props to display data in a component
+---
+
+import MonsterReveal from 'src/components/MonsterReveal.astro'
+
+In the [**previous step**](/code-monster/guides/prisma/displaying-data), we displayed a list of game titles on the page.
+
+In this step, we will pass the game data into a component so that we can display the information in a more user-friendly way.
+
+## Understanding Props in React Components
+
+React components can accept inputs called "props" (short for properties). Props allow us to pass data from a parent component to a child component, making our components reusable with different data.
+
+## Step 1: Define Props for the GameCard Component
+
+First, we need to define what props our `GameCard` component will accept. We'll create an interface to specify the expected props and their types.
+
+```diff lang="tsx"  title="app/components/GameCard.tsx"
++interface GameCardProps {
++  title: string;
++  releaseDate: string;
++}
++export default function GameCard({ title, releaseDate }: GameCardProps) {
++  const formattedDate = releaseDate.substring(0, 10);
+```
+
+:::note
+TypeScript interfaces help us define the shape of objects. Here, we're creating an interface called `GameCardProps` that specifies our component will receive two props: `title` and `releaseDate`, both of type string.
+:::
+
+## Step 2: Update the GameCard Component to Use Props
+
+Now that we've defined our props, we need to update the component to use them instead of hardcoded values.
+
+```diff lang="tsx" title="app/components/GameCard.tsx"
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="relative h-72 overflow-hidden">
+        <img
+          src="https://picsum.photos/400/300"
+          alt="Game Cover"
+          className="w-full object-cover rounded-md"
+        />
+      </div>
+      <div className="flex justify-between">
+        <div className="flex flex-col justify-between w-2/3">
+-          <h3 className="font-bold text-2xl text-slate-300">Game Title</h3>
++          <h3 className="font-bold text-2xl text-slate-300">{title}</h3>
+          <p className="text-cyan-300 uppercase text-sm font-semibold">Genre</p>
+-          <p className="text-slate-200/60 text-sm font-semibold">Start date</p>
++          <p className="text-slate-200/60 text-sm font-semibold">
++            {formattedDate}
++          </p>
+        </div>
+```
+
+:::note[Expression slots]
+We're using curly braces `{}` to insert JavaScript expressions into our JSX. This allows us to display the dynamic values passed through props.
+
+We're also formatting the date by using `substring(0, 10)` to show only the first 10 characters of the date string (YYYY-MM-DD format).
+:::
+
+## Step 3: Update the Index Route to Pass Props to GameCard
+
+Finally, we need to update our index route to pass the game data to the `GameCard` component.
+
+```diff lang="tsx" title="app/routes/_index.tsx"
+  return (
+-    <div className="flex items-center justify-center min-h-screen">
+-      <div>
+-        <h1 className="text-4xl font-bold">Hello, World!</h1>
+-        <GameCard />
+-        {games.map((game) => (
+-          <div key={game.id}>
+-            <h2>{game.title}</h2>
+-          </div>
+-        ))}
+-      </div>
++    <div className="container mx-auto px-8 grid grid-cols-3 gap-8">
++      {games.map((game) => (
++        <div key={game.id}>
++          <GameCard
++            key={game.id}
++            title={game.title}
++            releaseDate={game.releaseDate}
++          />
++        </div>
++      ))}
+    </div>
+  );
+```
+
+:::note
+We're using the `map()` method to iterate over each game in our array and create a `GameCard` component for each one.
+
+The `key` prop is a special React prop that helps React identify which items have changed, been added, or been removed. It should be a unique identifier, which is why we're using `game.id`.
+
+We're also updating our layout to use a grid with 3 columns, which will display our game cards in a more visually appealing way.
+:::
+
+## What We've Learned
+
+In this tutorial, we've:
+
+1. Created a TypeScript interface to define the props for our `GameCard` component
+2. Updated the `GameCard` component to use these props instead of hardcoded values
+3. Modified our index route to pass game data to the `GameCard` component
+4. Improved the layout of our page using CSS Grid
+
+Now our application displays each game from the database in a visually appealing card format, making the information more user-friendly and organized.
+
+<MonsterReveal>
+  Congratulations! You've successfully learned how to pass data from a parent component to a child component using props. This is a fundamental concept in React that allows you to create reusable components that can display different data based on the props they receive.
+</MonsterReveal>

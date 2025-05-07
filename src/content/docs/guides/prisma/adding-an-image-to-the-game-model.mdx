@@ -1,0 +1,175 @@
+---
+title: 🖥️ Adding an image to the Game model
+description: Preparing to display images in a component
+---
+
+import MonsterReveal from 'src/components/MonsterReveal.astro'
+
+In this guide, we will add an `imageUrl` field to our `Game` model. This will allow us to store the URL of an image for each game.
+
+## Understanding Database Schema Changes
+
+When building applications, it's common to need to update your database schema as your application evolves. Prisma makes this process straightforward with its migration system.
+
+## Step 1: Update the Prisma Schema
+
+First, we need to modify our Prisma schema to include the new `imageUrl` field in the `Game` model.
+
+```diff lang="prisma" title="prisma/schema.prisma"
+model Game {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  rating      Float
+  releaseDate DateTime
++  imageUrl    String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+```
+
+:::note
+We've added an `imageUrl` field of type `String` with a question mark (`?`), which makes it optional. This means games can exist in our database without an image URL.
+:::
+
+## Step 2: Create a Migration
+
+After updating the schema, we need to create a migration to apply this change to our database. Run the following command in your terminal:
+
+```bash
+npx prisma migrate dev --name add_image_url_to_game_model
+```
+
+This command will:
+1. Generate a new migration file
+2. Apply the migration to your development database
+3. Generate an updated Prisma client
+
+The migration file will look something like this:
+
+```sql lang="sql" title="prisma/migrations/20250506213524_add_image_to_game_model/migration.sql"
+-- AlterTable
+ALTER TABLE "Game" ADD COLUMN "imageUrl" TEXT;
+```
+
+:::note
+Prisma automatically generates the SQL needed to update your database schema. In this case, it's adding a new TEXT column called "imageUrl" to the Game table.
+:::
+
+## Step 3: Source images from the Internet
+
+Before we can add actual image URLs to our seed data, we need to find some images to use.
+
+Open your seed file at `prisma/seed.ts`.
+
+Look carefully at the game titles in the seed data.
+
+You will need to find images for each game title. Use a simple Google search to find an image for each game title, and save these to your computer's Downloads folder.
+
+## Step 4: Upload Images to Cloudinary
+
+Next, you will need to create an account with [**Cloudinary**](https://cloudinary.com/).
+
+:::note[What is Cloudinary?]
+Cloudinary is a cloud-based image hosting service that we will use to store our game images.
+
+If you already have an account with Cloudinary, you can skip this step.
+:::
+
+1. Navigate to the [**Cloudinary sign-up page**](https://cloudinary.com/users/register/free) and sign up for a free account.
+2. Once you have created an account, log in and navigate to the **Media Library** section.
+3. Click the **Upload** button and select the images you want to upload.
+4. Once the images have uploaded, click on each one to view its details.
+5. Copy the **URL** for each image, as we will need these in the next step.
+
+
+## Step 4: Update the Seed Data
+
+Now that we have the new field in our database, we should update our seed data to include image URLs for our games.
+
+```diff lang="tsx" title="prisma/seed.ts"
+async function seed() {
+  const games = [
+    {
+      title: "The Legend of Zelda: Breath of the Wild",
+      description: "...",
+      price: 59.99,
+      rating: 4.9,
+      releaseDate: new Date("2017-03-03"),
++      imageUrl:
++        "https://res.cloudinary.com/abcdefgh/image/upload/v1234567890/gamelog/zelda_osdu8u.webp",
+    },
+    {
+      title: "The Witcher 3: Wild Hunt",
+      description: "...",
+      price: 39.99,
+      rating: 4.8,
+      releaseDate: new Date("2015-05-19"),
++      imageUrl:
++        "https://res.cloudinary.com/abcdefgh/image/upload/v1234567890/gamelog/witcher-3_tueizl.webp",
+    },
+    // Additional games with image URLs...
+```
+
+:::note
+We're adding image URLs for each game in our seed data. These URLs point to images stored in Cloudinary, a cloud-based image hosting service.
+
+Remember that your URLs will be different to the ones shown here. You will need to copy these from your Cloudinary account:
+
+![Cloudinary image URL](src/assets/webp/prisma/copy-image-url.webp)
+
+Once you have a URL for each image, paste it into your seed file in the way shown above and save it.
+:::
+
+:::tip[Challenge]
+
+Can you update the seed data to include image URLs for all of the games?
+
+:::
+
+## Step 5: Apply the Updated Seed Data
+
+Now that we have updated the seed data, we need to apply these changes to our database. Run the following command:
+
+```bash
+npm run setup
+```
+
+After hitting enter, you will be asked to confirm if you want to delete all data in the database. Click 'y' to confirm.
+
+This will delete all data in the database and re-run the seed file.
+
+It will update your database with the new image URLs for each game.
+
+You can check the database to confirm the changes have been applied by running the following command:
+
+```bash
+npx prisma studio
+```
+
+You should see the new `imageUrl` field in the `Game` table, with a URL for each game.
+
+## What We've Learned
+
+In this tutorial, we've:
+
+1. Updated our Prisma schema to include a new field for storing image URLs
+2. Created and applied a database migration to update our database schema
+3. Updated our seed data to include image URLs for our games
+4. Applied the updated seed data to our database
+
+These changes prepare our application to display images for each game, which will make our UI more visually appealing and informative.
+
+## Next Steps
+
+Now that we have image URLs stored in our database, we can update our `GameCard` component to display these images instead of using placeholder images. This will be covered in the next guide.
+
+<MonsterReveal>
+  Great job! You've successfully updated your database schema and seed data to include images for your games.
+  
+  This is a common task in web development, and Prisma makes it easy with its migration system.
+  
+  In the next guide, we'll use these image URLs to display actual game images in our UI.
+</MonsterReveal>
+

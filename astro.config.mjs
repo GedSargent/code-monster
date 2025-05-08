@@ -233,6 +233,14 @@ export default defineConfig({
                   label: "🖥️ Load and display game images",
                   link: "guides/prisma/load-and-display-game-images",
                 },
+                {
+                  label: "🖥️ Creating new games",
+                  link: "guides/prisma/creating-new-games",
+                },
+                {
+                  label: "🖥️ Next steps",
+                  link: "guides/prisma/next-steps",
+                },
               ]
             },
           ]

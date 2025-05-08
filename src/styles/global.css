@@ -83,6 +83,8 @@ code {
 
 .sl-markdown-content ul {
   margin-bottom: var(--custom-ul-vertical-margin);
+  list-style: inside;
+  margin-left: 1rem;
 }
 
 .sl-markdown-content ul li ul {

@@ -1,0 +1,594 @@
+---
+title: 🖥️ Creating New Games
+description: Build a form to add new games with image upload functionality
+---
+
+import MonsterReveal from 'src/components/MonsterReveal.astro'
+import { Steps } from '@astrojs/starlight/components'
+
+In this guide, we'll create a form that allows users to add new games to our database. We'll also implement image upload functionality using Cloudinary, a cloud-based image management service.
+
+## Understanding the Challenge
+
+To create a complete game entry, we need to:
+
+<Steps>
+1. Build a form to collect game details
+2. Create an image uploader component
+3. Set up a server endpoint to handle image uploads
+4. Connect to Cloudinary for image storage
+5. Save all the data to our database
+</Steps>
+
+Let's break this down into manageable steps.
+
+## Start the development server
+
+If you need to, start the development server by running the following command in your terminal:
+
+```bash
+npm run dev
+```
+
+## Install Cloudinary
+
+Before we can upload images to Cloudinary, we need to install the Cloudinary package. Run the following command in your terminal:
+
+```bash
+npm install cloudinary
+```
+
+:::note[What does this package do?]
+Cloudinary is a cloud-based image hosting service.
+
+We have already used Cloudinary to host our game images in the previous guide, but we have not yet integrated it with our application.
+
+The `cloudinary` package will allow us to upload images to Cloudinary from our application.
+:::
+
+## Locate and add Cloudinary credentials
+
+To upload images to Cloudinary, we need to provide our Cloudinary credentials. These credentials will be stored in environment variables.
+
+:::note[Cloudinary signup]
+You should have already signed up to Cloudinary for a free account in a [previous guide](/code-monster/guides/prisma/adding-an-image-to-the-game-model#step-4-upload-images-to-cloudinary). If you have not done so, please do so now.
+:::
+
+Open the `.env` file in the root of your project and add the following variables beneath the ones already there:
+
+```bash
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+:::note[Where do I find these credentials?]
+You can find your Cloudinary credentials in the Cloudinary dashboard.
+
+<Steps>
+1. Log in to your Cloudinary account
+2. Click on the **Account** tab
+3. Click on the **Environment Variables** tab
+4. Copy the values for `Cloud name`, `API Key`, and `API Secret`
+5. Paste these values into your `.env` file, replacing the `your_` placeholders with the actual values
+</Steps>
+:::
+
+## Step 1: Create an Image Uploader Component
+
+First, we'll create a reusable component for uploading images. This component will:
+- Allow users to select an image file
+- Show a preview of the selected image
+- Upload the image to Cloudinary
+- Return the URL of the uploaded image
+
+Add a new file at `app/components/ImageUploader.tsx` and add the following code:
+
+```tsx lang="tsx" title="app/components/ImageUploader.tsx"
+import { useState, useRef } from "react";
+import { useFetcher } from "@remix-run/react";
+
+// Define the response type from the upload API
+interface UploadResponse {
+  imageUrl?: string;
+  error?: string;
+}
+
+interface ImageUploaderProps {
+  onImageUploaded: (imageUrl: string) => void;
+}
+
+export default function ImageUploader({ onImageUploaded }: ImageUploaderProps) {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fetcher = useFetcher<UploadResponse>();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUpload = async () => {
+    if (!preview) return;
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("image", preview);
+
+    fetcher.submit(formData, {
+      method: "post",
+      action: "/api/upload",
+      encType: "multipart/form-data",
+    });
+  };
+
+  // Handle the response from the upload
+  if (fetcher.data?.imageUrl && isUploading) {
+    setIsUploading(false);
+    onImageUploaded(fetcher.data.imageUrl);
+  }
+
+  // Handle errors
+  if (fetcher.state === "idle" && isUploading && fetcher.data?.error) {
+    setIsUploading(false);
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <label
+        htmlFor="image"
+        className="block text-sm font-medium mb-2 text-slate-400"
+      >
+        Image
+      </label>
+      <div className="relative h-72 overflow-hidden bg-gray-800 rounded-xl">
+        {preview ? (
+          <img
+            src={preview}
+            alt="Preview"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-400">No image selected</p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex gap-4 mt-4 justify-end">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          ref={fileInputRef}
+          className="hidden"
+        />
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="bg-gray-700 text-white px-4 py-2 rounded-md transition hover:bg-gray-800"
+        >
+          Select Image
+        </button>
+
+        <button
+          type="button"
+          onClick={handleUpload}
+          disabled={!preview || isUploading}
+          className={`px-4 py-2 rounded-md ${
+            !preview || isUploading
+              ? "bg-gray-600 text-gray-400 transition hover:bg-gray-600 disabled:hover:bg-gray-600 disabled:cursor-not-allowed"
+              : "bg-cyan-600 text-white"
+          }`}
+        >
+          {isUploading ? "Uploading..." : "Upload"}
+        </button>
+      </div>
+
+      {fetcher.data?.error && (
+        <p className="text-red-500">{fetcher.data.error}</p>
+      )}
+    </div>
+  );
+}
+```
+
+:::note
+This component uses several important React and Remix concepts:
+
+<Steps>
+1. **useState**: Manages the component's state for the image preview and upload status
+2. **useRef**: Creates a reference to the file input element so we can trigger it programmatically
+3. **useFetcher**: A Remix hook that allows us to make API calls without navigating to a new page
+4. **FormData**: A browser API for creating form data to send to the server
+5. **FileReader**: A browser API for reading files as data URLs
+</Steps>
+:::
+
+## Step 2: Create a Cloudinary Integration
+
+Next, we'll create a server-side utility to handle the Cloudinary integration. This will securely upload our images to Cloudinary and return the URL.
+
+Create a new file at `app/utils/cloudinary.server.ts` and add the following code:
+
+```tsx lang="tsx" title="app/utils/cloudinary.server.ts"
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+export async function uploadImage(imageData: string) {
+  try {
+    const result = await cloudinary.uploader.upload(imageData, {
+      folder: "game-covers",
+    });
+    return result.secure_url;
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    throw new Error("Failed to upload image");
+  }
+}
+```
+
+:::note
+This server-side utility:
+
+1. Configures the Cloudinary SDK with our account credentials from environment variables
+2. Provides an `uploadImage` function that:
+   - Takes a base64-encoded image string
+   - Uploads it to Cloudinary in a "game-covers" folder
+   - Returns the secure URL of the uploaded image
+   - Handles errors appropriately
+
+The `.server` in the filename is a Remix convention that ensures this code only runs on the server, keeping our API credentials secure.
+:::
+
+## Step 3: Create an API Route for Image Uploads
+
+Now, we'll create an API route that our ImageUploader component can call to upload images.
+
+Create a new file at `app/routes/api.upload.tsx` and add the following code:
+
+```tsx lang="tsx" title="app/routes/api.upload.tsx"
+import { json } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
+import { uploadImage } from "~/utils/cloudinary.server";
+
+export async function action({ request }: ActionFunctionArgs) {
+  if (request.method !== "POST") {
+    return json({ error: "Method not allowed" }, { status: 405 });
+  }
+
+  try {
+    const formData = await request.formData();
+    const imageData = formData.get("image") as string;
+
+    if (!imageData) {
+      return json({ error: "No image provided" }, { status: 400 });
+    }
+
+    const imageUrl = await uploadImage(imageData);
+    return json({ imageUrl });
+  } catch (error) {
+    console.error("Upload error:", error);
+    return json({ error: "Failed to upload image" }, { status: 500 });
+  }
+}
+```
+
+:::note
+### What is an API route?
+
+An API route is a special type of route in Remix that is designed to handle API requests.
+
+API routes are typically used to handle requests that don't render a page in the browser, such as requests to upload files, send emails, or fetch data from external APIs.
+
+This API route uses Remix's **action function** to handle POST requests:
+
+<Steps>
+1. It first checks if the request method is POST
+2. Then it extracts the form data from the request using `request.formData()`
+3. It gets the image data from the form data
+4. It calls our `uploadImage` utility to upload the image to Cloudinary
+5. Finally, it returns the image URL as JSON, or an error if something went wrong
+</Steps>
+
+The filename `api.upload.tsx` creates a route at `/api/upload` in Remix's file-based routing system.
+:::
+
+## Step 4: Create the Add Game Form
+
+Finally, we'll create the main form for adding new games, which will use our ImageUploader component.
+
+```tsx lang="tsx" title="app/routes/add-game.tsx"
+import { useState } from "react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import { json, redirect } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
+import { PrismaClient } from "@prisma/client";
+import ImageUploader from "~/components/ImageUploader";
+
+export async function loader() {
+  const prisma = new PrismaClient();
+  const categories = await prisma.category.findMany({
+    select: { id: true, title: true },
+    orderBy: { title: "asc" },
+  });
+
+  prisma.$disconnect();
+
+  return json({ categories });
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const price = parseFloat(formData.get("price") as string);
+  const rating = parseFloat(formData.get("rating") as string);
+  const releaseDate = new Date(formData.get("releaseDate") as string);
+  const imageUrl = formData.get("imageUrl") as string;
+  const categoryId = formData.get("categoryId") as string;
+
+  const prisma = new PrismaClient();
+
+  await prisma.game.create({
+    data: {
+      title,
+      description,
+      price,
+      rating,
+      releaseDate,
+      imageUrl,
+      categoryId,
+    },
+  });
+
+  prisma.$disconnect();
+
+  return redirect("/");
+}
+
+export default function AddGame() {
+  const { categories } = useLoaderData<typeof loader>();
+  const [imageUrl, setImageUrl] = useState("");
+
+  const handleImageUploaded = (url: string) => {
+    setImageUrl(url);
+  };
+
+  return (
+    <div className="container mx-auto py-20 px-4">
+      <h1 className="font-bold text-5xl text-center mb-10">
+        Add <span className="text-cyan-400">Game</span>
+      </h1>
+
+      <div className="max-w-2xl mx-auto bg-gray-950 p-8 rounded-xl">
+        <Form method="post" className="space-y-6">
+          <input type="hidden" name="imageUrl" value={imageUrl} />
+
+          <div>
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium mb-2 text-slate-400"
+            >
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              required
+              className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium mb-2 text-slate-400"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              required
+              rows={4}
+              className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            ></textarea>
+          </div>
+
+          <div className="mb-8">
+            <ImageUploader onImageUploaded={handleImageUploaded} />
+          </div>
+
+          {/* Additional form fields for price, rating, etc. */}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="price"
+                className="block text-sm font-medium mb-2 text-slate-400"
+              >
+                Price
+              </label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                step="0.01"
+                min="0"
+                required
+                className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="rating"
+                className="block text-sm font-medium mb-2 text-slate-400"
+              >
+                Rating
+              </label>
+              <input
+                type="number"
+                id="rating"
+                name="rating"
+                step="0.1"
+                min="0"
+                max="5"
+                required
+                className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="releaseDate"
+              className="block text-sm font-medium mb-2 text-slate-400"
+            >
+              Release Date
+            </label>
+            <input
+              type="date"
+              id="releaseDate"
+              name="releaseDate"
+              required
+              className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="categoryId"
+              className="block text-sm font-medium mb-2 text-slate-400"
+            >
+              Category
+            </label>
+            <select
+              id="categoryId"
+              name="categoryId"
+              required
+              className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            >
+              <option value="">Select a category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-16">
+            <Link
+              to="/"
+              className=" text-red-300 border-2 border-red-300 py-3 px-6 rounded-md hover:bg-red-50/10 transition duration-200"
+            >
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              className=" bg-cyan-600 text-white py-3 px-6 rounded-md hover:bg-cyan-500 transition duration-200"
+            >
+              Add Game
+            </button>
+          </div>
+        </Form>
+      </div>
+    </div>
+  );
+}
+```
+
+:::note
+This page combines several important Remix concepts:
+
+1. **Loader Function**: Fetches the categories from the database before the page renders
+2. **Action Function**: Processes the form submission and creates a new game in the database
+3. **Form Component**: Remix's `<Form>` component that handles form submissions
+4. **useLoaderData Hook**: Accesses the data returned by the loader function
+5. **useState Hook**: Manages the image URL state
+6. **redirect Function**: Redirects the user to the home page after successful form submission
+
+The form includes fields for all the game properties, including a hidden field for the image URL that gets populated when an image is uploaded.
+:::
+
+## Understanding Key Concepts
+
+### Remix Action Functions
+
+In Remix, an action function handles form submissions and other non-GET requests. It runs on the server and receives the request object, which contains the form data. The action function can:
+
+<Steps>
+1. Process the form data
+2. Interact with the database
+3. Return a response, such as redirecting to another page
+</Steps>
+
+Action functions are defined in route files and are automatically called when a form is submitted to that route.
+
+### The FormData Object
+
+The `FormData` object is a browser API that represents form data. In Remix:
+
+<Steps>
+1. When a form is submitted, Remix automatically creates a FormData object
+2. In the action function, we can access this data using `request.formData()`
+3. We can extract values using `formData.get("fieldName")`
+4. We need to cast these values to the appropriate types (string, number, etc.)
+</Steps>
+
+FormData is also useful for programmatically creating form submissions, as we do in the ImageUploader component.
+
+### Cloudinary Integration
+
+Our Cloudinary integration consists of three parts:
+
+1. **Server-side utility** (`cloudinary.server.ts`):
+   - Configures the Cloudinary SDK with our account credentials
+   - Provides a function to upload images to Cloudinary
+   - Returns the URL of the uploaded image
+
+2. **API route** (`api.upload.tsx`):
+   - Receives the image data from the client
+   - Calls the server-side utility to upload the image
+   - Returns the image URL to the client
+
+3. **Client-side component** (`ImageUploader.tsx`):
+   - Allows the user to select an image
+   - Sends the image data to the API route
+   - Receives the image URL and passes it to the parent component
+
+This separation of concerns keeps our code organized and secure, with sensitive operations happening on the server.
+
+## What We've Learned
+
+In this tutorial, we've:
+
+<Steps>
+1. Created a reusable image uploader component
+2. Set up a Cloudinary integration for storing images
+3. Created an API route for handling image uploads
+4. Built a form for adding new games to our database
+5. Learned about Remix action functions and form handling
+</Steps>
+
+These concepts form the foundation for creating interactive web applications with Remix and Prisma.
+
+<MonsterReveal>
+  Congratulations! You've built a complete form with image upload functionality. This is a significant achievement that combines many important web development concepts. You can now add new games to your database with images, making your application more dynamic and user-friendly.
+</MonsterReveal>

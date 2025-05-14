@@ -48,9 +48,11 @@ export default defineConfig({
         replacesTitle: true,
         alt: "Code Monster Logo",
       },
-      social: {
-        github: "https://github.com/GedSargent/code-monster",
-      },
+      social: [{
+        icon: 'github',
+        label: 'GitHub',
+        href: "https://github.com/GedSargent/code-monster",
+      }],
       sidebar: [
         {
           label: "Programming Principles",

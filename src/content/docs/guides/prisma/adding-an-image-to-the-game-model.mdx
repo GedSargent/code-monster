@@ -4,6 +4,7 @@ description: Preparing to display images in a component
 ---
 
 import MonsterReveal from 'src/components/MonsterReveal.astro'
+import { Steps } from '@astrojs/starlight/components'
 
 In this guide, we will add an `imageUrl` field to our `Game` model. This will allow us to store the URL of an image for each game.
 
@@ -77,11 +78,17 @@ Cloudinary is a cloud-based image hosting service that we will use to store our 
 If you already have an account with Cloudinary, you can skip this step.
 :::
 
+<Steps>
 1. Navigate to the [**Cloudinary sign-up page**](https://cloudinary.com/users/register/free) and sign up for a free account.
-2. Once you have created an account, log in and navigate to the **Media Library** section.
+2. Once you have created an account, you will be presented the question below. Select the option shown below:
+  ![Cloudinary signup 1](src/assets/webp/prisma/cloudinary-sign-up.webp)
+2. Navigate to **AssetsMedia Library**.
+  ![Cloudinary media library](src/assets/webp/prisma/cloudinary-media-library.webp)
 3. Click the **Upload** button and select the images you want to upload.
 4. Once the images have uploaded, click on each one to view its details.
-5. Copy the **URL** for each image, as we will need these in the next step.
+5. Copy the **URL** for each image, as we will need these in the next step:
+  ![Cloudinary image URL](src/assets/webp/prisma/cloudinary-image-url.webp)
+</Steps>
 
 
 ## Step 4: Update the Seed Data

@@ -46,33 +46,45 @@ We have already used Cloudinary to host our game images in the previous guide, b
 The `cloudinary` package will allow us to upload images to Cloudinary from our application.
 :::
 
+## Create a Cloudinary account
+
+If you have not already done so, sign up for a free Cloudinary account at [**cloudinary.com**](https://cloudinary.com/).
+
+You should then see the Cloudinary dashboard.
+
+
 ## Locate and add Cloudinary credentials
 
-To upload images to Cloudinary, we need to provide our Cloudinary credentials. These credentials will be stored in environment variables.
+Sign into your Cloudinary account.
 
 :::note[Cloudinary signup]
 You should have already signed up to Cloudinary for a free account in a [previous guide](/code-monster/guides/prisma/adding-an-image-to-the-game-model#step-4-upload-images-to-cloudinary). If you have not done so, please do so now.
 :::
 
-Open the `.env` file in the root of your project and add the following variables beneath the ones already there:
+Look carefully for a button that says 'View API Keys'. It should look like the one below:
 
-```bash
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+![Cloudinary dashboard](src/assets/webp/prisma/cloudinary-dashboard.webp)
+
+Once you click this, you will have access to your Cloudinary credentials.
+
+To upload images to Cloudinary, we need to store these credentials in **environment variables**.
+
+
+Open the `.env` file in the root of your project and add the following variables beneath the one already there:
+
+```diff lang="bash" title=".env"
+DATABASE_URL="file:./data.db?connection_limit=1"
+
++CLOUDINARY_CLOUD_NAME=your_cloud_name
++CLOUDINARY_API_KEY=your_api_key
++CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-:::note[Where do I find these credentials?]
-You can find your Cloudinary credentials in the Cloudinary dashboard.
+Replace `your_cloud_name`, `your_api_key`, and `your_api_secret` with the values from your Cloudinary account shown below:
 
-<Steps>
-1. Log in to your Cloudinary account
-2. Click on the **Account** tab
-3. Click on the **Environment Variables** tab
-4. Copy the values for `Cloud name`, `API Key`, and `API Secret`
-5. Paste these values into your `.env` file, replacing the `your_` placeholders with the actual values
-</Steps>
-:::
+![Cloudinary credentials](src/assets/webp/prisma/cloudinary-credentials.webp)
+
+With these in place, we are now ready to create our image uploader.
 
 ## Step 1: Create an Image Uploader Component
 

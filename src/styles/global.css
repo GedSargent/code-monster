@@ -3,7 +3,6 @@
 :root {
   --bgColor: rgb(43, 43, 43);
   --custom-base-font-size: 1.3rem;
-  --custom-p-margin-top: 1.5rem;
   --custom-ul-vertical-margin: 1rem;
   --custom-secondary-li-font-size: 1.2rem;
   --custom-margin-top-headings: 3rem;
@@ -97,11 +96,6 @@ code {
 
 .landing-hero {
   font-family: var(--sl-font);
-}
-
-.sl-markdown-content
-	:not(a, strong, em, del, span, input, code, svg, details, summary, li), :where(.content *) {
-    margin-top: var(--custom-p-margin-top);
 }
 
 .sl-markdown-content :is(iframe):not(:where(.not-content *)) {

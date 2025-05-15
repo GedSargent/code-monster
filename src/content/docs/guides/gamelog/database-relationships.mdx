@@ -32,7 +32,7 @@ Each user can have multiple articles associated with them, and each article must
 
 We will start by creating a new table called `Category` in the `schema.prisma` file. This table will have a `title` and a `description` field, as well as a `createdAt` and `updatedAt` field to keep track of when the article was created and last updated.
 
-Add this model to the `schema.prisma` file directly beneath the `User` model we created in the [**previous lesson**](/code-monster/guides/prisma/prisma-schema):
+Add this model to the `schema.prisma` file directly beneath the `User` model we created in the [**previous lesson**](/code-monster/guides/gamelog/prisma-schema):
 
 ```diff lang="tsx" title="prisma/schema.prisma"
 model User {
@@ -127,7 +127,7 @@ Can you can work out how to generate a migration file to apply the new changes t
 
 #### TIPS
 
-- Refresh your memory of how to generate a migration file by reviewing the [**previous lesson**](/code-monster/guides/prisma/prisma-schema#creating-a-migration-file).
+- Refresh your memory of how to generate a migration file by reviewing the [**previous lesson**](/code-monster/guides/gamelog/prisma-schema#creating-a-migration-file).
 - Remember that you will need to change the name of the migration file from `add-user-model` to something more appropriate for the changes we have made here.
 
 Finally, let's fire up Prisma Studio to check that the changes have been applied to the database.

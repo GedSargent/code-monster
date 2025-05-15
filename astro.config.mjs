@@ -181,34 +181,34 @@ export default defineConfig({
           ],
         },
         {
-          label: "Prisma",
+          label: "GameLog",
           items: [
             {
               label: "🗄️ Database config",
               items: [
                 {
                   label: "🗄️ Getting started",
-                  link: "guides/prisma/getting-started",
+                  link: "guides/gamelog/getting-started",
                 },
                 {
                   label: "🗄️ The schema and migrations",
-                  link: "guides/prisma/prisma-schema",
+                  link: "guides/gamelog/prisma-schema",
                 },
                 {
                   label: "🗄️ Prisma Studio",
-                  link: "guides/prisma/prisma-studio",
+                  link: "guides/gamelog/prisma-studio",
                 },
                 {
                   label: "🗄️ One-to-many relationships",
-                  link: "guides/prisma/relationships-one-to-many",
+                  link: "guides/gamelog/relationships-one-to-many",
                 },
                 {
                   label: "🌱 Seed files",
-                  link: "guides/prisma/seed-files",
+                  link: "guides/gamelog/seed-files",
                 },
                 {
                   label: "🗄️ Reading data - loader functions",
-                  link: "guides/prisma/reading-data",
+                  link: "guides/gamelog/reading-data",
                 },
               ]
             },
@@ -217,31 +217,31 @@ export default defineConfig({
               items: [
                 {
                   label: "🖥️ Displaying data with `map`",
-                  link: "guides/prisma/displaying-data",
+                  link: "guides/gamelog/displaying-data",
                 },
                 {
                   label: "🖥️ Passing data into components",
-                  link: "guides/prisma/passing-data-into-components",
+                  link: "guides/gamelog/passing-data-into-components",
                 },
                 {
                   label: "🖥️ Displaying data from two tables",
-                  link: "guides/prisma/displaying-data-from-two-tables",
+                  link: "guides/gamelog/displaying-data-from-two-tables",
                 },
                 {
                   label: "🖥️ Adding an image to the Game model",
-                  link: "guides/prisma/adding-an-image-to-the-game-model",
+                  link: "guides/gamelog/adding-an-image-to-the-game-model",
                 },
                 {
                   label: "🖥️ Load and display game images",
-                  link: "guides/prisma/load-and-display-game-images",
+                  link: "guides/gamelog/load-and-display-game-images",
                 },
                 {
                   label: "🖥️ Creating new games",
-                  link: "guides/prisma/creating-new-games",
+                  link: "guides/gamelog/creating-new-games",
                 },
                 {
                   label: "🖥️ Next steps",
-                  link: "guides/prisma/next-steps",
+                  link: "guides/gamelog/next-steps",
                 },
               ]
             },

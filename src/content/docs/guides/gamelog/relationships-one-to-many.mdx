@@ -42,7 +42,7 @@ We will start by creating a new table called `Category` in the `schema.prisma` f
 - `createdAt` and `updatedAt` fields to keep track of when the category was created and last updated.
 - an association with the `Game` table
 
-Add this model to the `schema.prisma` file directly beneath the `Game` model we created in the [**previous lesson**](/code-monster/guides/prisma/prisma-schema):
+Add this model to the `schema.prisma` file directly beneath the `Game` model we created in the [**previous lesson**](/code-monster/guides/gamelog/prisma-schema):
 
 ```diff lang="tsx" title="prisma/schema.prisma"
 model Game {
@@ -121,7 +121,7 @@ Can you can work out how to generate a migration file to apply the new changes t
 
 #### TIPS
 
-- Refresh your memory of how to generate a migration file by reviewing the [**previous lesson**](/code-monster/guides/prisma/prisma-schema#creating-a-migration-file).
+- Refresh your memory of how to generate a migration file by reviewing the [**previous lesson**](/code-monster/guides/gamelog/prisma-schema#creating-a-migration-file).
 - Remember that you will need to name the migration file with something suitable - `add-category-model` would work.
 
 <MonsterReveal>

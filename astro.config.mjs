@@ -240,6 +240,14 @@ export default defineConfig({
                   link: "guides/gamelog/creating-new-games",
                 },
                 {
+                  label: "🖥️ Deleting games",
+                  link: "guides/gamelog/deleting-games",
+                },
+                {
+                  label: "🖥️ Editing games",
+                  link: "guides/gamelog/editing-games",
+                },
+                {
                   label: "🖥️ Next steps",
                   link: "guides/gamelog/next-steps",
                 },

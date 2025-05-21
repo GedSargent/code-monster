@@ -1,0 +1,389 @@
+---
+title: 🖥️ Editing Games
+description: Add functionality to edit existing games in the database
+---
+
+import MonsterReveal from 'src/components/MonsterReveal.astro'
+import { Steps } from '@astrojs/starlight/components'
+
+In this guide, we'll add functionality that allows users to edit existing games in the database. We'll create an edit page similar to our add game form, but pre-populated with the game's current data, and then link to it from the game card.
+
+## Understanding the Challenge
+
+To implement edit functionality, we need to:
+
+<Steps>
+1. Create a route that displays a form for editing a game
+2. Pre-populate the form with the game's current data
+3. Handle form submission to update the game in the database
+4. Add a way for users to navigate to the edit page
+</Steps>
+
+## Step 1: Create the Edit Game Page
+
+First, we'll create a new route file for editing games. This will be similar to our add game form, but with some key differences to handle loading and updating existing data.
+
+Add a new file called `edit-game.$gameId.tsx` inside `app/routes/`, and add the following code:
+
+```tsx lang="tsx" title="app/routes/edit-game.$gameId.tsx"
+import { useState } from "react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import { json, redirect } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import { PrismaClient } from "@prisma/client";
+import ImageUploader from "~/components/ImageUploader";
+
+export async function loader({ params }: LoaderFunctionArgs) {
+  const gameId = params.gameId;
+
+  const prisma = new PrismaClient();
+
+  const game = await prisma.game.findUnique({
+    where: { id: gameId },
+  });
+
+  if (!game) {
+    throw new Response("Game not found", { status: 404 });
+  }
+
+  const categories = await prisma.category.findMany({
+    select: { id: true, title: true },
+    orderBy: { title: "asc" },
+  });
+
+  prisma.$disconnect();
+
+  return json({ game, categories });
+}
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const gameId = params.gameId;
+  const formData = await request.formData();
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const price = parseFloat(formData.get("price") as string);
+  const rating = parseFloat(formData.get("rating") as string);
+  const releaseDate = new Date(formData.get("releaseDate") as string);
+  const imageUrl = formData.get("imageUrl") as string;
+  const categoryId = formData.get("categoryId") as string;
+
+  const prisma = new PrismaClient();
+
+  await prisma.game.update({
+    where: { id: gameId },
+    data: {
+      title,
+      description,
+      price,
+      rating,
+      releaseDate,
+      imageUrl,
+      categoryId,
+    },
+  });
+
+  prisma.$disconnect();
+
+  return redirect("/");
+}
+
+export default function EditGame() {
+  const { game, categories } = useLoaderData<typeof loader>();
+  const [imageUrl, setImageUrl] = useState(game.imageUrl || "");
+
+  const handleImageUploaded = (url: string) => {
+    setImageUrl(url);
+  };
+
+  // Format the date to YYYY-MM-DD for the date input
+  const formattedDate = new Date(game.releaseDate).toISOString().split("T")[0];
+
+  return (
+    <div className="container mx-auto py-20 px-4">
+      <h1 className="font-bold text-5xl text-center mb-10">
+        Edit <span className="text-cyan-400">Game</span>
+      </h1>
+
+      <div className="max-w-2xl mx-auto bg-gray-950 p-8 rounded-xl">
+        <Form method="post" className="space-y-6">
+          <input type="hidden" name="imageUrl" value={imageUrl} />
+
+          {/* Form fields with defaultValue set to current game data */}
+          <div>
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium mb-2 text-slate-400"
+            >
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              defaultValue={game.title}
+              required
+              className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium mb-2 text-slate-400"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              defaultValue={game.description}
+              required
+              rows={4}
+              className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            ></textarea>
+          </div>
+
+          <div className="mb-8">
+            <ImageUploader onImageUploaded={handleImageUploaded} />
+            {imageUrl && (
+              <div className="mt-2">
+                <p className="text-sm text-slate-400">Current image:</p>
+                <img
+                  src={imageUrl}
+                  alt={game.title}
+                  className="mt-1 h-20 object-cover rounded-md"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="price"
+                className="block text-sm font-medium mb-2 text-slate-400"
+              >
+                Price
+              </label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                defaultValue={game.price}
+                step="0.01"
+                min="0"
+                required
+                className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="rating"
+                className="block text-sm font-medium mb-2 text-slate-400"
+              >
+                Rating
+              </label>
+              <input
+                type="number"
+                id="rating"
+                name="rating"
+                defaultValue={game.rating}
+                step="0.1"
+                min="0"
+                max="5"
+                required
+                className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="releaseDate"
+              className="block text-sm font-medium mb-2 text-slate-400"
+            >
+              Release Date
+            </label>
+            <input
+              type="date"
+              id="releaseDate"
+              name="releaseDate"
+              defaultValue={formattedDate}
+              required
+              className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="categoryId"
+              className="block text-sm font-medium mb-2 text-slate-400"
+            >
+              Category
+            </label>
+            <select
+              id="categoryId"
+              name="categoryId"
+              defaultValue={game.categoryId || ""}
+              required
+              className="w-full p-3 bg-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            >
+              <option value="">Select a category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-16">
+            <Link
+              to="/"
+              className="text-red-300 border-2 border-red-300 py-3 px-6 rounded-md hover:bg-red-50/10 transition duration-200"
+            >
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              className="bg-cyan-600 text-white py-3 px-6 rounded-md hover:bg-cyan-500 transition duration-200"
+            >
+              Update Game
+            </button>
+          </div>
+        </Form>
+      </div>
+    </div>
+  );
+}
+```
+
+:::note
+This route file contains several important parts:
+
+1. **Loader Function**: Fetches the game data and categories before rendering the page
+   - Uses `findUnique` to get a specific game by ID
+   - Throws a 404 response if the game doesn't exist
+   - Also fetches categories for the dropdown
+
+2. **Action Function**: Handles the form submission to update the game
+   - Uses Prisma's `update` method instead of `create`
+   - Specifies which game to update using the `where` clause
+
+3. **Component**: Renders a form similar to the add game form, but with differences:
+   - Pre-populates form fields with the game's current data using `defaultValue`
+   - Formats the date for the date input field
+   - Uses "Update Game" instead of "Add Game" for the submit button
+
+The `defaultValue` prop is key here - it sets the initial value of form inputs without making them controlled components, allowing for a simpler implementation.
+:::
+
+## Step 2: Add a Link to the Edit Page from the Game Card
+
+Now that we have an edit page, we need a way for users to navigate to it. We'll update the `GameCard` component to make the game image clickable, linking to the edit page.
+
+```diff lang="tsx" title="app/components/GameCard.tsx"
+-import { Form } from "@remix-run/react";
++import { Form, Link } from "@remix-run/react";
+
+interface GameCardProps {
+  id: string;
+  title: string;
+  releaseDate: string;
+  genre: string;
+  imageUrl: string;
+}
+export default function GameCard({
+  id,
+  title,
+  releaseDate,
+  genre,
+  imageUrl,
+}: GameCardProps) {
+  const formattedDate = releaseDate.substring(0, 10);
+
+  return (
+    <div className="flex flex-col gap-4">
+-      <div className="relative h-72 overflow-hidden">
++      <Link to={`/edit-game/${id}`} className="relative h-72 overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={`${title} cover`}
+          className="absolute inset-0 w-full h-full object-cover rounded-xl"
+        />
+-      </div>
++      </Link>
+      <div className="flex justify-between">
+        <div className="flex flex-col justify-between w-2/3 pr-4">
+          <h3 className="font-bold text-2xl text-slate-300">{title}</h3>
+```
+
+:::note
+We've made two key changes to the `GameCard` component:
+
+1. **Imported the Link component**: We're using Remix's `Link` component for client-side navigation.
+2. **Replaced the div with a Link**: We've wrapped the image in a `Link` component that navigates to `/edit-game/${id}` when clicked.
+
+This creates a natural user experience where clicking on a game's image takes you to its edit page. The `Link` component is preferable to a regular `<a>` tag because it enables client-side navigation, making the transition faster and smoother.
+:::
+
+## Understanding Key Concepts
+
+### Dynamic Routes with Parameters
+
+In our edit page, we're using a dynamic route parameter (`$gameId`) to identify which game to edit. This is a powerful feature of Remix's file-based routing system:
+
+<Steps>
+1. The filename `edit-game.$gameId.tsx` creates a route that matches URLs like `/edit-game/123`
+2. The `$gameId` part becomes available as `params.gameId` in both the loader and action functions
+3. This allows us to fetch and update the specific game identified in the URL
+</Steps>
+
+### Form Pre-population
+
+Pre-populating form fields with existing data is a key aspect of edit functionality. In React, there are two approaches:
+
+- **Controlled components**: The form field values are controlled by React state
+- **Uncontrolled components with defaultValue**: The initial values are set, but the DOM handles subsequent updates
+
+In our implementation, we're using the second approach with `defaultValue`. This is simpler and works well for most edit forms. The `defaultValue` prop sets the initial value of the input, but doesn't control it afterward.
+
+### Prisma Update Operations
+
+Updating data with Prisma follows a similar pattern to creating data, but with a few key differences:
+
+- We use the `update` method instead of `create`
+- We specify which record to update using the `where` clause
+- We provide the new data in the `data` object
+
+This pattern is consistent across Prisma operations, making it easy to learn and use.
+
+### Client-Side Navigation with Link
+
+The `Link` component from Remix enables client-side navigation, which has several benefits:
+
+- Faster page transitions (no full page reload)
+- Preserved JavaScript state
+- Automatic prefetching of linked pages when hovering
+- Fallback to regular navigation if JavaScript fails
+
+By wrapping the game image in a `Link`, we're creating an intuitive way for users to access the edit functionality.
+
+## What We've Learned
+
+In this tutorial, we've:
+
+<Steps>
+1. Created a route for editing games with a pre-populated form
+2. Implemented the server-side logic to update games in the database
+3. Added a link from the game card to the edit page
+4. Learned about dynamic routes, form pre-population, and Prisma update operations
+5. Explored client-side navigation with Remix's `Link` component
+</Steps>
+
+These changes complete the "U" in CRUD functionality for our application, allowing users to update existing games in the database.
+
+<MonsterReveal>
+  Excellent work! You've successfully implemented edit functionality in your application, which is a crucial part of any data management system. With this addition, your GameLog application now supports creating, reading, updating, and deleting games - the full CRUD spectrum. This makes your application much more useful and complete.
+</MonsterReveal>

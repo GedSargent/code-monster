@@ -1,0 +1,222 @@
+---
+title: 🖥️ Deleting Games
+description: Add functionality to delete games from the database
+---
+
+import MonsterReveal from 'src/components/MonsterReveal.astro'
+import { Steps } from '@astrojs/starlight/components'
+
+In this guide, we'll add functionality that allows users to delete games from the database. This is an essential feature for any CRUD (Create, Read, Update, Delete) application.
+
+## Understanding the Challenge
+
+To implement delete functionality, we need to:
+
+<Steps>
+1. Update the `GameCard` component to include a delete button
+2. Create a route that handles the delete action
+3. Connect the button to the route using a form
+4. Implement the server-side logic to delete the game from the database
+</Steps>
+
+Let's break this down into manageable steps.
+
+## Step 1: Update the GameCard Component
+
+First, we need to modify our `GameCard` component to accept a game ID and include a delete button that submits to our delete route.
+
+```diff lang="tsx" title="app/components/GameCard.tsx"
++import { Form } from "@remix-run/react";
+
+interface GameCardProps {
++  id: string;
+  title: string;
+  releaseDate: string;
+  genre: string;
+  imageUrl: string;
+}
+export default function GameCard({
++  id,
+  title,
+  releaseDate,
+  genre,
+  imageUrl,
+}: GameCardProps) {
+  const formattedDate = releaseDate.substring(0, 10);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="relative h-72 overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={`${title} cover`}
+          className="absolute inset-0 w-full h-full object-cover rounded-xl"
+        />
+      </div>
+      <div className="flex justify-between">
+        <div className="flex flex-col justify-between w-2/3">
+          <h3 className="font-bold text-2xl text-slate-300">{title}</h3>
+          <p className="text-cyan-300 uppercase text-sm font-semibold">
+            {genre}
+          </p>
+          <p className="text-slate-200/60 text-sm font-semibold">
+            {formattedDate}
+          </p>
+        </div>
+        <div className="flex flex-col gap-7 w-1/3">
+          <button className="border-2 border-cyan-300 text-cyan-300 p-2 rounded-md transition hover:bg-cyan-50/10">
+            View
+          </button>
+-          <button className="border-2 border-red-300 text-red-300 p-2 rounded-md transition hover:bg-red-50/10">
+-            Delete
+-          </button>
++          <Form action={`/delete-game/${id}`} method="post">
++            <button
++              type="submit"
++              className="border-2 border-red-300 text-red-300 p-2 rounded-md transition hover:bg-red-50/10 w-full"
++            >
++              Delete
++            </button>
++          </Form>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+:::note
+We've made several important changes to the `GameCard` component:
+
+<Steps>
+1. **Imported the Form component**: We're using Remix's `Form` component to handle the delete action.
+2. **Added an id prop**: We need the game's ID to know which game to delete.
+3. **Replaced the button with a Form**: Instead of a simple button, we now have a form that submits to a specific route.
+4. **Set the action and method**: The form submits to `/delete-game/${id}` with a POST method (this route doesn't exist yet!)
+</Steps>
+
+The `Form` component is a key part of Remix's data mutation strategy. It enhances the HTML `<form>` element with JavaScript-powered submissions while maintaining the browser's native form behavior as a fallback.
+:::
+
+## Step 2: Pass the Game ID to the GameCard Component
+
+Now that our `GameCard` component accepts an ID prop, we need to pass the game ID from the parent component.
+
+Open your `app/routes/_index.tsx` file and update the `GameCard` component as follows:
+
+```diff lang="tsx" title="app/routes/_index.tsx"
+export default function Index() {
+  const { games } = useLoaderData<typeof loader>();
+
+  return (
+    <div className="container mx-auto px-8 grid grid-cols-3 gap-8">
+      {games.map((game) => (
+        <div key={game.id}>
+          <GameCard
+            key={game.id}
++            id={game.id}
+            title={game.title}
+            releaseDate={game.releaseDate}
+            imageUrl={game.imageUrl || fallbackImage}
+            genre={game.category?.title || "Unknown"}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+:::note
+This is a simple change - we're just passing the `game.id` as a prop to the `GameCard` component. This ID will be used to construct the form action URL.
+:::
+
+## Step 3: Create a Route to Handle Game Deletion
+
+Now we need to create a route that will handle the delete action. In Remix, we can create a route with a dynamic parameter using the `$` symbol in the filename.
+
+Create a new file inside `app/routes/` called `delete-game.$gameId.tsx` and add the following code:
+
+```tsx lang="tsx" title="app/routes/delete-game.$gameId.tsx"
+import { redirect } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
+import { PrismaClient } from "@prisma/client";
+
+export async function action({ params }: ActionFunctionArgs) {
+  const gameId = params.gameId;
+
+  const prisma = new PrismaClient();
+
+  // Delete the game from the database
+  await prisma.game.delete({
+    where: { id: gameId },
+  });
+
+  prisma.$disconnect();
+
+  // Redirect back to the home page
+  return redirect("/");
+}
+
+// No need for a default export since this route only handles the action
+```
+
+:::note
+This route file contains only an action function, with no `default export` for rendering a component. This is because it's a "resource route" that only handles data mutations, not UI rendering.
+
+Key points about this route:
+
+<Steps>
+1. **Dynamic Parameter**: The `$gameId` in the filename becomes a parameter in the `params` object.
+2. **Action Function**: This function runs when a form is submitted to this route with a POST request.
+3. **Prisma Delete Operation**: We use Prisma's `delete` method to remove the game from the database.
+4. **Redirect**: After deletion, we redirect the user back to the home page.
+</Steps>
+
+The route naming convention (`delete-game.$gameId.tsx`) is part of Remix's file-based routing system. The `$gameId` segment becomes a dynamic parameter that can be accessed via `params.gameId`.
+:::
+
+## Understanding Key Concepts
+
+### Remix Resource Routes
+
+A resource route in Remix is a route that doesn't render a UI component but instead handles data operations. These routes typically:
+
+- Have an action function, a loader function, or both
+- Don't have a default export (component)
+- Are used for API-like functionality within your Remix application
+
+Resource routes are perfect for operations like deleting data, as they provide a clean separation between data mutations and UI rendering.
+
+### Dynamic Route Parameters
+
+Remix uses file naming conventions to define routes with dynamic parameters:
+
+- A file named `delete-game.$gameId.tsx` creates a route that matches `/delete-game/123`, `/delete-game/abc`, etc.
+- The `$gameId` part becomes a parameter that can be accessed via `params.gameId` in the loader or action function
+- This allows you to create flexible routes that can handle different resources based on the URL
+
+### Form Submissions in Remix
+
+Remix enhances HTML forms with [progressive enhancement](https://remix.run/docs/en/main/discussion/progressive-enhancement):
+
+- When JavaScript is available, Remix intercepts the form submission and handles it with client-side navigation
+- When JavaScript is not available, the form falls back to the browser's native form submission behavior
+- In both cases, the action function in the target route is called to handle the submission
+
+This approach provides a robust user experience that works even if JavaScript fails to load or execute.
+
+## What We've Learned
+
+In this tutorial, we've:
+
+1. Updated the `GameCard` component to include a delete button
+2. Created a resource route to handle the delete action
+3. Connected the button to the route using Remix's `Form` component
+4. Implemented the server-side logic to delete the game from the database
+
+These changes allow users to delete games from the database with a simple button click, completing the "D" in CRUD functionality for our application.
+
+<MonsterReveal>
+  Great job! You've successfully implemented delete functionality in your application. This is an essential feature for any data-driven application, allowing users to manage their content effectively. With this addition, your GameLog application now supports both creating and deleting games, making it more useful and complete.
+</MonsterReveal>

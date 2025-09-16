@@ -59,23 +59,27 @@ At the moment, it doesn't seem all that impressive, but we'll change that soon!
 
 To change the existing text, locate the `<h1>` tag inside the `App` function of your `root.tsx` file:
 
-```tsx showLineNumbers title="app/root.tsx" collapse={1-10} {20}
-import { type LinksFunction } from '@remix-run/node'
-import Document from '~/components/shared-layout/Document'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
+```tsx showLineNumbers title="app/root.tsx" collapse={1-13} {24}
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import Document from './components/shared-layout/Document.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 
-export const links: LinksFunction = () => {
+export const links: Route.LinksFunction = () => {
 	return rootLinkElements
 }
-export { headers, meta } from './__root.client.tsx'
-export { action, loader } from './__root.server.tsx'
+export { meta } from './__root.client.tsx'
+export { headers, loader } from './__root.server.tsx'
 
 export default function App() {
+	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 
 	return (
-		<Document nonce={nonce}>
+		<Document nonce={nonce} honeyProps={data?.honeyProps}>
 			<div className="flex h-screen flex-col justify-between">
 				<div className="flex-1">
 					<main className="grid h-full place-items-center">
@@ -86,6 +90,8 @@ export default function App() {
 		</Document>
 	)
 }
+
+export const ErrorBoundary = GeneralErrorBoundary
 ```
 
 Change `"Welcome to Epic News!"` to any message you like, such as `Your Journey Begins!`.

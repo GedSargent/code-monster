@@ -44,7 +44,7 @@ export default function App() {
 	const nonce = useNonce()
 
 	return (
-		<Document nonce={nonce}>
+		<Document nonce={nonce} honeyProps={data?.honeyProps}>
 			<div className="flex h-screen flex-col justify-between">
 				<div className="flex-1">
 					<main className="grid h-full place-items-center">

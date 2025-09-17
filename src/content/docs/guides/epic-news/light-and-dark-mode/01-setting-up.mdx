@@ -13,19 +13,23 @@ All we need to do is implement it 🚀.
 
 Open `app/root.tsx` and look carefully at the `App` function being exported:
 
-```tsx title="app/root.tsx" {12-26} collapse={1-4}
-import { type LinksFunction } from '@remix-run/node'
-import Document from '~/components/shared-layout/Document.tsx'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { useNonce } from '~/utils/nonce-provider.ts'
+```tsx title="app/root.tsx" {15-29} collapse={1-7}
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import Document from './components/shared-layout/Document.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 
-export const links: LinksFunction = () => {
+export const links: Route.LinksFunction = () => {
 	return rootLinkElements
 }
-export { headers, meta } from './__root.client.tsx'
-export { action, loader } from './__root.server.tsx'
+export { meta } from './__root.client.tsx'
+export { headers, loader } from './__root.server.tsx'
 
 export default function App() {
+	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 
 	return (
@@ -40,6 +44,8 @@ export default function App() {
 		</Document>
 	)
 }
+
+export const ErrorBoundary = GeneralErrorBoundary
 ```
 
 :::note
@@ -54,19 +60,23 @@ Don't worry, the fundamentals of this process remain the same.
 
 Notice the `Document` component that wraps everything being returned from the `App` function?
 
-```tsx title="app/root.tsx" collapse={6-10} {2, 16, 24}
-import { type LinksFunction } from '@remix-run/node'
-import Document from '~/components/shared-layout/Document.tsx'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { useNonce } from '~/utils/nonce-provider.ts'
+```tsx title="app/root.tsx" collapse={9-13} {5, 20, 28}
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import Document from './components/shared-layout/Document.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 
-export const links: LinksFunction = () => {
+export const links: Route.LinksFunction = () => {
 	return rootLinkElements
 }
-export { headers, meta } from './__root.client.tsx'
-export { action, loader } from './__root.server.tsx'
+export { meta } from './__root.client.tsx'
+export { headers, loader } from './__root.server.tsx'
 
 export default function App() {
+	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 
 	return (
@@ -81,6 +91,8 @@ export default function App() {
 		</Document>
 	)
 }
+
+export const ErrorBoundary = GeneralErrorBoundary
 ```
 
 Right-click the opening `Document` tag, and select '**Go to Source Definition**' from the option menu:
@@ -90,45 +102,69 @@ Right-click the opening `Document` tag, and select '**Go to Source Definition**'
 This will open the file where the `Document` component code is held:
 
 ```tsx title="app/components/shared-layout/Document.tsx"
+import { OpenImgContextProvider } from 'openimg/react'
+import { Meta, Links, ScrollRestoration, Scripts } from 'react-router'
+import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import { ClientHintCheck } from '#app/utils/client-hints'
+import { getImgSrc } from '#app/utils/misc.tsx'
+import { type Theme } from '#app/utils/theme.server'
+
 interface DocumentProps {
 	children: React.ReactNode
 	nonce: string
+	honeyProps:
+		| {
+				nameFieldName: string
+				validFromFieldName: string | null
+				encryptedValidFrom: string
+		  }
+		| undefined
 	theme?: Theme
-	env?: Record<string, string>
-	allowIndexing?: boolean
+	env?: Record<string, string | undefined>
 }
 
 export default function Document({
 	children,
+	honeyProps,
 	nonce,
 	theme = 'dark',
 	env = {},
-	allowIndexing = true,
 }: DocumentProps) {
+	const allowIndexing = ENV.ALLOW_INDEXING !== 'false'
 	return (
-		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
-			<head>
-				<ClientHintCheck nonce={nonce} />
-				<Meta />
-				<meta charSet="utf-8" />
-				<meta name="viewport" content="width=device-width,initial-scale=1" />
-				{allowIndexing ? null : (
-					<meta name="robots" content="noindex, nofollow" />
-				)}
-				<Links />
-			</head>
-			<body className="bg-background text-foreground">
-				{children}
-				<script
-					nonce={nonce}
-					dangerouslySetInnerHTML={{
-						__html: `window.ENV = ${JSON.stringify(env)}`,
-					}}
-				/>
-				<ScrollRestoration nonce={nonce} />
-				<Scripts nonce={nonce} />
-			</body>
-		</html>
+		<HoneypotProvider {...honeyProps}>
+			<OpenImgContextProvider
+				optimizerEndpoint="/resources/images"
+				getSrc={getImgSrc}
+			>
+				<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
+					<head>
+						<ClientHintCheck nonce={nonce} />
+						<Meta />
+						<meta charSet="utf-8" />
+						<meta
+							name="viewport"
+							content="width=device-width,initial-scale=1"
+						/>
+						{allowIndexing ? null : (
+							<meta name="robots" content="noindex, nofollow" />
+						)}
+						<Links />
+					</head>
+					<body className="bg-background text-foreground">
+						{children}
+						<script
+							nonce={nonce}
+							dangerouslySetInnerHTML={{
+								__html: `window.ENV = ${JSON.stringify(env)}`,
+							}}
+						/>
+						<ScrollRestoration nonce={nonce} />
+						<Scripts nonce={nonce} />
+					</body>
+				</html>
+			</OpenImgContextProvider>
+		</HoneypotProvider>
 	)
 }
 ```
@@ -149,19 +185,27 @@ Here is the `DocumentProps` interface:
 
 ```tsx
 interface DocumentProps {
-  children: React.ReactNode;
-  nonce: string;
-  theme?: Theme;
-  env?: Record<string, string>;
-	allowIndexing?: boolean
+	children: React.ReactNode
+	nonce: string
+	honeyProps:
+		| {
+				nameFieldName: string
+				validFromFieldName: string | null
+				encryptedValidFrom: string
+		  }
+		| undefined
+	theme?: Theme
+	env?: Record<string, string | undefined>
 }
 ```
 
 It's saying that any object we want to pass as a `DocumentProps` object should have the following properties:
 
-- `children`: This should be a `React.ReactNode`. In simple terms, this means it can be any kind of item that React can render on the screen, like a component, a piece of text, or even nothing at all.
+1.`children`: This should be a `React.ReactNode`. In simple terms, this means it can be any kind of item that React can render on the screen, like a component, a piece of text, or even nothing at all.
 
-- `nonce`: This should be a `string`, which is a sequence of characters like "hello" or "1234".
+2. `nonce`: This should be a `string`, which is a sequence of characters like "hello" or "1234".
+
+3. `honeyProps`: This is a bit more complex. It's saying that `honeyProps` can either be an object with three properties (`nameFieldName`, `validFromFieldName`, and `encryptedValidFrom`) or it can be `undefined`.
 
 :::caution
 
@@ -171,7 +215,7 @@ _We don't need to worry about this for now, but we will come back to it soon._
 
 :::
 
-- `theme`: This is an optional property (that's what the `?` means), and it should be of type `Theme`. We don't see a definition for `Theme` in this file, but it's being `import`ed at the top from the file `app/utils/theme.server.ts`:
+4. `theme`: This is an optional property (that's what the `?` means), and it should be of type `Theme`. We don't see a definition for `Theme` in this file, but it's being `import`ed at the top from the file `app/utils/theme.server.ts`:
 
   ```tsx
   import { Theme } from "~/utils/theme.server";
@@ -185,101 +229,113 @@ _We don't need to worry about this for now, but we will come back to it soon._
 
   This means that `Theme` must be one of two possible strings: `'light'` or `'dark'`. We'll be looking at this in more detail later.
 
-- `env`: This is also optional, and it should be of the type `Record<string, string>`.
+5. `env`: This is also optional, and it should be of the type `Record<string, string>`.
 
 		This is a fancy way of saying it's an object where all the keys and values are strings. For example, `{ "key1": "value1", "key2": "value2" }` would be a valid `env`.
-
-- `allowIndexing`: This is also optional, and it should be of the type `boolean`.
-
-		This is a flag that tells search engines like Google whether they should index the page or not. If `allowIndexing` is `true`, the page will be indexed. If it's `false`, the page won't be indexed.
 
 So, if you have an object and you want to make sure it fits the `DocumentProps` blueprint, it needs to have these properties with these types.
 
 #### Props
 
-Remember that the `Document` function is a [**React component**](https://react.dev/learn/passing-props-to-a-component).
-
-Because of this, it's a function that can take an object called `props` as an argument and returns some JSX.
-
-Props are a way of passing data into a component from elsewhere in the codebase. In this case, the `Document` component is expecting an object that fits the `DocumentProps` interface.
-
-Wherever we use the `Document` component, we _must_ pass it an object that has the properties `children` and `nonce`. The `theme`, `env` and `allowIndexing` properties are _optional_ - we can pass them if we want to, but we don't have to.
-
-##### Refresher tutorial
-
 If you need a refresher on props in React, check out the previous lesson on [**Props**](/code-monster/guides/react-101/props) in our React 101 section, or visit the [**React documentation**](https://react.dev/learn/passing-props-to-a-component).
+
+:::tip[The "children" prop]
 
 #### Children
 
-The `children` property is a special prop in React. It's used to pass any content between the opening and closing tags of a component.
+`children` is a special prop in React. It's used to pass any content between the opening and closing tags of a component.
 
 In the example of the `Document` component, the `children` prop is used to pass in the content that should be rendered between the `<body>` tags of the HTML document.
 
-```tsx title="app/components/shared-layout/Document.tsx" showLineNumbers collapse={1-11, 22-31} {14, 33}
-import { Links, Meta, Scripts, ScrollRestoration } from '@remix-run/react'
-import { ClientHintCheck } from '~/utils/client-hints'
-import { Theme } from '~/utils/theme.server'
+```tsx title="app/components/shared-layout/Document.tsx" showLineNumbers collapse={1-20, 29-49, 61-64} {23, 51}
+import { OpenImgContextProvider } from 'openimg/react'
+import { Meta, Links, ScrollRestoration, Scripts } from 'react-router'
+import { HoneypotProvider } from 'remix-utils/honeypot/react'
+import { ClientHintCheck } from '#app/utils/client-hints'
+import { getImgSrc } from '#app/utils/misc.tsx'
+import { type Theme } from '#app/utils/theme.server'
 
 interface DocumentProps {
 	children: React.ReactNode
 	nonce: string
+	honeyProps:
+		| {
+				nameFieldName: string
+				validFromFieldName: string | null
+				encryptedValidFrom: string
+		  }
+		| undefined
 	theme?: Theme
-	env?: Record<string, string>
-	allowIndexing?: boolean
+	env?: Record<string, string | undefined>
 }
 
 export default function Document({
 	children,
+	honeyProps,
 	nonce,
 	theme = 'dark',
 	env = {},
-	allowIndexing = true,
 }: DocumentProps) {
+	const allowIndexing = ENV.ALLOW_INDEXING !== 'false'
 	return (
-		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
-			<head>
-				<ClientHintCheck nonce={nonce} />
-				<Meta />
-				<meta charSet="utf-8" />
-				<meta name="viewport" content="width=device-width,initial-scale=1" />
-				{allowIndexing ? null : (
-					<meta name="robots" content="noindex, nofollow" />
-				)}
-				<Links />
-			</head>
-			<body className="bg-background text-foreground">
-				{children}
-				<script
-					nonce={nonce}
-					dangerouslySetInnerHTML={{
-						__html: `window.ENV = ${JSON.stringify(env)}`,
-					}}
-				/>
-				<ScrollRestoration nonce={nonce} />
-				<Scripts nonce={nonce} />
-			</body>
-		</html>
+		<HoneypotProvider {...honeyProps}>
+			<OpenImgContextProvider
+				optimizerEndpoint="/resources/images"
+				getSrc={getImgSrc}
+			>
+				<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
+					<head>
+						<ClientHintCheck nonce={nonce} />
+						<Meta />
+						<meta charSet="utf-8" />
+						<meta
+							name="viewport"
+							content="width=device-width,initial-scale=1"
+						/>
+						{allowIndexing ? null : (
+							<meta name="robots" content="noindex, nofollow" />
+						)}
+						<Links />
+					</head>
+					<body className="bg-background text-foreground">
+						{children}
+						<script
+							nonce={nonce}
+							dangerouslySetInnerHTML={{
+								__html: `window.ENV = ${JSON.stringify(env)}`,
+							}}
+						/>
+						<ScrollRestoration nonce={nonce} />
+						<Scripts nonce={nonce} />
+					</body>
+				</html>
+			</OpenImgContextProvider>
+		</HoneypotProvider>
 	)
 }
 ```
 
-This unassuming little prop actually does a lot of work behind the scenes. It's what allows us to nest components inside other components, and it's what makes React so powerful.
+This unassuming little prop actually does a lot of work behind the scenes. It's what allows us to _nest_ components inside other components, and it's what makes React so powerful.
 
 If you look back at the `App` function in `app/root.tsx`, you can see that the `Document` component is being used to wrap the content of the page:
 
-```tsx title="app/root.tsx" collapse={6-10} {2, 16, 24}
-import { type LinksFunction } from '@remix-run/node'
-import Document from '~/components/shared-layout/Document.tsx'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { useNonce } from '~/utils/nonce-provider.ts'
+```tsx title="app/root.tsx" collapse={9-13} {5, 20, 28} showLineNumbers
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import Document from './components/shared-layout/Document.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 
-export const links: LinksFunction = () => {
+export const links: Route.LinksFunction = () => {
 	return rootLinkElements
 }
-export { headers, meta } from './__root.client.tsx'
-export { action, loader } from './__root.server.tsx'
+export { meta } from './__root.client.tsx'
+export { headers, loader } from './__root.server.tsx'
 
 export default function App() {
+	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 
 	return (
@@ -294,9 +350,13 @@ export default function App() {
 		</Document>
 	)
 }
+
+export const ErrorBoundary = GeneralErrorBoundary
 ```
 
 Nesting components within each other like this is a common pattern in React. It allows us to build up complex user interfaces from lots of smaller building blocks.
+
+:::
 
 ::::
 
@@ -311,11 +371,12 @@ Change this to `theme = 'light'` and save the file:
 ```diff lang="tsx" title="app/components/shared-layout/Document.tsx" showLineNumbers startLineNumber={18}
 export default function Document({
 	children,
+	honeyProps,
 	nonce,
 -	theme = 'dark',
 +	theme = 'light',
 	env = {},
-}: DocumentProps)
+}: DocumentProps) {
 ```
 
 You should see the website in the browser looks completely different:
@@ -324,15 +385,17 @@ You should see the website in the browser looks completely different:
 
 ### Why? Tailwind classes and string interpolation
 
-Take a closer look at the opening `html` component being returned from the `Document` function:
+Take a closer look at the opening `html` component being returned from the `Document` function.
 
-```tsx mark='${theme}' {4} showLineNumbers collapse={10-30}
+Can you see how the value of the `theme` variable has been slotted into the `className` **property** (or '**prop**')?
+
+```tsx mark='${theme}' {5} showLineNumbers collapse={10-30}
 export default function Document({
 	children,
+	honeyProps,
 	nonce,
 	theme = 'light',
 	env = {},
-	allowIndexing = true,
 }: DocumentProps) {
 	return (
 		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
@@ -361,8 +424,6 @@ export default function Document({
 	)
 }
 ```
-
-Can you see how the value of the `theme` variable has been slotted into the `className` **property** (or '**prop**')?
 
 This is called [**interpolation**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), and is a way of inserting the value of a variable into a string in JavaScript.
 

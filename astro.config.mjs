@@ -175,7 +175,7 @@ export default defineConfig({
                 },
                 {
                   label: "🌞 From server to client - `useLoaderData`",
-                  link: `${lightDarkModeDir}/03-from-server-to-client`,
+                  link: `${lightDarkModeDir}/02-from-server-to-client`,
                 },
               ],
             },

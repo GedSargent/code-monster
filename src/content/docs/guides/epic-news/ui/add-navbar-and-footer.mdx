@@ -13,29 +13,29 @@ Now that we have light and dark mode, let's add a navigation bar to our site. We
 First, let's add the component to our `app/root.tsx` file.
 
 ```diff lang="tsx" title="app/root.tsx" collapse={1-6, 11-20, 27-35} showLineNumbers
-import { type LinksFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import Document from '~/components/shared-layout/Document'
-import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { loader } from './__root.server'
-import useTheme from './hooks/useTheme.tsx'
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import Document from './components/shared-layout/Document.tsx'
+import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 +import HeaderWithSearch from './components/organisms/HeaderWithSearch'
 
-export const links: LinksFunction = () => {
+export const links: Route.LinksFunction = () => {
 	return rootLinkElements
 }
-export { headers, meta } from './__root.client.tsx'
-export { action, loader } from './__root.server.tsx'
+export { meta } from './__root.client.tsx'
+export { headers, loader } from './__root.server.tsx'
 
 export default function App() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 	const theme = useTheme()
 
 	return (
-		<Document nonce={nonce} theme={theme}>
+		<Document theme={theme} nonce={nonce} honeyProps={data?.honeyProps}>
 			<div className="flex h-screen flex-col justify-between">
 +				<HeaderWithSearch />
 
@@ -58,7 +58,7 @@ export default function App() {
 
 Head across to your browser and you should see the navigation bar at the top of the page. It should look something like this:
 
-![Navbar](src/assets/png/navbar.png)
+![Navbar](src/assets/webp/epic-news/ui/add-navbar.webp)
 
 You'll notice that if you click the **Log in** button, nothing happens. This is because we haven't implemented the login functionality yet. We'll do that in a later section. For now, let's add a footer to our site.
 
@@ -105,12 +105,12 @@ Next, let's slot the `FooterMenuRight` component towards the bottom of our `App`
 
 ```diff lang="tsx" title="app/root.tsx"
 export default function App() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 	const theme = useTheme()
 
 	return (
-		<Document nonce={nonce} theme={theme}>
+		<Document theme={theme} nonce={nonce} honeyProps={data?.honeyProps}>
 			<div className="flex h-screen flex-col justify-between">
 				<HeaderWithSearch />
 
@@ -135,7 +135,7 @@ export default function App() {
 
 Save your work and check the browser. Scroll the page down, and you should see a footer at the bottom of the page:
 
-![Footer](src/assets/png/footer.png)
+![Footer](src/assets/webp/epic-news/ui/footer.webp)
 
 Finally, remember to tidy up your imports at the top of the file using the VS Code keyboard shortcut <MonsterKbd>Shift + Alt + O</MonsterKbd> (on Windows) or <MonsterKbd>Shift + Option + O</MonsterKbd> (on Mac).
 

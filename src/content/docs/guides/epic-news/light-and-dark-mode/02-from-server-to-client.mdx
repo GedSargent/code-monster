@@ -10,7 +10,7 @@ import MonsterKbd from "src/components/MonsterKbd.astro"
 
 In any given website, there are two main parts to the code that drives it:
 
-1. **Frontend code**: This is the code that runs in the user's browser. It's written in JavaScript and is responsible for rendering the website and handling user interactions.
+1. **Frontend code**: This is the code that runs in the user's browser (the 'client'). It's written in JavaScript and is responsible for rendering the website and handling user interactions.
 
 2. **Backend code**: This is the code that runs on the server. It's written in a server-side language like Node.js, Python, or Ruby, and is responsible for fetching data from a database, processing it, and sending it to the frontend.
 
@@ -28,19 +28,23 @@ So far, we have been working exclusively on the frontend code. So where is the b
 
 Take another look at the `app/root.tsx` file:
 
-```tsx title="app/root.tsx" showLineNumbers {10}
-import { type LinksFunction } from '@remix-run/node'
-import Document from '~/components/shared-layout/Document'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
+```tsx title="app/root.tsx" showLineNumbers {13}
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import Document from './components/shared-layout/Document.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 
-export const links: LinksFunction = () => {
+export const links: Route.LinksFunction = () => {
 	return rootLinkElements
 }
-export { headers, meta } from './__root.client.tsx'
-export { action, loader } from './__root.server.tsx'
+export { meta } from './__root.client.tsx'
+export { headers, loader } from './__root.server.tsx'
 
 export default function App() {
+	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 
 	return (
@@ -55,19 +59,21 @@ export default function App() {
 		</Document>
 	)
 }
+
+export const ErrorBoundary = GeneralErrorBoundary
 ```
 
-You'll notice that we are exporting two functions from this file: `action` and `loader`.
+You'll notice that we are exporting a function from this file called: `loader`.
 
-```tsx
-export { action, loader } from './__root.server.tsx'
+```tsx "loader"
+export { headers, loader } from './__root.server.tsx'
 ```
 
-These functions are responsible for fetching data from the server and processing it before it is sent to the frontend.
+This function is responsible for fetching data from the server and processing it before it is sent to the frontend.
 
-But where are these functions defined? The line highlighted above says that the `action` and `loader` functions are being exported somehow, but we don't see them in this file. 🧐
+But where is this function defined? The line highlighted above says that the `loader` function is being exported somehow, but we don't see them in this file. 🧐
 
-That's because they are defined in a completely separate file: `__root.server.tsx`. We can communicate between two files in JavaScript using `import` and `export` statements.
+That's because it is defined in a completely separate file: `__root.server.tsx`.
 
 :::note[Deep Dive]
 
@@ -82,10 +88,13 @@ Having smaller, more focused files makes it easier for humans to understand what
 That's precisely what the `import` statements are doing at the top of each file in the project, e.g.:
 
 ```tsx title="app/root.tsx" showLineNumbers
-import { type LinksFunction } from '@remix-run/node'
-import Document from '~/components/shared-layout/Document'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import Document from './components/shared-layout/Document.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 ```
 
 Each `import` statement is bringing in a function or variable from another file, so that it can be used in the current file.
@@ -146,10 +155,7 @@ import { type LinksFunction } from '@remix-run/node'
 import Document from '~/components/shared-layout/Document'
 import { useNonce } from '~/utils/nonce-provider.ts'
 import rootLinkElements from '~/utils/providers/rootLinkElements'
-+import { useLoaderData } from '@remix-run/react'
-+import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-+import { type loader } from './__root.server'
-+import useTheme from './hooks/useTheme.tsx'
++import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
 ```
 
 Next, carefully add the code highlighted in green below to the `App` component function itself:
@@ -167,28 +173,28 @@ However, while you are finding your feet, _**take the time to slot these lines i
 :::
 
 ```diff lang="tsx" title="app/root.tsx" showLineNumbers ins=" theme={theme}" collapse={1-14}
-import { type LinksFunction } from '@remix-run/node'
-import Document from '~/components/shared-layout/Document'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { useLoaderData } from '@remix-run/react'
-import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-import { loader } from './__root.server'
-import useTheme from './hooks/useTheme.tsx'
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import Document from './components/shared-layout/Document.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
+import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
 
 export const links: LinksFunction = () => {
 	return rootLinkElements
 }
-export { headers, meta } from './__root.client.tsx'
-export { action, loader } from './__root.server.tsx'
+export { meta } from './__root.client.tsx'
+export { headers, loader } from './__root.server.tsx'
 
 export default function App() {
-+	const data = useLoaderData<typeof loader>();
+	const data = useLoaderData<typeof loader>();
 	const nonce = useNonce();
 +	const theme = useTheme()
 
 	return (
-		<Document nonce={nonce} theme={theme}>
+		<Document theme={theme} nonce={nonce} honeyProps={data?.honeyProps}>
 			<div className="flex h-screen flex-col justify-between">
 				<div className="flex-1">
 					<main className="grid h-full place-items-center">
@@ -197,7 +203,7 @@ export default function App() {
 				</div>
 +
 +				<div className="container flex justify-between pb-5">
-+					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
++					<ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
 +				</div>
 			</div>
 		</Document>
@@ -225,25 +231,25 @@ When you are ready, open the explanation below.
     const data = useLoaderData<typeof loader>()
     ```
 
-    The `useLoaderData` hook provides whatever value is returned from the `loader` function. In this case, we are calling this value `data`, but it's just a variable name, and could be anything we wanted it to be.
+    The `useLoaderData` hook provides whatever value is returned from the `loader` function (which in this case we are importing from `app/__root.server.tsx`).
 
-		This is precisely how `useLoaderData` can be thought of as the bridge connecting the server to the browser.
+		Think of `useLoaderData` as a bridge connecting the server to the browser.
 
-		Any code returned from the `loader` that is generated on the server is captured and passed straight into the browser by this simple hook.
+		Any code returned from `loader` that is generated on the server is captured and passed straight into the browser by this simple hook.
 
     So, the `data` variable here represents the object being returned from the `loader` function that we have imported from the `app/__root.client.tsx` file.
 
 		A few lines down, we pass this into the `ThemeSwitch` component:
 
-    ```tsx title="app/root.tsx" mark="data.requestInfo.userPrefs.theme"
-    <ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
+    ```tsx title="app/root.tsx" mark="data?.requestInfo.userPrefs.theme"
+    <ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
     ```
 
     As you can probably guess, this particular bit of the `data` object contains the user's `theme` preferences (i.e. 'light' or 'dark'), and is read directly from a browser [**cookie**](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies).
 
     #### 2. The `ThemeSwitch` component
 
-    The `ThemeSwitch` component is simply an icon wrapped inside a Remix [form](https://remix.run/docs/en/main/components/form). It should toggle between 'light' and 'dark' icons clicked, but something isn't quite right yet. Let's see if we can fix it.
+    The `ThemeSwitch` component is simply an icon wrapped inside a Remix [form](https://remix.run/docs/en/main/components/form).
 
   </div>
 

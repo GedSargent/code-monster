@@ -40,28 +40,37 @@ Typically, the logo is placed on the left side of the navigation bar:
 
 ![Nav Logo Position](src/assets/png/epic-news/nav-logo-position.png)
 
-:::tip[Challenge]
+::::tip[Challenge]
 
 Look carefully at the `HeaderWithSearch` component and decide where you should place a new `div` to encapsulate the new logo.
 
 ```tsx title="HeaderWithSearch.tsx"
-import { useMatches } from '@remix-run/react'
-import { SearchBar } from '../molecules/SearchBar'
-import LoginOrUserDropdown from './LoginOrUserDropdown'
+import { useMatches, Link } from 'react-router'
+import { SearchBar } from '#app/components/search-bar.tsx'
+import { Button } from '#app/components/ui/button.tsx'
+import { UserDropdown } from '#app/components/user-dropdown.tsx'
+import { useOptionalUser } from '#app/utils/user.ts'
 
 export default function HeaderWithSearch() {
 	const matches = useMatches()
-	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+	const isOnSearchPage = matches.find((m) => m.id === 'routes/users+/index')
 	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+	const user = useOptionalUser()
 
 	return (
-		<header className="bg-primary/10 py-6 dark:bg-dark-primary/10">
-			<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+		<header className="container py-6">
+			<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
 					{searchBar}
 				</div>
 				<div className="flex items-center gap-10">
-					<LoginOrUserDropdown />
+					{user ? (
+						<UserDropdown />
+					) : (
+						<Button asChild variant="default" size="lg">
+							<Link to="/login">Log In</Link>
+						</Button>
+					)}
 				</div>
 				<div className="block w-full sm:hidden">{searchBar}</div>
 			</nav>
@@ -70,7 +79,9 @@ export default function HeaderWithSearch() {
 }
 ```
 
-For the time being, just place the code below at the spot you think is best:
+:::caution[Tip]
+
+For the time being, just copy and past the code below at the spot you think is best:
 
 ```tsx
 <div>
@@ -78,10 +89,12 @@ For the time being, just place the code below at the spot you think is best:
 </div>
 ```
 
+:::
+
 When you have added your text, compare your solution with the one below:
 
 <MonsterReveal>
-```diff lang="tsx" title="HeaderWithSearch.tsx" showLineNumbers collapse={}
+```diff lang="tsx" title="HeaderWithSearch.tsx" showLineNumbers
 import { useMatches } from '@remix-run/react'
 import { SearchBar } from '../molecules/SearchBar'
 import LoginOrUserDropdown from './LoginOrUserDropdown'
@@ -115,7 +128,7 @@ With this in place, your navbar should look something like this:
 ![Placeholder logo text](src/assets/png/epic-news/placeholder-logo-text.png)
 </MonsterReveal>
 
-:::
+::::
 
 ## Create a logo
 

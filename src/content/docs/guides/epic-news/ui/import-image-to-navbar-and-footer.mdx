@@ -30,9 +30,11 @@ The easiest way to do this is to simply drag and drop the image file into the `a
 Now that the image is in the correct folder, you can import it into your component:
 
 ```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx"
-import { useMatches } from '@remix-run/react'
-import { SearchBar } from '../molecules/SearchBar'
-import LoginOrUserDropdown from './LoginOrUserDropdown'
+import { useMatches, Link } from 'react-router'
+import { SearchBar } from '#app/components/search-bar.tsx'
+import { Button } from '#app/components/ui/button.tsx'
+import { UserDropdown } from '#app/components/user-dropdown.tsx'
+import { useOptionalUser } from '#app/utils/user.ts'
 +import logo from '~/assets/png/epic-news-logo.png';
 ```
 
@@ -52,29 +54,38 @@ You should also set an `alt` attribute to describe the image for users accessing
 
 Add the line of code below inside the `div` that you created in the previous tutorial:
 
-```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers collapse={1-4, 18-24}
-import { useMatches } from '@remix-run/react'
-import { SearchBar } from '../molecules/SearchBar'
-import LoginOrUserDropdown from './LoginOrUserDropdown'
-import logo from '~/assets/png/epic-news-logo.png'
+```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers collapse={1-6, 21-33}
+import { useMatches, Link } from 'react-router'
+import { SearchBar } from '#app/components/search-bar.tsx'
+import { Button } from '#app/components/ui/button.tsx'
+import { UserDropdown } from '#app/components/user-dropdown.tsx'
+import { useOptionalUser } from '#app/utils/user.ts'
+import logo from '~/assets/svg/epic-news-sample-logo.svg'
 
 export default function HeaderWithSearch() {
 	const matches = useMatches()
-	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+	const isOnSearchPage = matches.find((m) => m.id === 'routes/users+/index')
 	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+	const user = useOptionalUser()
 
 	return (
-		<header className="dark:bg-dark-primary/10 bg-primary/10 py-6">
-			<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+		<header className="container py-6">
+			<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
 				<div>
 +					<img src={logo} alt="Epic News Logo" className="w-16" />
-					<span className="text-sm text-foreground">Epic News</span>
+					<span className="text-foreground text-sm">Epic News</span>
 				</div>
 				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
 					{searchBar}
 				</div>
 				<div className="flex items-center gap-10">
-					<LoginOrUserDropdown />
+					{user ? (
+						<UserDropdown />
+					) : (
+						<Button asChild variant="default" size="lg">
+							<Link to="/login">Log In</Link>
+						</Button>
+					)}
 				</div>
 				<div className="block w-full sm:hidden">{searchBar}</div>
 			</nav>
@@ -105,7 +116,7 @@ You will need to use Tailwind's flexbox utilities to achieve this.
 
 Use the flexbox generator below to generate the code required for this layout:
 
-<FlexboxGenerator />
+<FlexboxGenerator applyFlex={true} />
 
 When you're ready, compare your solution with the one below:
 

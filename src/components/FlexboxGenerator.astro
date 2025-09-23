@@ -1,7 +1,14 @@
 ---
 import FlexboxGeneratorReact from './react/tailwind/FlexboxGenerator';
+
+interface Props {
+  applyFlex?: boolean;
+}
+
+const { applyFlex = false } = Astro.props;
 ---
 
 <FlexboxGeneratorReact
   client:visible={true}
+  applyFlexAutomatically={applyFlex}
 />

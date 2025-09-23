@@ -49,9 +49,9 @@ function Select({ label, options, onChange, disabled = false }: SelectProps) {
   )
 }
 
-function FlexboxGenerator() {
+function FlexboxGenerator({ applyFlexAutomatically = false }: { applyFlexAutomatically?: boolean }) {
   const [numberOfChildren, setNumberOfChildren] = React.useState(2);
-  const [applyFlex, setApplyFlex] = React.useState(false);
+  const [applyFlex, setApplyFlex] = React.useState(applyFlexAutomatically);
   const [flexWrap, setFlexWrap] = React.useState(false);
   const [flexDirection, setFlexDirection] = React.useState('flex-row');
   const [justifyContent, setJustifyContent] = React.useState('justify-start');

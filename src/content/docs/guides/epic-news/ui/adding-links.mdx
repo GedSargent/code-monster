@@ -11,7 +11,7 @@ Now that we have a site logo in the navigation bar, let's add some links to page
 
 Traditionally, in a React app, you would use an `a` tag to create a link to another page.
 
-However, in Remix, we use the `Link` component from `@remix-run/react` because it has several advantages:
+However, in Remix, we use the `Link` component from `react-router` because it has several advantages:
 
 - It can be set to pre-fetch the linked page's data, so the page loads faster
 - The `Link` component loads content without requiring a full page refresh
@@ -21,42 +21,53 @@ However, in Remix, we use the `Link` component from `@remix-run/react` because i
 
 Let's start by adding a `Link` to the logo in the navigation bar. This will link back to the home page of the site.
 
-Firstly, let's `import` the `Link` component from `@remix-run/react`:
+Firstly, notice that we are already `import` the `Link` component from `react-router`:
 
-```diff lang="tsx" ins="Link, " title="app/components/organisms/HeaderWithSearch.tsx"
-import { Link, useMatches } from '@remix-run/react'
-import { SearchBar } from '../molecules/SearchBar'
-import LoginOrUserDropdown from './LoginOrUserDropdown'
-import logo from '~/assets/png/epic-news-logo.png'
+```diff lang="tsx" ", Link" title="app/components/organisms/HeaderWithSearch.tsx"
+import { useMatches, Link } from 'react-router'
+import { SearchBar } from '#app/components/search-bar.tsx'
+import { Button } from '#app/components/ui/button.tsx'
+import { UserDropdown } from '#app/components/user-dropdown.tsx'
+import { useOptionalUser } from '#app/utils/user.ts'
+import logo from '~/assets/svg/epic-news-sample-logo.svg'
 ```
 
 Next, let's wrap the logo and site title inside this `Link` component:
 
-```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers collapse={1-4, 20-26}
-import { Link, useMatches } from '@remix-run/react'
-import { SearchBar } from '../molecules/SearchBar'
-import LoginOrUserDropdown from './LoginOrUserDropdown'
-import logo from '~/assets/png/epic-news-logo.png'
+```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers collapse={1-6, 26-35}
+import { Link, useMatches } from 'react-router'
+import { SearchBar } from '#app/components/search-bar.tsx'
+import { Button } from '#app/components/ui/button.tsx'
+import { UserDropdown } from '#app/components/user-dropdown.tsx'
+import { useOptionalUser } from '#app/utils/user.ts'
+import logo from '~/assets/svg/epic-news-sample-logo.svg'
 
 export default function HeaderWithSearch() {
 	const matches = useMatches()
-	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+	const isOnSearchPage = matches.find((m) => m.id === 'routes/users+/index')
 	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+	const user = useOptionalUser()
 
 	return (
-		<header className="dark:bg-dark-primary/10 bg-primary/10 py-6">
-			<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
-+				<Link to="/">
+		<header className="container py-6">
+			<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
++				<Link to="/" className="flex items-center gap-4">
 					<div className="flex items-center gap-4">
 						<img src={logo} alt="Epic News Logo" className="w-16" />
-						<span className="text-sm text-foreground">Epic News</span>
+						<span className="text-foreground text-sm">Epic News</span>
 					</div>
 +				</Link>
 				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
 					{searchBar}
 				</div>
 				<div className="flex items-center gap-10">
-					<LoginOrUserDropdown />
+					{user ? (
+						<UserDropdown />
+					) : (
+						<Button asChild variant="default" size="lg">
+							<Link to="/login">Log In</Link>
+						</Button>
+					)}
 				</div>
 				<div className="block w-full sm:hidden">{searchBar}</div>
 			</nav>
@@ -69,7 +80,7 @@ export default function HeaderWithSearch() {
 
 ## Adding a link to 'News'
 
-Now that we have a link to the home page, see if you can add a link to the 'News' page. This page doesn't exist yet, but we will create it in a later tutorial.
+Now that we have a link to the home page, see if you can add a link so that it is ready for a page we haven't created yet: the 'News' page. We will create the actual page in a later tutorial.
 
 The link should:
 - be placed in the navigation bar, next to the logo
@@ -78,43 +89,52 @@ The link should:
 - be styled however you like, but have a hover effect (e.g. the text colour changes)
 - be created with the Remix `Link` component
 
+![Navbar with News link](src/assets/gif/navbar-news-link.gif)
+
 Once you've added it, compare your solution against the one below:
 
 <MonsterReveal>
 
-```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers collapse={}
-import { Link, useMatches } from '@remix-run/react'
-import { SearchBar } from '../molecules/SearchBar'
-import LoginOrUserDropdown from './LoginOrUserDropdown'
-import logo from '~/assets/png/epic-news-logo.png'
+```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers collapse={1-13}
+import { Link, useMatches } from 'react-router'
+import { SearchBar } from '#app/components/search-bar.tsx'
+import { Button } from '#app/components/ui/button.tsx'
+import { UserDropdown } from '#app/components/user-dropdown.tsx'
+import { useOptionalUser } from '#app/utils/user.ts'
+import logo from '~/assets/svg/epic-news-sample-logo.svg'
 
 export default function HeaderWithSearch() {
 	const matches = useMatches()
-	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+	const isOnSearchPage = matches.find((m) => m.id === 'routes/users+/index')
 	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+	const user = useOptionalUser()
 
 	return (
-		<header className="dark:bg-dark-primary/10 bg-primary/10 py-6">
-			<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
-				<Link to="/">
+		<header className="container py-6">
+			<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+				<Link to="/" className="flex items-center gap-4">
 					<div className="flex items-center gap-4">
 						<img src={logo} alt="Epic News Logo" className="w-16" />
-						<span className="text-sm text-foreground">Epic News</span>
+						<span className="text-foreground text-sm">Epic News</span>
 					</div>
 				</Link>
-+				<div>
-+					<Link
-+						to="/news"
-+						className="text-sm font-semibold text-muted-foreground transition hover:text-foreground"
-+					>
-+						News
-+					</Link>
-+				</div>
++				<Link
++					to="/news"
++					className="text-muted-foreground hover:text-foreground text-sm font-semibold transition"
++				>
++					News
++				</Link>
 				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
 					{searchBar}
 				</div>
 				<div className="flex items-center gap-10">
-					<LoginOrUserDropdown />
+					{user ? (
+						<UserDropdown />
+					) : (
+						<Button asChild variant="default" size="lg">
+							<Link to="/login">Log In</Link>
+						</Button>
+					)}
 				</div>
 				<div className="block w-full sm:hidden">{searchBar}</div>
 			</nav>
@@ -127,7 +147,6 @@ export default function HeaderWithSearch() {
 
 The code above adds a simple link like so:
 
-![Navbar with News link](src/assets/gif/navbar-news-link.gif)
 
 :::
 
@@ -164,39 +183,6 @@ In this tutorial, we have:
 - Added a link to the home page in the navigation bar
 - Added a link to the 'News' page in the navigation bar
 - Customised the footer with links, a site logo and a copyright message
-
-::::note[Assignment]
-
-## 📄 Assignment documentation
-
-You will need to document all the changes that you have made to the site so far in this 'User Interface' section.
-
-You should include:
-
-- How you have imported components into the `root.tsx` file.
-- Adding a navigation bar using the `<HeaderWithSearch />` component.
-- Adding a footer using the `<FooterMenuRight />` component.
-- Creating a logo for the site using Figma
-- Exporting the logo as a PNG file
-- Importing images into the project and using them in components
-- Adding the logo to the navigation bar and footer
-- Customising the position of the logo in the navigation bar with Tailwind CSS and flexbox
-- Adding links to the navigation bar and footer using the Remix `Link` component
-- Styling the links with Tailwind CSS and hover effects
-- Customising the footer with links, a site logo and a copyright message
-
-:::tip[Useful links]
-
-- [Remix `Link` component documentation](https://remix.run/docs/en/main/components/link)
-- [Remix `NavLink` component](https://remix.run/docs/en/main/components/nav-link)
-- [Logo Design](https://www.canva.com/learn/logo-design-principles/)
-- [Importing images in React](https://create-react-app.dev/docs/adding-images-fonts-and-files/)
-- [Tailwind CSS flexbox](https://tailwindcss.com/docs/flex)
-- [Tailwind CSS hover effects](https://tailwindcss.com/docs/hover-focus-and-other-states)
-
-:::
-
-::::
 
 ## What's next?
 

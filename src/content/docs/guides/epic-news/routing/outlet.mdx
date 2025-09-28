@@ -13,11 +13,11 @@ At the moment, we have only been working on one page in our app, but of course w
 
 So far, we've been using the `root.tsx` file to render what appears to be a single page. But looks can be deceiving: this little file is very powerful!
 
-As you'll see, the `root.tsx` file is actually the springboard from which we can render a shared _layout_ that all of our other pages depend on.
+As you'll see, the `root.tsx` file is actually the springboard from which we can render a _shared layout_ that all of our other pages depend on.
 
 In this step, we will:
 
-- Learn how to use the `Outlet` component to render child routes inside a parent route
+- Learn how to use the `Outlet` component to render 'child' routes inside a 'parent' route
 - Create a new route file in Remix
 - Understand how the file naming conventions in Remix map to the URL paths in the browser
 - Add new routes to our app and see how they are served from the correct URL paths
@@ -49,40 +49,48 @@ The easiest way to do this is to select the block of code you want to comment ou
 
 <Steps>
 
-1. Add the `Outlet` components as an extra import at the top of the `root.tsx` file:
+1. Add `Outlet` as an extra import at the top of the `root.tsx` file:
 
 		```diff lang="tsx" title="app/root.tsx" showLineNumbers ins="Outlet, " collapse={4-17}
-		import { type LinksFunction } from '@remix-run/node'
-		import { Outlet, useLoaderData } from '@remix-run/react'
+		import { Link, Outlet, useLoaderData } from 'react-router'
 		import { ParallaxProvider } from 'react-scroll-parallax'
-		import Document from '~/components/shared-layout/Document'
-		import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-		import { useNonce } from '~/utils/nonce-provider.ts'
-		import rootLinkElements from '~/utils/providers/rootLinkElements'
-		import { type loader } from './__root.server'
+		import { type Route } from './+types/root.ts'
+		import { type loader } from './__root.server.tsx'
+		import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 		import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 		import HeaderWithSearch from './components/organisms/HeaderWithSearch'
-		import useTheme from './hooks/useTheme.tsx'
+		import ParallaxBackground from './components/organisms/Hero/ParallaxBackground.tsx'
+		import Document from './components/shared-layout/Document.tsx'
+		import { Button } from './components/ui/button.tsx'
+		import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
+		import { useNonce } from './utils/nonce-provider.ts'
+		import rootLinkElements from './utils/providers/rootLinkElements.ts'
+		import heroImage from '~/assets/jpg/sample-hero.jpg'
+		import logo from '~/assets/svg/epic-news-sample-logo.svg'
 		```
 
 2. Comment out the all your code that is currently wrapped between the `div` with a `className` of `flex-1`. 
 
-		This the opening and closing `<main>` tag, along with all its children.
+		This will include the opening and closing `<main>` tag, along with all its children.
 
 		I've highlighted this code in white below - your actual code will likely look different here, as you have started to customise it.
 
-				```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-17, 55-61} {31-52}
-		import { type LinksFunction } from '@remix-run/node'
-		import { Outlet, useLoaderData } from '@remix-run/react'
+		```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-21} {35-56}
+		import { Link, Outlet, useLoaderData } from 'react-router'
 		import { ParallaxProvider } from 'react-scroll-parallax'
-		import Document from '~/components/shared-layout/Document'
-		import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-		import { useNonce } from '~/utils/nonce-provider.ts'
-		import rootLinkElements from '~/utils/providers/rootLinkElements'
-		import { type loader } from './__root.server'
+		import { type Route } from './+types/root.ts'
+		import { type loader } from './__root.server.tsx'
+		import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 		import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 		import HeaderWithSearch from './components/organisms/HeaderWithSearch'
-		import useTheme from './hooks/useTheme.tsx'
+		import ParallaxBackground from './components/organisms/Hero/ParallaxBackground.tsx'
+		import Document from './components/shared-layout/Document.tsx'
+		import { Button } from './components/ui/button.tsx'
+		import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
+		import { useNonce } from './utils/nonce-provider.ts'
+		import rootLinkElements from './utils/providers/rootLinkElements.ts'
+		import heroImage from '~/assets/jpg/sample-hero.jpg'
+		import logo from '~/assets/svg/epic-news-sample-logo.svg'
 
 		export const links: LinksFunction = () => {
 			return rootLinkElements
@@ -140,7 +148,7 @@ The easiest way to do this is to select the block of code you want to comment ou
 
 3. Add the `Outlet` component beneath the commented out code
 
-		```diff lang="tsx" title="app/root.tsx" ins="Outlet, " showLineNumbers collapse={1-17, 32-51, 56-62} {31-52}
+		```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-17, 32-51}
 		import { type LinksFunction } from '@remix-run/node'
 		import { Outlet, useLoaderData } from '@remix-run/react'
 		import { ParallaxProvider } from 'react-scroll-parallax'
@@ -193,6 +201,7 @@ The easiest way to do this is to select the block of code you want to comment ou
 										</div>
 									</ParallaxBackground>
 								</main> */}
+		+						
 		+						<Outlet />
 							</div>
 
@@ -220,12 +229,14 @@ The easiest way to do this is to select the block of code you want to comment ou
 
 Why can we still see the navbar and footer, but the central page content has changed? And where is this new code coming from?
 
-Well - the screenshot itself provides a big clue to this last question!
+Well - the screenshot itself provides a big clue to this last question! The code for the main page content is now coming from a completely different file to the one we have been working on!
 
-Open the file at `app/routes/_index.tsx` and you'll find the matching code:
+Specifically, we are now looking at content from the `app/routes/_index.tsx` file.
+
+Open this file at `app/routes/_index.tsx` and you'll find the matching code:
 
 ```tsx title="app/routes/_index.tsx"
-import { type MetaFunction } from "@remix-run/node";
+import { type MetaFunction } from 'react-router'
 
 export const meta: MetaFunction = () => [{ title: "Epic News" }];
 
@@ -243,13 +254,15 @@ export default function Index() {
 }
 ```
 
-So what exactly is happening here?? Why is the `Outlet` component rendering the `_index.tsx` file?
+So what exactly is happening here? Why is the `Outlet` component suddenly rendering `_index.tsx`?
+
+To understand this, we need to take a brief detour into the world of "routes".
 
 ::::note[Deep Dive]
 
 ### What is a "route"? 🔀
 
-In a web app, a "route" is a web address (URL) that shows a specific page or view in the app. Every route is served from a specific file in the code base.
+In a web app, a "route" is a web address (URL) that shows a page or view in the app. Every route is served from a specific file in the code base.
 
 For example, when we run a Remix application on our local machines, the **base URL** is
 
@@ -283,11 +296,11 @@ The file name - `about-us.tsx` - and the URL path - `/about-us` - must match in 
 
 ### Parent and child routes
 
-A "child" route is nested _within_ another route, which we call a "parent".
+As soon as we place the `Outlet` component inside a route file (like we just have in `root.tsx`), it converts the file into what we call a "parent" route.
 
-As soon as we place the `Outlet` component inside a route file (like we just have in `root.tsx`), it converts the file into a "parent" route.
+The "parent" calls another file, which becomes the "child" route, via the `Outlet` component.
 
-`Outlet` tells Remix where to render the matching child route(s) within the parent.
+`Outlet` tells Remix **where** to render the matching child route file within the parent's content.
 
 :::caution[Important!]
 
@@ -307,7 +320,7 @@ Hover your cursor over the two buttons below to see how the parent `root.tsx` re
 
 ## The route structure
 
-So, how does Remix know which route files to load as "children" of "parents"? 🤔
+So, how does Remix know which route file to load as "children" of its "parent"? 🤔
 
 The answer lies in Remix's **file names**.
 
@@ -351,15 +364,17 @@ Head back over to your browser and navigate to [http://localhost:3000/about-us](
 
 Notice how the navbar, footer and theme switcher are still present on the page?
 
+This is because they are still being rendered from `root.tsx`, but the main page content is now being rendered from `about-us.tsx`.
+
 Think of the `Outlet` component as a "window" or "placeholder" for the child route. It's a way of telling Remix where to render the child route's code **inside** the parent.
 
 ## Update navbar links
 
-Finally, let's update the navbar links to include the new 'About us' page.
+Let's update the navbar to include a link to the new 'About us' page.
 
 Open `app/components/organisms/HeaderWithSearch.tsx` and add the following code to the navbar section:
 
-```diff title="app/components/organisms/HeaderWithSearch.tsx" lang="tsx" ins=' className="flex flex-1 justify-center gap-8"'
+```diff title="app/components/organisms/HeaderWithSearch.tsx" lang="tsx"
 export default function HeaderWithSearch() {
 	const matches = useMatches()
 	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
@@ -375,7 +390,7 @@ export default function HeaderWithSearch() {
 					</div>
 				</Link>
 +
-				<div className="flex flex-1 justify-center gap-8">
++				<div className="flex flex-1 justify-center gap-8">
 					<Link
 						to="/news"
 						className="text-sm font-semibold text-muted-foreground transition hover:text-foreground"
@@ -388,8 +403,8 @@ export default function HeaderWithSearch() {
 +					>
 +						About us
 +					</Link>
-				</div>
-
++				</div>
++
 				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
 					{searchBar}
 				</div>
@@ -451,20 +466,6 @@ In this tutorial we have:
 - Discovered how to create a new route file in Remix
 - Understood how the file naming conventions in Remix map to the URL paths in the browser
 - Added new routes to our app and seen how they are served from the correct URL paths
-
-::::note[Assignment]
-
-## 📄 Assignment documentation
-
-We need to update your assignment to document the new features added in this section. 🚀
-
-1. Explain what the `Outlet` component is and how it is used in a Remix application.
-2. Describe how the file naming conventions in Remix map to the URL paths in the browser.
-3. Explain how to add new routes to a Remix application and how they are served from the correct URL paths.
-4. Explain why the `Link` component makes navigation between pages faster in a Remix application.
-5. What is the `prefetch` attribute and how does it speed up page loading times even more in a Remix application?
-
-::::
 
 ## What's next?
 

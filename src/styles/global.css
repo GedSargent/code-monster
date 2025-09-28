@@ -93,6 +93,16 @@ code {
 .sl-markdown-content ul li ul {
   margin-top: 0.5rem;
 }
+
+/* Remove disc list style for file tree components */
+.sl-markdown-content starlight-file-tree ul {
+  list-style: none;
+  margin-top: 0 !important;
+}
+.sl-markdown-content starlight-file-tree ul li details ul {
+  margin-top: 0 !important;
+}
+
 .sl-markdown-content ul li ul li {
   margin-top: 0;
   font-size: var(--custom-secondary-li-font-size);

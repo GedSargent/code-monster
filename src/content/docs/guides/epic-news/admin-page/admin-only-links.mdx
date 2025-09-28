@@ -76,7 +76,7 @@ Don't worry - we will fix this in the next step.
 
 ```diff lang="tsx" title="app/root.tsx" showLineNumbers startLineNumber=22 collapse={2-4, 14-23} ins=" isAdminUser={data.isAdminUser}"
 export default function App() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader | null>()
 	const theme = useTheme()
 	const nonce = useNonce()
 
@@ -84,7 +84,7 @@ export default function App() {
 		<ParallaxProvider>
 			<AuthenticityTokenProvider token={data.csrfToken}>
 				<HoneypotProvider {...data.honeyProps}>
-					<Document nonce={nonce} theme={theme}>
+					<Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
 						<div className="flex h-screen flex-col justify-between">
 							<HeaderWithSearch isAdminUser={data.isAdminUser} />
 
@@ -115,7 +115,7 @@ Add the following code to the `HeaderWithSearch` component:
 
 ```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers ins="{ isAdminUser }: HeaderWithSearchProps" ins="flex flex-1 items-center justify-center gap-8" collapse={38-50}
 import { Link, useMatches } from '@remix-run/react'
-import logo from '~/assets/png/epic-news-logo.png'
+import logo from '~/assets/svg/epic-news-sample-logo.svg'
 import { SearchBar } from '../molecules/SearchBar'
 import LoginOrUserDropdown from './LoginOrUserDropdown'
 

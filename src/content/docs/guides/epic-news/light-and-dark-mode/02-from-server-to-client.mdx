@@ -189,7 +189,7 @@ export { meta } from './__root.client.tsx'
 export { headers, loader } from './__root.server.tsx'
 
 export default function App() {
-	const data = useLoaderData<typeof loader>();
+	const data = useLoaderData<typeof loader | null>();
 	const nonce = useNonce();
 +	const theme = useTheme()
 
@@ -228,7 +228,7 @@ When you are ready, open the explanation below.
     #### 1. `useLoaderData` and the `data` object
 
     ```tsx title="app/root.tsx"
-    const data = useLoaderData<typeof loader>()
+    const data = useLoaderData<typeof loader | null>()
     ```
 
     The `useLoaderData` hook provides whatever value is returned from the `loader` function (which in this case we are importing from `app/__root.server.tsx`).

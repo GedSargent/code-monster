@@ -122,12 +122,12 @@ Let's add these now.
 
 ```diff lang="tsx" title="app/root.tsx" collapse={}
 export default function App() {
-  const data = useLoaderData<typeof loader>()
+  const data = useLoaderData<typeof loader | null>()
   const nonce = useNonce()
   const theme = useTheme()
 
   return (
-    <Document nonce={nonce} theme={theme}>
+    <Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
       <div className="flex h-screen flex-col justify-between">
         <HeaderWithSearch />
 
@@ -481,7 +481,7 @@ There are a few changes we need to get the hero full width:
 
 ```diff lang="tsx" title="app/root.tsx" del="grid " del=" place-items-center" showLineNumbers collapse={2-4, 30-33}
 export default function App() {
-  const data = useLoaderData<typeof loader>()
+  const data = useLoaderData<typeof loader | null>()
   const nonce = useNonce()
   const theme = useTheme()
 

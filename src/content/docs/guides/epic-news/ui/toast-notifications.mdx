@@ -57,14 +57,14 @@ Next, add the following code to the bottom of the `app/root.tsx` file:
 
 ```diff lang="tsx" title="app/root.tsx"
 export default function App() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader | null>()
 	const nonce = useNonce()
 	const theme = useTheme()
 
 +	useToast(data.toast)
 
 	return (
-		<Document nonce={nonce} theme={theme}>
+		<Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
       <div className="flex h-screen flex-col justify-between">
         <HeaderWithSearch />
 

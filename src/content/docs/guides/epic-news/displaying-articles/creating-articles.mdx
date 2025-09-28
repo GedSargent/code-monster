@@ -33,7 +33,7 @@ Once on your user's profile page, let's quickly add a button link to the 'Articl
 
 		```diff lang="tsx" title="app/routes/users+/$username.tsx" collapse={2-42, 61-73}
 		export default function ProfileRoute() {
-			const data = useLoaderData<typeof loader>()
+			const data = useLoaderData<typeof loader | null>()
 			const user = data.user
 			const userDisplayName = user.name ?? user.username
 			const loggedInUser = useOptionalUser()
@@ -226,7 +226,7 @@ With this in place, we can now display the `category` name in the browser.
 
 		```diff lang="tsx" title="app/routes/users+/$username_+/articles.$articleId.tsx"
 		export default function ArticleRoute() {
-			const data = useLoaderData<typeof loader>()
+			const data = useLoaderData<typeof loader | null>()
 			const user = useOptionalUser()
 			const isOwner = user?.id === data.article.ownerId
 			const canDelete = userHasPermission(
@@ -271,7 +271,7 @@ If you want to give the form more room in your browser, you can adjust its minim
 
 ```diff lang="tsx" title="app/routes/users+/$username_+/articles.tsx" ins="750px"
 export default function ArticlesRoute() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader | null>()
 	const user = useOptionalUser()
 	const isOwner = user?.id === data.owner.id
 	const ownerDisplayName = data.owner.name ?? data.owner.username
@@ -347,7 +347,7 @@ To edit the article, we need to find a different route file.
 		}
 
 		export default function ArticleEdit() {
-			const data = useLoaderData<typeof loader>()
+			const data = useLoaderData<typeof loader | null>()
 
 			return <ArticleEditor categories={data.categories} article={data.article} />
 		}
@@ -420,7 +420,7 @@ return json({ article: article, categories })
 
 ```diff lang=tsx mark=" categories={data.categories}"
 export default function ArticleEdit() {
-  const data = useLoaderData<typeof loader>()
+  const data = useLoaderData<typeof loader | null>()
 
   return <ArticleEditor categories={data.categories} article={data.article} />
 }
@@ -459,7 +459,7 @@ We will also now need to load `categories` when creating a new article.
 
 		-export default ArticleEditor
 		+export default function ArticleNew() {
-		+	const data = useLoaderData<typeof loader>()
+		+	const data = useLoaderData<typeof loader | null>()
 		+
 		+	return <ArticleEditor categories={data.categories} />
 		+}

@@ -66,22 +66,20 @@ The `react-scroll-parallax` package requires that our ENTIRE application is wrap
 
 2. Next, `import` the `ParallaxProvider` at the top of your `app/root.tsx` file:
 
-```diff lang="tsx" title="app/root.tsx" collapse={1-12}
-import { type LinksFunction } from '@remix-run/node'
-import { Link, useLoaderData } from '@remix-run/react'
-import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
-import { HoneypotProvider } from 'remix-utils/honeypot/react'
-import Document from '~/components/shared-layout/Document'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { loader } from './__root.server.tsx'
+```diff lang="tsx" title="app/root.tsx" collapse={1-9}
+import { Link, useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 import HeaderWithSearch from './components/organisms/HeaderWithSearch'
 import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
-import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
-import useTheme from './hooks/useTheme.tsx'
+import Document from './components/shared-layout/Document.tsx'
+import { Button } from './components/ui/button.tsx'
+import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 import heroImage from '~/assets/jpg/sample-hero.jpg'
-import { Button } from './components/atoms/Button.tsx'
 +import { ParallaxProvider } from 'react-scroll-parallax'
 ```
 
@@ -89,13 +87,13 @@ import { Button } from './components/atoms/Button.tsx'
 
 ```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={12-45}
 export default function App() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader | null>()
 	const theme = useTheme()
 	const nonce = useNonce()
 
 	return (
 +		<ParallaxProvider>
-			<Document nonce={nonce} theme={theme}>
+			<Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
 				<div className="flex h-screen flex-col justify-between">
 					<HeaderWithSearch />
 
@@ -165,7 +163,7 @@ For now, you should place the component **immediately below** the `HeroCallToAct
 
 #### TIPS
 
-- Open the `ParallaxBackground` component file first. Look carefully at its `interface` to see what props it accepts
+1. Open the `ParallaxBackground` component file first. Look carefully at its `interface` to see what props it accepts
 
 		```tsx title="app/components/organisms/Hero/ParallaxBackground.tsx" showLineNumbers collapse={12-66} {3-10}
 		import { Parallax, useParallaxController } from 'react-scroll-parallax'
@@ -253,106 +251,100 @@ First, import the `ParallaxBackground` component and the site logo at the top of
 
 Use the site logo you designed [**previously**](/code-monster/guides/epic-news/ui/logo-design), and, for now, the same test `heroImage` as the `HeroCallToAction` component:
 
-```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-14}
-import { type LinksFunction } from '@remix-run/node'
-import { Link, useLoaderData } from '@remix-run/react'
-import { ParallaxProvider } from 'react-scroll-parallax'
-import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
-import { HoneypotProvider } from 'remix-utils/honeypot/react'
-import heroImage from '~/assets/jpg/sample-hero.jpg'
-import logo from '~/assets/png/epic-news-logo.png'
-import Document from '~/components/shared-layout/Document'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { loader } from './__root.server.tsx'
-import { Button } from './components/atoms/Button.tsx'
+```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={1-10}
+import { Link, useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 import HeaderWithSearch from './components/organisms/HeaderWithSearch'
 import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
-import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
-import useTheme from './hooks/useTheme.tsx'
+import Document from './components/shared-layout/Document.tsx'
+import { Button } from './components/ui/button.tsx'
+import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
+import heroImage from '~/assets/jpg/sample-hero.jpg'
 import { ParallaxProvider } from 'react-scroll-parallax'
 +import ParallaxBackground from './components/organisms/Hero/ParallaxBackground.tsx'
-+import logo from '~/assets/png/epic-news-logo.png'
++import logo from '~/assets/svg/epic-news-sample-logo.svg'
 ```
 
 #### 2. ⚙️ Place component
 
 Carefully place the `ParallaxBackground` component below the `HeroCallToAction` component, looking to see where it should go in relation to the other lines of code:
 
-```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={2-4, 11-14, 17-31, 54-63}
+```diff lang="tsx" title="app/root.tsx" showLineNumbers collapse={2-4, 15-29, 54-63}
 export default function App() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader | null>()
 	const theme = useTheme()
 	const nonce = useNonce()
 
 	return (
 		<ParallaxProvider>
-			<AuthenticityTokenProvider token={data.csrfToken}>
-				<HoneypotProvider {...data.honeyProps}>
-					<Document nonce={nonce} theme={theme}>
-						<div className="flex h-screen flex-col justify-between">
-							<HeaderWithSearch />
+			<Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
+				<div className="flex h-screen flex-col justify-between">
+					<HeaderWithSearch />
 
-							<div className="flex-1">
-								<main className="grid h-full">
-									<HeroCallToAction
-										image={heroImage}
-										imageRight={true}
-										hasBackgroundColour={true}
-									>
-										<div className="flex h-full flex-1 flex-col justify-between p-16">
-											<div className="flex flex-col gap-8">
-												<h2 className="text-h2">Welcome to Epic News</h2>
-												<p className="text-lg">
-													Keep up to date with the latest tech news.
-												</p>
-											</div>
-											<Button asChild variant="default" size="lg">
-												<Link to="/signup">Sign up</Link>
-											</Button>
-										</div>
-									</HeroCallToAction>
+					<div className="flex-1">
+						<main className="grid h-full">
+							<HeroCallToAction
+								image={heroImage}
+								imageRight={true}
+								hasBackgroundColour={true}
+							>
+								<div className="flex h-full flex-1 flex-col justify-between p-16">
+									<div className="flex flex-col gap-8">
+										<h2 className="text-h2">Welcome to Epic News</h2>
+										<p className="text-lg">
+											Keep up to date with the latest tech news.
+										</p>
+									</div>
+									<Button asChild variant="default" size="lg">
+										<Link to="/signup">Sign up</Link>
+									</Button>
+								</div>
+							</HeroCallToAction>
 
-+									<ParallaxBackground
-+										image={heroImage}
-+										title="Epic News"
-+										logo={logo}
-+										altText="Welcome to Epic News, where the latest developments in tech are found."
-+									>
-+										<div className="mx-auto flex w-fit flex-1 flex-col justify-between gap-16 bg-secondary/40 px-28 py-16 backdrop-blur-sm">
-+											<p className="text-center text-4xl font-extrabold text-secondary-foreground">
-+												The latest tech news in one place
-+											</p>
-+											<div className="flex justify-center gap-8">
-+												<Button variant="default" size="wide">
-+													<Link to="/signup">Sign up</Link>
-+												</Button>
-+												<Button variant="secondary" size="wide">
-+													<Link to="/login">Login</Link>
-+												</Button>
-+											</div>
-+										</div>
-+									</ParallaxBackground>
-								</main>
-							</div>
++							<ParallaxBackground
++								image={heroImage}
++								title="Epic News"
++								logo={logo}
++								altText="Welcome to Epic News, where the latest developments in tech are found."
++							>
++								<div className="mx-auto flex w-fit flex-1 flex-col justify-between gap-16 bg-secondary/40 px-28 py-16 backdrop-blur-sm">
++									<p className="text-center text-4xl font-extrabold text-secondary-foreground">
++										The latest tech news in one place
++									</p>
++									<div className="flex justify-center gap-8">
++										<Button variant="default" size="wide">
++											<Link to="/signup">Sign up</Link>
++										</Button>
++										<Button variant="secondary" size="wide">
++											<Link to="/login">Login</Link>
++										</Button>
++									</div>
++								</div>
++							</ParallaxBackground>
+						</main>
+					</div>
 
-							<div className="container flex justify-between pb-5">
-								<ThemeSwitch
-									userPreference={data?.requestInfo.userPrefs.theme}
-								/>
-							</div>
-							<FooterMenuRight />
-						</div>
-					</Document>
-				</HoneypotProvider>
-			</AuthenticityTokenProvider>
+					<div className="container flex justify-between pb-5">
+						<ThemeSwitch
+							userPreference={data?.requestInfo.userPrefs.theme}
+						/>
+					</div>
+					<FooterMenuRight />
+				</div>
+			</Document>
 		</ParallaxProvider>
 	)
 }
 ```
 
-With this in place, you should see the `ParallaxBackground` component displayed on the homepage, and a parallax effect applied as you scroll up and down:
+Start your server with `npm run dev` (if you need to) and view your site in the browser.
+
+You should see the `ParallaxBackground` component displayed on the homepage, and a parallax effect applied as you scroll up and down:
 
 ![ParallaxBackground solution 01](src/assets/gif/parallax-background-solution-01.gif)
 
@@ -368,7 +360,7 @@ Decide on your favourite, and delete the other from `app/root.tsx`. Remember you
 
 ## Experimentation
 
-There are lots of other custom components in the `app/components` directory that you can explore and use in your site.
+There are lots of other custom components that I can share with you in OneNote.
 
 Documentation for each can be found in the `README_COMPONENTS.md` at the root of your project.
 
@@ -390,14 +382,10 @@ In this step, we have:
 
 ## 📄 Assignment documentation
 
-You will need to document all the changes that you have made to the site so far in this '🧩 Custom Components' section.
-
-You should include:
-
 - What are custom components in React, and why are they useful?
-- The built-in custom components that you have used on your homepage, and any modifications that you have made
-- Any other customisations that you have made to the site's homepage
-- Any custom components that you have built yourself
+- What built-in custom components have you used on your homepage? What modifications have you made and why?
+- What other customisations have you made to the site's homepage?
+- Have you built any custom components yourself?
 
 :::tip[Useful links]
 

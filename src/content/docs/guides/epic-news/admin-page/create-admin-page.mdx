@@ -420,7 +420,7 @@ For the time being, we will make this page available to everyone. We can grant a
 		export { action, loader } from './__admin-review.$articleId.server'
 
 		export default function AdminReviewRoute() {
-			const data = useLoaderData<typeof loader>()
+			const data = useLoaderData<typeof loader | null>()
 
 			return (
 				<div className="absolute inset-0 flex flex-col px-10">

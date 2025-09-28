@@ -91,13 +91,13 @@ The easiest way to do this is to select the block of code you want to comment ou
 		export { action, loader } from './__root.server.tsx'
 
 		export default function App() {
-			const data = useLoaderData<typeof loader>()
+			const data = useLoaderData<typeof loader | null>()
 			const nonce = useNonce()
 			const theme = useTheme()
 
 			return (
 				<ParallaxProvider>
-					<Document nonce={nonce} theme={theme}>
+					<Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
 						<div className="flex h-screen flex-col justify-between">
 							<HeaderWithSearch />
 
@@ -160,13 +160,13 @@ The easiest way to do this is to select the block of code you want to comment ou
 		export { action, loader } from './__root.server.tsx'
 
 		export default function App() {
-			const data = useLoaderData<typeof loader>()
+			const data = useLoaderData<typeof loader | null>()
 			const nonce = useNonce()
 			const theme = useTheme()
 
 			return (
 				<ParallaxProvider>
-					<Document nonce={nonce} theme={theme}>
+					<Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
 						<div className="flex h-screen flex-col justify-between">
 							<HeaderWithSearch />
 

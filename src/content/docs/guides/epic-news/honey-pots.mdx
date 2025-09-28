@@ -59,14 +59,14 @@ Once in place, we can wrap our `Document` and all its children with the `Honeypo
 
 ```diff lang="tsx" title="app/root.tsx"
 export default function App() {
-	const data = useLoaderData<typeof loader>()
+	const data = useLoaderData<typeof loader | null>()
 	const theme = useTheme()
 	const nonce = useNonce()
 
 	return (
 		<AuthenticityTokenProvider token={data.csrfToken}>
 +			<HoneypotProvider {...data.honeyProps}>
-				<Document nonce={nonce} theme={theme}>
+				<Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
 					<div className="flex h-screen flex-col justify-between">
 						<HeaderWithSearch />
 

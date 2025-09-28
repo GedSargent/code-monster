@@ -7,11 +7,7 @@ import MonsterReveal from "src/components/MonsterReveal.astro"
 
 ## Introduction
 
-In this guide, we will learn how to use and build custom components for your Epic News site.
-
-The starter project that you have downloaded comes with several custom components that you can use to build your site.
-
-We will start with these as a foundation, and then you can build your own custom components as you need them.
+In this guide, we will learn how to use and build custom components for your site.
 
 ## Pre-built Custom Components
 
@@ -45,16 +41,17 @@ The `HeroCallToAction` component offers a quick way to display a hero section th
 
 2. Add the following to the end of your `import` list:
 
-```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" collapse={1-6}
-import { type LinksFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import Document from '~/components/shared-layout/Document'
-import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { loader } from './__root.server'
-import useTheme from './hooks/useTheme.tsx'
+```diff lang="tsx" title="app/root.tsx" collapse={1-6}
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import Document from './components/shared-layout/Document.tsx'
+import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 +import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
 ```
 
@@ -62,50 +59,55 @@ import HeaderWithSearch from './components/organisms/HeaderWithSearch'
 
 		Don't worry about the red underline that appears under the `HeaderWithSearch` component for now - we will fix this in a moment:
 
-```diff lang="tsx" title="app/root.tsx" collapse={1-16}
-import { type LinksFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import Document from '~/components/shared-layout/Document'
-import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { loader } from './__root.server'
-import useTheme from './hooks/useTheme.tsx'
+```diff lang="tsx" title="app/root.tsx" collapse={1-17}
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
+import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import Document from './components/shared-layout/Document.tsx'
+import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
 
-export const links: LinksFunction = () => {
-  return rootLinkElements
+export const links: Route.LinksFunction = () => {
+	return rootLinkElements
 }
-export { headers, meta } from './__root.client.tsx'
-export { action, loader } from './__root.server.tsx'
+export { meta } from './__root.client.tsx'
+export { headers, loader } from './__root.server.tsx'
 
 export default function App() {
-  const data = useLoaderData<typeof loader>()
-  const nonce = useNonce()
-  const theme = useTheme()
+	const data = useLoaderData<typeof loader | null>()
+	const nonce = useNonce()
+	const theme = useTheme()
 
-  return (
-    <Document nonce={nonce} theme={theme}>
-      <div className="flex h-screen flex-col justify-between">
-        <HeaderWithSearch />
+	return (
+		<Document theme={theme} nonce={nonce} honeyProps={data?.honeyProps}>
+			<div className="flex h-screen flex-col justify-between">
+				<HeaderWithSearch />
 
-        <div className="flex-1">
-          <main className="grid h-full place-items-center">
-            <h1 className="text-mega">Welcome to Epic News!</h1>
+				<div className="flex-1">
+					<main className="grid h-full place-items-center">
+						<h1 className="text-mega">Welcome to Epic News!</h1>
 +						<div className="w-full py-16">
 +							<HeroCallToAction />
 +						</div>
-          </main>
-        </div>
+					</main>
+				</div>
 
-        <div className="container flex justify-between pb-5">
-          <ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
-        </div>
-      </div>
-    </Document>
-  )
+				<div className="container flex justify-between pb-5">
+					<ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
+				</div>
+
+				<FooterMenuRight />
+			</div>
+		</Document>
+	)
 }
+
+export const ErrorBoundary = GeneralErrorBoundary
 ```
 
 4. You will notice that the `HeroCallToAction` component is underlined in red. Let's find out why by hovering our mouse over it:
@@ -165,19 +167,47 @@ You should now see the `HeroCallToAction` component displayed correctly on your 
 
 1. Open the component file at `app/components/organisms/Hero/HeroCallToAction.tsx` (if you haven't already).
 
-2. If you look inside the `HeroCallToAction` component code, you will see that it has an [**`interface`**](https://prismic.io/blog/typescript-interfaces) defined at the top of the file.
+2. If you look inside the `HeroCallToAction` component code, you will see that it has something called an [**`interface`**](https://prismic.io/blog/typescript-interfaces) defined at the very top of the file.
 
 		This interface describes the props that the component expects to receive.
 
 		Let's take a look:
 
-		```tsx title="app/components/organisms/Hero/HeroCallToAction.tsx"
+		```tsx title="app/components/organisms/Hero/HeroCallToAction.tsx" showLineNumbers {1-6} collapse={9-35}
 		interface HeroCallToActionProps {
 			image: string
 			imageRight?: boolean
 			hasBackgroundColour?: boolean
 			children: React.ReactNode
 		}
+
+		const HeroCallToAction = ({
+			children,
+			image,
+			imageRight = false,
+			hasBackgroundColour = false,
+		}: HeroCallToActionProps) => {
+			return (
+				<div
+					className={`md:mx-auto md:flex md:max-w-6xl ${
+						imageRight && 'md:flex-row-reverse'
+					}`}
+				>
+					<div className="relative flex h-96 items-center justify-center overflow-hidden md:h-[32rem] md:w-1/2">
+						<img
+							src={image}
+							alt="A hero with a call to action."
+							className="absolute min-h-full min-w-full object-cover object-center"
+						/>
+					</div>
+					<div className="relative flex h-96 items-center justify-center md:h-[32rem] md:w-1/2">
+						{children}
+					</div>
+				</div>
+			)
+		}
+
+		export default HeroCallToAction
 		```
 
 		This tells us that the component has two [**optional props**](https://www.sonarsource.com/blog/common-typescript-issues-no-5-optional-property-declarations/) as well as the mandatory ones we've been using already.
@@ -221,9 +251,9 @@ With this change saved, check your browser again:
 
 ![Hero Call To Action Image Right](src/assets/webp/epic-news/hero-call-to-action-image-right.webp)
 
-Exploring the custom components in the Epic News starter project will help you understand how they work and how you can build your own.
+Notice how the picture has shifted from the left to the right?
 
-Looking at the `interface` expected by a component will help you understand what props you need to pass to it.
+Looking at the `interface` expected by a component will help you understand what props you need to pass into it.
 
 ::::tip[Challenge]
 
@@ -234,15 +264,15 @@ Looking at the `interface` expected by a component will help you understand what
 3. You will notice that the `HeroCallToAction` component has a `hasBackgroundColour` prop, but this is not used anywhere inside the component.
 
 		- Fix the component so that if `hasBackgroundColour` is set to true, it should have the background colour class of `bg-secondary`. If it is false, is should be `bg-transparent`
-		- TIP: Look at how similar logic has been implemented from lines 15-19 with the `imageRight` prop.
+		- TIP: Look at how similar logic has been implemented with the `imageRight` prop.
 
 4. Currently, the `HeroCallToAction` component has a lot of space around it from the title and horizontal margins.
 
 	![Hero Call To Action With Space](src/assets/webp/epic-news/hero-call-to-action-with-space.webp)
 
 		Can you modify the `root.tsx` file to:
-			- Remove the `<h1>` title at the top of the page, and have it as part of the `HeroCallToAction` component instead?
 			- remove this space and make the component full width?
+			- move the `<h1>` title at the top of the page so that it becomes part of the `HeroCallToAction` component instead?
 
 :::note[Tip]
 
@@ -266,20 +296,18 @@ Firstly, let's `import` an image from our `app/assets/jpg` folder.
 
 Add the following to the end of your `import` list at top of `app/root.tsx`:
 
-```diff lang="tsx" title="app/root.tsx" collapse={1-11}
-import { type LinksFunction } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
-import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
-import { HoneypotProvider } from 'remix-utils/honeypot/react'
-import Document from '~/components/shared-layout/Document'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { loader } from './__root.server.tsx'
+```diff lang="tsx" title="app/root.tsx" collapse={1-8}
+import { useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import Document from './components/shared-layout/Document.tsx'
+import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
-import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
-import useTheme from './hooks/useTheme.tsx'
 +import heroImage from '~/assets/jpg/sample-hero.jpg'
 ```
 
@@ -338,22 +366,22 @@ Here is an example of how you can customise the `children`:
 </HeroCallToAction>
 ```
 
-Note that, to get the `Button` and `Link` components to render correctly, you will need to import the at the top of the file:
+Note that, to get the `Button` and `Link` components to render correctly, you will need to import them at the top of the file:
 
-```diff lang="tsx" title="app/root.tsx" ins="Link, " collapse={4-7, 11-13} showLineNumbers
-import { type LinksFunction } from '@remix-run/node'
-import { Link, useLoaderData } from '@remix-run/react'
-import heroImage from '~/assets/jpg/sample-hero.jpg'
-import Document from '~/components/shared-layout/Document'
-import ThemeSwitch from '~/components/shared-layout/ThemeSwitch'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import { type loader } from './__root.server'
-+import { Button } from './components/atoms/Button.tsx'
+```diff lang="tsx" title="app/root.tsx" ins="Link, " collapse={4-10} showLineNumbers
+import { Link, useLoaderData } from 'react-router'
+import { type Route } from './+types/root.ts'
+import { type loader } from './__root.server.tsx'
+import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
 import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+import Document from './components/shared-layout/Document.tsx'
+import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
+import { useNonce } from './utils/nonce-provider.ts'
+import rootLinkElements from './utils/providers/rootLinkElements.ts'
 import HeroCallToAction from './components/organisms/Hero/HeroCallToAction.tsx'
-import useTheme from './hooks/useTheme.tsx'
+import heroImage from '~/assets/jpg/sample-hero.jpg'
++import { Button } from './components/ui/button.tsx'
 ```
 
 </MonsterReveal>
@@ -396,9 +424,11 @@ const HeroCallToAction = ({
 }
 ```
 
-You'll notice that the `className` of this `div` tag is using a ternary operator to conditionally apply the `'md:flex-row-reverse'` class if `imageRight` is `true`.
+You'll notice that the `className` of this `div` tag is using a [ternary operator](https://scrimba.com/advanced-javascript-c03kpi3kss/~0xse) to conditionally apply the `'md:flex-row-reverse'` class if `imageRight` is `true`.
 
-We can apply the same logic to the `hasBackgroundColour` prop by adding another ternary operator to the `className` of the `div` tag wrapping the `children` prop:
+We can apply the same logic to the `hasBackgroundColour` prop by adding another ternary operator to the `className` of the `div` tag wrapping the `children` prop.
+
+Look carefully where the red highlighted code is located in your file, then replace it with the green highlighted code below:
 
 ```diff lang="tsx" title="app/components/organisms/Hero/HeroCallToAction.tsx" collapse={} showLineNumbers
 const HeroCallToAction = ({
@@ -423,11 +453,13 @@ const HeroCallToAction = ({
 -			<div
 -				className="relative flex h-96 items-center justify-center md:h-[32rem] md:w-1/2"
 -			>
+-				{children}
+-			</div>
 +			<div
 +				className={`relative flex h-96 items-center justify-center ${hasBackgroundColour ? `bg-secondary` : `bg-transparent`} md:h-[32rem] md:w-1/2`}
 +			>
-				{children}
-			</div>
++				{children}
++			</div>
 		</div>
 	)
 }
@@ -443,7 +475,9 @@ With this change in place, a background colour will now be shown if we pass `has
 
 There are a few changes we need to get the hero full width:
 
-1. Remove the `<h1>` title from the `App` component, and the parent `div` wrapping the `HeroCallToAction` component:
+1. Head back to `app/root.tsx`.
+
+2. Remove the `<h1>` title from the `App` component, and the parent `div` wrapping the `HeroCallToAction` component:
 
 ```diff lang="tsx" title="app/root.tsx" del="grid " del=" place-items-center" showLineNumbers collapse={2-4, 30-33}
 export default function App() {
@@ -452,13 +486,13 @@ export default function App() {
   const theme = useTheme()
 
   return (
-    <Document nonce={nonce} theme={theme}>
+    <Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
       <div className="flex h-screen flex-col justify-between">
         <HeaderWithSearch />
 
         <div className="flex-1">
           <main className="grid h-full place-items-center">
--            <h1 className="text-mega">Welcome to Epic News!</h1>
+-           <h1 className="text-mega">Welcome to Epic News!</h1>
 
 -						<div className="w-full py-16">
 							<HeroCallToAction

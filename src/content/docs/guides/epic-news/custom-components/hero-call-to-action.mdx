@@ -568,6 +568,26 @@ With these changes in place, you should now have a full-width hero section on yo
 
 ::::
 
+## Housekeeping
+
+You'll notice that, as we've been adding more `import`s to the top of `app/root.tsx`, a few of these have been underlined with yellow squiggly lines.
+
+This is because ESLint wants us to organise our `import`s in a certain way.
+
+![Organise imports](src/assets/webp/epic-news/custom-components/imports-need-organising.webp)
+
+To fix this, hover your mouse over an underlined `import` and, after a moment, select `Quick Fix > Fix all auto-fixable problems` from the options that appear:
+
+![Fix all auto-fixable problems](src/assets/webp/epic-news/custom-components/fix-all-imports.webp)
+
+VS Code will automatically organise your `import`s for you, and the yellow underlines will disappear.
+
+:::tip
+
+Remember to do this every time an `import` is underlined with a yellow squiggly line. It's a good habit to get into!
+
+:::
+
 ## Summary
 
 In this step, we have:

@@ -46,7 +46,7 @@ If you ever see an error message like this on an `import`, it means you need to 
 
 1. Stop your server (if it is running) by clicking into the terminal panel and typing <MonsterKbd>CTRL + C</MonsterKbd> (or <MonsterKbd>CMD + C</MonsterKbd> on Mac)
 
-2. Next type the following command in your terminal and hit enter:
+2. Next type or copy the following command in your terminal and hit enter:
 
 ```bash
 npm install react-scroll-parallax
@@ -60,9 +60,7 @@ With the package installed successfully, we can begin to use the `ParallaxBackgr
 
 ## Wrapper component
 
-The `react-scroll-parallax` package requires that our application is wrapped in a `ParallaxProvider` component. This allows the package to track the parallax effect across multiple areas of the app.
-
-To do this, we need to wrap the entire application in a `ParallaxProvider` component in the `app/root.tsx` file.
+The `react-scroll-parallax` package requires that our ENTIRE application is wrapped in a `ParallaxProvider` component. This allows the package to track the parallax effect across multiple areas of the app.
 
 1. Firstly, open `app/root.tsx`.
 

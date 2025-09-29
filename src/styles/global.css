@@ -135,7 +135,11 @@ code {
 }
 
 .starlight-aside__content ul {
-  margin-top: 1rem !important;
+  margin-top: 0.5rem !important;
+}
+
+.starlight-aside__content ul li p {
+  display: inline-block;
 }
 
 #code-playground-wrapper * {

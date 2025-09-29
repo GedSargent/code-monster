@@ -68,7 +68,7 @@ Save the file and head back to your browser. Refresh the page and you should see
 
 ![News page](src/assets/png/news-page.png)
 
-The `root.tsx` file is still rendering the code for the header and footer, but now the `Outlet` component we placed [**earlier**](/code-monster/guides/epic-news/routing/outlet#the-outlet-component) is now rendering the `NewsPage` component as its child route.
+The `root.tsx` file is still rendering the code for the header and footer, but now the `Outlet` component we placed [**earlier**](/code-monster/guides/epic-news/routing/outlet#the-outlet-component) is rendering the `NewsPage` component as its **child** route.
 
 <NestedRouting childFilename="news.tsx" childUrl="/news"/>
 
@@ -88,8 +88,8 @@ There are some golden rules to follow when creating route files in Remix:
 	- `routes/news.tsx` maps to `/news`.
 	- `routes/about-us.tsx` maps to the `/about-us` URL.
 	- Spelling, case and special characters are important.
-
-		If we named the file `AboutUs.tsx`, then the URL would be `/AboutUs`, which is not what we want in a web app.
+      
+			If we named the file `AboutUs.tsx`, then the URL would be `/AboutUs`, which is not what we want for the URL in a web app.
 
 ![Remix route conventions](src/assets/png/about-us-file-to-route.png)
 
@@ -125,10 +125,10 @@ In Remix, this is achieved through a combination of ***nested*** and ***dynamic*
 
 		To see a **child** route rendered in the browser at `/news`, we also need to add an `Outlet` component to this file, just like we did earlier in the `root.tsx` file.
 
-		 Add the code below to `app/routes/news.tsx`:
+		Add the code below to `app/routes/news.tsx`:
 
 		```diff lang="tsx" title="app/routes/news.tsx"
-		+import { Outlet } from '@remix-run/react'
+		+import { Outlet } from 'react-router'
 
 		export default function NewsPage() {
 			return (
@@ -155,6 +155,12 @@ In Remix, this is achieved through a combination of ***nested*** and ***dynamic*
 		
 		You will see the same generic news category page rendered for each category. We will explain why later.
 
+		:::note
+
+		Just like we did in `root.tsx`, by adding an `Outlet` component to the `news.tsx` file, we have converted it into a parent route that can render child routes.
+
+		:::
+
 </Steps>
 
 ## Adding navigation links
@@ -168,7 +174,7 @@ Let's add a sub-navigation menu to the parent news page.
 		Add the code shown below:
 
 		```diff lang="tsx" title="app/routes/news.tsx" ins="NavLink, "
-		import { NavLink, Outlet } from '@remix-run/react'
+		import { NavLink, Outlet } from 'react-router'
 
 		export default function NewsPage() {
 			return (
@@ -199,9 +205,9 @@ Let's add a sub-navigation menu to the parent news page.
 
 :::note[The NavLink component]
 
-The `NavLink` component is a special Remix `<Link>` that knows whether it is **"active"** or not via a special `isActive` boolean that Remix supplies for us.
+The `NavLink` component is a special Remix `<Link>` that knows whether it is **"active"** or not. It does this via a special `isActive` boolean that Remix supplies for us.
 
-If the user is on the page that the `NavLink` links to then `isActive` turns `true` and we can apply a different style to the link text via a callback function.
+If the user is on the page that the `NavLink` links to, then `isActive` turns `true` and we can apply a different style to the link text via a callback function.
 
 In the example here, we are applying a lighter blue color to the text and an underline to the link when it is active:
 
@@ -369,7 +375,7 @@ export default function NewsPageIndex() {
 }
 ```
 
-With this code in place, restart your server.
+With this code in place, refresh your page.
 
 When the user visits `http://localhost:3000/news`, they will see the welcome message displayed on the page, and this will then be replaced by the different category pages when they click on a link:
 

@@ -25,10 +25,9 @@ We will do this in the next step.
 
 :::
 
-```diff lang=tsx title="app/routes/news.$category.tsx" showLineNumbers collapse={1-13}
+```diff lang=tsx title="app/routes/news.$category.tsx" showLineNumbers collapse={1-12}
 import { invariant } from '@epic-web/invariant'
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, data, useLoaderData } from 'react-router'
 import { toTitleCase } from '~/utils/stringUtils.ts'
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -37,7 +36,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 	invariant(typeof category === 'string', 'Category not found')
 	const categoryTitle = toTitleCase(category)
 
-	return json({ categoryTitle })
+	return data({ categoryTitle })
 }
 
 +const WireframeBlock = () => {

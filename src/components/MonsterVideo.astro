@@ -1,5 +1,14 @@
 ---
-const { src } = Astro.props;
+const { src, title = 'YouTube Video Player' } = Astro.props;
 ---
 
-<iframe height="520" src={src} title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<div class="relative aspect-video w-full shadow-2xl">
+  <iframe
+    class="absolute top-0 left-0 w-full h-full"
+    src={src}
+    title={title}
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen>
+  </iframe>
+</div>

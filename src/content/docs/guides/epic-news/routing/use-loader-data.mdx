@@ -3,6 +3,8 @@ title: "Server/client communication with useLoaderData"
 description: "Learn how to access server data in the browser with useLoaderData."
 ---
 
+import { Steps } from '@astrojs/starlight/components';
+
 ## Introduction
 
 In the [**previous step**](/code-monster/guides/epic-news/routing/dynamic-routes), we learned about route parameters and how to use them to create dynamic routes in Remix. We then accessed this data on the server using the `loader` function.
@@ -15,57 +17,61 @@ In this next step we will:
 
 ## Passing data to the page
 
-Success! With our [**previous step**](/code-monster/guides/epic-news/routing/dynamic-routes) complete, we are now reading the `category` value from the URL 🎉. We can use this value to fetch the correct data for our page.
+With our [**previous step**](/code-monster/guides/epic-news/routing/dynamic-routes) complete, we are now reading the `category` value from the URL 🎉. We can use this value to fetch the correct data for our page.
 
-Let's update the `loader` function so it returns this value in title-case as part of the `json` response.
+<Steps>
+1. Open `app/routes/news.$category.tsx`.
+2. Update the `loader` function so it returns the `category` value in title-case as part of the `data` response.
+
+		:::danger[Extra care]
+
+		***Remember***:
+
+		- take extra care to delete lines that are highlighted in red
+		- add the new lines in green exactly where shown
+
+		:::
+
+		```diff lang="tsx" ins=", useLoaderData" title="app/routes/news.$category.tsx"
+		import { type LoaderFunctionArgs, data, useLoaderData } from 'react-router'
+		+import { toTitleCase } from '~/utils/stringUtils.ts'
+
+		export async function loader({ params }: LoaderFunctionArgs) {
+			const { category } = params
+
+		-	console.log({ category })
+		+	const categoryTitle = toTitleCase(category)
+
+		-	return data({})
+		+	return data({ categoryTitle })
+		}
+
+		export default function NewsCategoryPage() {
+		+	const { categoryTitle } = useLoaderData<typeof loader>()
+
+			return (
+				<div className="container py-16">
+		-			<h2 className="text-h2">Generic news category page</h2>
+		+			<h2 className="text-h2">{categoryTitle}</h2>
+				</div>
+			)
+		}
+		```
+</Steps>
+
+
 
 :::caution
 
-After updating the code below, you may see a red line under `category`:
+After updating the code above, you will see a red line under `category`:
 
-![Typescript cateogry warning](src/assets/webp/epic-news/typescript-category-warning.webp)
+![Typescript category warning](src/assets/webp/epic-news/typescript-category-warning.webp)
 
 This is because TypeScript doesn't know what data type the `category` variable is yet.
 
 Don't worry about this for now - we can fix it later.
 
 :::
-
-:::danger[Extra care]
-
-***Remember***:
-
-- take extra care to delete lines that are highlighted in red
-- add the new lines in green exactly where shown
-
-:::
-
-```diff lang="tsx" title="app/routes/news.$category.tsx"
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-+import { useLoaderData } from '@remix-run/react'
-+import { toTitleCase } from '~/utils/stringUtils.ts'
-
-export async function loader({ params }: LoaderFunctionArgs) {
-	const { category } = params
-
--	console.log({ category })
-+	const categoryTitle = toTitleCase(category)
-
--	return json({})
-+	return json({ categoryTitle })
-}
-
-export default function NewsCategoryPage() {
-+	const { categoryTitle } = useLoaderData<typeof loader>()
-
-	return (
-		<div className="container py-16">
--			<h2 className="text-h2">Generic news category page</h2>
-+			<h2 className="text-h2">{categoryTitle}</h2>
-		</div>
-	)
-}
-```
 
 :::note
 
@@ -90,14 +96,14 @@ That's a lot of changes! Let's break it down:
 	```
 ---
 - We the call the `toTitleCase` function inside the `loader` function to convert the `category` value to title-case.
-- We return the `categoryTitle` value as part of the `json` response.
+- We return the `categoryTitle` value as part of the `data` response.
 ```tsx {4, 6}
 export async function loader({ params }: LoaderFunctionArgs) {
 	const { category } = params
 
 	const categoryTitle = toTitleCase(category)
 
-	return json({ categoryTitle })
+	return data({ categoryTitle })
 }
 ```
 ---
@@ -131,8 +137,7 @@ First, `import` the package at the top of your `news.$category.tsx` file:
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx"
 +import { invariant } from '@epic-web/invariant'
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, data, useLoaderData } from 'react-router'
 import { toTitleCase } from '~/utils/stringUtils.ts'
 ```
 
@@ -140,8 +145,7 @@ Next, inside your `loader` function, add the following check:
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={1-4, 15-23}
 import { invariant } from '@epic-web/invariant'
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, data, useLoaderData } from 'react-router'
 import { toTitleCase } from '~/utils/stringUtils.ts'
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -150,7 +154,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 +	invariant(typeof category === 'string', 'Category not found')
 	const categoryTitle = toTitleCase(category)
 
-	return json({ categoryTitle })
+	return data({ categoryTitle })
 }
 
 export default function NewsCategoryPage() {

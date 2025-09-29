@@ -59,7 +59,10 @@ There are two rules to remember when creating a `loader` function:
 
 You can learn more about `loader` functions below:
 
-<MonsterVideo src="https://www.youtube.com/embed/NXqEP_PsPNc?si=_mUaoXuvBJs6Enoe" />
+<MonsterVideo
+	src="https://www.youtube.com/embed/NXqEP_PsPNc?si=_mUaoXuvBJs6Enoe"
+	title="Remix loader function"
+/>
 
 More info is available in the [**Remix docs**](https://remix.run/docs/en/main/route/loader).
 
@@ -70,14 +73,14 @@ At first, let's just log the `category` value out to the console and see what it
 Carefully add the following code to your `news/$category.tsx` file:
 
 ```diff lang="tsx" title="app/routes/news.$category.tsx"
-+import { type LoaderFunctionArgs, json } from '@remix-run/node'
++import { type LoaderFunctionArgs, data } from 'react-router'
 +
 +export async function loader({ params }: LoaderFunctionArgs) {
 +	const { category } = params
 +
 +	console.log({ category })
 +
-+	return json({})
++	return data({})
 +}
 
 export default function NewsCategoryPage() {
@@ -91,7 +94,7 @@ export default function NewsCategoryPage() {
 
 :::caution[Important]
 
-You'll notice the `loader` function is being passed a `params` object as an argument here:
+You'll notice the `loader` function is being passed a `params` object as an [argument](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions#passing_arguments) here:
 
 ```tsx "{ params }"
 export async function loader({ params }: LoaderFunctionArgs) {

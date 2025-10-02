@@ -16,7 +16,7 @@ export default function Reveal({ children, title }: RevealProps) {
 		<div
 			onClick={handleClickInside}
 			className={`!mt-4 relative rounded-2xl bg-white/30 border-2 border-black/10 p-8 shadow-black/40 ${isBlurred ? 'shadow-2xl' : 'shadow-md shadow-black-20'}	transition duration-500	${isBlurred ? 'cursor-pointer' : 'cursor-auto'}	hover:shadow-md hover:shadow-black/20 dark:border-white/10 dark:bg-white/5`}>
-			<div className={`relative !mt-0 transition duration-500
+			<div className={`monster-reveal-content relative !mt-0 transition duration-500
 				${isBlurred ? `blur-xl select-none` : `blur-0 select-auto`}`}
 			>
 				{children}

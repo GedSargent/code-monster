@@ -151,6 +151,19 @@ code {
   margin-bottom: 1rem;
 }
 
+.monster-reveal-content ul {
+  list-style: outside;
+}
+
+.monster-reveal-content ul li p {
+  display: inline;
+  margin: 0;
+}
+
+.monster-reveal-content ul li p:not(:last-child) {
+  margin-bottom: 1rem;
+}
+
 #code-playground-wrapper * {
   margin-top: 0;
 }

@@ -138,8 +138,17 @@ code {
   margin-top: 0.5rem !important;
 }
 
+.starlight-aside__content ul {
+  list-style: outside;
+}
+
 .starlight-aside__content ul li p {
-  display: inline-block;
+  display: inline;
+  margin: 0;
+}
+
+.starlight-aside__content ul li p:not(:last-child) {
+  margin-bottom: 1rem;
 }
 
 #code-playground-wrapper * {

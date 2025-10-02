@@ -13,7 +13,7 @@ In this section, we will begin the process of adding articles to the app, associ
 
 1. Updating the Prisma schema found at `prisma/schema.prisma`
 2. Updating the seed data generated in `prisma/seed.ts` to populate our database with some dummy articles
-3. Changing the file structure of the project to add 'articles' as well as the 'notes' which already exist
+3. Changing the file structure of the project to add 'articles' as well as the 'articles' which already exist
 4. Display some raw, unstyled article data in the `/news/$category.tsx` route file that we created in a [**previous lesson**](/code-monster/guides/epic-news/routing/dynamic-routes#creating-a-dynamic-route)
 
 🚀 **Let's get started!** 🚀
@@ -24,13 +24,13 @@ A Prisma schema is a file that serves as a blueprint for your database, defining
 
 Open the Prisma schema for the project which can be found at `prisma/schema.prisma`.
 
-:::note
+:::article
 
 In a Prisma schema, you define your data models, each representing a table in the database. For each model, you specify the fields (which correspond to columns in the database table), their types, and any constraints or relations they might have.
 
 :::
 
-In the code snippet below is a copy of the `User`, `Note` and `NoteImage` models from the project.
+In the code snippet below is a copy of the `User`, `Article` and `ArticleImage` models from the project.
 
 Click on the collapsed lines to expand them one at a time, and look carefully at the links between them.
 
@@ -48,13 +48,13 @@ model User {
 
   image       UserImage?
   password    Password?
-  notes       Note[]
+  articles    Article[]
   roles       Role[]
   sessions    Session[]
   connections Connection[]
 }
 
-model Note {
+model Article {
   id      String @id @default(cuid())
   title   String
   content String
@@ -65,7 +65,7 @@ model Note {
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   ownerId String
 
-  images NoteImage[]
+  images ArticleImage[]
 
   // non-unique foreign key
   @@index([ownerId])
@@ -73,7 +73,7 @@ model Note {
   @@index([ownerId, updatedAt])
 }
 
-model NoteImage {
+model ArticleImage {
   id          String  @id @default(cuid())
   altText     String?
   contentType String
@@ -82,11 +82,11 @@ model NoteImage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  noteId String
+  article   Article   @relation(fields: [articleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  articleId String
 
   // non-unique foreign key
-  @@index([noteId])
+  @@index([articleId])
 }
 ```
 
@@ -97,8 +97,8 @@ Let's take each of the models in turn:
 ### `User`
 
 - A user has an `id`, `email`, `username` and `name` field. The `id`, `email` and `username` fields are required and unique. This means that they are all mandatory and must be unique for each user; no two users can share the same email address, for example.
-- A user can also have an `image` and a `password`. Note that the `image` and `password` fields are optional. We can tell this because they are defined with a `?` at the end of the type declaration.
-- A user can have many `notes`, `roles`, `sessions` and `connections`.
+- A user can also have an `image` and a `password`. Article that the `image` and `password` fields are optional. We can tell this because they are defined with a `?` at the end of the type declaration.
+- A user can have many `articles`, `roles`, `sessions` and `connections`.
 
 ```prisma
 model User {
@@ -112,7 +112,7 @@ model User {
 
   image       UserImage?
   password    Password?
-  notes       Note[]
+  articles       Article[]
   roles       Role[]
   sessions    Session[]
   connections Connection[]
@@ -121,18 +121,18 @@ model User {
 
 </MonsterReveal>
 
-<MonsterReveal title="The `Note` model">
+<MonsterReveal title="The `Article` model">
 
-### `Note`
+### `Article`
 
-- A note must have an `id`, `title` and `content` field. The `id` field is the primary key and is generated automatically using the `cuid()` function.
-- A note can have many `images`.
-- A note belongs to a `user` (the `owner` field). This is known as a **one-to-many relationship**, as a user can have many `notes`, but a `note` can only belong to one `user`.
+- An article must have an `id`, `title` and `content` field. The `id` field is the primary key and is generated automatically using the `cuid()` function.
+- An article can have many `images`.
+- An article belongs to a `user` (the `owner` field). This is known as a **one-to-many relationship**, as a user can have many `articles`, but an `article` can only belong to one `user`.
 - The `ownerId` field is a foreign key that references the `id` field of the `User` model.
 - The `ownerId` field and the `updatedAt` field are indexed to improve performance. We can tell this because of the `@@index` directive at the end of the model.
 
 ```prisma
-model Note {
+model Article {
   id      String @id @default(cuid())
   title   String
   content String
@@ -143,7 +143,7 @@ model Note {
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   ownerId String
 
-  images NoteImage[]
+  images ArticleImage[]
 
   // non-unique foreign key
   @@index([ownerId])
@@ -154,16 +154,16 @@ model Note {
 
 </MonsterReveal>
 
-<MonsterReveal title="The `NoteImage` model">
+<MonsterReveal title="The `ArticleImage` model">
 
-### `NoteImage`
+### `ArticleImage`
 
-- A `noteImage` belongs to a `note`. This is known as a **one-to-many relationship**, as a `note` can have many `images`, but an `image` can only belong to one `note`.
-- The `noteId` field is a foreign key that references the `id` field of the `Note` model.
-- The `noteId` field is indexed to improve performance. We can tell this because of the `@@index` directive at the end of the model.
+- An `articleImage` belongs to an `article`. This is known as a **one-to-many relationship**, as an `article` can have many `images`, but an `image` can only belong to one `article`.
+- The `articleId` field is a foreign key that references the `id` field of the `Article` model.
+- The `articleId` field is indexed to improve performance. We can tell this because of the `@@index` directive at the end of the model.
 
 ```prisma
-model NoteImage {
+model ArticleImage {
   id          String  @id @default(cuid())
   altText     String?
   contentType String
@@ -172,230 +172,48 @@ model NoteImage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  noteId String
+  article   Article   @relation(fields: [articleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  articleId String
 
   // non-unique foreign key
-  @@index([noteId])
+  @@index([articleId])
 }
 ```
 
 </MonsterReveal>
 
-## Creating an `Article` model
+## Additional `Article` fields
 
-Our goal is to add **articles** to the app. To do this, we need to create:
+We need to add some additional fields to the `Article` model to indicate whether an article is **published** or **draft**, and when it was published.
 
-- an `Article` model in the Prisma schema.
-- an `ArticleImage` model to store images associated with articles.
+### 1. Add `isPublished` and `publishedAt` fields
 
-Many of the features that we need for articles are already present in the `Note` model.
+Carefully add the lines highlighted in green below to the `Article` model:
 
-We will use this as a blueprint for the `Article` model, and make the necessary changes to reflect the differences between notes and articles.
+```diff lang="prisma" title="prisma/schema.prisma" collapse={11-19}
+model Article {
+  id          String @id @default(cuid())
+  title       String
+  content     String
++  isPublished Boolean @default(false)
 
-<Steps>
++  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-1. ### Add an `Article` and `ArticleImage` model
+  owner       User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId     String
 
-    Place the code below directly below the `NoteImage` model in your `schema.prisma` file.
+  images      ArticleImage[]
 
-    :::caution[Ignore red lines]
+  // non-unique foreign key
+  @@index([ownerId])
+  // This helps our order by in the user search a LOT
+  @@index([ownerId, updatedAt])
+}
+```
 
-    When you paste the `Article` and `ArticleImage` models into the Prisma schema, you will see some red underlines appear.
-
-    Don't worry about these for now. We will fix these in the next step.
-
-    :::
-
-    ```diff lang="prisma" title="prisma/schema.prisma" collapse={2-14}
-    model NoteImage {
-      id          String  @id @default(cuid())
-      altText     String?
-      contentType String
-      blob        Bytes
-
-      createdAt DateTime @default(now())
-      updatedAt DateTime @updatedAt
-
-      note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-      noteId String
-
-      // non-unique foreign key
-      @@index([noteId])
-    }
-
-    +model Article {
-    +  id      String @id @default(cuid())
-    +  title   String
-    +  content String
-    +
-    +  createdAt DateTime @default(now())
-    +  updatedAt DateTime @updatedAt
-    +
-    +  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    +  ownerId String
-    +
-    +  images NoteImage[]
-    +
-    +  // non-unique foreign key
-    +  @@index([ownerId])
-    +  // This helps our order by in the user search a LOT
-    +  @@index([ownerId, updatedAt])
-    +}
-    +
-    +model ArticleImage {
-    +  id          String  @id @default(cuid())
-    +  altText     String?
-    +  contentType String
-    +  blob        Bytes
-    +
-    +  createdAt DateTime @default(now())
-    +  updatedAt DateTime @updatedAt
-    +
-    +  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    +  noteId String
-    +
-    +  // non-unique foreign key
-    +  @@index([noteId])
-    +}
-    ```
-
-2. ### Update `User` and `Article`
-
-    We now need to update the existing `User` article. You will find this around line 13.
-    
-    Add a relationship in the `User` model to the `Article` model like so:
-
-    ```diff lang="prisma" title="prisma/schema.prisma" showLineNumbers startLineNumber={13} collapse={2-8, 20-27, 34-36}
-    model User {
-      id       String  @id @default(cuid())
-      email    String  @unique
-      username String  @unique
-      name     String?
-
-      createdAt DateTime @default(now())
-      updatedAt DateTime @updatedAt
-
-      image       UserImage?
-      password    Password?
-      notes       Note[]
-    +  articles    Article[]
-      roles       Role[]
-      sessions    Session[]
-      connections Connection[]
-    }
-    ```
-
-    Next, we will update the `Article` model, around line 66.
-    
-    Edit the code below to reference the `ArticleImage` model instead of the `NoteImage` model.
-
-    ```diff lang="prisma" title="prisma/schema.prisma" collapse={2-6} showLineNumbers startLineNumber={66}
-    model Article {
-      id      String @id @default(cuid())
-      title   String
-      content String
-
-      createdAt DateTime @default(now())
-      updatedAt DateTime @updatedAt
-
-      owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-      ownerId String
-
-    -  images NoteImage[]
-    +  images ArticleImage[]
-
-      // non-unique foreign key
-      @@index([ownerId])
-      // This helps our order by in the user search a LOT
-      @@index([ownerId, updatedAt])
-    }
-    ```
-
-    Don't worry that `images ArticleImage[]` is still underlined red - there's one last change to make.
-
-3. ### Update the `ArticleImage` model
-
-    The `ArticleImage` model is a little more complex, as it references the `Article` model as the parent.
-
-    In other words, each `ArticleImage` belongs to a single `Article` that it needs to reference via a foreign key.
-
-    We therefore need to make several changes here:
-
-    :::danger[Extra care needed!]
-
-    This is a complex update, so take your time to place the code snippets exactly where shown in the diff below.
-
-    Remember:
-    
-    - green lines are additions
-    - red lines are deletions.
-
-    :::
-
-    ```diff lang="prisma" title="prisma/schema.prisma" showLineNumbers startLineNumber={85}
-    model ArticleImage {
-      id          String    @id @default(cuid())
-      altText     String?
-      contentType String
-      blob        Bytes
-
-      createdAt   DateTime  @default(now())
-      updatedAt   DateTime  @updatedAt
-
-    -  note        Note      @relation(fields: [noteId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    -  noteId      String
-    +  article     Article   @relation(fields: [articleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-    +  articleId   String
-
-      // non-unique foreign key
-    -  @@index([noteId])
-    +  @@index([articleId])
-    }
-    ```
-
-    :::note
-
-    These changes have:
-    
-    - renamed the `note` field to `article`
-    - referenced the `Article` model instead of the `Note` model
-    - renamed the `noteId` field to `articleId`
-    - referenced the `id` field of the `Article` model instead of the `Note` model
-    - updated the `@@index` directive to reference `articleId` instead of `noteId`
-
-    :::
-
-4. ### Additional `Article` fields
-
-    Finally, we need to add some additional fields to the `Article` model to indicate whether an article is published or draft, and when it was published:
-
-    ```diff lang="prisma" title="prisma/schema.prisma" collapse={11-19}
-    model Article {
-      id          String @id @default(cuid())
-      title       String
-      content     String
-    +  isPublished Boolean @default(false)
-
-    +  publishedAt DateTime?
-      createdAt   DateTime @default(now())
-      updatedAt   DateTime @updatedAt
-
-      owner       User   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-      ownerId     String
-
-      images      ArticleImage[]
-
-      // non-unique foreign key
-      @@index([ownerId])
-      // This helps our order by in the user search a LOT
-      @@index([ownerId, updatedAt])
-    }
-    ```
-
-</Steps>
-
-### Default values and optional fields
+#### Default values and optional fields
 
 Notice that the `isPublished` field is a `Boolean` type with a default value of `false`. Similarly, the `publishedAt` field is a `DateTime` type that is optional.
 
@@ -408,7 +226,7 @@ Why do you think the `publishedAt` field is optional, and `isPublished` has an i
 - The `publishedAt` field is optional because an article might be a draft and not yet published. In this case, the `publishedAt` field would be `null`.
 </MonsterReveal>
 
-## Add an `ArticleCategory` model
+### 2. Add an `ArticleCategory` model
 
 Finally, we want to arrange the news articles into categories, such as 'Technology', 'Entertainment' and 'Business'.
 
@@ -477,6 +295,7 @@ To do this, we will create an `ArticleCategory` model and link it to the `Articl
     }
     ```
 3. Remember to ***save*** your changes to the Prisma schema file.
+
 </Steps>
 
 ## Migrate changes to database
@@ -514,20 +333,17 @@ In this section, we have:
 - Updated the Prisma schema to include an `Article` model and an `ArticleImage` model.
 - Updated the `User` model to include an `articles` field that references the `Article` model.
 - Updated the `Article` model to include an `isPublished`, `publishedAt` and `category` field.
-- Updated the `ArticleImage` model to reference the `Article` model instead of the `Note` model.
+- Updated the `ArticleImage` model to reference the `Article` model instead of the `Article` model.
 - Migrated these changes to the database.
 
-::::note[Assignment]
+::::article[Assignment]
 
 ## 📄 Assignment documentation
 
 We need to update your assignment to document this new feature. 🚀
 
-1. What changes did you make to the Prisma schema to include an `Article` model and an `ArticleImage` model?
-2. How did you you update the `User` model to include an `articles` field that references the `Article` model?
-3. Explain how you updated the `Article` model to include an `isPublished`, `publishedAt` and `category` field.
-4. How did you update the `ArticleImage` model to reference the `Article` model?
-5. Explain how you migrated these changes to the database.
+1. Explain how you updated the `Article` model to include an `isPublished`, `publishedAt` and `category` field.
+2. Explain how you migrated these changes to the database.
 
 :::tip
 
@@ -535,6 +351,8 @@ We need to update your assignment to document this new feature. 🚀
 
 - [Prisma schema](https://www.prisma.io/docs/orm/prisma-schema/overview)
 - [Prisma migrations](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/overview)
+
+:::
 
 ::::
 

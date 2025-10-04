@@ -253,10 +253,6 @@ export default defineConfig({
                   label: '🗄️ Schema updates',
                   link: 'guides/epic-news/prisma/schema-updates'
                 },
-                {
-                  label: '🗄️ Modify project structure',
-                  link: 'guides/epic-news/prisma/modify-project-structure'
-                },
               ]
             },
             {

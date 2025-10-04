@@ -9,11 +9,10 @@ import { Steps } from '@astrojs/starlight/components';
 
 ## Objectives
 
-In this section, we will begin the process of adding articles to the app, associating them with users and displaying some raw article data on the front-end. This will involve:
+In this section, we will look at how articles are configured in the app database and add some extra features to them. This will involve:
 
-1. Updating the Prisma schema found at `prisma/schema.prisma`
-2. Updating the seed data generated in `prisma/seed.ts` to populate our database with some dummy articles
-3. Changing the file structure of the project to add 'articles' as well as the 'articles' which already exist
+1. Understanding the Prisma schema found at `prisma/schema.prisma`
+2. Adding some extra fields to the article table that will help us to publish and unpublish them on the site
 4. Display some raw, unstyled article data in the `/news/$category.tsx` route file that we created in a [**previous lesson**](/code-monster/guides/epic-news/routing/dynamic-routes#creating-a-dynamic-route)
 
 🚀 **Let's get started!** 🚀

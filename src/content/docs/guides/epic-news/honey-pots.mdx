@@ -33,40 +33,25 @@ A 'honeypot' is a hidden field in a form that is invisible to users but visible 
 
 ![Spam bot honeypot attack](src/assets/webp/epic-news/spambot-honeypot-attack.webp)
 
-Let's add this now.
+Let's see how this works.
 
 ## Adding a honeypot field
 
-Firstly, add the following import to the top of the file:
+Our application is already set up to use a honeypot field. It enters our application through the `data` object returned from the `loader` function we import from `app/__root.server.tsx`:
 
-```diff lang="tsx" title="app/root.tsx"
-import { type LinksFunction } from '@remix-run/node'
-import Document from '~/components/shared-layout/Document'
-import { useNonce } from '~/utils/nonce-provider.ts'
-import rootLinkElements from '~/utils/providers/rootLinkElements'
-import HeaderWithSearch from './components/organisms/HeaderWithSearch'
-import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
-import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
-import { loader } from './__root.server.tsx'
-import { Outlet, useLoaderData } from '@remix-run/react'
-import useTheme from './hooks/useTheme.tsx'
-import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
-+import { HoneypotProvider } from 'remix-utils/honeypot/react'
+```tsx title="app/root.tsx" showLineNumbers collapse={14-33} {1, 4, 12}
+export { headers, loader } from './__root.server.tsx'
 
-```
-
-Once in place, we can wrap our `Document` and all its children with the `HoneypotProvider` component:
-
-```diff lang="tsx" title="app/root.tsx"
 export default function App() {
 	const data = useLoaderData<typeof loader | null>()
-	const theme = useTheme()
 	const nonce = useNonce()
+	const theme = useTheme()
+	useToast(data?.toast)
 
 	return (
-		<AuthenticityTokenProvider token={data.csrfToken}>
-+			<HoneypotProvider {...data.honeyProps}>
-				<Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
+		<AuthenticityTokenProvider token={data?.csrfToken ?? ''}>
+			<ParallaxProvider>
+				<Document theme={theme} nonce={nonce} honeyProps={data?.honeyProps}>
 					<div className="flex h-screen flex-col justify-between">
 						<HeaderWithSearch />
 
@@ -77,10 +62,19 @@ export default function App() {
 						<div className="container flex justify-between pb-5">
 							<ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
 						</div>
+
 						<FooterMenuRight />
 					</div>
+					<EpicToaster
+						closeButton
+						position="bottom-right"
+						theme={theme}
+						expand
+						richColors
+						duration={5000}
+					/>
 				</Document>
-+			</HoneypotProvider>
+			</ParallaxProvider>
 		</AuthenticityTokenProvider>
 	)
 }
@@ -88,15 +82,348 @@ export default function App() {
 
 ## Checking the honeypot field
 
-We can see the honeypot in action if we visit the [**`http://localhost:3000/signup`**](http://localhost:3000/signup) page and inspect the form in our browser's developer tools.
+With this in place, we can add `HomeypotInputs` to any form in our application that we want to protect.
 
-![Honeypot field](src/assets/webp/epic-news/honeypot-field.webp)
+One of these is the login form, which is located in `app/routes/_auth+/login.tsx`, and is already protected:
 
-Can you see the hidden fields? 🕵️‍♂️
+```tsx title="app/routes/_auth+/login.tsx" showLineNumbers collapse={1-6, 12-102, 122-130, 136-226, 233-328} {9, 135}
+import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+import { type SEOHandle } from '@nasa-gcn/remix-seo'
+import { startAuthentication } from '@simplewebauthn/browser'
+import { useOptimistic, useState, useTransition } from 'react'
+import { data, Form, Link, useNavigate, useSearchParams } from 'react-router'
+import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
+import { CSRFError } from 'remix-utils/csrf/server'
+import { HoneypotInputs } from 'remix-utils/honeypot/react'
+import { z } from 'zod'
+import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
+import { CheckboxField, ErrorList, Field } from '#app/components/forms.tsx'
+import { Spacer } from '#app/components/spacer.tsx'
+import { Icon } from '#app/components/ui/icon.tsx'
+import { StatusButton } from '#app/components/ui/status-button.tsx'
+import { login, requireAnonymous } from '#app/utils/auth.server.ts'
+import {
+	ProviderConnectionForm,
+	providerNames,
+} from '#app/utils/connections.tsx'
+import { checkHoneypot } from '#app/utils/honeypot.server.ts'
+import { getErrorMessage, useIsPending } from '#app/utils/misc.tsx'
+import { redirectWithToast } from '#app/utils/toast.server.ts'
+import { PasswordSchema, UsernameSchema } from '#app/utils/user-validation.ts'
+import { type Route } from './+types/login.ts'
+import { handleNewSession } from './login.server.ts'
+import { csrf } from '~/utils/csrf.server'
 
-Well, spam bots can't! If they fill in this field, our application will now reject their submission.
+export const handle: SEOHandle = {
+	getSitemapEntries: () => null,
+}
 
-And that's it! Our application is protected against spam bots. 🚫🤖
+const LoginFormSchema = z.object({
+	username: UsernameSchema,
+	password: PasswordSchema,
+	redirectTo: z.string().optional(),
+	remember: z.boolean().optional(),
+})
+
+const AuthenticationOptionsSchema = z.object({
+	options: z.object({ challenge: z.string() }),
+}) satisfies z.ZodType<{ options: PublicKeyCredentialRequestOptionsJSON }>
+
+export async function loader({ request }: Route.LoaderArgs) {
+	await requireAnonymous(request)
+	return {}
+}
+
+export async function action({ request }: Route.ActionArgs) {
+	try {
+		await csrf.validate(request)
+	} catch (error) {
+		if (error instanceof CSRFError) {
+			return redirectWithToast(`/`, {
+				description: 'CSRF token is invalid. Please try again in a new window',
+				type: 'error',
+			})
+		}
+		return redirectWithToast(`/`, {
+			description: 'Something went wrong. Please try again in a new window',
+			type: 'error',
+		})
+	}
+
+	await requireAnonymous(request)
+	const formData = await request.formData()
+	await checkHoneypot(formData)
+	const submission = await parseWithZod(formData, {
+		schema: (intent) =>
+			LoginFormSchema.transform(async (data, ctx) => {
+				if (intent !== null) return { ...data, session: null }
+
+				const session = await login(data)
+				if (!session) {
+					ctx.addIssue({
+						code: z.ZodIssueCode.custom,
+						message: 'Invalid username or password',
+					})
+					return z.NEVER
+				}
+
+				return { ...data, session }
+			}),
+		async: true,
+	})
+
+	if (submission.status !== 'success' || !submission.value.session) {
+		return data(
+			{ result: submission.reply({ hideFields: ['password'] }) },
+			{ status: submission.status === 'error' ? 400 : 200 },
+		)
+	}
+
+	const { session, remember, redirectTo } = submission.value
+
+	return handleNewSession({
+		request,
+		session,
+		remember: remember ?? false,
+		redirectTo,
+	})
+}
+
+export default function LoginPage({ actionData }: Route.ComponentProps) {
+	const isPending = useIsPending()
+	const [searchParams] = useSearchParams()
+	const redirectTo = searchParams.get('redirectTo')
+
+	const [form, fields] = useForm({
+		id: 'login-form',
+		constraint: getZodConstraint(LoginFormSchema),
+		defaultValue: { redirectTo },
+		lastResult: actionData?.result,
+		onValidate({ formData }) {
+			return parseWithZod(formData, { schema: LoginFormSchema })
+		},
+		shouldRevalidate: 'onBlur',
+	})
+
+	return (
+		<div className="flex min-h-full flex-col justify-center pt-20 pb-32">
+			<div className="mx-auto w-full max-w-md">
+				<div className="flex flex-col gap-3 text-center">
+					<h1 className="text-h1">Welcome back!</h1>
+					<p className="text-body-md text-muted-foreground">
+						Please enter your details.
+					</p>
+				</div>
+				<Spacer size="xs" />
+
+				<div>
+					<div className="mx-auto w-full max-w-md px-8">
+						<Form method="POST" {...getFormProps(form)}>
+							<AuthenticityTokenInput />
+							<HoneypotInputs />
+							<Field
+								labelProps={{ children: 'Username' }}
+								inputProps={{
+									...getInputProps(fields.username, { type: 'text' }),
+									autoFocus: true,
+									className: 'lowercase',
+									autoComplete: 'username',
+								}}
+								errors={fields.username.errors}
+							/>
+
+							<Field
+								labelProps={{ children: 'Password' }}
+								inputProps={{
+									...getInputProps(fields.password, {
+										type: 'password',
+									}),
+									autoComplete: 'current-password',
+								}}
+								errors={fields.password.errors}
+							/>
+
+							<div className="flex justify-between">
+								<CheckboxField
+									labelProps={{
+										htmlFor: fields.remember.id,
+										children: 'Remember me',
+									}}
+									buttonProps={getInputProps(fields.remember, {
+										type: 'checkbox',
+									})}
+									errors={fields.remember.errors}
+								/>
+								<div>
+									<Link
+										to="/forgot-password"
+										className="text-body-xs font-semibold"
+									>
+										Forgot password?
+									</Link>
+								</div>
+							</div>
+
+							<input
+								{...getInputProps(fields.redirectTo, { type: 'hidden' })}
+							/>
+							<ErrorList errors={form.errors} id={form.errorId} />
+
+							<div className="flex items-center justify-between gap-6 pt-3">
+								<StatusButton
+									className="w-full"
+									status={isPending ? 'pending' : (form.status ?? 'idle')}
+									type="submit"
+									disabled={isPending}
+								>
+									Log in
+								</StatusButton>
+							</div>
+						</Form>
+						<hr className="my-4" />
+						<div className="flex flex-col gap-5">
+							<PasskeyLogin
+								redirectTo={redirectTo}
+								remember={fields.remember.value === 'on'}
+							/>
+						</div>
+						<hr className="my-4" />
+						<ul className="flex flex-col gap-5">
+							{providerNames.map((providerName) => (
+								<li key={providerName}>
+									<ProviderConnectionForm
+										type="Login"
+										providerName={providerName}
+										redirectTo={redirectTo}
+									/>
+								</li>
+							))}
+						</ul>
+						<div className="flex items-center justify-center gap-2 pt-6">
+							<span className="text-muted-foreground">New here?</span>
+							<Link
+								to={
+									redirectTo
+										? `/signup?redirectTo=${encodeURIComponent(redirectTo)}`
+										: '/signup'
+								}
+							>
+								Create an account
+							</Link>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+const VerificationResponseSchema = z.discriminatedUnion('status', [
+	z.object({
+		status: z.literal('success'),
+		location: z.string(),
+	}),
+	z.object({
+		status: z.literal('error'),
+		error: z.string(),
+	}),
+])
+
+function PasskeyLogin({
+	redirectTo,
+	remember,
+}: {
+	redirectTo: string | null
+	remember: boolean
+}) {
+	const [isPending] = useTransition()
+	const [error, setError] = useState<string | null>(null)
+	const [passkeyMessage, setPasskeyMessage] = useOptimistic<string | null>(
+		'Login with a passkey',
+	)
+	const navigate = useNavigate()
+
+	async function handlePasskeyLogin() {
+		try {
+			setPasskeyMessage('Generating Authentication Options')
+			// Get authentication options from the server
+			const optionsResponse = await fetch('/webauthn/authentication')
+			const json = await optionsResponse.json()
+			const { options } = AuthenticationOptionsSchema.parse(json)
+
+			setPasskeyMessage('Requesting your authorization')
+			const authResponse = await startAuthentication({ optionsJSON: options })
+			setPasskeyMessage('Verifying your passkey')
+
+			// Verify the authentication with the server
+			const verificationResponse = await fetch('/webauthn/authentication', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ authResponse, remember, redirectTo }),
+			})
+
+			const verificationJson = await verificationResponse.json().catch(() => ({
+				status: 'error',
+				error: 'Unknown error',
+			}))
+
+			const parsedResult =
+				VerificationResponseSchema.safeParse(verificationJson)
+			if (!parsedResult.success) {
+				throw new Error(parsedResult.error.message)
+			} else if (parsedResult.data.status === 'error') {
+				throw new Error(parsedResult.data.error)
+			}
+			const { location } = parsedResult.data
+
+			setPasskeyMessage("You're logged in! Navigating...")
+			await navigate(location ?? '/')
+		} catch (e) {
+			const errorMessage = getErrorMessage(e)
+			setError(`Failed to authenticate with passkey: ${errorMessage}`)
+		}
+	}
+
+	return (
+		<form action={handlePasskeyLogin}>
+			<AuthenticityTokenInput />
+			<StatusButton
+				id="passkey-login-button"
+				aria-describedby="passkey-login-button-error"
+				className="w-full"
+				status={isPending ? 'pending' : error ? 'error' : 'idle'}
+				type="submit"
+				disabled={isPending}
+			>
+				<span className="inline-flex items-center gap-1.5">
+					<Icon name="passkey" />
+					<span>{passkeyMessage}</span>
+				</span>
+			</StatusButton>
+			<div className="mt-2">
+				<ErrorList errors={[error]} id="passkey-login-button-error" />
+			</div>
+		</form>
+	)
+}
+
+export const meta: Route.MetaFunction = () => {
+	return [{ title: 'Login to Epic News' }]
+}
+
+export function ErrorBoundary() {
+	return <GeneralErrorBoundary />
+}
+```
+
+We can see the honeypot in action if we visit the [**`http://localhost:3000/login`**](http://localhost:3000/login) page and inspect the form with our browser's developer tools:
+
+![Honeypot field](src/assets/webp/epic-news/honeypot-field-login.webp)
+
+Can you see the hidden fields in your own browser? 🕵️‍♂️
+
+Well, spam bots can't! If they fill in this field, our application will know its not a genuine user, and reject their submission. 🚫🤖
 
 ## Summary
 
@@ -108,9 +435,12 @@ Let's update your assignment to document this new security feature. 🚀
 
 ## 📄 Assignment documentation
 
-1. Explain what a spam bot is and how it works. Why is it important to protect against spam bots?
+### Section 1: Security features
+1. In section 1 of your assignment, explain what a spam bot is and how it works. Why is it important to protect against spam bots?
 2. Describe what a honeypot field is and how it helps protect against spam bots.
-3. Explain how the `HoneypotProvider` component works and why it is important to wrap the application with it.
+
+### Section 2: Implementation
+3. In section 2 of your assignment, explain how the `HoneypotProvider` component works and why it is important to wrap the application with it.
 4. Show the hidden honeypot field in your broswer application and explain how it works across the forms in your application.
 
 :::tip

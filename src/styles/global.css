@@ -16,6 +16,7 @@
   --custom-body-font: 'wotfardregular', sans-serif;
   --custom-box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
   --sl-text-code-sm: 1.1rem;
+  --code-mark-border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 @layer components {
@@ -82,6 +83,23 @@ code {
   animation-name: border;
   animation-duration: 1500ms ease-in-out 1;
   animation-direction: forwards;
+}
+
+/* Highlighted code lines - smart border handling using :has() selector */
+.expressive-code .ec-line.mark {
+  /* Default: no borders (for middle lines in ranges) */
+  border-top: none;
+  border-bottom: none;
+}
+
+/* First line in a range: has top border (no highlighted line immediately before) */
+.expressive-code .ec-line.mark:not(.ec-line.mark + .ec-line.mark) {
+  border-top: var(--code-mark-border);
+}
+
+/* Last line in a range: has bottom border (no highlighted line immediately after) */
+.expressive-code .ec-line.mark:not(:has(+ .ec-line.mark)) {
+  border-bottom: var(--code-mark-border);
 }
 
 .sl-markdown-content ul {

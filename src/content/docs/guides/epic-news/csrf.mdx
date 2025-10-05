@@ -16,7 +16,7 @@ We will start by adding cross-site request forgery CSRF protection to our applic
 
 ## What is Cross-Site Request Forgery (CSRF)?
 
-[**Cross-Site Request Forgery**](https://owasp.org/www-community/attacks/csrf), often abbreviated as CSRF, is a type of cyber attack that tricks a user into performing actions they didn't intend to do on a web app where they are currently authenticated.
+[**Cross-Site Request Forgery**](https://owasp.org/www-community/attacks/csrf), often abbreviated as CSRF, is a type of cyber attack that tricks a user into performing actions they didn't intend to do when they are signed into a website.
 
 ### How does it work?
 
@@ -46,94 +46,303 @@ When you return to look at your balance, you see that your money has been lost.
 
 ## How can we protect against CSRF?
 
-One way to protect against CSRF attacks is to use a CSRF token.
+One way to protect against CSRF attacks is to use a [CSRF token](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF#csrf_tokens).
 
-This is a unique string that is generated for each user session and is sent with each request to the server.
+This is a unique string of random characters that the app generates for each user session. Every time a user makes a request to the server, the token is sent along with it.
 
 Before processing any request, the server checks that the token is valid and that it matches the user's session. If it doesn't, the request is rejected.
 
 Let's add this now.
 
-## Wrapping the application with extra security
+## Add CSRF protection
 
-Luckily, adding CSRF protection to our application is straightforward.
+Luckily, adding CSRF protection to our application is relatively easy.
 
 <Steps>
 
 1. Open `app/root.tsx`.
 
-2. Add the following import to the top of your `app/root.tsx` file:
+2. Add the following imports to the top of your `app/root.tsx` file:
 
 		```diff lang="tsx" title="app/root.tsx"
-		import { type LinksFunction } from '@remix-run/node'
-		import Document from '~/components/shared-layout/Document'
-		import { useNonce } from '~/utils/nonce-provider.ts'
-		import rootLinkElements from '~/utils/providers/rootLinkElements'
-		import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+		import { Outlet, useLoaderData } from 'react-router'
+		import { ParallaxProvider } from 'react-scroll-parallax'
+		import { type Route } from './+types/root.ts'
+		import { type loader } from './__root.server.tsx'
+		import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 		import FooterMenuRight from './components/organisms/Footer/FooterMenuRight'
-		import ThemeSwitch from './components/shared-layout/ThemeSwitch.tsx'
-		import { loader } from './__root.server.tsx'
-		import { Outlet, useLoaderData } from '@remix-run/react'
-		import useTheme from './hooks/useTheme.tsx'
+		import HeaderWithSearch from './components/organisms/HeaderWithSearch'
+		import Document from './components/shared-layout/Document.tsx'
+		import { ThemeSwitch, useTheme } from './routes/resources+/theme-switch.tsx'
+		import { useNonce } from './utils/nonce-provider.ts'
+		import rootLinkElements from './utils/providers/rootLinkElements.ts'
 		+import { AuthenticityTokenProvider } from 'remix-utils/csrf/react'
+		+import { EpicToaster } from './components/ui/sonner.tsx'
+		+import { useToast } from './components/toaster.tsx'
 		```
 
-3. We simply need to wrap our application with this `AuthenticityTokenProvider` to ensure that a valid CSRF token is checked for every request across the entire application.
-
-		This is done by wrapping the JSX returned by the `App` component with the `AuthenticityTokenProvider`, then passing a `csrfToken` from the `data` object to the `AuthenticityTokenProvider` component:
+3. Wrap all the JSX returned by the `App` component with the `AuthenticityTokenProvider`, then pass a `csrfToken` from the `data` object to it:
 
 		```diff lang="tsx" title="app/root.tsx"
 		export default function App() {
 			const data = useLoaderData<typeof loader | null>()
 			const nonce = useNonce()
 			const theme = useTheme()
-
-			useToast(data.toast)
+			useToast(data?.toast)
 
 			return (
-		+		<AuthenticityTokenProvider token={data.csrfToken}>
-					<Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
-						<div className="flex h-screen flex-col justify-between">
-							<HeaderWithSearch />
+		+		<AuthenticityTokenProvider token={data?.csrfToken ?? ''}>
+					<ParallaxProvider>
+						<Document theme={theme} nonce={nonce} honeyProps={data?.honeyProps}>
+							<div className="flex h-screen flex-col justify-between">
+								<HeaderWithSearch />
 
-							<div className="flex-1">
-								<Outlet />
+								<div className="flex-1">
+									<Outlet />
+								</div>
+
+								<div className="container flex justify-between pb-5">
+									<ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
+								</div>
+
+								<FooterMenuRight />
 							</div>
-
-							<div className="container flex justify-between pb-5">
-								<ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
-							</div>
-
-						<FooterMenuRight />
-						</div>
-					</Document>
+						</Document>
+					</ParallaxProvider>
 		+		</AuthenticityTokenProvider>
 			)
 		}
 		```
+4. Next, add a new component called `EpicToaster` carefully in the space shown below. Add it just above the closing `</Document>` tag:
 
-3. Save your changes.
+		```diff lang="tsx" title="app/root.tsx"
+		export default function App() {
+			const data = useLoaderData<typeof loader | null>()
+			const nonce = useNonce()
+			const theme = useTheme()
+		+	useToast(data?.toast)
 
-4. Before moving on to the next tutorial, make sure you rearrange the imports at the top of the `app/root.tsx` file by using the VS Code keyboard shortcut <MonsterKbd>SHIFT + ALT + O</MonsterKbd> (Windows) or <MonsterKbd>SHIFT + OPT + O</MonsterKbd> (Mac)
+			return (
+				// <AuthenticityTokenProvider token={data?.csrfToken ?? ''}>
+				<AuthenticityTokenProvider token={'invalid'}>
+					<ParallaxProvider>
+						<Document theme={theme} nonce={nonce} honeyProps={data?.honeyProps}>
+							<div className="flex h-screen flex-col justify-between">
+								<HeaderWithSearch />
+
+								<div className="flex-1">
+									<Outlet />
+								</div>
+
+								<div className="container flex justify-between pb-5">
+									<ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
+								</div>
+
+								<FooterMenuRight />
+							</div>
+		+					<EpicToaster
+		+						closeButton
+		+						position="bottom-right"
+		+						theme={theme}
+		+						expand
+		+						richColors
+		+						duration={5000}
+		+					/>
+						</Document>
+					</ParallaxProvider>
+				</AuthenticityTokenProvider>
+			)
+		}
+		```
+
+		:::note[info]
+
+		The `EpicToaster` component is used to display [toast notifications](https://mobbin.com/glossary/toast).
+		
+		These are brief messages that pop up temporarily to inform the user of something.
+
+		![Toast notification example](src/assets/gif/epic-news/toast-message-example.gif)
+
+		:::
+
+5. Save your changes.
+
+6. Remember to organise the imports at the top of `app/root.tsx` by using the VS Code keyboard shortcut <MonsterKbd>SHIFT + ALT + O</MonsterKbd> (Windows) or <MonsterKbd>SHIFT + OPT + O</MonsterKbd> (Mac)
+
+7. Let's check for a CSRF token when someone tries to login to the website. If they try to login without a valid CSRF token, we will redirect them to the home page and display a toast notification to inform the user.
+
+		Open the file `app/routes/_auth+/login.tsx`.
+		
+8. Add the following imports to the top of the file:
+
+		```diff lang="tsx" title="app/routes/_auth+/login.tsx" showLineNumbers collapse={1-19}
+		import { getFormProps, getInputProps, useForm } from '@conform-to/react'
+		import { getZodConstraint, parseWithZod } from '@conform-to/zod'
+		import { type SEOHandle } from '@nasa-gcn/remix-seo'
+		import { startAuthentication } from '@simplewebauthn/browser'
+		import { useOptimistic, useState, useTransition } from 'react'
+		import { data, Form, Link, useNavigate, useSearchParams } from 'react-router'
+		import { HoneypotInputs } from 'remix-utils/honeypot/react'
+		import { z } from 'zod'
+		import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
+		import { CheckboxField, ErrorList, Field } from '#app/components/forms.tsx'
+		import { Spacer } from '#app/components/spacer.tsx'
+		import { Icon } from '#app/components/ui/icon.tsx'
+		import { StatusButton } from '#app/components/ui/status-button.tsx'
+		import { login, requireAnonymous } from '#app/utils/auth.server.ts'
+		import {
+			ProviderConnectionForm,
+			providerNames,
+		} from '#app/utils/connections.tsx'
+		import { checkHoneypot } from '#app/utils/honeypot.server.ts'
+		import { getErrorMessage, useIsPending } from '#app/utils/misc.tsx'
+		import { PasswordSchema, UsernameSchema } from '#app/utils/user-validation.ts'
+		import { type Route } from './+types/login.ts'
+		import { handleNewSession } from './login.server.ts'
+		+import { AuthenticityTokenInput } from 'remix-utils/csrf/react'
+		+import { CSRFError } from 'remix-utils/csrf/server'
+		+import { csrf } from '~/utils/csrf.server'
+		+import {
+		+	createToastHeaders,
+		+	redirectWithToast,
+		+} from '#app/utils/toast.server.ts'
+
+9. Next, find the `action` function around line 52 in the same file.
+
+		Add the following block of code just after its opening bracket:
+
+		```diff lang="tsx" title="app/routes/_auth+/login.tsx" showLineNumbers collapse={21-53} startLineNumber=52
+		export async function action({ request }: Route.ActionArgs) {
+		+	try {
+		+		await csrf.validate(request)
+		+	} catch (error) {
+		+		if (error instanceof CSRFError) {
+		+			return redirectWithToast(`/`, {
+		+				description: 'CSRF token is invalid. Please try again in a new window',
+		+				type: 'error',
+		+			})
+		+		}
+		+		return redirectWithToast(`/`, {
+		+			description: 'Something went wrong. Please try again in a new window',
+		+			type: 'error',
+		+		})
+		+	}
+		+
+			await requireAnonymous(request)
+			const formData = await request.formData()
+			await checkHoneypot(formData)
+			const submission = await parseWithZod(formData, {
+				schema: (intent) =>
+					LoginFormSchema.transform(async (data, ctx) => {
+						if (intent !== null) return { ...data, session: null }
+
+						const session = await login(data)
+						if (!session) {
+							ctx.addIssue({
+								code: z.ZodIssueCode.custom,
+								message: 'Invalid username or password',
+							})
+							return z.NEVER
+						}
+
+						return { ...data, session }
+					}),
+				async: true,
+			})
+
+			if (submission.status !== 'success' || !submission.value.session) {
+				return data(
+					{ result: submission.reply({ hideFields: ['password'] }) },
+					{ status: submission.status === 'error' ? 400 : 200 },
+				)
+			}
+
+			const { session, remember, redirectTo } = submission.value
+
+			return handleNewSession({
+				request,
+				session,
+				remember: remember ?? false,
+				redirectTo,
+			})
+		}
+
+10. Open `app/root.tsx`.
+
+11. We will deliberately add an invalid CSRF token to the `AuthenticityTokenProvider` to test our new code.
+
+		Replace the `token` prop with the following:
+
+		```diff lang="tsx" title="app/root.tsx" ins="token={'invalid'}" showLineNumbers collapse={9-33}  startLineNumber=22
+		export default function App() {
+			const data = useLoaderData<typeof loader | null>()
+			const nonce = useNonce()
+			const theme = useTheme()
+			useToast(data?.toast)
+
+			return (
+				<AuthenticityTokenProvider token={'invalid'}>
+					<ParallaxProvider>
+						<Document theme={theme} nonce={nonce} honeyProps={data?.honeyProps}>
+							<div className="flex h-screen flex-col justify-between">
+								<HeaderWithSearch />
+
+								<div className="flex-1">
+									<Outlet />
+								</div>
+
+								<div className="container flex justify-between pb-5">
+									<ThemeSwitch userPreference={data?.requestInfo.userPrefs.theme} />
+								</div>
+
+								<FooterMenuRight />
+							</div>
+							<EpicToaster
+								closeButton
+								position="bottom-right"
+								theme={theme}
+								expand
+								richColors
+								duration={5000}
+							/>
+						</Document>
+					</ParallaxProvider>
+				</AuthenticityTokenProvider>
+			)
+		}
+		```
+	
+12. Next, in your browser, click on the **Login** button in the top right corner of the screen.
+
+		Login with the following details:
+
+		**Username**: <MonsterKbd>kody</MonsterKbd>
+		**Password**: <MonsterKbd>kodylovesyou</MonsterKbd>
+
+13.	When you click 'Login', you should be redirected to the home page and see a toast notification informing you that the CSRF token is invalid:
+
+		![Toast notification example](src/assets/gif/epic-news/toast-message-example.gif)
+
 </Steps>
 
 ## Summary
 
-Although not much has changed visually, we've added a strong security feature to our application that is crucial for you to write about in your assignment.
+We've added a strong security feature to our application that is crucial for you to write about in your assignment.
 
 ::::note[Assignment]
 
 ## 📄 Assignment documentation
 
-1. Explain what Cross-Site Request Forgery (CSRF) is and how it works.
-2. Describe how adding a CSRF token to the application helps protect against CSRF attacks.
-3. Explain how the `AuthenticityTokenProvider` component works and why it is important to wrap the application with it.
+1. Explain what Cross-Site Request Forgery (CSRF) is and how it works. Add this to section 1 of your assignment.
+2. Still in section 1, describe how adding a CSRF token to a web application helps protect against CSRF attacks.
+3. In section 2, explain how you implemented CSRF protection in your application.
 
 :::tip[Useful links]
 
 ### Useful links
 
 - [Cross-Site Request Forgery (CSRF)](https://owasp.org/www-community/attacks/csrf)
+- [CSRF tokens](https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF#csrf_tokens)
 - [CSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html)
 - [Remix Utils docs - CSRF](https://github.com/sergiodxa/remix-utils?tab=readme-ov-file#csrf)
 

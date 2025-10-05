@@ -256,7 +256,7 @@ export default defineConfig({
               ]
             },
             {
-              label: "🔒 Security 101",
+              label: "🔒 Security",
               collapsed: true,
               items: [
                 {

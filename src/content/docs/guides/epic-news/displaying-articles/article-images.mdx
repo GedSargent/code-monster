@@ -8,7 +8,7 @@ import MonsterReveal from "src/components/MonsterReveal.astro";
 
 :::note
 
-This tutorial guide is optional. Only complete this if you feel you have time, or return to it as an optional extra at the end of your project.
+This tutorial guide is optional. Only complete this if you are looking for a challenge, or return to it as an optional extra at the end of your project if you have time.
 
 ## Pre-requisites
 
@@ -20,21 +20,7 @@ To complete this tutorial, you will need to have successfully extract the `Artic
 
 We are currently only fetching the `id` of each image from the database. To display the images on the page, we will need to generate a `src` for each image using a utility function from the Epic Stack.
 
-If you remember from a [**previous guide**](/code-monster/guides/epic-news/prisma/modify-project-structure#add-getarticleimgsrc-function), we created a utility function called `getArticleImgSrc` to generate a `src` for each article image.
-
-:::caution[Check previous work]
-
-#### Check your previous work
-
-Check that your `getArticleImgSrc` function is correctly implemented in the `app/utils/misc.tsx` file.
-
-If the function is missing, you will need to go back to the [**previous guide**](/code-monster/guides/epic-news/prisma/modify-project-structure#add-getarticleimgsrc-function) and follow the steps to add it correctly.
-
-:::
-
 ## Configuring `ArticleCard`
-
-If you have the `getArticleImgSrc` function in place, we can now use it to display real article images on the page.
 
 <Steps>
 
@@ -42,13 +28,13 @@ If you have the `getArticleImgSrc` function in place, we can now use it to displ
 
 	:::note
 	
-	Adding the code below will produce a red underline, but don't worry, we will fix this in the next steps.
+	Adding the code below will initially produce a red underline again, but don't worry. Like earlier, we will fix this in the next steps.
+
+	:::
 
 	To display the article images on the page, we need to pass the `id` of each article image to the `ArticleCard` component.
 		
 	This `id` will be used to generate the `src` for each article image using the `getArticleImgSrc` function.
-
-	:::
 
 	Add the line of code below to pass the `id` of the first article image to the `ArticleCard` component:
 
@@ -91,7 +77,7 @@ If you have the `getArticleImgSrc` function in place, we can now use it to displ
 								key={article.id}
 								title={article.title}
 								category={article.category?.name}
-		+						imageId={article.images[0]?.id}
+		+						objectKey={article.images[0]?.objectKey}
 							/>
 						))}
 					</div>
@@ -115,7 +101,8 @@ If you have the `getArticleImgSrc` function in place, we can now use it to displ
 
 2. Add the following import statements at the top of the `ArticleCard` component file to import the `getArticleImgSrc` function:
 
-		```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx" showLineNumbers collapse={10-35}
+		```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx" showLineNumbers collapse={11-37}
+		import { type ReactElement } from 'react'
 		import {
 			MdOutlineBusinessCenter,
 			MdOutlineTheaters,
@@ -123,7 +110,7 @@ If you have the `getArticleImgSrc` function in place, we can now use it to displ
 			MdOutlineNewspaper,
 		} from 'react-icons/md'
 		+import { getArticleImgSrc } from '~/utils/misc.tsx'
-		+import siteLogo from '~/assets/svg/site-logo.svg'
+		+import siteLogo from '~/assets/svg/site-logo.svg' // !!! Change to your own logo!!!
 
 		interface ArticleCardProps {
 			title: string
@@ -134,7 +121,7 @@ If you have the `getArticleImgSrc` function in place, we can now use it to displ
 			title,
 			category = 'General news',
 		}: ArticleCardProps) {
-			const categoryIcons: { [key: string]: JSX.Element } = {
+			const categoryIcons: { [key: string]: ReactElement } = {
 				Business: <MdOutlineBusinessCenter size={20} className="text-red-300" />,
 				Entertainment: <MdOutlineTheaters size={20} className="text-red-300" />,
 				Technology: <MdOutlineDesktopMac size={20} className="text-red-300" />,
@@ -163,7 +150,8 @@ If you have the `getArticleImgSrc` function in place, we can now use it to displ
 
 4. With this in place, let's now modify the logic inside our `ArticleCard` component to display the article image above the title:
 
-		```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={1-8, 23-28}
+		```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={1-9, 24-29}
+		import { type ReactElement } from 'react'
 		import {
 			MdOutlineBusinessCenter,
 			MdOutlineTheaters,
@@ -176,17 +164,17 @@ If you have the `getArticleImgSrc` function in place, we can now use it to displ
 		interface ArticleCardProps {
 			title: string
 			category?: string
-		+	imageId?: string
+		+	objectKey?: string
 		}
 
 		export default function ArticleCard({
 			title,
 			category = 'General news',
-		+	imageId,
+		+	objectKey,
 		}: ArticleCardProps) {
-		+	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
+		+	const imageSrc = objectKey ? getArticleImgSrc(objectKey) : siteLogo
 
-			const categoryIcons: { [key: string]: JSX.Element } = {
+			const categoryIcons: { [key: string]: ReactElement } = {
 				Business: <MdOutlineBusinessCenter size={20} className="text-red-300" />,
 				Entertainment: <MdOutlineTheaters size={20} className="text-red-300" />,
 				Technology: <MdOutlineDesktopMac size={20} className="text-red-300" />,
@@ -196,10 +184,7 @@ If you have the `getArticleImgSrc` function in place, we can now use it to displ
 			return (
 		+		<div>
 		+			<div>
-		+				<img
-		+					src={imageSrc}
-		+					alt={title}
-		+				/>
+		+				<img src={imageSrc}	alt={title}	/>
 		+			</div>
 					<div className="flex h-64 cursor-pointer flex-col justify-between rounded bg-red-900 p-4 transition-all duration-500 hover:scale-110">
 						<h3 className="line-clamp-3 text-xl font-bold">{title}</h3>
@@ -242,29 +227,30 @@ I'd strongly recommend that you find your own solution for this challenge, but i
 <MonsterReveal title="ArticleCard.tsx">
 
 ```tsx title="app/components/organisms/ArticleCard.tsx"
+import { type ReactElement } from 'react'
 import {
 	MdOutlineBusinessCenter,
 	MdOutlineTheaters,
 	MdOutlineDesktopMac,
 	MdOutlineNewspaper,
 } from 'react-icons/md'
-import siteLogo from '~/assets/svg/site-logo.svg'
 import { getArticleImgSrc } from '~/utils/misc.tsx'
+import siteLogo from '~/assets/svg/epic-news-sample-logo.svg'
 
 interface ArticleCardProps {
 	title: string
 	category?: string
-	imageId?: string
+	objectKey?: string
 }
 
 export default function ArticleCard({
 	title,
 	category = 'General news',
-	imageId,
+	objectKey,
 }: ArticleCardProps) {
-	const imageSrc = imageId ? getArticleImgSrc(imageId) : siteLogo
+	const imageSrc = objectKey ? getArticleImgSrc(objectKey) : siteLogo
 
-	const categoryIcons: { [key: string]: JSX.Element } = {
+	const categoryIcons: { [key: string]: ReactElement } = {
 		Business: <MdOutlineBusinessCenter size={20} className="text-red-300" />,
 		Entertainment: <MdOutlineTheaters size={20} className="text-red-300" />,
 		Technology: <MdOutlineDesktopMac size={20} className="text-red-300" />,
@@ -299,7 +285,7 @@ This can then be imported and called from anywhere in the project like this:
 <ArticleCard
 	title={article.title}
 	category={article.category?.name}
-	imageId={article.images[0]?.id}
+	objectKey={article.images[0]?.objectKey}
 />
 ```
 

@@ -34,11 +34,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
 			id: true,
 			title: true,
 			category: { select: { name: true } },
-			images: { select: { id: true } },
+			images: { select: { objectKey: true } },
 		},
 	})
 
-	return json({ categoryTitle, allArticles })
+	return data({ categoryTitle, allArticles })
 }
 ```
 
@@ -64,12 +64,12 @@ Let's fix this so that only articles in the specified category are retrieved.
 					id: true,
 					title: true,
 					category: { select: { name: true } },
-					images: { select: { id: true } },
+					images: { select: { objectKey: true } },
 				},
 			})
 
-		-	return json({ category, allArticles })
-		+	return json({ category, filteredArticles })
+		-	return data({ category, allArticles })
+		+	return data({ category, filteredArticles })
 		}
 		```
 
@@ -120,11 +120,11 @@ Let's fix this so that only articles in the specified category are retrieved.
 				id: true,
 				title: true,
 				category: { select: { name: true } },
-				images: { select: { id: true } },
+				images: { select: { objectKey: true } },
 			},
 		})
 
-		return json({ categoryTitle, filteredArticles })
+		return data({ categoryTitle, filteredArticles })
 	}
 	```
 
@@ -147,7 +147,7 @@ Let's fix this so that only articles in the specified category are retrieved.
 								key={article.id}
 								title={article.title}
 								categoryTitle={categoryTitle}
-								imageId={article.images[0]?.id}
+								objectKey={article.images[0]?.objectKey}
 							/>
 						)
 					})}
@@ -162,6 +162,14 @@ Let's fix this so that only articles in the specified category are retrieved.
 	Now, if you navigate to the news index page and click on a category, you should see the articles update based on the selected category:
 
 	![Category filter working](src/assets/gif/category-filter-working.gif)
+
+	:::note
+
+	If you are seeing a blank page for some of the categories, try updating some of your user's articles so that they have a category assigned to them.
+
+	We looked at editing article categories in the [Creating Articles tutorial](/code-monster/guides/epic-news/displaying-articles/creating-articles#display-categories)
+
+	:::
 
 </Steps>
 
@@ -191,27 +199,27 @@ As always, try to solve this yourself before checking the solution below 👀.
 
 <Steps>
 
-1. Firstly, import the `prisma` client, the `json` helper and your `ArticleCard` component at the top of your file.
+1. Firstly, import the `prisma` client, the `data` helper and your `ArticleCard` component at the top of your file.
 
-		```diff lang="tsx" title="app/routes/_index.tsx" ins="json, "
-		import { type MetaFunction } from '@remix-run/node'
-		import { json, Link, useLoaderData } from '@remix-run/react'
+		```diff lang="tsx" title="app/routes/_index.tsx" ins="data, " ins=", useLoaderData"
+		import { data, Link, type MetaFunction, useLoaderData } from 'react-router'
+		import ParallaxBackground from '#app/components/organisms/Hero/ParallaxBackground.tsx'
+		import { Button } from '#app/components/ui/button.tsx'
 		import heroImage from '~/assets/jpg/sample-hero.jpg'
-		import { Button } from '~/components/atoms/Button.tsx'
+		import logo from '~/assets/svg/epic-news-sample-logo.svg'
 		+import ArticleCard from '~/components/organisms/ArticleCard.tsx'
-		import HeroCallToAction from '~/components/organisms/Hero/HeroCallToAction.tsx'
 		+import { prisma } from '~/utils/db.server.ts'
 		```
 
 2. Next, add a `loader` function between the `meta` function and your `Index` component.
 
-		```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={1-7, 25-45}
-		import { type MetaFunction } from '@remix-run/node'
-		import { json, Link, useLoaderData } from '@remix-run/react'
+		```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={1-7, 25-47}
+		import { data, Link, type MetaFunction, useLoaderData } from 'react-router'
+		import ParallaxBackground from '#app/components/organisms/Hero/ParallaxBackground.tsx'
+		import { Button } from '#app/components/ui/button.tsx'
 		import heroImage from '~/assets/jpg/sample-hero.jpg'
-		import { Button } from '~/components/atoms/Button.tsx'
+		import logo from '~/assets/svg/epic-news-sample-logo.svg'
 		import ArticleCard from '~/components/organisms/ArticleCard.tsx'
-		import HeroCallToAction from '~/components/organisms/Hero/HeroCallToAction.tsx'
 		import { prisma } from '~/utils/db.server.ts'
 
 		export const meta: MetaFunction = () => [{ title: 'Epic News' }]
@@ -222,33 +230,36 @@ As always, try to solve this yourself before checking the solution below 👀.
 		+			id: true,
 		+			title: true,
 		+			category: { select: { name: true } },
-		+			images: { select: { id: true } },
+		+			images: { select: { objectKey: true } },
 		+		},
 		+	})
 		+
-		+	return json({ allArticles })
+		+	return data({ allArticles })
 		+}
 
 		export default function Index() {
 			return (
-				<main>
-					<HeroCallToAction
+				<main className="h-full">
+					<ParallaxBackground
 						image={heroImage}
-						imageRight={true}
-						hasBackgroundColour={true}
+						title="Epic News"
+						logo={logo}
+						altText="Welcome to Epic News, where the latest developments in tech are found."
 					>
-						<div className="flex h-full flex-1 flex-col justify-between p-16">
-							<div className="flex flex-col gap-8">
-								<h2 className="text-h2">Welcome to Epic News</h2>
-								<p className="text-lg">
-									Keep up to date with the latest tech news.
-								</p>
+						<div className="bg-secondary/40 mx-auto flex w-fit flex-1 flex-col justify-between gap-16 px-28 py-16 backdrop-blur-sm">
+							<p className="text-secondary-foreground text-center text-4xl font-extrabold">
+								The latest tech news in one place
+							</p>
+							<div className="flex justify-center gap-8">
+								<Button variant="default" size="wide">
+									<Link to="/signup">Sign up</Link>
+								</Button>
+								<Button variant="secondary" size="wide">
+									<Link to="/login">Login</Link>
+								</Button>
 							</div>
-							<Button asChild variant="default" size="lg">
-								<Link to="/signup">Sign up</Link>
-							</Button>
 						</div>
-					</HeroCallToAction>
+					</ParallaxBackground>
 				</main>
 			)
 		}
@@ -258,13 +269,13 @@ As always, try to solve this yourself before checking the solution below 👀.
 
 		I've chosen a space just below my hero section, but you can place this wherever you like.
 
-		```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={1-22, 30-44}
-		import { type MetaFunction } from '@remix-run/node'
-		import { json, Link, useLoaderData } from '@remix-run/react'
+		```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={1-22, 30-47}
+		import { data, Link, type MetaFunction, useLoaderData } from 'react-router'
+		import ParallaxBackground from '#app/components/organisms/Hero/ParallaxBackground.tsx'
+		import { Button } from '#app/components/ui/button.tsx'
 		import heroImage from '~/assets/jpg/sample-hero.jpg'
-		import { Button } from '~/components/atoms/Button.tsx'
+		import logo from '~/assets/svg/epic-news-sample-logo.svg'
 		import ArticleCard from '~/components/organisms/ArticleCard.tsx'
-		import HeroCallToAction from '~/components/organisms/Hero/HeroCallToAction.tsx'
 		import { prisma } from '~/utils/db.server.ts'
 
 		export const meta: MetaFunction = () => [{ title: 'Epic News' }]
@@ -275,36 +286,38 @@ As always, try to solve this yourself before checking the solution below 👀.
 					id: true,
 					title: true,
 					category: { select: { name: true } },
-					images: { select: { id: true } },
+					images: { select: { objectKey: true } },
 				},
 			})
 
-			return json({ allArticles })
+			return data({ allArticles })
 		}
 
 		export default function Index() {
-			const { allArticles } = useLoaderData<typeof loader>()
+		+	const { allArticles } = useLoaderData<typeof loader>()
 
 			return (
-				<main>
-					<HeroCallToAction
+				<main className="h-full">
+					<ParallaxBackground
 						image={heroImage}
-						imageRight={true}
-						hasBackgroundColour={true}
+						title="Epic News"
+						logo={logo}
+						altText="Welcome to Epic News, where the latest developments in tech are found."
 					>
-						<div className="flex h-full flex-1 flex-col justify-between p-16">
-							<div className="flex flex-col gap-8">
-								<h2 className="text-h2">Welcome to Epic News</h2>
-								<p className="text-lg">
-									Keep up to date with the latest tech news.
-								</p>
+						<div className="bg-secondary/40 mx-auto flex w-fit flex-1 flex-col justify-between gap-16 px-28 py-16 backdrop-blur-sm">
+							<p className="text-secondary-foreground text-center text-4xl font-extrabold">
+								The latest tech news in one place
+							</p>
+							<div className="flex justify-center gap-8">
+								<Button variant="default" size="wide">
+									<Link to="/signup">Sign up</Link>
+								</Button>
+								<Button variant="secondary" size="wide">
+									<Link to="/login">Login</Link>
+								</Button>
 							</div>
-							<Button asChild variant="default" size="lg">
-								<Link to="/signup">Sign up</Link>
-							</Button>
 						</div>
-					</HeroCallToAction>
-
+					</ParallaxBackground>
 		+			<div className="container py-16">
 		+				<h2 className="mb-8 text-h2 font-normal">Latest news</h2>
 		+
@@ -315,7 +328,7 @@ As always, try to solve this yourself before checking the solution below 👀.
 		+								key={article.id}
 		+								title={article.title}
 		+								category={article.category?.name}
-		+								imageId={article.images[0]?.id}
+		+								objectKey={article.images[0]?.objectKey}
 		+							/>
 		+						))
 		+					) : (

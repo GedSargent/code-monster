@@ -5,8 +5,6 @@ description: Learn how to create a single article page in Epic News.
 
 import MonsterReveal from "src/components/MonsterReveal.astro";
 
-In this guide, you'll learn how to create a single article page in Epic News.
-
 ## The single article page
 
 Now that we have a news index page, we need a page for users to read the full article. For now, this page will display the article title, first image, author, date, and content.
@@ -61,13 +59,12 @@ After you've had a go at this yourself, check out the solution below.
 2. To display a fake article and the `articleId` in the page content, add the following code to the `article.$articleId.tsx` file:
 
 ```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers
-+import { type LoaderFunctionArgs, json } from '@remix-run/node'
-+import { useLoaderData } from '@remix-run/react'
++import { type LoaderFunctionArgs, data, useLoaderData } from 'react-router'
 +
 +export async function loader({ params }: LoaderFunctionArgs) {
 +	const { articleId } = params
 +
-+	return json({ articleId })
++	return data({ articleId })
 +}
 +
 +export default function ArticlePage() {

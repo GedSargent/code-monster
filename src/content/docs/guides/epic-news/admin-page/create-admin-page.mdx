@@ -1,6 +1,6 @@
 ---
 title: Create an admin page
-description: Cretae an admin review page that allows admins to approve or reject articles.
+description: Create an admin review page that allows admins to approve or reject articles.
 ---
 
 import { Steps } from '@astrojs/starlight/components';
@@ -8,11 +8,11 @@ import MonsterReveal from 'src/components/MonsterReveal.astro'
 
 The news app is almost complete. We can write articles, view, edit, and delete them.
 
-Our final job is to add an admin page that allows admin level users to publish articles when they are ready, and make them live on the site.
+Our final job is to add an admin page that allows admin level users to publish articles when they are ready, and make them appear to visitors on the site.
 
 ## Set up the admin page
 
-For the time being, we will make this page available to everyone. We can grant access to `admin` users only in the next guide.
+For the time being, we will make this page available to everyone. We can grant access to `admin` only users in the next guide.
 
 <Steps>
 
@@ -20,16 +20,16 @@ For the time being, we will make this page available to everyone. We can grant a
 
 		The first thing we need is a new parent route to display a list of all articles.
 
-		This is straightforward. Firstly, I need to create a new file inside `app/routes` called `admin-review.tsx`:
+		This is straightforward. Firstly, create a new file inside `app/routes` called `admin-review.tsx`:
 
 		![Create admin review](src/assets/webp/epic-news/create-admin-review.webp)
 
 2. ### Add a `loader` function
 
-		In `app/routes/admin-review.tsx`, I'll set up a `loader` function that returns the `id`, `title` and `isPublished` values for each article:
+		In `app/routes/admin-review.tsx`, set up a `loader` function that returns the `id`, `title` and `isPublished` values for each article:
 
 		```tsx title="app/routes/admin-review.tsx"
-		import { json } from '@remix-run/node'
+		import { data } from 'react-router'
 		import { prisma } from '~/utils/db.server.ts'
 
 		export async function loader() {
@@ -37,32 +37,31 @@ For the time being, we will make this page available to everyone. We can grant a
 				select: { id: true, title: true, isPublished: true },
 			})
 
-			return json({ allArticles })
+			return data({ allArticles })
 		}
 		```
 
 3. ### Parent user interface
 
-		I'll then use the same layout as the `/users/$username/articles` page to display the list of articles.
+		We can use the same layout as the `/users/$username/articles` page to display the list of articles.
 
-		The only thing I've added (on line 43) is an indication of whether the article is published or not.
+		The only thing we need to add (on line 43) is an indication of whether the article is published or not.
 
 		This will be a small 'pill' user interface element. It will show a green 'P' for 'Published' or a red 'D' for 'Draft'.
 
 		Still inside `app/routes/admin-review.tsx`, add the following code:
 
-		```diff lang="tsx" title="app/routes/admin-review.tsx" showLineNumbers
-		import { json } from '@remix-run/node'
-		+import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
+		```diff lang="tsx" title="app/routes/admin-review.tsx" ins=", NavLink, Outlet, useLoaderData" showLineNumbers
+		import { data, NavLink, Outlet, useLoaderData } from 'react-router'
 		import { prisma } from '~/utils/db.server.ts'
-		import { cn } from '~/utils/misc.tsx'
+		+import { cn } from '~/utils/misc.tsx'
 
 		export async function loader() {
 			const allArticles = await prisma.article.findMany({
 				select: { id: true, title: true, isPublished: true },
 			})
 
-			return json({ allArticles })
+			return data({ allArticles })
 		}
 
 		+interface StatusPillProps {
@@ -122,17 +121,18 @@ For the time being, we will make this page available to everyone. We can grant a
 		+}
 		```
 
-		Save your changes and check the `/admin-review` route in the browser.
+		Save your changes and head to [`http://localhost:3000/admin-review`](http://localhost:3000/admin-review) in the browser.
 
 		At first, of course, all the articles will show a red 'D' to signify 'Draft':
 
+		:::caution[Important!]
+
+		If the user interface 'pills' are not displaying as expected, try restarting your server.
+
+		:::
+
 		![Initial admin review](src/assets/webp/epic-news/initial-admin-review.webp)
 
-	:::note
-
-	If the user interface 'pills' are not displaying as expected, try restarting your server.
-
-	:::
 
 		As we update the articles, the status will change to a green 'P' for those that we mark as 'Published'.
 
@@ -179,12 +179,12 @@ For the time being, we will make this page available to everyone. We can grant a
 		```tsx title="app/routes/__admin-review.$articleId.server.tsx" showLineNumbers collapse={17-38, 41-50, 68-89}
 		import { parseWithZod } from '@conform-to/zod'
 		import { invariantResponse } from '@epic-web/invariant'
+		import { formatDistanceToNow } from 'date-fns'
 		import {
+			data,
 			type LoaderFunctionArgs,
 			type ActionFunctionArgs,
-		} from '@remix-run/node'
-		import { json } from '@remix-run/react'
-		import { formatDistanceToNow } from 'date-fns'
+		} from 'react-router'
 		import { z } from 'zod'
 		import { prisma } from '~/utils/db.server.js'
 		import { redirectWithToast } from '~/utils/toast.server.js'
@@ -210,7 +210,7 @@ For the time being, we will make this page available to everyone. We can grant a
 					},
 					images: {
 						select: {
-							id: true,
+							objectKey: true,
 							altText: true,
 						},
 					},
@@ -228,7 +228,7 @@ For the time being, we will make this page available to everyone. We can grant a
 				? formatDistanceToNow(publishedAtDate)
 				: null
 
-			return json({
+			return data({
 				article,
 				timeAgoUpdated,
 				timeAgoPublished,
@@ -258,7 +258,7 @@ For the time being, we will make this page available to everyone. We can grant a
 							message: 'Article not found',
 						})
 					}
-				}).transform(async data => {
+				}).transform(async (data) => {
 					return {
 						...data,
 						publishedAt: new Date(),
@@ -269,7 +269,7 @@ For the time being, we will make this page available to everyone. We can grant a
 			})
 
 			if (submission.status !== 'success') {
-				return json(
+				return data(
 					{ result: submission.reply() },
 					{ status: submission.status === 'error' ? 400 : 200 },
 				)
@@ -317,7 +317,7 @@ For the time being, we will make this page available to everyone. We can grant a
 						},
 						images: {
 							select: {
-								id: true,
+								objectKey: true,
 								altText: true,
 							},
 						},
@@ -408,15 +408,14 @@ For the time being, we will make this page available to everyone. We can grant a
 
 		```tsx title="app/routes/admin-review/$articleId.tsx" showLineNumbers collapse={1-11, 18-72, 91-113}
 		import { getFormProps, useForm } from '@conform-to/react'
-		import { Form, useActionData, useLoaderData } from '@remix-run/react'
-		import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
+		import { Form, useActionData, useLoaderData } from 'react-router'
+		import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
+		import { type action, type loader } from './__admin-review.$articleId.server'
 		import { floatingToolbarClassName } from '~/components/floating-toolbar.tsx'
 		import { ErrorList } from '~/components/forms.tsx'
 		import { Icon } from '~/components/ui/icon.tsx'
 		import { StatusButton } from '~/components/ui/status-button.tsx'
 		import { getArticleImgSrc, useIsPending } from '~/utils/misc.tsx'
-
-		import type { action, loader } from './__admin-review.$articleId.server'
 		export { action, loader } from './__admin-review.$articleId.server'
 
 		export default function AdminReviewRoute() {
@@ -424,24 +423,24 @@ For the time being, we will make this page available to everyone. We can grant a
 
 			return (
 				<div className="absolute inset-0 flex flex-col px-10">
-					<h2 className="mb-2 pt-12 text-h2 lg:mb-6">{data.article.title}</h2>
-					<div className="mb-4 flex  justify-between gap-4">
-						<p className="w-fit rounded-lg bg-card px-4 py-2 text-sm text-card-foreground">
-							{data.article.category?.name ?? 'General News'}
+					<h2 className="text-h2 mb-2 pt-12 lg:mb-6">{data?.article.title}</h2>
+					<div className="mb-4 flex justify-between gap-4">
+						<p className="bg-card text-card-foreground w-fit rounded-lg px-4 py-2 text-sm">
+							{data?.article.category?.name ?? 'General News'}
 						</p>
 						<p
-							className={`w-fit rounded-lg ${data.article.isPublished ? 'bg-green-800' : 'bg-destructive'} px-4 py-2 text-xs font-bold text-card-foreground`}
+							className={`w-fit rounded-lg ${data?.article.isPublished ? 'bg-green-800' : 'bg-destructive'} text-card-foreground px-4 py-2 text-xs font-bold`}
 						>
-							{data.article.isPublished ? 'Published' : 'Awaiting review'}
+							{data?.article.isPublished ? 'Published' : 'Awaiting review'}
 						</p>
 					</div>
 					<div className="overflow-y-auto pb-24">
 						<ul className="flex flex-wrap gap-5 py-5">
-							{data.article.images.map(image => (
-								<li key={image.id}>
-									<a href={getArticleImgSrc(image.id)}>
+							{data?.article.images.map((image) => (
+								<li key={image.objectKey}>
+									<a href={getArticleImgSrc(image.objectKey)}>
 										<img
-											src={getArticleImgSrc(image.id)}
+											src={getArticleImgSrc(image.objectKey)}
 											alt={image.altText ?? ''}
 											className="h-32 w-32 rounded-lg object-cover"
 										/>
@@ -449,33 +448,33 @@ For the time being, we will make this page available to everyone. We can grant a
 								</li>
 							))}
 						</ul>
-						<p className="whitespace-break-spaces text-sm md:text-lg">
-							{data.article.content}
+						<p className="text-sm whitespace-break-spaces md:text-lg">
+							{data?.article.content}
 						</p>
 					</div>
 
 					<div className={floatingToolbarClassName}>
-						<span className="text-sm text-foreground/90 max-[524px]:hidden">
+						<span className="text-foreground/90 text-sm max-[524px]:hidden">
 							<Icon name="clock" className="scale-125">
-								{data.timeAgoUpdated} ago
+								{data?.timeAgoUpdated} ago
 							</Icon>
 						</span>
 						<span
-							className={`text-sm ${data.timeAgoPublished ? 'text-foreground/90' : 'text-red/90'} max-[524px]:hidden`}
+							className={`text-sm ${data?.timeAgoPublished ? 'text-foreground/90' : 'text-red/90'} max-[524px]:hidden`}
 						>
 							<Icon
-								name={data.timeAgoPublished ? 'check' : 'update'}
+								name={data?.timeAgoPublished ? 'check' : 'update'}
 								className="scale-125"
 							>
-								{data.timeAgoPublished
-									? `Published ${data.timeAgoPublished} ago`
+								{data?.timeAgoPublished
+									? `Published ${data?.timeAgoPublished} ago`
 									: 'Not published yet'}
 							</Icon>
 						</span>
 						<div className="grid flex-1 grid-cols-2 justify-end gap-2 min-[525px]:flex md:gap-4">
 							<ArticleStatusForm
-								id={data.article.id}
-								isPublished={data.article.isPublished}
+								id={data?.article.id ?? ''}
+								isPublished={data?.article.isPublished ?? false}
 							/>
 						</div>
 					</div>
@@ -506,7 +505,7 @@ For the time being, we will make this page available to everyone. We can grant a
 						type="submit"
 						name="intent"
 						value="set-article-status"
-						status={isPending ? 'pending' : form.status ?? 'idle'}
+						status={isPending ? 'pending' : (form.status ?? 'idle')}
 						disabled={isPending}
 						className="w-full max-md:aspect-square max-md:px-0"
 					>
@@ -529,7 +528,7 @@ For the time being, we will make this page available to everyone. We can grant a
 				<GeneralErrorBoundary
 					statusHandlers={{
 						403: () => <p>You are not allowed to do that</p>,
-						404: ({ params }) => <p>No article with the id exists</p>,
+						404: () => <p>No article with the id exists</p>,
 					}}
 				/>
 			)
@@ -565,8 +564,8 @@ For the time being, we will make this page available to everyone. We can grant a
 					</span>
 					<div className="grid flex-1 grid-cols-2 justify-end gap-2 min-[525px]:flex md:gap-4">
 						<ArticleStatusForm
-							id={data.article.id}
-							isPublished={data.article.isPublished}
+							id={data?.article.id ?? ''}
+							isPublished={data?.article.isPublished ?? false}
 						/>
 					</div>
 				</div>

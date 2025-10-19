@@ -12,9 +12,11 @@ Now that we have our single article page built, we need a way to link to it from
 
 ## Link to the single article page
 
-For every card on a news index page (e.g. the home page or `/news/$category`), we want to link to the single article page when the user clicks on the card.
+Open `app/routes/news._index.tsx` and look carefully at the code again.
 
-- You should use the `Link` component from `'@remix-run/react'` to create a link to the single article page.
+For every card on the news index page, we want to link to the single article page for that particular news story when the user clicks on the card.
+
+- You should import the `Link` component from `'react-router'` to create a link to the single article page.
 - The link should incorporate the article ID into its URL (use a [**template literal string**](https://stackoverflow.com/questions/30372538/how-can-i-interpolate-jsx-with-an-expression-in-a-string) for this).
 - Can you set the link to [**`prefetch` the page data**](https://remix.run/docs/en/main/components/link#prefetch) when the user hovers over it?
 
@@ -43,7 +45,7 @@ Adding the line of code below will initially produce a red underline, but don't 
 ```diff lang="tsx" title="app/routes/news.$category.tsx" showLineNumbers collapse={1-29}
 import { invariant } from '@epic-web/invariant'
 import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { useLoaderData } from 'react-router'
 import ArticleCard from '~/components/organisms/ArticleCard.tsx'
 import { prisma } from '~/utils/db.server.ts'
 import { toTitleCase } from '~/utils/stringUtils.ts'
@@ -98,32 +100,34 @@ export default function NewsCategoryPage() {
 
 <MonsterReveal title="2. Modify `ArticleCard`">
 
-1. Open `app/components/organisms/ArticleCard.tsx`
+1. Open `app/components/organisms/ArticleCard.tsx` if you extracted the `ArticleCard` component earlier, or find your `ArticleCard` component inside `app/routes/news.$category.tsx` if you did not.
 
 2. Add the `Link` component to the import list at the top of your file:
 
 ```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx"
-+import { Link } from '@remix-run/react'
+import { type ReactElement } from 'react'
 import {
 	MdOutlineBusinessCenter,
 	MdOutlineTheaters,
 	MdOutlineDesktopMac,
 	MdOutlineNewspaper,
 } from 'react-icons/md'
++import { Link } from 'react-router'
 import siteLogo from '~/assets/svg/site-logo.svg'
 import { getArticleImgSrc } from '~/utils/misc.tsx'
 ```
 
 3. Add the `articleId` prop to the `ArticleCard` component:
 
-```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx" showLineNumbers collapse={1-9, 24-53}
-import { Link } from '@remix-run/react'
+```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx" showLineNumbers collapse={1-10, 25-54}
+import { type ReactElement } from 'react'
 import {
 	MdOutlineBusinessCenter,
 	MdOutlineTheaters,
 	MdOutlineDesktopMac,
 	MdOutlineNewspaper,
 } from 'react-icons/md'
+import { Link } from 'react-router'
 import siteLogo from '~/assets/svg/site-logo.svg'
 import { getArticleImgSrc } from '~/utils/misc.tsx'
 
@@ -178,13 +182,14 @@ export default function ArticleCard({
 	We can use a template literal string to incorporate the `articleId` prop into the URL:
 
 ```diff lang="tsx" title="app/components/organisms/ArticleCard.tsx" showLineNumbers collapse={1-16, 24-33}
-import { Link } from '@remix-run/react'
+import { type ReactElement } from 'react'
 import {
 	MdOutlineBusinessCenter,
 	MdOutlineTheaters,
 	MdOutlineDesktopMac,
 	MdOutlineNewspaper,
 } from 'react-icons/md'
+import { Link } from 'react-router'
 import siteLogo from '~/assets/svg/site-logo.svg'
 import { getArticleImgSrc } from '~/utils/misc.tsx'
 
@@ -257,7 +262,7 @@ If you are also displaying news articles on the home page, you will need to upda
 In this guide, you learned how to:
 
 - link to a single article page from the news index page
-- use the `Link` component from `'@remix-run/react'` to create a link to the single article page
+- use the `Link` component from `'react-router'` to create a link to the single article page
 - incorporate the article ID into the URL using a template literal string
 - set the link to prefetch the page data when the user hovers over it
 

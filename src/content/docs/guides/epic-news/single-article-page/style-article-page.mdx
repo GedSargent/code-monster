@@ -55,7 +55,7 @@ Eventually (in the next solution step), I will use this component in the single 
 This component will be responsible for displaying the article `title`, `content`, author `name`, `category` and `images`.
 
 ```tsx title="app/components/organisms/SingleArticle.tsx"
-import { Link } from '@remix-run/react'
+import { type JSX } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import {
 	MdOutlineBusinessCenter,
@@ -63,8 +63,9 @@ import {
 	MdOutlineDesktopMac,
 	MdOutlineNewspaper,
 } from 'react-icons/md'
+import { Link } from 'react-router'
 import { toTitleCase } from '#app/utils/stringUtils.js'
-import siteLogo from '~/assets/svg/site-logo.svg'
+import siteLogo from '~/assets/svg/epic-news-sample-logo.svg'
 import { getArticleImgSrc } from '~/utils/misc.js'
 
 interface SingleArticleProps {
@@ -79,15 +80,14 @@ interface SingleArticleProps {
 			name: string
 		} | null
 		images: {
-			id: string
+			objectKey: string
 		}[]
 	}
 }
 export default function SingleArticle({ article }: SingleArticleProps) {
 	const mainImage = article.images[0]
-	const imageSrc = article.images.length
-		? getArticleImgSrc(mainImage.id)
-		: siteLogo
+
+	const imageSrc = mainImage ? getArticleImgSrc(mainImage.objectKey) : siteLogo
 	const categoryTitle = toTitleCase(article.category?.name || '')
 
 	const categoryIcons: { [key: string]: JSX.Element } = {
@@ -104,12 +104,12 @@ export default function SingleArticle({ article }: SingleArticleProps) {
 			<div className="lg:w-2/3">
 				<Link
 					to="/news"
-					className="group flex items-center gap-2 pb-4 text-muted-foreground transition hover:text-foreground"
+					className="group text-muted-foreground hover:text-foreground flex items-center gap-2 pb-4 transition"
 				>
 					<FiArrowLeft className="transition group-hover:-translate-x-1" /> Back
 					to News
 				</Link>
-				<h2 className="pb-8 text-h2">{article.title}</h2>
+				<h2 className="text-h2 pb-8">{article.title}</h2>
 
 				<div
 					className={`relative h-[18rem] object-cover md:h-[23rem] lg:h-[28rem]`}
@@ -127,11 +127,11 @@ export default function SingleArticle({ article }: SingleArticleProps) {
 						{categoryIcons[categoryTitle]}
 						<p className="text-sm text-violet-300">{categoryTitle}</p>
 					</div>
-					<span className="text-sm text-muted-foreground">
+					<span className="text-muted-foreground text-sm">
 						By: {article.owner.name}
 					</span>
 				</div>
-				<div className="whitespace-break-spaces pt-16 text-lg leading-loose">
+				<div className="pt-16 text-lg leading-loose whitespace-break-spaces">
 					{article.content}
 				</div>
 			</div>
@@ -140,7 +140,7 @@ export default function SingleArticle({ article }: SingleArticleProps) {
 }
 ```
 
-This is a lot of code! But don't worry, it's just a lot of JSX. The logic is simple: we're displaying the article title, content, author name, category and images.
+This is a lot of code! But don't worry, it's just JSX like we have written before. The logic is simple: we're displaying the article title, content, author name, category and images.
 
 Take the time to understand how the component works, and how it uses the `getArticleImgSrc` utility function to get the image source.
 
@@ -154,12 +154,11 @@ With this in place, I can make two simple changes to the single article page.
 
 1. Open the `app/routes/article.$articleId.tsx` file
 
-2. Add the changes highlighted in green below:
+2. Remove the code highlighted in red, and add the changes highlighted in green below:
 
-```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers collapse={7-37}
+```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers collapse={6-36}
 import { invariant } from '@epic-web/invariant'
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, data, useLoaderData } from 'react-router'
 +import SingleArticle from '#app/components/organisms/SingleArticle.tsx'
 import { prisma } from '~/utils/db.server.ts'
 
@@ -177,11 +176,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
 			content: true,
 			category: { select: { name: true } },
 			owner: { select: { name: true } },
-			images: { select: { id: true } },
+			images: { select: { objectKey: true } },
 		},
 	})
 
-	return json({ article })
+	return data({ article })
 }
 
 const ArticleNotFound = () => {
@@ -198,6 +197,13 @@ const ArticleNotFound = () => {
 export default function ArticlePage() {
 	const { article } = useLoaderData<typeof loader>()
 
+-	return article ? (
+-		<div className="container py-16">
+-			<h2 className="text-h2 pb-8">{article.title}</h2>
+-		</div>
+-	) : (
+-		<ArticleNotFound />
+-	)
 +	return article ? <SingleArticle article={article} /> : <ArticleNotFound />
 }
 ```
@@ -217,24 +223,6 @@ In this step, we have:
 - Extracted each field relevant to display on the the single article page
 - Provided a fallback screen to show if the user tries to access an article that doesn't exist
 - Styled the single article page in Epic News with Tailwind CSS
-
-
-::::note[Assignment]
-
-## 📄 Assignment documentation
-
-We need to update your assignment to document this new feature. 🚀
-
-1. How did you style the single article page in Epic News?
-2. Did you extract any of your React code into separate components? If so, why?
-
-:::tip
-
-### Useful links
-
-- [Clean code in React](https://www.turing.com/kb/writing-clean-react-code#break-down-components)
-
-::::
 
 ## Next steps
 

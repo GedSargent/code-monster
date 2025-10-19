@@ -69,7 +69,7 @@ export default function Index() {
 								articleId={article.id}
 								title={article.title}
 								category={article.category?.name}
-								imageId={article.images[0]?.id}
+								objectKey={article.images[0]?.objectKey}
 							/>
 						))
 					) : (
@@ -158,7 +158,7 @@ export default function Index() {
 								articleId={article.id}
 								title={article.title}
 								category={article.category?.name}
-								imageId={article.images[0]?.id}
+								objectKey={article.images[0]?.objectKey}
 							/>
 						))
 					) : (

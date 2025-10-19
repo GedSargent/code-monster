@@ -11,7 +11,7 @@ In this guide, you will fetch and display article data in the single article pag
 
 ## Fetch article data
 
-Using your knowledge from our previous lesson on how to [**load and display articles**](/code-monster/guides/epic-news/displaying-articles/load-and-display-all-real-articles) for the news index page, can you fetch and display the article data for the single article page?
+Using your knowledge from our previous lesson on how to [**load and display articles**](/code-monster/guides/epic-news/displaying-articles/load-and-display-article-data) for the news index page, can you fetch and display the article data for the single article page?
 
 Your Prisma query should fetch a single article based on the `articleId` parameter from the URL.
 
@@ -48,8 +48,7 @@ For the time being, just display the article title on the screen. We will look a
 
 ```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers
 +import { invariant } from '@epic-web/invariant'
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, data, useLoaderData } from 'react-router'
 +import { prisma } from '~/utils/db.server.ts'
 ```
 
@@ -57,10 +56,9 @@ import { useLoaderData } from '@remix-run/react'
 
 		Remember to `return` the `article` object from the query, rather than the old `articleId`:
 
-```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers collapse={26-34}
+```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers collapse={28-36}
 import { invariant } from '@epic-web/invariant'
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, data, useLoaderData } from 'react-router'
 import { prisma } from '~/utils/db.server.ts'
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -81,11 +79,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
 +		},
 +	})
 +
-+	return json({ article })
--	return json({ articleId })
++	return data({ article })
+-	return data({ articleId })
 }
 
-export default function ArticlePage() {
+export default function ArticleRoute() {
 	const { articleId } = useLoaderData<typeof loader>()
 
 	return (
@@ -106,10 +104,9 @@ export default function ArticlePage() {
 
 Add the code below to display the article title, and a fallback message if no article is found:
 
-```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers collapse={1-25}
+```diff lang="tsx" title="app/routes/article.$articleId.tsx" showLineNumbers collapse={1-24}
 import { invariant } from '@epic-web/invariant'
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, data, useLoaderData } from 'react-router'
 import { prisma } from '~/utils/db.server.ts'
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -130,7 +127,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 		},
 	})
 
-	return json({ article })
+	return data({ article })
 }
 
 +const ArticleNotFound = () => {
@@ -144,7 +141,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 +	)
 +}
 
-export default function ArticlePage() {
+export default function ArticleRoute() {
 +	const { article } = useLoaderData<typeof loader>()
 
 +	return article ? (
@@ -168,7 +165,7 @@ Here, we're checking if the entire `article` is truthy (i.e. is it an actual obj
 If it is, we render the article title. If it's not, we render the `ArticleNotFound` component.
 
 ```tsx mark={4-10}
-export default function ArticlePage() {
+export default function ArticleRoute() {
 	const { article } = useLoaderData<typeof loader>()
 
 	return article ? (
@@ -194,25 +191,6 @@ In this tutorial, we have:
 - Created a Prisma query to fetch a single article.
 - Updated the single article page to fetch and display the article data.
 - Added a simple error message if the article is not found.
-
-::::note[Assignment]
-
-## 📄 Assignment documentation
-
-We need to update your assignment to document this new feature. 🚀
-
-1. How did you fetch the article data in the single article page?
-2. What did you show on the screen if the article was not found? How did you handle this in the code?
-
-:::tip
-
-### Useful links
-
-- [Remix `loader` functions](https://remix.run/docs/en/main/discussion/data-flow#route-loader)
-- [Remix `useLoaderData` hook](https://remix.run/docs/en/main/hooks/use-loader-data)
-- [JavaScript ternary operator](https://www.programiz.com/javascript/ternary-operator)
-
-::::
 
 ## What's next?
 

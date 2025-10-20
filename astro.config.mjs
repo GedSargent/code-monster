@@ -215,150 +215,150 @@ export default defineConfig({
                 }
               ]
             },
-            {
-              label: "🔀 Routes, loaders and useLoaderData",
-              collapsed: true,
-              items: [
-                {
-                  label: "🔀 The `Outlet` component",
-                  link: "guides/epic-news/routing/outlet",
-                },
-                {
-                  label: "🔀 Nested routes",
-                  link: "guides/epic-news/routing/nested-routes",
-                },
-                {
-                  label: "🔀 Dynamic routes and loader functions",
-                  link: "guides/epic-news/routing/dynamic-routes",
-                },
-                {
-                  label: "🔀 Server/client communication with useLoaderData",
-                  link: "guides/epic-news/routing/use-loader-data",
-                },
-                {
-                  label: "🔀 News wireframe layout",
-                  link: "guides/epic-news/routing/news-layout",
-                },
-              ]
-            },
-            {
-              label: '🗄️ Prisma database',
-              collapsed: true,
-              items: [
-                {
-                  label: '🗄️ Getting started',
-                  link: 'guides/epic-news/prisma/getting-started'
-                },
-                {
-                  label: '🗄️ Schema updates',
-                  link: 'guides/epic-news/prisma/schema-updates'
-                },
-                {
-                  label: '🌱 Seed files',
-                  link: 'guides/epic-news/prisma/seed-files'
-                },
-              ]
-            },
-            {
-              label: "🔒 Security",
-              collapsed: true,
-              items: [
-                {
-                  label: "🔒 Cross site request forgery",
-                  link: "guides/epic-news/csrf",
-                },
-                {
-                  label: "🔒 Spambots and honeypots",
-                  link: "guides/epic-news/honey-pots",
-                },
-                {
-                  label: "🔒 Account creation",
-                  link: "guides/epic-news/account-creation",
-                },
-              ]
-            },
-            {
-              label: "🖥️ Articles",
-              collapsed: true,
-              items: [
-                {
-                  label: '🖥️ Creating articles',
-                  link: 'guides/epic-news/displaying-articles/creating-articles'
-                },
-                {
-                  label: '🖥️ Load and display article data',
-                  link: 'guides/epic-news/displaying-articles/load-and-display-article-data'
-                },
-                {
-                  label: '🖥️ Article images (optional)',
-                  link: 'guides/epic-news/displaying-articles/article-images'
-                },
-                {
-                  label: '🖥️ Filter articles by category',
-                  link: 'guides/epic-news/displaying-articles/filter-articles-by-category'
-                },
-              ]
-            },
-            {
-              label: "📝 Single article page",
-              collapsed: true,
-              items: [
-                {
-                  label: '📝 Create a single article page',
-                  link: 'guides/epic-news/single-article-page/create-single-article-page'
-                },
-                {
-                  label: '📝 Link from news index to single article page',
-                  link: 'guides/epic-news/single-article-page/link-to-single-article-page'
-                },
-                {
-                  label: '📝 Fetch and display article data',
-                  link: 'guides/epic-news/single-article-page/fetch-article-data'
-                },
-                {
-                  label: '📝 Style the article page',
-                  link: 'guides/epic-news/single-article-page/style-article-page'
-                },
-              ]
-            },
-            {
-              label: "🛡️ Admin page",
-              collapsed: true,
-              items: [
-                {
-                  label: '🛡️ Create an admin review page',
-                  link: 'guides/epic-news/admin-page/create-admin-page'
-                },
-                {
-                  label: '🛡️ Protecting routes',
-                  link: 'guides/epic-news/admin-page/protecting-routes'
-                },
-                {
-                  label: '🛡️ Admin-only links',
-                  link: 'guides/epic-news/admin-page/admin-only-links'
-                },
-                {
-                  label: '🛡️ Filter published articles',
-                  link: 'guides/epic-news/admin-page/filter-published-articles'
-                }
-              ]
-            },
-            { label: '🚀 Wrapping up',
-              collapsed: true,
-              items: [
-              {
-                label: '🚀 Functionality complete!',
-                link: 'guides/epic-news/wrapping-up/functionality-complete'
-              },
-              {
-                label: '🚀 Extra credit - Single sign-on',
-                link: 'guides/epic-news/wrapping-up/single-sign-on'
-              },
-              {
-                label: '🚀 Extra credit - Advanced grid layout',
-                link: 'guides/epic-news/wrapping-up/advanced-grid-layout'
-              }
-            ]}
+            // {
+            //   label: "🔀 Routes, loaders and useLoaderData",
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: "🔀 The `Outlet` component",
+            //       link: "guides/epic-news/routing/outlet",
+            //     },
+            //     {
+            //       label: "🔀 Nested routes",
+            //       link: "guides/epic-news/routing/nested-routes",
+            //     },
+            //     {
+            //       label: "🔀 Dynamic routes and loader functions",
+            //       link: "guides/epic-news/routing/dynamic-routes",
+            //     },
+            //     {
+            //       label: "🔀 Server/client communication with useLoaderData",
+            //       link: "guides/epic-news/routing/use-loader-data",
+            //     },
+            //     {
+            //       label: "🔀 News wireframe layout",
+            //       link: "guides/epic-news/routing/news-layout",
+            //     },
+            //   ]
+            // },
+            // {
+            //   label: '🗄️ Prisma database',
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: '🗄️ Getting started',
+            //       link: 'guides/epic-news/prisma/getting-started'
+            //     },
+            //     {
+            //       label: '🗄️ Schema updates',
+            //       link: 'guides/epic-news/prisma/schema-updates'
+            //     },
+            //     {
+            //       label: '🌱 Seed files',
+            //       link: 'guides/epic-news/prisma/seed-files'
+            //     },
+            //   ]
+            // },
+            // {
+            //   label: "🔒 Security",
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: "🔒 Cross site request forgery",
+            //       link: "guides/epic-news/csrf",
+            //     },
+            //     {
+            //       label: "🔒 Spambots and honeypots",
+            //       link: "guides/epic-news/honey-pots",
+            //     },
+            //     {
+            //       label: "🔒 Account creation",
+            //       link: "guides/epic-news/account-creation",
+            //     },
+            //   ]
+            // },
+            // {
+            //   label: "🖥️ Articles",
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: '🖥️ Creating articles',
+            //       link: 'guides/epic-news/displaying-articles/creating-articles'
+            //     },
+            //     {
+            //       label: '🖥️ Load and display article data',
+            //       link: 'guides/epic-news/displaying-articles/load-and-display-article-data'
+            //     },
+            //     {
+            //       label: '🖥️ Article images (optional)',
+            //       link: 'guides/epic-news/displaying-articles/article-images'
+            //     },
+            //     {
+            //       label: '🖥️ Filter articles by category',
+            //       link: 'guides/epic-news/displaying-articles/filter-articles-by-category'
+            //     },
+            //   ]
+            // },
+            // {
+            //   label: "📝 Single article page",
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: '📝 Create a single article page',
+            //       link: 'guides/epic-news/single-article-page/create-single-article-page'
+            //     },
+            //     {
+            //       label: '📝 Link from news index to single article page',
+            //       link: 'guides/epic-news/single-article-page/link-to-single-article-page'
+            //     },
+            //     {
+            //       label: '📝 Fetch and display article data',
+            //       link: 'guides/epic-news/single-article-page/fetch-article-data'
+            //     },
+            //     {
+            //       label: '📝 Style the article page',
+            //       link: 'guides/epic-news/single-article-page/style-article-page'
+            //     },
+            //   ]
+            // },
+            // {
+            //   label: "🛡️ Admin page",
+            //   collapsed: true,
+            //   items: [
+            //     {
+            //       label: '🛡️ Create an admin review page',
+            //       link: 'guides/epic-news/admin-page/create-admin-page'
+            //     },
+            //     {
+            //       label: '🛡️ Protecting routes',
+            //       link: 'guides/epic-news/admin-page/protecting-routes'
+            //     },
+            //     {
+            //       label: '🛡️ Admin-only links',
+            //       link: 'guides/epic-news/admin-page/admin-only-links'
+            //     },
+            //     {
+            //       label: '🛡️ Filter published articles',
+            //       link: 'guides/epic-news/admin-page/filter-published-articles'
+            //     }
+            //   ]
+            // },
+            // { label: '🚀 Wrapping up',
+            //   collapsed: true,
+            //   items: [
+            //   {
+            //     label: '🚀 Functionality complete!',
+            //     link: 'guides/epic-news/wrapping-up/functionality-complete'
+            //   },
+            //   {
+            //     label: '🚀 Extra credit - Single sign-on',
+            //     link: 'guides/epic-news/wrapping-up/single-sign-on'
+            //   },
+            //   {
+            //     label: '🚀 Extra credit - Advanced grid layout',
+            //     link: 'guides/epic-news/wrapping-up/advanced-grid-layout'
+            //   }
+            // ]}
           ],
         },
         {
@@ -378,112 +378,112 @@ export default defineConfig({
             },
           ],
         },
-        {
-          label: "📱 React Native",
-          collapsed: true,
-          items: [
-            {
-              label: "📱 Getting started with Expo Snacks",
-              link: "guides/react-native/what-is-react-native",
-            },
-            {
-              label: "📱 Coding a Figma Design",
-              link: "guides/react-native/recreating-a-design",
-            },
-            {
-              label: "📱 Editing tasks",
-              link: "guides/react-native/editing-tasks",
-            },
-            {
-              label: "📱 Creating new tasks",
-              link: "guides/react-native/creating-new-tasks",
-            },
-            {
-              label: "📱 Saving tasks to local storage",
-              link: "guides/react-native/saving-tasks-to-localstorage",
-            },
-            {
-              label: "📱 Writing tests",
-              link: "guides/react-native/writing-tests",
-            },
-          ],
-        },
-        {
-          label: "GameLog",
-          collapsed: true,
-          items: [
-            {
-              label: "🗄️ Database config",
-              items: [
-                {
-                  label: "🗄️ Getting started",
-                  link: "guides/gamelog/getting-started",
-                },
-                {
-                  label: "🗄️ The schema and migrations",
-                  link: "guides/gamelog/prisma-schema",
-                },
-                {
-                  label: "🗄️ Prisma Studio",
-                  link: "guides/gamelog/prisma-studio",
-                },
-                {
-                  label: "🗄️ One-to-many relationships",
-                  link: "guides/gamelog/relationships-one-to-many",
-                },
-                {
-                  label: "🌱 Seed files",
-                  link: "guides/gamelog/seed-files",
-                },
-                {
-                  label: "🗄️ Reading data - loader functions",
-                  link: "guides/gamelog/reading-data",
-                },
-              ]
-            },
-            {
-              label: "🖥️ Displaying data",
-              items: [
-                {
-                  label: "🖥️ Displaying data with `map`",
-                  link: "guides/gamelog/displaying-data",
-                },
-                {
-                  label: "🖥️ Passing data into components",
-                  link: "guides/gamelog/passing-data-into-components",
-                },
-                {
-                  label: "🖥️ Displaying data from two tables",
-                  link: "guides/gamelog/displaying-data-from-two-tables",
-                },
-                {
-                  label: "🖥️ Adding an image to the Game model",
-                  link: "guides/gamelog/adding-an-image-to-the-game-model",
-                },
-                {
-                  label: "🖥️ Load and display game images",
-                  link: "guides/gamelog/load-and-display-game-images",
-                },
-                {
-                  label: "🖥️ Creating new games",
-                  link: "guides/gamelog/creating-new-games",
-                },
-                {
-                  label: "🖥️ Deleting games",
-                  link: "guides/gamelog/deleting-games",
-                },
-                {
-                  label: "🖥️ Editing games",
-                  link: "guides/gamelog/editing-games",
-                },
-                {
-                  label: "🖥️ Next steps",
-                  link: "guides/gamelog/next-steps",
-                },
-              ]
-            },
-          ]
-        },
+        // {
+        //   label: "📱 React Native",
+        //   collapsed: true,
+        //   items: [
+        //     {
+        //       label: "📱 Getting started with Expo Snacks",
+        //       link: "guides/react-native/what-is-react-native",
+        //     },
+        //     {
+        //       label: "📱 Coding a Figma Design",
+        //       link: "guides/react-native/recreating-a-design",
+        //     },
+        //     {
+        //       label: "📱 Editing tasks",
+        //       link: "guides/react-native/editing-tasks",
+        //     },
+        //     {
+        //       label: "📱 Creating new tasks",
+        //       link: "guides/react-native/creating-new-tasks",
+        //     },
+        //     {
+        //       label: "📱 Saving tasks to local storage",
+        //       link: "guides/react-native/saving-tasks-to-localstorage",
+        //     },
+        //     {
+        //       label: "📱 Writing tests",
+        //       link: "guides/react-native/writing-tests",
+        //     },
+        //   ],
+        // },
+        // {
+        //   label: "GameLog",
+        //   collapsed: true,
+        //   items: [
+        //     {
+        //       label: "🗄️ Database config",
+        //       items: [
+        //         {
+        //           label: "🗄️ Getting started",
+        //           link: "guides/gamelog/getting-started",
+        //         },
+        //         {
+        //           label: "🗄️ The schema and migrations",
+        //           link: "guides/gamelog/prisma-schema",
+        //         },
+        //         {
+        //           label: "🗄️ Prisma Studio",
+        //           link: "guides/gamelog/prisma-studio",
+        //         },
+        //         {
+        //           label: "🗄️ One-to-many relationships",
+        //           link: "guides/gamelog/relationships-one-to-many",
+        //         },
+        //         {
+        //           label: "🌱 Seed files",
+        //           link: "guides/gamelog/seed-files",
+        //         },
+        //         {
+        //           label: "🗄️ Reading data - loader functions",
+        //           link: "guides/gamelog/reading-data",
+        //         },
+        //       ]
+        //     },
+        //     {
+        //       label: "🖥️ Displaying data",
+        //       items: [
+        //         {
+        //           label: "🖥️ Displaying data with `map`",
+        //           link: "guides/gamelog/displaying-data",
+        //         },
+        //         {
+        //           label: "🖥️ Passing data into components",
+        //           link: "guides/gamelog/passing-data-into-components",
+        //         },
+        //         {
+        //           label: "🖥️ Displaying data from two tables",
+        //           link: "guides/gamelog/displaying-data-from-two-tables",
+        //         },
+        //         {
+        //           label: "🖥️ Adding an image to the Game model",
+        //           link: "guides/gamelog/adding-an-image-to-the-game-model",
+        //         },
+        //         {
+        //           label: "🖥️ Load and display game images",
+        //           link: "guides/gamelog/load-and-display-game-images",
+        //         },
+        //         {
+        //           label: "🖥️ Creating new games",
+        //           link: "guides/gamelog/creating-new-games",
+        //         },
+        //         {
+        //           label: "🖥️ Deleting games",
+        //           link: "guides/gamelog/deleting-games",
+        //         },
+        //         {
+        //           label: "🖥️ Editing games",
+        //           link: "guides/gamelog/editing-games",
+        //         },
+        //         {
+        //           label: "🖥️ Next steps",
+        //           link: "guides/gamelog/next-steps",
+        //         },
+        //       ]
+        //     },
+        //   ]
+        // },
         {
           label: "Reference",
           collapsed: true,

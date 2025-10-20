@@ -15,117 +15,28 @@ The problem is that our current function that checks the user's role throws an e
 
 This wouldn't work in the case of a navbar link, as we still want users who are not admins to see the navbar but not the link.
 
-This is actually a straightfoward fix, and we will do this in three stages:
-
-## Create an optional admin user check
-
-Open `app/utils/rootProviders/generateRootJson.ts` and add the following code to the `generateRootJson` function that starts around line 43:
-
-```diff lang="tsx" title="app/utils/rootProviders/generateRootJson.ts" showLineNumbers startLineNumber=43
-export default function generateRootJson({
-	user,
-	request,
-	honeyProps,
-	toast,
-	csrfToken,
-	timings,
-	toastHeaders,
-	csrfCookieHeader,
-}: GenerateRootJsonArgs) {
-	const pageData = {
-		user,
-		requestInfo: {
-			hints: getHints(request),
-			origin: getDomainUrl(request),
-			path: new URL(request.url).pathname,
-			userPrefs: {
-				theme: getTheme(request),
-			},
-		},
-		ENV: getEnv(),
-		toast,
-		honeyProps,
-		csrfToken,
-+		isAdminUser: user ? user.roles.some(role => role.name === 'admin') : false,
-	}
-	const headerData = {
-		headers: combineHeaders(
-			{ 'Server-Timing': timings.toString() },
-			toastHeaders,
-			csrfCookieHeader ? { 'set-cookie': csrfCookieHeader } : null,
-		),
-	}
-
-	return { pageData, headerData }
-}
-```
-
-## Pass `isAdminUser` to the navbar
-
-Next, open `app/root.tsx` and add the following code to the `HeaderWithSearch` component (or whichever navbar component you are using):
-
-:::caution
-
-Adding the code below will create a red line under `isAdminUser` in your editor.
-
-This is because `HeaderWithSearch` isn't expecting the `isAdminUser` prop yet.
-
-Don't worry - we will fix this in the next step.
-
-:::
-
-```diff lang="tsx" title="app/root.tsx" showLineNumbers startLineNumber=22 collapse={2-4, 14-23} ins=" isAdminUser={data.isAdminUser}"
-export default function App() {
-	const data = useLoaderData<typeof loader | null>()
-	const theme = useTheme()
-	const nonce = useNonce()
-
-	return (
-		<ParallaxProvider>
-			<AuthenticityTokenProvider token={data.csrfToken}>
-				<HoneypotProvider {...data.honeyProps}>
-					<Document nonce={nonce} theme={theme} honeyProps={data?.honeyProps}>
-						<div className="flex h-screen flex-col justify-between">
-							<HeaderWithSearch isAdminUser={data.isAdminUser} />
-
-							<div className="flex-1">
-								<Outlet />
-							</div>
-
-							<div className="fixed m-4 rounded-full bg-black/20 p-2 backdrop-blur-sm transition hover:bg-black/30 dark:bg-white/20 dark:hover:bg-white/30">
-								<ThemeSwitch
-									userPreference={data?.requestInfo.userPrefs.theme}
-								/>
-							</div>
-							<FooterMenuRight companyName="Epic News" />
-						</div>
-					</Document>
-				</HoneypotProvider>
-			</AuthenticityTokenProvider>
-		</ParallaxProvider>
-	)
-}
-```
+This is actually a straightforward fix, and we will do this in a single step.
 
 ## Conditionally render the admin link
 
-Finally, open `app/components/organisms/HeaderWithSearch.tsx`.
+Open `app/components/organisms/HeaderWithSearch.tsx`.
 
 Add the following code to the `HeaderWithSearch` component:
 
-```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers ins="{ isAdminUser }: HeaderWithSearchProps" ins="flex flex-1 items-center justify-center gap-8" collapse={38-50}
-import { Link, useMatches } from '@remix-run/react'
+```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers collapse={1-6, 39-51, 54-57}
+import { Link, useMatches } from 'react-router'
+import { SearchBar } from '#app/components/search-bar.tsx'
+import { Button } from '#app/components/ui/button.tsx'
+import { UserDropdown } from '#app/components/user-dropdown.tsx'
+import { useOptionalUser } from '#app/utils/user.ts'
 import logo from '~/assets/svg/epic-news-sample-logo.svg'
-import { SearchBar } from '../molecules/SearchBar'
-import LoginOrUserDropdown from './LoginOrUserDropdown'
 
-+interface HeaderWithSearchProps {
-+	isAdminUser: boolean
-+}
-export default function HeaderWithSearch({ isAdminUser }: HeaderWithSearchProps) {
+export default function HeaderWithSearch() {
 	const matches = useMatches()
 	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
 	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+	const user = useOptionalUser()
++	const isAdminUser = user ? userHasRole(user, 'admin') : false
 
 	return (
 		<header className="bg-emerald-50 py-6 dark:bg-emerald-950">
@@ -178,6 +89,33 @@ export default function HeaderWithSearch({ isAdminUser }: HeaderWithSearchProps)
 }
 ```
 
+:::note
+
+### What is happening here?
+
+The Epic Stack provides a could of handy hooks to check if a user is logged in and what role they have.
+
+Firstly, we are using the `useOptionalUser` hook to check if a user is logged in. If they are, we are storing their user data in the `user` variable.
+
+```tsx
+const isAdminUser = user ? userHasRole(user, 'admin') : false
+```
+
+We then call the `userHasRole` function to check if they have the 'admin' role. If they do, we can render the admin link in the navbar. If they don't, or if they are not logged in at all, we are not rendering the admin link.
+
+```tsx
+{isAdminUser && (
+	<Link
+		to="/admin-review"
+		className="rounded-lg bg-green-900 px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-green-800"
+	>
+		Admin Review
+	</Link>
+)}
+```
+
+:::
+
 ### Testing - admin user login
 
 Whilst logged in as a normal user, or when not logged in at all, you should not be able to see the new admin link in the navbar:
@@ -203,11 +141,21 @@ Once you are logged in as 'Kody', you should now see the "Admin Review" link has
 
 Click on this link, and you should be taken straight to the admin review page.
 
+:::tip[Challenge]
+
+You will notice that the admin link is not in line with the other links in the navbar:
+
+![Align navbar links](src/assets/webp/epic-news/admin-only-links/align-navbar-links.webp)
+
+Can you style the admin links so that they are in line with the other links?
+
+:::
+
 ## Summary
 
 In this tutorial, we have:
 
-- Created an optional admin user check in the `generateRootJson` function.
+- Created an optional admin user check in the `loader` function.
 - Added an admin link to the navbar that is only visible to users with the 'admin' role.
 
 ::::note[Assignment]

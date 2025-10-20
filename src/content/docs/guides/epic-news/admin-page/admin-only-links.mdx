@@ -4,6 +4,7 @@ description: Learn how to add links to the navbar that are only visible to users
 ---
 
 import MonsterKbd from 'src/components/MonsterKbd.astro'
+import { Steps } from '@astrojs/starlight/components';
 
 ## Objectives
 
@@ -11,110 +12,110 @@ In the [**previous guide**](/code-monster/guides/epic-news/admin-page/protecting
 
 Now that we have protected the admin review page, we need to provide a link in the navbar to the admin review page only for users with the 'admin' role.
 
-The problem is that our current function that checks the user's role throws an error if they are not an admin.
-
-This wouldn't work in the case of a navbar link, as we still want users who are not admins to see the navbar but not the link.
-
-This is actually a straightforward fix, and we will do this in a single step.
+This is actually a straightforward fix that can be done in a couple of easy steps.
 
 ## Conditionally render the admin link
 
-Open `app/components/organisms/HeaderWithSearch.tsx`.
+<Steps>
 
-Add the following code to the `HeaderWithSearch` component:
+1. Open `app/components/organisms/HeaderWithSearch.tsx`.
 
-```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers collapse={1-6, 39-51, 54-57}
-import { Link, useMatches } from 'react-router'
-import { SearchBar } from '#app/components/search-bar.tsx'
-import { Button } from '#app/components/ui/button.tsx'
-import { UserDropdown } from '#app/components/user-dropdown.tsx'
-import { useOptionalUser } from '#app/utils/user.ts'
-import logo from '~/assets/svg/epic-news-sample-logo.svg'
+2. Add the following code to the `HeaderWithSearch` component:
 
-export default function HeaderWithSearch() {
-	const matches = useMatches()
-	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
-	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
-	const user = useOptionalUser()
-+	const isAdminUser = user ? userHasRole(user, 'admin') : false
+		```diff lang="tsx" title="app/components/organisms/HeaderWithSearch.tsx" showLineNumbers collapse={1-6, 39-51, 54-57}
+		import { Link, useMatches } from 'react-router'
+		import { SearchBar } from '#app/components/search-bar.tsx'
+		import { Button } from '#app/components/ui/button.tsx'
+		import { UserDropdown } from '#app/components/user-dropdown.tsx'
+		import { useOptionalUser } from '#app/utils/user.ts'
+		import logo from '~/assets/svg/epic-news-sample-logo.svg'
 
-	return (
-		<header className="bg-emerald-50 py-6 dark:bg-emerald-950">
-			<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
-				<Link to="/" className="group">
-					<div className="flex items-center gap-4 transition group-hover:opacity-80">
-						<img src={logo} alt="Epic News Logo" className="w-16" />
-						<span className="text-sm font-bold text-foreground">Epic News</span>
-					</div>
-				</Link>
-				<div className="flex flex-1 items-center justify-center gap-8">
-+					{isAdminUser && (
-+						<Link
-+							to="/admin-review"
-+							className="rounded-lg bg-green-900 px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-green-800"
-+						>
-+							Admin Review
-+						</Link>
-+					)}
-					<Link
-						to="/news"
-						className="text-sm font-semibold text-foreground transition hover:text-foreground/80"
-					>
-						News
-					</Link>
-					<Link
-						to="/about-us"
-						prefetch="intent"
-						className="text-sm font-semibold text-foreground transition hover:text-foreground/80"
-					>
-						About us
-					</Link>
-					<Link
-						to="/contact-us"
-						className="text-sm font-semibold text-foreground transition hover:text-foreground/80"
-					>
-						Contact us
-					</Link>
-				</div>
-				<div className="ml-auto hidden max-w-sm flex-1 sm:block">
-					{searchBar}
-				</div>
-				<div className="flex items-center gap-10">
-					<LoginOrUserDropdown />
-				</div>
-				<div className="block w-full sm:hidden">{searchBar}</div>
-			</nav>
-		</header>
-	)
-}
-```
+		export default function HeaderWithSearch() {
+			const matches = useMatches()
+			const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
+			const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
+			const user = useOptionalUser()
+		+	const isAdminUser = user ? userHasRole(user, 'admin') : false
 
-:::note
+			return (
+				<header className="bg-emerald-50 py-6 dark:bg-emerald-950">
+					<nav className="container flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
+						<Link to="/" className="group">
+							<div className="flex items-center gap-4 transition group-hover:opacity-80">
+								<img src={logo} alt="Epic News Logo" className="w-16" />
+								<span className="text-sm font-bold text-foreground">Epic News</span>
+							</div>
+						</Link>
+						<div className="flex flex-1 items-center justify-center gap-8">
+		+					{isAdminUser && (
+		+						<Link
+		+							to="/admin-review"
+		+							className="rounded-lg bg-green-900 px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-green-800"
+		+						>
+		+							Admin Review
+		+						</Link>
+		+					)}
+							<Link
+								to="/news"
+								className="text-sm font-semibold text-foreground transition hover:text-foreground/80"
+							>
+								News
+							</Link>
+							<Link
+								to="/about-us"
+								prefetch="intent"
+								className="text-sm font-semibold text-foreground transition hover:text-foreground/80"
+							>
+								About us
+							</Link>
+							<Link
+								to="/contact-us"
+								className="text-sm font-semibold text-foreground transition hover:text-foreground/80"
+							>
+								Contact us
+							</Link>
+						</div>
+						<div className="ml-auto hidden max-w-sm flex-1 sm:block">
+							{searchBar}
+						</div>
+						<div className="flex items-center gap-10">
+							<LoginOrUserDropdown />
+						</div>
+						<div className="block w-full sm:hidden">{searchBar}</div>
+					</nav>
+				</header>
+			)
+		}
+		```
 
-### What is happening here?
+		:::note
 
-The Epic Stack provides a could of handy hooks to check if a user is logged in and what role they have.
+		### What is happening here?
 
-Firstly, we are using the `useOptionalUser` hook to check if a user is logged in. If they are, we are storing their user data in the `user` variable.
+		The Epic Stack provides a could of handy hooks to check if a user is logged in and what role they have.
 
-```tsx
-const isAdminUser = user ? userHasRole(user, 'admin') : false
-```
+		Firstly, we are using the `useOptionalUser` hook to check if a user is logged in. If they are, we are storing their user data in the `user` variable.
 
-We then call the `userHasRole` function to check if they have the 'admin' role. If they do, we can render the admin link in the navbar. If they don't, or if they are not logged in at all, we are not rendering the admin link.
+		```tsx
+		const isAdminUser = user ? userHasRole(user, 'admin') : false
+		```
 
-```tsx
-{isAdminUser && (
-	<Link
-		to="/admin-review"
-		className="rounded-lg bg-green-900 px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-green-800"
-	>
-		Admin Review
-	</Link>
-)}
-```
+		We then call the `userHasRole` function to check if they have the 'admin' role. If they do, we can render the admin link in the navbar. If they don't, or if they are not logged in at all, we are not rendering the admin link.
 
-:::
+		```tsx
+		{isAdminUser && (
+			<Link
+				to="/admin-review"
+				className="rounded-lg bg-green-900 px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-green-800"
+			>
+				Admin Review
+			</Link>
+		)}
+		```
+
+		:::
+
+</Steps>
 
 ### Testing - admin user login
 

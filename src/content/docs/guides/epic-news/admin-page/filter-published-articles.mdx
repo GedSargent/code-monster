@@ -11,9 +11,8 @@ Now that we've implemented the functionality to publish and unpublish articles, 
 
 Open the file at `app/routes/_index.tsx` and remind yourself of the code we wrote to fetch all articles:
 
-```tsx title="app/routes/_index.tsx" showLineNumbers {12-21} collapse={1-9, 24-68}
-import { type MetaFunction } from '@remix-run/node'
-import { json, Link, useLoaderData } from '@remix-run/react'
+```tsx title="app/routes/_index.tsx" showLineNumbers {11-18} collapse={1-8, 23-67}
+import { data, Link, type MetaFunction, useLoaderData } from 'react-router'
 import heroImage from '~/assets/jpg/sample-hero.jpg'
 import { Button } from '~/components/atoms/Button.tsx'
 import ArticleCard from '~/components/organisms/ArticleCard.tsx'
@@ -32,7 +31,7 @@ export async function loader() {
 		},
 	})
 
-	return json({ allArticles })
+	return data({ allArticles })
 }
 
 export default function Index() {
@@ -99,9 +98,8 @@ How will you handle the case where there are no published articles to display?
 
 The change require is only small:
 
-```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={1-9, 25-69}
-import { type MetaFunction } from '@remix-run/node'
-import { json, Link, useLoaderData } from '@remix-run/react'
+```diff lang="tsx" title="app/routes/_index.tsx" showLineNumbers collapse={1-8, 25-67}
+import { data, Link, type MetaFunction, useLoaderData } from 'react-router'
 import heroImage from '~/assets/jpg/sample-hero.jpg'
 import { Button } from '~/components/atoms/Button.tsx'
 import ArticleCard from '~/components/organisms/ArticleCard.tsx'
@@ -121,7 +119,7 @@ export async function loader() {
 		},
 	})
 
-	return json({ allArticles })
+	return data({ allArticles })
 }
 
 export default function Index() {
@@ -212,15 +210,4 @@ In this step, we have:
 
 - Modified the homepage, `/news/$category`, and `/article/$articleId` routes to display only published articles.
 - Added a fallback UI to display a message when no published articles are found in a category.
-
-::::note[Assignment]
-
-## 📄 Assignment documentation
-
-Update your assignment to include explanations of the following:
-
-- What changes did you make to fetch only published articles?
-- What did you show the user if there are no published articles in a given category?
-
-::::
 

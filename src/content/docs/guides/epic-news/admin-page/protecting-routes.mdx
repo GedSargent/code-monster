@@ -20,15 +20,12 @@ We will do this across two stages:
 
 ## 1. Protect the admin review page
 
-This first step is surprisingly easy because the Epic Stack comes with functions that handle authentication and authorisation!
-
-We therefore only need to add a few lines of code 😎.
+This first step is surprisingly easy because the Epic Stack comes with functions that handle authentication and authorisation 😎!
 
 Open `app/routes/admin-review.tsx` and make the additions shown below:
 
 ```diff lang="tsx" title="app/routes/admin-review.tsx" ins="type LoaderFunctionArgs, " ins="{ request }: LoaderFunctionArgs"
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, data, NavLink, Outlet, useLoaderData } from 'react-router'
 import { prisma } from '~/utils/db.server.ts'
 import { cn } from '~/utils/misc.tsx'
 +import { requireUserWithRole } from '~/utils/permissions.server.js'
@@ -40,7 +37,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		select: { id: true, title: true, isPublished: true },
 	})
 
-	return json({ allArticles })
+	return data({ allArticles })
 }
 ```
 
@@ -81,25 +78,23 @@ Let's add an `ErrorBoundary` component to `app/routes/admin-review.tsx`.
 First, import the `GeneralErrorBoundary` and `Button` components:
 
 ```diff lang="tsx" title="app/routes/admin-review.tsx"
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
+import { type LoaderFunctionArgs, data, NavLink, Outlet, useLoaderData } from 'react-router'
 import { prisma } from '~/utils/db.server.ts'
 import { cn } from '~/utils/misc.tsx'
 import { requireUserWithRole } from '~/utils/permissions.server.js'
 +import { Button } from '~/components/atoms/Button.js'
-+import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
++import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 ```
 
 Next, scroll all the way to the bottom of the component file, and add the code below:
 
-```diff lang="tsx" title="app/routes/admin-review.tsx" showLineNumbers collapse={10-16, 19-30, 33-72}
-import { type LoaderFunctionArgs, json } from '@remix-run/node'
-import { NavLink, Outlet, useLoaderData } from '@remix-run/react'
+```diff lang="tsx" title="app/routes/admin-review.tsx" showLineNumbers collapse={9-15, 18-29, 32-71}
+import { type LoaderFunctionArgs, data, NavLink, Outlet, useLoaderData } from 'react-router'
 import { prisma } from '~/utils/db.server.ts'
 import { cn } from '~/utils/misc.tsx'
 import { requireUserWithRole } from '~/utils/permissions.server.js'
 import { Button } from '~/components/atoms/Button.js'
-import { GeneralErrorBoundary } from '~/components/ErrorBoundary.js'
+import { GeneralErrorBoundary } from '#app/components/error-boundary.tsx'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	await requireUserWithRole(request, 'admin')
@@ -108,7 +103,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 		select: { id: true, title: true, isPublished: true },
 	})
 
-	return json({ allArticles })
+	return data({ allArticles })
 }
 
 interface StatusPillProps {

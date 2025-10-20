@@ -2,11 +2,12 @@
 import Reveal from './react/MonsterReveal'
 interface Props {
   title?: string;
+  secretRevealCode?: string;
 }
 
-const { title = "Click to reveal" } = Astro.props;
+const { title = "Click to reveal", secretRevealCode } = Astro.props;
 ---
 
-<Reveal client:load title={title}>
+<Reveal client:load title={title} secretRevealCode={secretRevealCode}>
   <slot />
 </Reveal>

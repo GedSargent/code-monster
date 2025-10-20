@@ -79,6 +79,18 @@ code {
     box-shadow: 0 -21px 0 2px var(--bgColor), -21px 0px 0 2px var(--bgColor), 0px 21px 0 2px var(--bgColor), 16px 40px 0 2px var(--bgColor), 0 0 0 2px #fff;
   }
 }
+
+@keyframes jiggle {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-8px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(8px);
+  }
+}
 .animate-draw-circle {
   animation-name: border;
   animation-duration: 1500ms ease-in-out 1;

@@ -1,13 +1,18 @@
 ---
 import Reveal from './react/MonsterReveal'
+import { hashString } from '../utils/hash'
+
 interface Props {
   title?: string;
   secretRevealCode?: string;
 }
 
 const { title = "Click to reveal", secretRevealCode } = Astro.props;
+
+// Hash the secret code on the server before passing to client
+const code = secretRevealCode ? await hashString(secretRevealCode) : undefined;
 ---
 
-<Reveal client:load title={title} secretRevealCode={secretRevealCode}>
+<Reveal client:load title={title} code={code}>
   <slot />
 </Reveal>
